@@ -1,0 +1,21 @@
+---
+title: "Section 1: Introduction"
+output: html_notebook
+---
+
+# What is statistics?
+
+
+# What can statistics do for us?
+
+There are three major things that we can do with statistics:
+
+- *Describe*: The world is complex and we often need to describe it in a way that simplifies it in a way that we can understand.  
+- *Decide*: We often need to make decisions based on data, often in the face of uncertainty.
+- *Predict*: We often wish to make predictions based on our knowledge.
+
+Let's look at an example of these in action, centered on a question that many of us are interested in: How do we decide what's healthy to eat?  There are many different sources of guidance, from government dietary guidelines to diet books to bloggers.  Let's focus in on a specific question: Is saturated fat in our diet a bad thing?
+
+One way that we might answer this question is common sense.  If we eat fat then it's going to turn straight into fat in our bodies, right?  And we have all seen photos of arteries clogged with fat, so eating fat is gong to clog our arteries, right?
+
+Another way that we might answer this question is by listening to authority figures.  
