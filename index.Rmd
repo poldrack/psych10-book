@@ -1,0 +1,10 @@
+---
+title: "YASB (Yet Another Statistics Book)"
+site: bookdown::bookdown_site
+output: bookdown::html_book
+documentclass: book
+---
+
+# Yet Another Statistics Book?
+
+## You're not a statistician - why should we listen to you?
