@@ -1,0 +1,12 @@
+# Probability
+
+Probability theory is the branch of mathematics that deals with chance and uncertainty.  It forms an important part of the foundation for statistics, because it provides us with the tools to describe uncertain events.  The study of probability arose in part due to interests in understanding games of chance, like cards or dice.  These games provide useful examples of many statistical concepts, because we can repeat them and the likelihood of different outcomes remains (mostly) the same. However, there are deep questions about the meaning of probability that we will not address here; see Suggested Readings at the end if you are interested in learning more about this fascinating topic and its history.
+
+## What is probability?
+
+Informally we usually think of probability as a number that describes the likelihood of some event occurring, which ranges from zero (impossibility) and one (certainty).  Sometimes they will instead be expressed in percentages, which range from zero to one hundred, as when the weather forecast predicts a twenty percent chance of rain today.  In each case, these numbers are expressing how likely that particular event is.  
+
+To formalize probability theory, we first need to define a few terms:
+- An *experiment* is any activity that produces or observes an outcome.  Examples are flipping a coin, rolling a 6-sided die, or trying a new route to work to see if it's faster than the old route.
+- The *Sample space* is the set of possible outcomes for an experiment.  For a coin flip, the sample space is {H,T} where the brackets represent the sample space and H/T represent heads/tails respectively.  For the die, the sample space is {1,2,3,4,5,6}.  For the amount of time it takes to get to work, the sample space is all possible real numbers greater than zero (since it can't take a negative amount of time to get somewhere, at least not yet). 
+
