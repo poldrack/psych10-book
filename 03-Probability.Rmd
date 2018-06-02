@@ -1,5 +1,12 @@
 # Probability
 
+```{r echo=FALSE,message=FALSE}
+library(dplyr)
+library(reshape2)
+library(tidyr)
+library(ggplot2)
+```
+
 Probability theory is the branch of mathematics that deals with chance and uncertainty.  It forms an important part of the foundation for statistics, because it provides us with the tools to describe uncertain events.  The study of probability arose in part due to interests in understanding games of chance, like cards or dice.  These games provide useful examples of many statistical concepts, because we can repeat them and the likelihood of different outcomes remains (mostly) the same. However, there are deep questions about the meaning of probability that we will not address here; see Suggested Readings at the end if you are interested in learning more about this fascinating topic and its history.
 
 ## What is probability?
@@ -7,6 +14,277 @@ Probability theory is the branch of mathematics that deals with chance and uncer
 Informally we usually think of probability as a number that describes the likelihood of some event occurring, which ranges from zero (impossibility) and one (certainty).  Sometimes they will instead be expressed in percentages, which range from zero to one hundred, as when the weather forecast predicts a twenty percent chance of rain today.  In each case, these numbers are expressing how likely that particular event is.  
 
 To formalize probability theory, we first need to define a few terms:
-- An *experiment* is any activity that produces or observes an outcome.  Examples are flipping a coin, rolling a 6-sided die, or trying a new route to work to see if it's faster than the old route.
-- The *Sample space* is the set of possible outcomes for an experiment.  For a coin flip, the sample space is {H,T} where the brackets represent the sample space and H/T represent heads/tails respectively.  For the die, the sample space is {1,2,3,4,5,6}.  For the amount of time it takes to get to work, the sample space is all possible real numbers greater than zero (since it can't take a negative amount of time to get somewhere, at least not yet). 
+
+- An **experiment** is any activity that produces or observes an outcome.  Examples are flipping a coin, rolling a 6-sided die, or trying a new route to work to see if it's faster than the old route.
+- The **sample space** is the set of possible outcomes for an experiment.  For a coin flip, the sample space is {H,T} where the brackets represent the sample space and H/T represent heads/tails respectively.  For the die, the sample space is {1,2,3,4,5,6}.  For the amount of time it takes to get to work, the sample space is all possible real numbers greater than zero (since it can't take a negative amount of time to get somewhere, at least not yet). 
+- An **event** is a subset of the sample size.  Here we will focus primarily on *elementary events* which consist of exactly one possible outcome, such as heads in a coin flip, a roll of 4 in dice, or 21 minutes to get home by the new route. 
+
+Now that we have those definitions, we can outline the formal features of a probability, which were first defined by the Russian mathematician Andrei Kolmogorov. If $P(X_i)$ is the probability of event $X_i$:
+
+- Probability cannot be negative: $P(X_i) ≥ 0$
+- The total probability of all outcomes in the sample space is 1. We can express this using the summation symbol:
+$$
+\sum_{i=1}^N{P(X_i)} = P(X_1) + P(X_2) + ... + P(X_N) = 1
+$$
+This is interpreted as saying "Take all of the N elementary events, which we have labeled from 1 to N, and add up their probabilities. These must sum to one."  An implication of this is that the probability of any individual event cannot be greater than one: $P(X_i)\le 1$
+
+## How do we determine probabilities?
+
+Now that we know what a probability is, how do we actually figure out what the probability is for any particular event?
+
+### Personal opinion
+
+Let's say that I asked you what the probability was that Bernie Sanders would have won the US Presidential Election in 2016 if he had gained the Democratic nomination instead of Hillary Clinton.  Here the sample space is {Sanders wins, Sanders loses}, but we can't actually do the experiment to find the outcome. However, most people with knowledge of the election would be willing to offer a guess at the probability of this event.  In many cases personal knowledge and/or opinion is the only guide we have determining the probability of an event, but this is not very scientifically satisfying.
+
+### Empirical frequency
+
+Another way to determine the probability of an event is to do the experiment many times and count how often each event happens.  From the relative frequency of the different outcomes, we can compute the probability of each.  For example, let's say that we are interested in knowing the probability of rain in San Francisco.  We first have to define the experiment --- let's say that we will simply look at the National Weather Service data for each day in 2017 and determine whether there was any rain at the downtown San Francisco weather station (which can be downloaded from https://www.ncdc.noaa.gov/).
+
+```{r RainInSF,warning=FALSE}
+SFrain=read.csv('data/SanFranciscoRain/1329219.csv',sep=',')
+# create a new variable indicating whether it rained on each day
+SFrain = SFrain %>%
+  mutate(rainToday=as.integer(PRCP>0))
+
+SFrain_summary = SFrain %>%
+  summarize(nRainyDays = sum(rainToday),
+            nDaysMeasured = n(),
+            pRainInSF = nRainyDays/nDaysMeasured)
+
+SFrain_summary
+```
+According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays)` rainy days.  To compute the probability, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017)=`r I(SFrain_summary$pRainInSF)`.
+
+How do we know that empirical probability gives us the right number? The answer to this question comes from the *law of large numbers*, which shows that the empirical probability will approach the true probability as the sample size increases.  We can see this by simulating a large number of coin flips, and looking at our our estimate of the probability of heads after each flip.  We will spend much more time discussing simulation in a later chapter; for now, just assume that we have a computational way to generate a random outcome for each coin flip.
+
+```{r FlipSim,fig.cap='A demonstration of the law of large numbers.  A coin was flipped 30,000 times, and after each flip the probability of heads was computed based on the number of heads and tail collected up to that point.  It takes about 15,000 flips for the probability to settle at the true probability of 0.5.'}
+set.seed(12345) # set the seed so that the outcome is consistent
+nsamples=30000 # how many flips do we want to make?
+
+# create some random coin flips using the rbinom() function with
+# a true probability of 0.5
+
+sampDf=data.frame(x=seq(nsamples),samples=rbinom(nsamples,1,0.5)) %>%
+  mutate(mean=cumsum(samples)/seq_along(samples))
+
+# start with a minimum sample of 10 flips
+ggplot(sampDf[10:nsamples,],aes(x=x,y=mean)) + 
+  geom_hline(yintercept = 0.5,color='blue',linetype='dashed') +
+  geom_line() + 
+  xlab('Number of trials') + ylab('Estimated probability of heads')
+```
+
+\@ref(fig:FlipSim) shows that as the number of samples increases, the estimated probability of heads converges onto the true value of 0.5. However, note that the estimates can be very far off from the true value when the sample sizes are small.  A real-world example of this was seen in the 2017 special election for the US Senate in Georgia, which pitted the Republican Roy Moore against Democrat Doug Jones.  \@ref(fig:ElectionResults) shows the relative amount of the vote reported for each of the candidates over the course of the evening, as an increasing number of ballots were counted. Early in the evening the vote counts were especially volatile, swinging from a large initial lead for Jones to a long period where Moore had the lead, until finally Jones took the lead to win the race.  
+
+```{r ElectionResults, fig.cap='Relative proportion of the vote in the Dec 12, 2017 special election for the US Senate seat in Georgia, as a function of the number of precincts reporting. These data were transcribed from https://www.ajc.com/news/national/alabama-senate-race-live-updates-roy-moore-doug-jones/KPRfkdaweoiXICW3FHjXqI/'}
+electionReturns=read.table('data/03/alabama_election_returns.csv',sep=',',
+                           col.names=c('pctResp','Jones','Moore'),header=TRUE) %>%
+  gather(candidate,pctVotes,-pctResp)
+
+ggplot(electionReturns,aes(pctResp,pctVotes,color=candidate)) +
+  geom_line(size=1) +
+  scale_color_manual(values=c( "#9999CC","#CC6666")) +
+  xlab('Percentage of precincts reporting') +
+  ylab('Percentage of votes')
+
+```
+
+These two examples show that while large samples will ultimately converge on the true probability, the results with small samples can be far off.  Unfortunately, many people forget this and overinterpret results from small samples.  This was referred to as the *law of small numbers* by the psychologists Danny Kahneman and Amos Tversky, who showed that people (even trained researchers) often behave as if the law of large numbers applies even to small samples.  We will see examples throughout the course of just how unstable statistical results can be when they are generated on the basis of small samples.
+
+### Classical probability
+
+None of us has ever flipped a coin tens of thousands of times, but we are nonetheless willing to believe that the probability of flipping heads is 0.5.  This reflects the use of yet another approach to computing probabilities, which we refer to as *classical probability*.  In this approach, we compute the probability directly based on our knowledge of the situation.  
+
+Classical probability arose from the study of games of chance such as dice and cards.  A famous example arose from a problem encountered by an  French gambler who went by the name of Chevalier de Méré.  de Méré played two different dice games: In the first he bet on the chance of at least one six on four rolls of a six-sided die, while in the second he bet on the chance of at least one double-six on 24 rolls of two dice.  He expected to win money on both of these gambles, but he found that while he won money on the first gamble, he actually lost money when he played the second gamble. To understand this he turned to his friend, the mathematician Blaise Pascal, who is now recognized as one of the founders of probability theory. 
+
+How can we understand this question using probability theory?  In classical probability, we start with the assumption that all of the elementary events in the sample space are equally likely; that is, when you roll a die, all of the possible outcomes ({1,2,3,4,5,6}) are equally likely to occur.  Given this, we can compute the probability of any individual outcome as:
+
+$$
+P(outcome_i) = \frac{1}{number\ of\ possible\ outcomes}
+$$
+
+For the six-sided die, the probability of each individual outcome is 1/6. 
+
+This is nice, but de Méré was interested in more complex events, like what happens on multiple dice throws.  How do we compute the probability of a complex event (which is a union of single events), like rolling a one on the first *or* the second throw?  de Méré thought that he could simply add together the probabilities of the individual events to compute the probability of the combined event, meaning that the probability of rolling a one on the first or second roll would be computed as follows:
+
+$$
+P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) = 1/6 + 1/6 = 1/3
+$$
+
+De Méré reasoned based on this that the probability of at least one six in four rolls was the sum of the probabilities on each of the individual throws: $4*\frac{1}{6}=\frac{2}{3}$.  Similarly, based on the fact that he reasoned that the since the probability of a double-six in throws of dice is 1/36, then the probability of at least one double-six on 24 rolls of two dice would be $24*\frac{1}{36}=\frac{2}{3}$.  Yet, while he consistently won money on the first bet, he lost money on the second bet.  What gives?
+
+To understand de Méré's error, we need to introduce some of the rules of probability theory.  The first is the *rule of subtraction*, which says that:
+
+$$
+P(\bar{A}) = 1 - P(A)
+$$
+
+where $\bar{A}$ means "not A". This rule derives directly from the axioms that we discussed above; since A and $\bar{A}$ are the only possible outcomes, then their total probability must sum to 1.  For example, if the probability of rolling a one in a single throw is $\frac{1}{6}$, then the probability of rolling anything other than a one is $\frac{5}{6}$.
+
+A second rule tells us how to compute the probability of a conjoint event -- that is, of both of two events occurring. This special version of the rule tells us how to compute this quantity in the special case when the two events are independent from one another; we will learn later exactly what the concept of *independence* means, but for now we can just take it for granted that the two die throws are independent events.
+
+$$
+P(A \cap B) = P(A) * P(B)\ iff\ A\ and\ B\ are\ independent
+$$
+Thus, the probability of throwing a six on each of two rolls is $\frac{1}{6}*\frac{1}{6}=\frac{1}{36}$.
+
+The third rule tells us how to add together probabilities - and it is here that we see the source of de Méré's error.  The addition rule tells us that:
+
+$$
+P(A \cup B) = P(A) + P(B) - P(A \cap B)
+$$
+That is, the probability of A or B occurring is determined by adding together the individual probabilities, but then subtracting the likelihood of both occurring together.  In a sense, this prevents us from counting those instances twice.  Let's say that we want to find the probability of rolling 6 on either of two throws.  According to our rules:
+
+
+$$
+P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) - P(Roll1_{throw1} \cap Roll1_{throw2}) = \frac{1}{6} + \frac{1}{6} - \frac{1}{36} = \frac{11}{36}
+$$
+
+Let's use a graphical depiction to get a different view of this rule.  
+
+```{r ThrowMatrix, fig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second row. Cells shown in light blue represent the cells with a one in either the first or second throw; the rest are shown in dark blue.'}
+imgmtx <- matrix(0, nrow=6, ncol=6)
+imgmtx[,1]=1
+imgmtx[1,]=1
+g=ggplot(melt(imgmtx), aes(Var1,Var2, fill=value)) + geom_raster()
+for (i in seq(0.5,6.5)) {
+  g=g+geom_hline(yintercept=i,color='white')
+  g=g+geom_vline(xintercept=i,color='white')
+  for (j in seq(0.5,6.5)) {
+    g=g+annotate("text", x = i+0.5, y = j+0.5, label = sprintf('%d,%d',i+0.5,j+0.5),color='white')
+  }
+}
+g=g+theme(axis.line=element_blank(),axis.text.x=element_blank(),
+          axis.text.y=element_blank(),axis.ticks=element_blank(),
+          legend.position="none",
+) 
+g=g+xlab('Throw 1') + ylab('Throw 2')
+g
+```
+
+\@ref(fig:ThrowMatrix) shows a matrix representing all possible throws, and highlights the cells that involve a one on either the first or second throw. If you count up the cells in light blue you will see that there are 11 such cells. This shows why the addition rule gives a different answer from de Méré's; if we were to simply add together the probabilities for the two throws as he did, then we would count (1,1) towards both, when it should really only be counted once.
+
+### Solving de Méré's problem
+
+Blaise Pascal used the rules of probability to come up with a solution to de Méré's problem.  First, he realized that computing the probability of at least one event out of a combination was tricky, whereas computing the probability that something does not occur across several events is relatively easy -- it's just the product of the probabilities of the individual events.  Thus, rather than computing the probability of at least one six in four rolls, he instead computed the probability of no sixes across all rolls:
+
+$$
+P(no\ sixes\ in\ four\ rolls) = \frac{5}{6}*\frac{5}{6}*\frac{5}{6}*\frac{5}{6}=\bigg(\frac{5}{6}\bigg)^4=0.482
+$$
+
+He then used the fact that the complement of no sixes in at four rolls is the complement of at least one six in four rolls, and used the rule of subtraction to compute the probability of interest:
+
+$$
+P(at\ least\ one\ six\ in\ four\ rolls) = 1 - \bigg(\frac{5}{6}\bigg)^4=0.517
+$$
+
+This gamble has a probability of greater than 0.5, explaning why de Méré made money on this bet on average. 
+
+What about the second bet?  Pascal used the same trick:
+
+$$
+P(no\ double\ six\ in\ 24\ rolls) = \bigg(\frac{35}{36}\bigg)^{24}=0.509
+$$
+$$
+P(at\ least\ one\ double\ six\ in\ 24\ rolls) = 1 - \bigg(\frac{35}{36}\bigg)^{24}=0.491
+$$
+
+The probability of this outcome was slightly below 0.5, showing why de Méré lost money on average on this bet.  
+
+## Probability distributions
+
+We often want to be able to quantify the probability of any possible value in an experiment.  For example, on Jan 20 2018, the basketball player Steph Curry hit only 2 out of 4 free throws in a game against the Houston Rockets. We know that Curry's overall probability of hitting free throws across the entire season was 0.91, so it seems pretty unlikely that he would hit only 50% of his free throws in a game, but exactly how unlikely is it?  We can determine this using a theoretical probability distribution; during this course we will encounter a number of these probability distributions, each of which is appropriate to describe different types of data.  In this case, we use the binomial distribution, which provides a way to compute the probability of some number of successes out of a number of Bernoulli trials (i.e. trials on which there is either success or failure) given some known probability of success on each trial.  This distribution is defined as:
+
+$$
+P(k; n,p) = P(X=k) = \binom{n}{k} p^k(1-p)^{n-k}
+$$
+
+This refers to the probability of k successes on n trials when the probability of success is p.  You may not be familiar with $\binom{n}{k}$, which is referred to as the *binomial coefficient* or "n-choose-k" because it describes the number of different ways that one can choose k items out of n total items.  The binomial coefficient is computed as:
+
+$$
+\binom{n}{k} = \frac{n!}{k!(n-k)!}
+$$
+where the explanation point (!) refers to the *factorial* of the number:
+
+$$
+n! = \prod_{i=1}^n i = n*(n-1)*...*2*1 
+$$
+
+
+In the example of Steph Curry's free throws:
+
+$$
+P(2;4,0.91) = \binom{4}{2} 0.91^2(1-0.91)^{4-2} = 0.040
+$$
+
+This shows that given Curry's overall free throw percentage, it is very unlikely that he would hit only 2 out of 4 free throws.  Which just goes to show that unlikely things do actually happen in the real world.
+
+### Cumulative probability distributions
+
+Often we want to know not just how likely a specific value is, but how likely it is to find a value that is as extreme or more than a particular value.  To answer this question, we can use a *cumulative* probability distribution; whereas a standard probability distribution tells us the probability of some specific value, the cumulative distribution tells us the probability of a value at least as large as some specific value.  
+
+In the free throw example, we might want to know: What is the probability that Steph Curry hits 2 *or fewer* free throws out of four, given his overall free throw probability of 0.91. To determine this, we could simply use the the binomial probability equation and plug in all of the possible values of k:
+
+$$
+P(k\le2)= P(k=2) + P(k=1) + P(k=0) = 6e^{-5} + .002 + .040 = .043  
+$$
+
+In many cases the number of possible outcomes would be too large for us to compute the cumulative probability; fortunately, it can be computed directly. For the binomial, we can do this in R using the `pbinom()` function:
+
+```{r}
+pFreeThrows=dbinom(seq(0,4),4,0.91)
+cumulative_dist = data.frame(numSuccesses=seq(0,4)) %>%
+          mutate(probability=pbinom(numSuccesses,4,0.91))
+cumulative_dist
+
+```
+
+From this we can see that the probability of Curry landing 2 or fewer free throws out of 4 attempts is `r I(cumulative_dist$probability[3])`.
+
+
+## Conditional probability
+
+So far we have limited ourselves to simple probabilities - that is, the probability of a single event.  However, we often wish to determine the probability of some event given that some other event has occurred, which are known as *conditional probabilities*.  
+
+**GET BETTER EXAMPLE**
+For many examples in this course we will use the National Health and Nutrition Examination Survey (NHANES).  NHANES is a large ongoing study organized by the US Centers for Disease Control that is designed to provide an overall picture of the health and nutritional status of both adults and children in the US.  Every year, the survey examines a sample of about 5000 people across the US using both interviews and physical and medical tests.  The NHANES data is included as a package in R, making it easy to access and work with.  It also provides us with a large, realistic dataset that will serve as an example for many different statistical tools.
+
+Let's say that we are interested in smoking behavior. NHANES records two variables that we will use to identify smoking behavior.  The first asks whether the person has smoked 100 or more cigarettes in their entire life.  The second asks whether they currently smoke cigarettes.  Putting these two variables together, we can determine the probability that someone is currently a smoker.
+
+```{r}
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_smoking = NHANES %>% 
+  drop_na(Smoke100) # %>%
+ # mutate(SmokeNow = if_else(Smoke100=='No',0,SmokeNow))
+         
+NHANES_smoking = NHANES_smoking %>% 
+  mutate(CurrentSmoker=if_else(Smoke100=='No',0,if_else(SmokeNow=='Yes',1,0)))
+
+NHANES_smoking_stats = NHANES_smoking %>%
+  group_by(CurrentSmoker) %>%
+  summarize(prob=n()/length(NHANES_smoking$CurrentSmoker))
+NHANES_smoking_stats
+  
+```
+
+This shows that the probability that someone in the NHANES dataset is currently a smoker is `r I(NHANES_smoking_stats$prob[1])`. Similarly, we can compute 
+
+
+One way to think of this is graphically.
+ADD IGRAPH PLOT
+
+To compute the conditional probability of A given B (which we write as $P(A|B)$), we need to know the *joint probability* (that is, the probability A and B) as well as the overall probability of B:
+
+$$
+P(A|B) = \frac{P(A \cap B)}{P(B)}
+$$
+
+In our example, we would need to know the joint probability of ...
+
+## Independence
 

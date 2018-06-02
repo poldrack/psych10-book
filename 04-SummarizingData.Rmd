@@ -24,9 +24,7 @@ A simple way to summarize data is to generate a table representing counts of var
 
 ![**Figure 4.1**: A Sumerian tablet from the Louvre, showing a sales contract for a house and field.  [Public domain], via Wikimedia Commons.](https://upload.wikimedia.org/wikipedia/commons/6/69/Sales_contract_Shuruppak_Louvre_AO3760.jpg)
 
-Let's look at some examples of the use of tables.  For many examples in this course we will use the National Health and Nutrition Examination Survey (NHANES).  NHANES is a large ongoing study organized by the US Centers for Disease Control that is designed to provide an overall picture of the health and nutritional status of both adults and children in the US.  Every year, the survey examines a sample of about 5000 people across the US using both interviews and physical and medical tests.  The NHANES data is included as a package in R, making it easy to access and work with.  It also provides us with a large, realistic dataset that will serve as an example for many different statistical tools.
-
-Let's load the NHANES dataset and have a look:
+Let's look at some examples of the use of tables.  We will usethe NHANES dataset:
 
 ```{r LoadNHANES}
 # load the NHANES data library
