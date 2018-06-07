@@ -1,0 +1,226 @@
+# Fitting models to data
+
+```{r}
+library(tidyverse)
+library(NHANES)
+library(ggplot2)
+library(cowplot)
+options(digits=2)
+
+```
+
+One of the fundamental activties in statistics is creating models that can summarize data using a small set of numbers that can nonetheless provide a compact description of the data.  In this chapter we will discuss the concept of a statistical model and how it can be used to describe dat.
+
+## What is a model?
+
+When we think of the things that we call "models" in the real world, they are generally meant as simplifications of things in the world that nonetheless convey the essence of the thing being modeled. A model of a building conveys the structure of the building while being small and light enough to pick up with one's hands; a model of a cell in biology is much larger than the actual thing, but again conveys the major parts of the cell and their relationships.  
+
+In statistics, a model is meant to provide a similarly condensed description, but for data rather than for a physical structure.  Like physical models, a statistical model is generally much simpler than the data being described; it is meant to capture the structure of the data as simply as possible.
+
+The basic structure of a statistical model is:
+
+$$
+data = model + error
+$$
+
+This expresses the idea that the data can be described by a statistical model that describes what we expect to occur in the data, along with the difference between the model and the dat, which we refer to the as *error* . 
+
+## Statistical modeling: An example
+
+Let's look at an example of fitting a model to data, using the data from NHANES.  In particular, we will try to build a model of the height of children in the NHANES sample. First let's load the dat aand plot them.
+
+```{r}
+
+# drop duplicated IDs within the NHANES dataset
+NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+
+# select the appropriate children with good height measurements
+
+NHANES_child = NHANES %>%
+  drop_na(Height) %>%
+  subset(Age < 18)
+
+ggplot(data=NHANES_child,aes(Height)) + 
+  geom_histogram(bins=100)
+
+
+```
+
+There are three fundamental goals for statistical models, which we discussed in the first lecture:
+
+* Describe: How can we best describe the distribution of heights?
+* Decide: Is height related to some other variable?
+* Predict: Given some new child, what is our best guess about their height?
+
+What is the simplest model we can imagine?  What about the most common value in the dataset (which we call the *mode*)?  R doesn't have a built-in function for the mode, so we will create one first, which we will call ``getmode()``.
+
+```{r}
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+height_mode=getmode(NHANES_child$Height)
+print(paste("mode of children's height from NHANES:",height_mode))
+```
+
+Our model for an individual datapoint $i$ would be:
+
+$$
+height_i = 166.5 + error
+$$
+This redescribes the entire set of `r I(dim(NHANES_child)[1])` children in terms of a single number, and if we wanted to predict the height of any new children, then our guess would be the same number: `r I(height_mode)` centimeters.  
+
+How good of a model is this?  In general we define the goodness of a model in terms of the error, which represents the difference between model and the data; all things being equal, the model that produces lower error is the better model.  Let's look at the errors produced by the mode:
+
+```{r}
+error_mode = NHANES_child$Height - height_mode
+ggplot(NULL,aes(error_mode)) + 
+  geom_histogram(bins=100)
+
+print(paste('average error (centimeters):',mean(error_mode)))
+
+
+```
+
+What we notice here is that the average individual has a pretty large error of `r I(mean(error_mode))` centimeters. We would like to have a model where the average error is zero, and it turns out that if we use the arithmetic mean (commonly known as the *average*) this will be the case. 
+
+The mean (ofted denoted by a bar over the variable, such as $\bar{X}$) is defined as:
+
+$$
+\bar{X} = \frac{\sum_{i=1}^{n}x_i}{n}
+$$
+
+That is, it is the sum of all of the values, divided by the number of values. We can prove that the sum of errors from the mean (and thus the average error) is zero:
+
+$$
+error = \sum_{i=1}^{n}(x_i - \bar{X}) = 0
+$$
+
+
+$$
+\sum_{i=1}^{n}x_i - \sum_{i=1}^{n}\bar{X}=0
+$$
+
+$$
+\sum_{i=1}^{n}x_i = \sum_{i=1}^{n}\bar{X}
+$$
+
+$$
+\sum_{i=1}^{n}x_i = n\bar{X}
+$$
+
+$$
+\sum_{i=1}^{n}x_i = \sum_{i=1}^{n}x_i
+$$
+
+Given that the average error is zero, this seems like a better model.  Let's confirm that it comes out correctly:
+
+```{r}
+error_mean = NHANES_child$Height - mean(NHANES_child$Height)
+
+ggplot(NULL,aes(error_mean)) + 
+  geom_histogram(bins=100) + xlim(-60,60)
+
+print(paste('average error (inches):',mean(error_mean)))
+
+
+```
+
+
+The average error here is a very small number, though not technically zero; we will discuss later in the course why this happens, but for now you can just treat it as being close enough to zero to call it zero.
+
+
+Even though the average of errors from the mean is zero, we can see from the histogram that each individual still has some degree of error; some are positive and some are negative, and those cancel each other out.  For this reason, we generally summarize errors in terms of some kind of measure that counts both positive and negative errors as bad; we could use the absolute value of each error value, but it's more common to use the squared errors, for reasons that we will see later in the course.  After averaging the squared errors, we take the square root of that value, so that it is in the same units as the original.
+
+```{r}
+rmse_mean=sqrt(mean(error_mean**2))
+rmse_mode=sqrt(mean(error_mode**2))
+print(paste('root mean squared error (centimeters):',rmse_mean)) 
+
+```
+
+This shows that the mean has a pretty substantial amount of error (about 27 cm on average). 
+
+Can we imagine a better model? Remember that these data are from all children in the NHANES sample, who vary from `r I(min(NHANES_child$Age))` to `r I(max(NHANES_child$Age))` years of age.  Given this wide age range, we might expect that our model of height should also include age.  Let's plot the data for height against age, to see if this relationship exists:
+
+```{r}
+ggplot(NHANES_child,aes(x=Age,y=Height)) +
+  geom_point(position = "jitter") +
+  geom_smooth()
+
+```
+
+The black points show individuals in the dataset, and the blue line provides a summary of the relationship between age and height, which seems to be strong, as we expected.  Thus, our model should look something like:
+
+$$
+height_i = constant + \beta * age_i + error_i
+$$
+
+where $\beta$ is a *parameter* that we multiply by age to get the smallest error, and constant is a constant value added to the prediction for all individuals (which we also call the *intercept* for reasons that will become clear when we discuss linear regression later in the course).  We will also learn later how it is that we actually compute these values; for now, we will use the ``lm()'' function in R to compute the values of the constant and $\beta$ that give us the smallest error.
+
+
+```{r}
+
+# find the best fitting model to predict height given age
+model_age=lm(Height ~ Age, data=NHANES_child)
+
+sprintf("model: height = %f + %f*Age",
+              model_age$coefficients[1],
+              model_age$coefficients[2])
+
+# the predict() function uses the fitted model to predict values for each person
+predicted_age=predict(model_age)
+
+rmse_age=sqrt(mean((NHANES_child$Height - predicted_age)**2))
+print(paste('root mean squared error:',rmse_age))
+
+ggplot(NULL,aes(error_age)) + 
+  geom_histogram(bins=100) + xlim(-60,60)
+
+```
+
+Our error is much smaller using this model -- only `r I(rmse_age)` centimeters on average.  Can you think of other variables that might also be related to height?  What about gender?  Let's plot the data separately for males and females:
+
+```{r}
+ggplot(NHANES_child,aes(x=Age,y=Height)) +
+  geom_point(aes(colour = factor(Gender)),position = "jitter",alpha=0.2) +
+  geom_smooth(aes(group=factor(Gender),colour = factor(Gender)))
+
+```
+
+From the plot, it seems that there is a difference between males and females, but it only emerges after the age of puberty.  Let's estimate this model and see how the errors look:
+
+```{r}
+
+model_age_gender=lm(Height ~ Age + Gender, data=NHANES_child)
+predicted_age_gender=predict(model_age_gender)
+rmse_age_gender=sqrt(mean((NHANES_child$Height - predicted_age_gender)**2))
+sprintf("model: height = %f + %f*Age + %f*Gender",
+              model_age_gender$coefficients[1],
+              model_age_gender$coefficients[2],
+              model_age_gender$coefficients[3])
+print(paste('root mean squared error:',rmse_age_gender))
+
+
+```
+
+Let's plot the root mean squared error values across the different models:
+
+```{r}
+error_df=data.frame(error=c(rmse_mode,rmse_mean,rmse_age,rmse_age_gender))
+row.names(error_df)=c('mode','mean','mean+age','mean+age+gender')
+error_df$RMSE=sqrt(error_df$error)
+ggplot(error_df,aes(x=row.names(error_df),y=RMSE)) + 
+  geom_col() +ylab('root mean squared error') + xlab('Model') +
+  scale_x_discrete(limits = c('mode','mean','mean+age','mean+age+gender'))
+```
+
+From this we see that the model got a little bit better going from mode to mean, much better going from mean to mean+age, and only very slighly better by including gender as well.
+
+## What makes a model "good"?
+
+There are generally two different things that we want from our statistical model. First, we want it to describe our data well; that is, we want it to have the lowest possible error when modeling our data.  Second, we want it to generalize well to new datasets; that is, we want its error to be as low as possible when we apply it to a new dataset.  It turns out that these two desires can often be in conflict.
+
+
+
+
