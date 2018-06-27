@@ -1,0 +1,260 @@
+# Hypothesis testing
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult = NHANES %>%
+  drop_na(PhysActive,BMI) %>%
+  subset(Age>=18)
+
+
+
+```
+
+In the first chapter we discussed the three major goals of statistics:
+
+- Describe
+- Decide
+- Predict
+
+In this chapter we will introduce the ideas behind the use of statistics to make decisions -- in particular, decisions about whether a particular hypothesis is supported by the data.  
+
+## Null Hypothesis Statistical Testing (NHST)
+
+The specific type of hypothesis testing that we will discuss is known (for reasons that will become clear) as *null hypothesis staistical testing* (NHST).  If you pick up almost any scientific or biomedical research publication, you will see NHST being used to test hypotheses, and in their introductory psycholology textbook, Gerrig & Zimbardo (2002) referred to NHST as the “backbone of psychological research”.  Thus, learning how to use and interpret the results from hypothesis testing is essential.
+
+It is also important for you to know, however, that NHST is deeply problematic, and that many statisticians and researchers (including myself) think that it has been the cause of serious problems in science, which we will discuss in a later chapter.  For more than 50 years, there have been calls to abandon NHST in favor of other approaches (like those that we will discuss in the following chapters). Thys a couple of examples:
+
+- “The test of statistical significance in psychological research may be taken as an instance of a kind of essential mindlessness in the conduct of research” (Bakan, 1966)
+- Hypothesis testing is “a wrongheaded view about what constitutes scientific progress” (Luce, 1988)
+ 
+NHST is also widely misunderstood, largely because it violates out intuitions about how statistical hypothesis testing should work.  Let's look at an example to see.
+
+## Null hypothesis statistical testing: An example
+
+There is great interest in the use of body-worn cameras by police officers, which are thought to reduce the use of force and improve officer behavior.  However, in order to establish this we need experimental evidence, and it has become increasingly common for governments to use randomized controlled trials to test such ideas.  A randomized controlled trial of the effectiveness of body-worn cameras was performed by the Washington, DC government and DC Metropolitan Police Department in 2015/2016 in order to test this.  Officers were randomly assigned to wear a body-worn camera or not, and their behavior was then tracked over time to determine whether the cameras resulted in less usee of force and fewer civilian complaints about officer behavior.  
+
+Before we get to the results, let's ask how you would think the statistical analysis might work. Let's say we want to specifically test the hypothesis of whether the use of force is decreased by the wearing of cameras. The randomized controlled trial provides us with the data to test the hypothesis -- namely, the rates of use of force by officers assigned to either the camera or control groups.  The next obvious step is to look at the data and determine whether they provide convincing evidence for or against the hypothesis.  That is: What is the likelihood that body-worn cameras reduce the use of force, given the data and everything else we know?
+
+It turns out that this is *not* how hypothesis testing works.  Instead, we first take our hypothesis of interest (i.e. whether body-worn cameras reduce use of force), and flip it on its head, creating a *null hypothesis* -- in this case, the null hypothesis would be that cameras do not reduce use of force.  Importantly, we then assume that the null hypothesis is true. We then look at the data, and determine whether the data are sufficiently unlikely under the null hypothesis that we can reject the null in favor of the *alternative hypothesis* which is our hypothesis of interest.  If there is not sufficient evidence to reject the null, then we say that we "failed to reject" the null.  
+
+Understanding some of the concepts of NHST, particularly the notorious "p-value", is invariably challenging the first time one encounters them, because they are so counter-intuitive. As we will see later, there are other approaches that provide a much more intuitive way to address hypothesis testing. However, before we get to those, it's important for you to have a deep understanding of how hypothesis testing works, because it's clearly not going to go away any time soon.
+
+## The process of null hypothesis testing
+
+We can break the process of null hypothesis testing down into a number of steps:
+
+1. Make predictions based on your hypothesis (*before seeing the data*)
+2. Collect some data relevant to the hypothesis
+3. Identify null and alternative hypotheses
+4. Fit a model to the data that represents the alternative hypothesis and compute a test statistic
+5. Compute the probability of the observed value of that statistic assuming that the null hypothesis is true
+5. Assess the “statistical significance” of the result
+
+For a hands-on example, let's use the NHANES data to ask the following question: Is physical activity related to body mass index?  In the NHANES dataset, participants were asked whether they engage regularly in moderate or vigorous-intensity sports, fitness or recreational activities (stored in the variable PhysActive). They also measured height and weight and computed Body Mass Index:
+
+$$
+BMI = \frac{weight(kg)}{height(m)^2}
+$$
+
+### Step 1: Formulate a prediction
+
+For step 1, we formulate a prediction based on our hypothesis: BMI should be greater for people who do not engage in physical activity, versus those who do.  
+
+### Step 2: Collect some data
+For step 2, we collect some data.  In this case, we will sample 250 individuals from the NHANES dataset.  \@ref(fig:bmiSample) shows an example of such a sample, with BMI split based on reported physical activity.
+
+```{r bmiSample, fig.cap="BMI data from a sample of adults from the NHANES dataset, split by whether they reported engaging in regular physical activity."}
+# take a sample from the NHANES dataset
+sampSize=250
+NHANES_sample=sample_n(NHANES_adult,sampSize)
+
+ggplot(NHANES_sample,aes(PhysActive,BMI)) +
+  geom_boxplot() + 
+  xlab('Physically active?') + 
+  ylab('Body Mass Index (BMI)')
+
+sampleSummary=NHANES_sample %>%
+  group_by(PhysActive) %>% 
+  summarize(N=length(BMI),
+            mean=mean(BMI),
+            sd=sd(BMI))
+
+print(sampleSummary)
+
+meanDiff=sampleSummary[1,3] - sampleSummary[2,3]
+
+
+```
+
+### Step 3: Specify the null and alternative hypotheses
+For step 3, we need to specify our null hypothesis (which we call $H_0$) and our alternative hypothesis (which we call $H_A$).  $H_0$ is thebaseline against which we test our hypothesis of interest: that is, what would we expect the data to look like if there was no effect?  The null hypothesis always involves some kind of equality (=, ≤, or ≥).  
+$H_A$ describes what we expect if there actually is an effect.  The alternative hypothesis always involves some kind of inequality (≠ ,>, or <).  
+Importantly, null hypothesis testing operates under the assumption that the null hypothesis is true unless the evidence shows otherwise.
+
+We also have to decide whether to use *directional* or* non-directional* hypotheses.  A non-directional hypothesis simply predicts that there will be a difference, without predicting which direction it will go.  For the BMI/activity example, a non-directional null hypothesis would be:
+
+> $H0: BMI_{active} = BMI_{inactive}$
+
+and the corresponding non-directional alternative hypothesis would be:
+
+> $HA: BMI_{active} \neq BMI_{inactive}$
+
+A directional hypothesis, on the other hand, predicts which direction the difference would go.  For example, we have strong prior knowledge to predict that people who engage in physical activity should weigh less than those who do not, so we would propose the following directional null hypothesis:
+
+> $H0: BMI_{active} \ge BMI_{inactive}$
+
+and directional alternative:
+
+> $H0: BMI_{active} < BMI_{inactive}$
+
+### Step 4: Fit a model to the data and compute a test statistic
+
+For step 4, we want to use the data to compute a statistic that will ultimately let us decide whether the null hypothesis is rejected or not.  To do this, the model needs to quantify the amount of evidence in favor of the alternative hypothesis, compared to the noise in the data. Thus we can think of the test statistic as providing a measure of the size of the effect compared to the variability in the data.  In general, this test statistic will have a probability distribution associated with it, because we will want to determine how likely our observed value of the statistic is under the null hypothesis.  
+
+For the BMI example, we need a test statistic that allows us to test for a difference between two means, since the hypotheses are stated in terms of mean BMI for each group.  One statistic that is often used to compare two means is the *t-statistic*, first developed by the statistician William Sealy Gossett, who worked for the Guiness Brewery in Dublin and wrote under the pen name "Student" - hence, it is often called "Student's t-statistic".  The t-statistic is appropriate for comparing the means of two groups when the sample sizes are relatively small and the population standard deviation is unknown.  The t-statistic for comparison of two independent groups is computed as:
+
+$$
+t = \frac{\bar{X_1} - \bar{X_2}}{\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}}
+$$
+
+where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  The t-statistic is distributed according to a probability distribution known as a *t* distribution.  The *t* distribution looks quite similar to a normal distribution, but it differs depending on the number of degrees of freedom, which for this example is the number of observations minus 2, since we have computed two means and thus given up two degrees of freedom.  When the degrees of freedom are large (say 1000), then the *t* distribution looks essentialy like the normal distribution, but when they are small then the *t* distribution has longer tails than the normal (see \@ref(fig:tVsNormal)).
+
+```{r tVsNormal, fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 10 degrees of freedom, in which case the distribution is similar but has slightly heavier tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal."}
+distDf = data.frame(x=seq(-4,4,0.01))
+p1=ggplot(distDf,aes(x)) + 
+    stat_function(fun = dnorm, n = 100,size=1.5,color='red') +
+  stat_function(fun = dt, args = list(df = 10),n = 100,size=1.5,color='blue',linetype='dashed') + ggtitle('df = 10')
+p2=ggplot(distDf,aes(x)) + 
+    stat_function(fun = dnorm, n = 100,size=1.5,color='red') +
+  stat_function(fun = dt, args = list(df = 1000),n = 100,size=1.5,color='blue',linetype='dashed')  + ggtitle('df = 1000')
+
+plot_grid(p1,p2)
+```
+
+
+### Step 5: Determine the probability of the data under the null hypothesis
+
+This is the step where NHST starts to violate our intuition -- rather than determining the likelihood the the null hypothesis is true given the data, we instead determine the probability of the data under the null hypothesis - because started out by assuming that the null hypothesis is true!  To do this, we need to know the probability distribution for the statistic under the null hypothesis, so that we can ask how likely the data are under taht distribution.
+
+Before we move to our BMI data, let's start with a simpler example.  Let's say that we wish to determine whether a coin is fair.  To collect data, we flip the coin 100 times, and we count 70 heads.  In this example, $H_0: P(heads)=0.5$ and $H_A: P(heads) \neq 0.5$, and our test statistic is simply the number of heads that we counted.  The question that we then want to as is: How likely is it that we would observe 70 heads if the true probability of heads is 0.5.  We can imagine that it might happen very occasionally just by chance, but doesn't seem very likely. To quantify this, we can use the *binomial distribution*:
+
+$$
+P(X < k) = \sum_{i=0}^k \binom{N}{k} p^i (1-p)^{(n-i)}
+$$
+This tells us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the likelihood of a certain number or more extreme, which we can obtain by subtracting from one:
+
+$$
+P(X \ge k) = 1 - P(X < k)
+$$
+
+We can compute the probability for our example as follows:
+
+```{r}
+p_lt_70 = pbinom(69,100,0.5)
+p_lt_70
+p_ge_70 = 1 - p_lt_70
+p_ge_70
+```
+
+
+This computation shows us that the likelihood of getting 70 heads if the coin is indeed fair is very small.  Now, what if we didn't have the `pbinom()` function to tell us the probability of that number of heads?  We could instead determine it by simulation -- we repeatly flip a coin 100 times using a true probability of 0.5, and then compute the distribution of number of heads across those simulation runs.  Let's do that here:
+
+```{r}
+tossCoins = function(){
+  flips=runif(100)>0.5
+  return(sum(flips))
+}
+
+# use a large number of replications since this is fast
+coinFlips=replicate(100000,tossCoins())
+
+ggplot(data.frame(coinFlips),aes(coinFlips))  +
+  geom_histogram(binwidth = 1) + 
+  geom_vline(xintercept = 70,color='red',size=1)
+
+p_ge_70_sim = mean(coinFlips>=70)
+p_ge_70_sim
+```
+
+Here we can see that the probability computed via simulation (`r I(p_ge_70)`) is very close to the theoretical probability (`r I(p_ge_70_sim)`).  
+
+Let's do the analogous computation for our BMI example. First we compute the t statistic using the values from our sample:
+
+```{r}
+tStat = (sampleSummary[1,3] - sampleSummary[2,3])/ sqrt(sampleSummary[1,4]**2/sampleSummary[1,2] + sampleSummary[2,4]**2/sampleSummary[2,2] )
+tStat
+```
+
+
+The question that we then want to ask is: What is the likelihood that we would find a t statistic of this size, if the true difference between groups is zero or less (i.e. the directional null hypothesis)?  
+We can use the t distribution to determine this probability. Our sample size is 250, so the appropriate t distribution has 248 degrees of freedom.  We can use the `pt()` function in R to determine the probability of finding a value of the t-statistic greater than or equal to our observed value.  Note that we want to know the probability of a value greater than our observed value, but by default `pt()` gives us the probability of a value less than the one that we provide it, so we have to tell it explicitly to provide us with the "upper tail" probability.
+
+```{r}
+pvalue_tdist = pt(tStat$mean,df=248, lower.tail = FALSE)
+pvalue_tdist
+
+```
+
+This tells us that our observed t-statistic value of `r I(tStat$mean)` is quite unlikely if the null hypothesis really is true.
+
+In this case, we used a directional hypothesis, so we only had to look at one end of the null distribution. If we want to test a non-directional hypothesis, then we are interested in differences in either direction, so we have to add the probability that the observed value is as extreme in the other direction -- which we get by simply multiplying it by -1, since the *t* distribution is centered around zero.  Using this, we can get a *two-tailed* value:
+
+
+
+```{r}
+pvalue_tdist_twotailed = pt(tStat$mean,df=248, lower.tail = FALSE) + 
+  pt(-1*tStat$mean,df=248, lower.tail = TRUE)
+pvalue_tdist_twotailed
+
+```
+
+Here we see that the p value for the two-tailed test is twice as large as that for the one-tailed test, which reflects the fact that an extreme value is less surprising since it could have occurred in either direction.
+
+How do you choose whether to use a one-tailed versus a two-tailed test?  The two-tailed test is always going to be more conservative, so it's always a good bet to use that one, unless you had a very strong prior reason for using a one-tailed test. In that case, you should have written down the hypothesis before you ever looked at the data. In a later chapter we will discuss the idea of pre-registration of hypotheses, which formalizes the idea of writing down your hypotheses before you ever see the actual data.  You should *never* make a decision about how to perform a hypothesis test once you have looked at the data, as this can introduce serious bias into the results.
+
+#### Computing p-values using randomization
+
+So far we have seen how we can use the t-distribution to compute the probability of the data under the null hypothesis, but we can also do this using simulation. The basic idea is that we generate simulated data like those that we would expect under the null hypothesis, and then ask how extreme the observed data are in comparison to those simulated data.  The key question is: How can we generate data for which the null hypothesis is true?  The general answer is that we can randomly rearrange the data in a specific way that makes the data look like they would if the null was really true.  This is similar to the idea of bootstrapping, in the sense that it uses our own data to come up with an answer, but it does it in a different way.
+
+Let's start with a simple example.
+
+
+```{r}
+
+roundToNearest5 <- function(x,base=5){ 
+        return(base*round(x/base))
+} 
+
+df=data.frame(group=as.factor(c(rep('FB',5),rep('XC',5))),
+              squat=roundToNearest5(c(rnorm(5)*30 + 300,rnorm(5)*30 + 140)))
+
+
+df = df %>% mutate(scrambledGroup=sample(group))
+df = df %>% mutate(scrambledGroup2=sample(group))
+df
+
+tt=t.test(squat~group,data=df,var.equal=TRUE)
+tt
+
+tt_scram=t.test(squat~scrambledGroup,data=df,var.equal=TRUE)
+tt_scram
+
+tt_scram2=t.test(squat~scrambledGroup2,data=df,var.equal=TRUE)
+tt_scram2
+
+
+```
+
+
+
+
