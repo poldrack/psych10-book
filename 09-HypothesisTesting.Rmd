@@ -401,6 +401,121 @@ That is, if we set $\alpha$ to .05, then in the long run we should make a Type I
 
 ### What does a significant result mean?
 
-There is a great deal of confusion about what p-values actually mean (Gigerenzer, 2004).  Let's say that you do an experiment comparing the means between conditions, and you find a difference with a p-value of .01.  
+There is a great deal of confusion about what p-values actually mean (Gigerenzer, 2004).  Let's say that we do an experiment comparing the means between conditions, and we find a difference with a p-value of .01.  There are a number of possible interpretations.
+
+#### Does it mean that the probability of the null hypothesis being true is .01?
+
+No.  Remember that in null hypothesis testing, the p-value is the probability of the data given the null hypothesis ($P(data|H_0)$). It does not warrant conclusions about the probability of the null hypothesis given the data ($P(H_0|data)$).  We will return to this question when we discuss Bayesian inference in a later chapter, as Bayes theorem lets us invert the conditional probability in a way that allows us to determine the latter probability.
+
+#### Does it mean that the probability that you are making the wrong decision is .01?
+
+No. This would be $P(H_0\ is\ true|data)$, but remember as above that p-values are probabilities of data under $H_0$, not probabilities of hypotheses.
+
+#### Does it mean that if you ran the study again, you would obtain the same result 99% of the time?
+
+No. The p-value is a statement about the likelihood of a particular dataset under the null; it does not allow us to make inferences about the likelihood of future events such as replication.  
+
+#### Does it mean that you have found a meaningful effect?
+
+No.  There is a distinction between statistical significance and practical significance.  As an example, let's say that we performed a randomized controlled trial to examine the effect of a particular diet on body weight, and we find a statistically significant effect at p<.05.  What this doesn't tell us is how much weight was actually lost, which we refer to as the *effect size*.  Let's run a simulation that shows us how likely we are to find a statistically significant effect depending on two factors: the amount of weight loss, and the size of the sample.
+
+```{r}
+weightLossTrial = function(nPerGroup,effectSize){
+  # mean and SD in Kg based on NHANES adult dataset
+  kgToLbs=2.2046 # conversion constant for Kg to Lbs
+  meanLbs=81.78*kgToLbs
+  sdLbs=21.29*kgToLbs
+  # create data
+  controlGroup=rnorm(nPerGroup)*sdLbs + meanLbs
+  expGroup=rnorm(nPerGroup)*sdLbs + meanLbs + effectSize*sdLbs
+  ttResult=t.test(expGroup,controlGroup)
+  return(c(nPerGroup,effectSize,ttResult$p.value,diff(ttResult$estimate)))
+
+}
+
+nRuns = 1000
+sampSizes=2**seq(4,14) # powers of 2
+effectSizes=seq(0,.05,0.01) # standardized effect sizes
+kgToLbs=2.2046 # conversion constant for Kg to Lbs
+effectSizesInLbs=effectSizes*21.29*kgToLbs
+ 
+nSigResults = matrix(NA,nrow=length(sampSizes),ncol=length(effectSizes))
+meanDiff = matrix(NA,nrow=length(sampSizes),ncol=length(effectSizes))
+
+for (i in 1:length(sampSizes)){
+  for (j in 1:length(effectSizes)){
+    simResults = replicate(nRuns,weightLossTrial(sampSizes[i],
+                                                effectSizes[j]))
+    nSigResults[i,j]=sum(simResults[1,]<0.05)
+    meanDiff[i,j]=mean(simResults[2,])*-1
+  }
+}
+nSigResults=nSigResults/nRuns
+
+```
+
+Let's visualize the results of the simulation by presenting them as a *heatmap* where the color reflects the value of the result:
+
+```{r}
+nSigDf=data.frame(nSigResults)
+names(nSigDf) = effectSizes
+nSigDf = nSigDf %>%  
+  mutate(sampSize = sampSizes)
+nSigDfTidy = nSigDf %>% melt()
+ggplot(data.frame(nsig=nSigResults),aes())
+```
+
+
+## NHST in a modern context: Multiple testing
+
+So far we have discussed examples where we are interested in testing a single statistical hypothesis, and this is consistent with traditional science which often measured only a few variables at a time.  However, in modern science we can often measure millions of variables per individual.  For example, in genetic studies that quantify the entire genome, there may be many millions of measures per individual, and in brain imaging we often collect data from more than 100,000 locations in the brain at once.  When standard hypothesis testing is applied in these contexts, bad things can happen unless the appopriate care is taken.
+
+Let's look at an example to see how this might work.  There is great interest in understanding the genetic factors that can predispose individuals to major mental illnesses such as schizophrenia.  We know that about 80% of the variation between individuals in the presence of schizophrenia is due to genetic differences. The Human Genome Project and the ensuing revolution in genome science has provided tools to examine the many ways in which humans differ from one another in their genomes.  One approach that has been used in recent years is known as a *genome-wide association study* (GWAS), in which the genome of each individual is characterized at about 1 million places in their genome to determine which letters of the genetic code (which we call "variants") they have at that location.  Once these have been determined, then the researchers perform a statistical test at each location in the genome to determine whether people diagnosed with schizoprenia are more or less likely to have one specific variant at that location.  
+
+Let's imagine what would happen if the researchers simply asked whether the test was significant at p<.05 at each location.  To do this, we generate a large number of simulated t values from a null distribution, and ask how many of them are significant at p<.05.  Let's do this many times, and each time count up how many of the tests come out as significant
+
+```{r}
+nRuns=1500  # number of simulated studies to run
+nTests=10000 # number of simulated genes to test in each run
+
+uncAlpha=0.05 # alpha level
+
+uncOutcome=replicate(nRuns,sum(rnorm(nTests)<qnorm(uncAlpha)))
+
+ggplot(data.frame(nsig=uncOutcome),aes(nsig)) +
+  geom_histogram(bins=50) +
+  xlab(sprintf('Number of significant results (out of %d)',nTests))
+
+print(sprintf('familywise error rate: %0.3f',mean(uncOutcome>0)))
+```
+
+This shows that about 5% of all of the tests were significant in each run, meaning that if we were to use p < .05 as our threshold for statistical significance, then even if there were no truly significant relationships present, we would still "find" about 500 genes that were seemingly significant (the expected number of significant results is simply $n * \alpha$).  That is because while we controlled for the error per test, we didn't control the *familywise error*, or the error across all of the tests, which is what we really want to control if we are going to be looking at the results from a large number of tests. Using p<.05, our familywise error rate in the above example is 1 -- that is, we are guaranteed to make at least one error in our study.  
+
+A simple way to control for the familywise error is to divide the alpha level by the number of tests; this is known as the *Bonferroni* correction, named after the Italian statistician Carlo Bonferroni.  In our example above, this gives us: 
+
+```{r}
+
+corAlpha=0.05/nTests
+
+corOutcome=replicate(nRuns,sum(rnorm(nTests)<(qnorm(corAlpha))))
+
+ggplot(data.frame(nsig=corOutcome),aes(nsig)) +
+  geom_histogram(bins=50) +
+  xlab(sprintf('Number of significant results (out of %d)',nTests))
+
+print(sprintf('familywise error rate: %0.3f',mean(corOutcome>0)))
+
+```
+
+Here we see that using the corrected alpha level of `r I(corAlpha)` instead of the nominal level of .05, we have now controlled the familywise error, such that the probability of making *any* errors in our study is controlled at .05.
+
+
+
+
+
+
+
+
+
 
 
