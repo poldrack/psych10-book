@@ -417,52 +417,52 @@ No. The p-value is a statement about the likelihood of a particular dataset unde
 
 #### Does it mean that you have found a meaningful effect?
 
-No.  There is a distinction between statistical significance and practical significance.  As an example, let's say that we performed a randomized controlled trial to examine the effect of a particular diet on body weight, and we find a statistically significant effect at p<.05.  What this doesn't tell us is how much weight was actually lost, which we refer to as the *effect size*.  Let's run a simulation that shows us how likely we are to find a statistically significant effect depending on two factors: the amount of weight loss, and the size of the sample.
+No.  There is a distinction between statistical significance and practical significance.  As an example, let's say that we performed a randomized controlled trial to examine the effect of a particular diet on body weight, and we find a statistically significant effect at p<.05.  What this doesn't tell us is how much weight was actually lost, which we refer to as the *effect size*.  If we think about a study of weight loss, then we probably don't think that the loss of ten ounces (i.e. the weight of a bag of potato chips) is practically significant.  Let's look at our ability to detect a significant difference of 10 ounces as the sample size increases.
 
 ```{r}
-weightLossTrial = function(nPerGroup,effectSize){
+weightLossTrial = function(nPerGroup,weightLossOz=1){
   # mean and SD in Kg based on NHANES adult dataset
-  kgToLbs=2.2046 # conversion constant for Kg to Lbs
-  meanLbs=81.78*kgToLbs
-  sdLbs=21.29*kgToLbs
+  kgToOz=35.27396195  # conversion constant for Kg to Oz
+  meanOz=81.78*kgToOz
+  sdOz=21.29*kgToOz
   # create data
-  controlGroup=rnorm(nPerGroup)*sdLbs + meanLbs
-  expGroup=rnorm(nPerGroup)*sdLbs + meanLbs + effectSize*sdLbs
+  controlGroup=rnorm(nPerGroup)*sdOz + meanOz
+  expGroup=rnorm(nPerGroup)*sdOz + meanOz - weightLossOz
   ttResult=t.test(expGroup,controlGroup)
-  return(c(nPerGroup,effectSize,ttResult$p.value,diff(ttResult$estimate)))
+  return(c(nPerGroup,weightLossOz,ttResult$p.value,diff(ttResult$estimate)))
 
 }
 
 nRuns = 1000
-sampSizes=2**seq(4,14) # powers of 2
-effectSizes=seq(0,.05,0.01) # standardized effect sizes
-kgToLbs=2.2046 # conversion constant for Kg to Lbs
-effectSizesInLbs=effectSizes*21.29*kgToLbs
- 
-nSigResults = matrix(NA,nrow=length(sampSizes),ncol=length(effectSizes))
-meanDiff = matrix(NA,nrow=length(sampSizes),ncol=length(effectSizes))
+sampSizes=2**seq(5,17) # powers of 2
 
+simResults=c()
 for (i in 1:length(sampSizes)){
-  for (j in 1:length(effectSizes)){
-    simResults = replicate(nRuns,weightLossTrial(sampSizes[i],
-                                                effectSizes[j]))
-    nSigResults[i,j]=sum(simResults[1,]<0.05)
-    meanDiff[i,j]=mean(simResults[2,])*-1
-  }
+    tmpResults = replicate(nRuns,weightLossTrial(sampSizes[i],weightLossOz = 10))
+    summaryResults=c(tmpResults[1,1],tmpResults[2,1],
+                     sum(tmpResults[3,]<0.05),
+                     mean(tmpResults[4,]))
+    simResults=rbind(simResults,summaryResults)
 }
-nSigResults=nSigResults/nRuns
 
+simResultsDf = data.frame(simResults)
+names(simResultsDf)=c('sampleSize','effectSizeLbs','nSigResults','meanEffect')
+simResultsDf = simResultsDf %>%
+  mutate(pSigResult=nSigResults/nRuns)
 ```
 
-Let's visualize the results of the simulation by presenting them as a *heatmap* where the color reflects the value of the result:
+\@ref(fig:sigResults) shows how the proportion of significant results increases as the sample size increases, such that with a very large sample size (about 262,000 total subjects), we will find a significant result in more than 90% of studies when there is a 10 ounce weight loss.  We will explore this relationship in more detail when we return to the concept of *statistical power* in a later chapter, but it should already be clear from this example that statistical significance is not necessarily indicative of practical significance.
 
-```{r}
-nSigDf=data.frame(nSigResults)
-names(nSigDf) = effectSizes
-nSigDf = nSigDf %>%  
-  mutate(sampSize = sampSizes)
-nSigDfTidy = nSigDf %>% melt()
-ggplot(data.frame(nsig=nSigResults),aes())
+```{r sigResults, fig.cap="The proportion of signifcant results for a very small change (10 ounces, which is about .01 standard deviations) as a function of sample size."}
+
+ggplot(simResultsDf,aes(sampleSize,pSigResult)) +
+  geom_line() +
+  scale_x_continuous(trans='log2',breaks=simResultsDf$sampleSize) + 
+  theme(axis.text.x = element_text( angle=45,vjust=0.5)) +
+  ylim(0,1) + ylab('Proportion of significant results') +
+  xlab('sample size per group') +
+  theme(panel.grid.major =   element_line(colour = "gray",size=0.25)) +
+  geom_hline(yintercept = 0.05,linetype='dashed')
 ```
 
 
