@@ -1,0 +1,245 @@
+# Confidence intervals and effect sizes
+
+In the previous chapter we discussed how we can use data to test hypotheses.  Those methods provided a binary answer: we either reject or fail to reject the null hypothesis. However, this kind of decision overlooks a couple of important questions.  First, we would like to know how much uncertainty we have about the answer (regardless of which way it goes).  In addition, sometimes we don't have a clear null hypothesis, so we would like to see what range of estimates are consistent with the data.  Second, we would like to know how large the effect actually is, since as we saw in the weight loss example in the previous chapter, a statisticially significant effect is not necessarily a practically important effect.
+
+In this chapter we will discuss methods to address these two questions: confidence intervals to provide a measure of our uncertainty about our estimates, and effect sizes to provide a standardized way to understand how large the effects are.
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(boot)
+library(MASS)
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult = NHANES %>%
+  drop_na(Weight) %>%
+  subset(Age>=18)
+
+```
+
+## Confidence intervals
+
+So far in the book we have focused on estimating the specific value of a statistic.  For example, let's say we want to estimate the mean weight of adults in the NHANES dataset.  We could take a sample from the dataset and estimate the mean:
+
+```{r}
+sampSize=250
+NHANES_sample=sample_n(NHANES_adult,sampSize)
+
+sample_summary = NHANES_sample %>%
+  summarize(meanWeight=mean(Weight),
+            sdWeight=sd(Weight))
+
+```
+
+In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe the difference.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly if we have the data from the entire population!  
+
+You may also remember that earlier we introduced the concept of a *confidence interval*, which is a way of describing our uncertainty about a statistical estimate.  Remember that a confidence interval describes an interval that will on average contain the true population parameter with a given probability; for example, the 95% confidence interval is an interval that will capture the true population parameter 95% of the time.  Note again that this is not a statement about the population parameter; any particular confidence interval either does or does not contain the true parameter.  As Jerzy Neyman, the inventor of the confidence interval, said:
+
+>"The parameter is an unknown constant and no probability statement concerning its value may be made."
+
+The confidence interval for the mean is computed as:
+
+$$
+CI = point\ estimate\ \pm critical\ value
+$$
+
+where the critical value is determined by the sampling distribution of the estimate.  The important question, then, is what that sampling distribution is.
+
+### Confidence intervals using the normal distribution
+
+If we know the population standard deviation, then we can use the normal distribution to compute a confidence interval. We usually don't, but for our example of the NHANES dataset we do (it's `r I(sd(NHANES_adult$Weight))` for weight).  
+
+Let's say that we want to compute a 95% confidence interval for the mean. The critical value would then be the values of the normal distribution that capture 95% of the distribution; these are simply the 2.5th percentile and the 97.5th percentile of the distribution, which we can compute using the `qnorm()` function in R, and come out to $\pm 1.96$.  Thus, the confidence interval for the mean ($\bar{X}$) is:
+
+$$
+CI = \bar{X} \pm 1.96*SE
+$$
+
+Using the estimated mean from our sample (`r I(sample_summary$meanWeight)`) and the known population standard deviation, we can compute the confidence interval of [`r I(sample_summary$meanWeight + qnorm(0.025)*sd(NHANES_adult$Weight)/sqrt(sampSize))`,`r I(sample_summary$meanWeight + qnorm(0.975)*sd(NHANES_adult$Weight)/sqrt(sampSize))`].
+
+### Confidence intervals using the t distribution
+
+As stated above, if we knew the population standard deviation, then we could use the normal distribution to compute our confidence intervals. However, in general we don't -- in which case the t distribution is more approriate as a sampling distribution. Remember that the t distribution is slightly broader than the normal distribution, especially for smaller samples, which means that the confidence intervals will be slightly wider than they would if we were using the normal distribution. This incorporates the extra uncertainty that arises when we make conclusions based on small samples.
+
+We can compute the 95% confidence interval in a way similar to the normal distribution example above, but critical value is determnined by the 2.5th percentile and the 97.5th percentile of the t distribution, which we can compute using the `qt()` function in R.  Thus, the confidence interval for the mean ($\bar{X}$) is:
+
+$$
+CI = \bar{X} \pm t_{crit}*SE
+$$
+where $t_{crit}$ is the critical t value.
+For the NHANES weight example (with sample size of `r I(sampSize)`), the confidence interval would be:
+
+```{r}
+sample_summary = sample_summary %>%
+  mutate(cutoff_lower = qt(0.025,sampSize),
+         cutoff_upper = qt(0.975,sampSize),
+        CI_lower = meanWeight + cutoff_lower*sdWeight/sqrt(sampSize),
+         CI_upper = meanWeight + cutoff_upper*sdWeight/sqrt(sampSize))
+sample_summary
+```
+
+Remember that this doesn't tell us anything about the probability of the true population value falling within this interval, since it is a fixed parameter (which we know is `r I(mean(NHANES_adult$Weight))` because we have the entire population in this case) and it either does or does not fall within this specific interval (in this case, it does).  Instead, it tells us that in the long run, if we compute the confidence interval using this procedure, 95% of the time that confidence interval will contain the true population parameter.
+
+### Confidence intervals and sample size
+
+Given that the standard error decreases with sample size, that means that the confidence interval should also get narrower as the sample size increases, providing tighter bounds on our estimate.  Let's look at an example of how the confidence interval would change as a function of sample size for the weight example, using the normal distribution to generate the intervals for simplicity.
+
+```{r confIntSampSize,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean.  This example uses the normal distribution based on the population standard deviation; the effect of sample sizes would be even larger using the t distribution."}
+ssDf = data.frame(sampSize=2**seq(4,9)) %>%
+  mutate(meanHeight=mean(NHANES_sample$Height),
+         ci.lower = meanHeight - 1.96*sd(NHANES_adult$Weight)/sqrt(sampSize),
+         ci.upper = meanHeight + 1.96*sd(NHANES_adult$Weight)/sqrt(sampSize))
+
+ggplot(ssDf, aes(sampSize, meanHeight)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0, size = 1)
+```
+Figure \@ref(fig:confIntSampSize) shows how the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, demonstrating the fact that denominator of the confidence interval term includes the square root of the sample size.
+
+### Computing confidence intervals using the bootstrap
+
+In some cases we can't assume normality, or we don't know the sampling distribution of the statistic.  In these cases, we can use the bootstrap (which we introduced in the earlier chapter on resampling).  As a reminder, the bootstrap involves repeatedly resampling the data *with replacement*, and then using the distribution of the samples as a surrogate for the sampling distribution of the statistic. 
+
+Earlier we ran the bootstrap using hand-crafted code, but R includes a package called `boot` that we can use to run the bootstrap and compute confidence intervals.  Let's use it to compute the confidence interval for weight in our NHANES sample.
+
+```{r}
+meanWeight = function(df,foo){
+  return(mean(df[foo,]$Weight))
+}
+bs=boot(NHANES_sample,meanWeight,1000)
+# use the percentile bootstrap
+bootci=boot.ci(bs,type='perc')
+print('Bootstrap confidence intervals:')
+bootci$perc[4:5]
+```
+
+### Relation of confidence intervals to hypothesis tests
+
+There is a close relationship between confidence intervals and hypothesis tests.  In particular, if the confidence interval does not include the null hypothesis, then the associated statistical test would be statistically significant.  
+
+ADD DETAILS ABOUT COMPARING CIs ACROSS CONDITIONS
+
+## Effect sizes
+
+> "Statistical significance is the least interesting thing about the results. You should describe the results in terms of measures of magnitude – not just, does a treatment affect people, but how much does it affect them." Gene Glass (REF)
+
+In the last chapter we discussed the idea that statistical significance may not necessarily reflect practical significance.  In order to discuss practical significance, we need a standard way to describe the size of an effect in terms of the actual data, which we refer to as an *effect size*.  In this section we will introduce the concept and discuss various ways that effect sizes can be calculated.
+
+### An example: Should you drink less?
+
+We already saw one example of an effect size in the weight loss example in the previous chapter -- here we present another, this time based on a published research study that examined the effects of alcohol consumption on longevity (REF).  MORE HERE
+
+
+### Cohen's D
+
+One of the most common measures of effect size is known as *Cohen's d*, named after the statistician Jacob Cohen (who is most famous for his 1994 paper titled "The Earth Is Round (p < .05)").  It is used to quantify the difference between two means, in terms of their standard deviation:
+
+$$
+d = \frac{\bar{X}_1 - \bar{X}_2}{s}
+$$
+
+where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, and $s$ is the pooled standard deviation (which is a combination of the standard deviations for the two samples, weighted by their sample sizes):
+
+$$
+s = \sqrt{\frac{(n_1 - 1)s^2_1 + (n_2 - 1)s^2_2 }{n_1 +n_2 -2}}
+$$
+where $n_1$ and $n_2$ are the sample sizes and $s^2_1$ and $s^2_2$ are the standard deviations for the two groups respectively.
+
+There is a commonly used scale for interpreting the size of an effect in terms of Cohen's d:
+
+```{r echo=FALSE}
+dInterp=data.frame("D"=c(0.2,0.5,0.8),
+                   "Interpretation"=c('small','medium','large'))
+dInterp
+```
+
+It can be useful to look at some commonly understood effects to help understand these interpretations.  
+
+```{r}
+NHANES_sample=NHANES_adult %>% 
+  drop_na(Height) %>%
+  sample_n(250)
+
+hsum = NHANES_sample  %>%
+  group_by(Gender) %>%
+  summarize(meanHeight=mean(Height),
+            varHeight=var(Height),
+            n=n())
+
+s_height_gender = sqrt(((hsum$n[1]-1)*hsum$varHeight[1] +(hsum$n[2]-1)*hsum$varHeight[2])/(hsum$n[1]+hsum$n[2]-2))
+d_height_gender = (hsum$meanHeight[2] - hsum$meanHeight[1])/s_height_gender
+d_height_gender
+```
+
+The effect size for gender differences in height (d = `r I(d_height_gender)`) is huge by reference to our table above.  We can also see this by looking at the distributions of male and female heights in our sample.  Figure \@ref(fig:genderHist) shows that the two distributions are quite well separated, though still overlapping, highlighting the fact that even when there is a large effect size in the difference between two groups, there will be individuals from each group that are more like the other group.
+
+```{r genderHist,fig.cap="Smoothed histogram plots for male and female heights in the NHANES dataset, showing clearly distinct distributions."}
+ggplot(NHANES_sample,aes(x=Height,color=Gender)) + 
+  geom_density(bins=40)
+```
+
+It is also worth nothing that we rarely encounter effects of this magnitude in science.  As we will see in the later chapter on reproducibility, huge effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. 
+
+### Pearson's r
+
+Pearson's *r*, also known as the *correlation coefficient*, is a measure of the size of the relationship between two continuous variables.  We will discuss correlation in much more detail in an upcoming chapter, so we will save the details for that chapter; here we simply introduce *r* as a way to quantify the relation between two variables.
+
+*r* is a measure that varies from -1 to 1, where a value of 1 represents a perfect positive relationship between the variables, 0 represents no relationship, and -1 represents a perfect negative relationship.  Figure \@ref(fig:corrFig) shows examples of various levels of correlation using randomly generated data.
+
+```{r corrFig,fig.cap="Examples of various levels of Pearson's r."}
+set.seed(123456789)
+p <- list()
+corrvals=c(1,0.5,0,-0.5,-1)
+for (i in 1:length(corrvals)){
+  simdata=data.frame(mvrnorm(n=50,mu=c(0,0),
+                  Sigma=matrix(c(1,corrvals[i],corrvals[i],1),2,2)))
+  tmp=ggplot(simdata,aes(X1,X2)) + 
+    geom_point(size=0.5) +
+    ggtitle(sprintf('r = %.02f',cor(simdata)[1,2]))
+  p[[i]] = tmp 
+}
+plot_grid(p[[1]],p[[2]],p[[3]],p[[4]],p[[5]])
+```
+
+### Odds ratio
+
+In our earlier discussion of probability we discussed the concept of odds -- that is the relative likelihood of some event happening versus not happening:
+
+$$
+odds\ of\ A = \frac{P(A)}{P(\neg A)}
+$$
+
+The odds ratio is simply the ratio of two odds. For example, let's take the case of smoking and lung cancer.  A study published in the International Journal of Cancer in 2012 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3296911/) combined data regarding the occurrence of lung cancer in smokers and individuals who have never smoked across a number of different studies.  Note that these data come from case-control studies, which means that participants in the studies were recruited because they either did or did not have cancer; their smoking status was then examined. These numbers thus do not represent the prevalence of cancer amongst smokers in the general population -- but they can tell us about the relationship between cancer and smoking.
+
+```{r}
+smokingDf = data.frame(NeverSmoked=c(2883,220),
+                       CurrentSmoker=c(3829,6784),
+                       row.names=c('NoCancer','Cancer'))
+smokingDf
+```
+We can convert these numbers to odds ratios for each of the groups:
+
+```{r}
+smokingDf = smokingDf %>%
+  mutate(pNeverSmoked=NeverSmoked/sum(NeverSmoked),
+         pCurrentSmoker=CurrentSmoker/sum(CurrentSmoker))
+oddsCancerNeverSmoked = smokingDf$NeverSmoked[2]/smokingDf$NeverSmoked[1]
+oddsCancerCurrentSmoker = smokingDf$CurrentSmoker[2]/smokingDf$CurrentSmoker[1]
+```
+
+The odds of someone having lung cancer who has never smoked is `r I(oddsCancerNeverSmoked)` whereas the odds of a current smoker having lung cancer is `r I(oddsCancerCurrentSmoker)`.  The ratio of these odds tells us about the relatively likelihood of cancer between the two groups:
+
+```{r}
+oddsRatio = oddsCancerCurrentSmoker/oddsCancerNeverSmoked
+oddsRatio
+```
+
+The odds ratio of `r I(oddsRatio)` tells us that the odds of cancer in smokers is roughly 23 times higher than never-smokers. 
+
