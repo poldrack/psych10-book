@@ -1,0 +1,306 @@
+# Modeling categorical relationships
+
+So far we have discussed the general concept of statistical modeling and hypothesis, and applied them to some simple analyses. In this chapter we will focus on the modeling of *categorical* relationships, by which we mean relationships variables that are measured on a nominal (and sometimes ordinal) scale.  These data are usually expressed in terms of counts; that is, for each value of the variable (or combination of values of multiple variables), how many observations take that value.  For example, when we count how many people from each major are in the class, we are fitting a categorical model to the data.
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(kableExtra)
+library(BayesFactor)
+
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult = NHANES %>%
+  drop_na(Weight) %>%
+  subset(Age>=18)
+
+```
+
+## Example: Does traffic to a web site vary across days of the week?
+
+Let's say that we want to know whether the traffic to a specific web site differs across different days of the week.  As an example, we can use data collected using Google Analytics for the Openfmri.org web site (which is run by my lab).  These data are shown in Figure \@ref(fig:openfmriTraffic).
+
+```{r openfmriTraffic,fig.cap='Traffic to openfmri.org during the month of June, 2018, separated by days of the week.'}
+openfmriData=read.table('data/openfmri_analytics.csv',sep=',',header=1) %>%
+  group_by(DayOfWeek) %>%
+  summarize(sumUsers=sum(Users))
+
+ggplot(openfmriData,aes(DayOfWeek,sumUsers,group=1)) + 
+  geom_line() + 
+  geom_point() + 
+  scale_x_discrete(limits=c('Mon','Tue','Wed','Thu','Fri','Sat','Sun')) +
+  geom_hline(yintercept = mean(openfmriData$sumUsers),linetype='dashed')
+```
+Looking at the data, it certainly seems like traffic is higher early in the week and declines over the course of the week, hitting its lowest point on the weekend.  However, how can we tell whether this apparent pattern is simply due to random fluctuations?  
+
+## Pearson's chi-squared test
+
+The Pearson chi-squared test provides us with a way to test whether observed count data differs from some specific expected values that define the null hypothesis:
+
+$$
+\chi^2 = \sum_i\frac{(observed_i - expected_i)^2}{expected_i}
+$$
+In the case of our web site traffic example, the null hypothesis of interest is that the number of visits is the same every day -- which means that we would expect under the null hypothesis that the number of visits each day is simply equivalent to the mean across all days (denoted by the dashed line in Figure \@ref(fig:openfmriTraffic)). 
+
+```{r}
+chisqVal = sum(((openfmriData$sumUsers - mean(openfmriData$sumUsers))**2)/mean(openfmriData$sumUsers))
+chisqVal
+```
+
+The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together.  Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
+
+```{r chisqDist,fig.cap="Examples of the chi-squared distribution for various degrees of freedom."}
+xvals=seq(0.01,20,0.01)
+dfvals=c(1,2,4,8)
+chisqDf=data.frame(xvals,dfvals) %>% 
+  complete(xvals,dfvals)
+chisqDf = chisqDf %>%
+  mutate(chisq = dchisq(x=xvals,df=dfvals)) %>%
+           group_by(dfvals) %>%
+         mutate(chisqNorm = chisq/max(chisq))
+  
+ggplot(chisqDf,aes(xvals,chisqNorm,group=as.factor(dfvals),color=as.factor(dfvals))) +
+  geom_line()
+```
+
+Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables.
+
+```{r chisqSim,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the blue line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom."}
+d=replicate(50000,rnorm(8)**2)
+dMean=apply(d,2,sum)
+csDf=data.frame(x=seq(0.01,30,0.01)) %>%
+  mutate(chisq=dchisq(x,8))
+ggplot(data.frame(dMean),aes(dMean)) + 
+  geom_histogram(aes(y=..density..),bins=100) +
+  geom_line(data=csDf,aes(x,chisq),color='blue',size=1.5)+
+  xlim(0,30) + ylim(0,.12)
+
+```
+
+For the web traffic example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all days. We use a chi-squared distribution with degrees of freedom equal to n - 1, since we lost one degree of freedom when we computed the mean in order to generate the expected values.
+
+```{r}
+pval = pchisq(chisqVal,6,lower.tail=FALSE)
+pval
+```
+
+This shows that our observed data are exceedingly unlikely under the null hypothesis. 
+
+## Contingency tables and the two-way test
+
+Another way that we often use the chi-squared test is to ask whether two categorical variables are related to one another.  As an example, let's take the question of whether a black individual is more likely to be searched when they are pulled over by a police officer, compared to a white individual.  The Stanford Open Policing Project (https://openpolicing.stanford.edu/) has studied this, and provides data that we can use to analyze the question.  We will use the data from the State of Connecticut since they are fairly small.  These data were first cleaned up to remove all unnecessary data (see code/process_CT_data.py).
+
+```{r}
+stopData=read.table('data/CT_data_cleaned.csv',header=TRUE,sep=',') %>%
+  mutate(searched=recode(search_conducted,'False'=FALSE,'True'=TRUE)) %>%
+  dplyr::select(-search_conducted)
+
+```
+
+The standard way to represent data from a categorical analysis is through a *contingency table*, which presents the number or proportion of observations falling into each possible combination of values for each of the variables.
+
+Let's compute the contingency table for the police search data:
+
+```{r}
+
+summaryDf2way=stopData %>% 
+  group_by(searched,driver_race) %>% 
+  summarize(n=n()) %>% 
+  arrange(driver_race,searched) 
+
+summaryContingencyTable = summaryDf2way %>% 
+  spread(driver_race,n)
+
+summaryContingencyTable
+
+```
+
+It can also be useful to look at the contingency table using proportions rather than raw numbers, since they are easier to compare visually.
+
+```{r}
+summaryContingencyTableProportion = summaryContingencyTable %>%
+  mutate(Black=Black/nrow(stopData),
+         White=White/nrow(stopData))
+summaryContingencyTableProportion
+```
+
+The Pearson chi-squared test allows us to test whether observed frequencies are different from expected frequencies, so we need to determine what frequencies we would expect in each cell if searches and race were unrelated -- which we can defined as being *independent.*  Remember from the chapter on probability that if X and Y are independent, then:
+
+$$
+P(X \cap Y) = P(X) * P(Y)
+$$
+That is, the joint probability under the null hypothesis of independence is simply the product of the *marginal* probabilities of each individual variable. We can compute those marginal probabilities, and then multiply them together to get the expected proportions under independence.  
+
+
+|              | Black      | White      |       |
+|--------------|------------|------------|-------|
+| Not searched | P(NS)*P(B) | P(NS)*P(W) | P(NS) |
+| Searched     | P(S)*P(B)  | P(S)*P(W)  | P(S)  |
+|              | P(B)       | P(W)       |       |
+
+We can use a linear algebra trick known as the "outer product" (via the `outer()` function) to compute this easily.
+
+```{r}
+# compute the marginal probabilities
+summaryDfRace = stopData %>% 
+  group_by(driver_race) %>% 
+  summarize(n=n(),prop=n()/nrow(stopData))
+summaryDfStop = stopData %>% 
+  group_by(searched) %>% 
+  summarize(n=n(),prop=n()/nrow(stopData))
+
+# multiply outer product by n to compute expected frequencies
+expected=outer(summaryDfRace$prop, summaryDfStop$prop)*nrow(stopData)
+
+expectedDf=data.frame(expected,driverRace = c('Black','White'))
+names(expectedDf)=c('NotStopped','Stopped','driverRace')
+expectedDfTidy=gather(expectedDf,searched,n,-driverRace) %>% 
+  arrange(driverRace,searched)
+
+# add expected frequencies and squared difference to summary table
+summaryDf2way = summaryDf2way %>% 
+  mutate(expected=NA)
+summaryDf2way$expected = expectedDfTidy$n
+summaryDf2way = summaryDf2way %>% 
+  mutate(stdSqDiff = (n - expected)**2/expected)
+summaryDf2way
+
+# compute chi-squared statistic by summing standarized squared differences
+chisq=sum(summaryDf2way$stdSqDiff)
+print(chisq)
+```
+
+Having computed the chi-squared statistic, we now need to compare it to the chi-squared distribution in order to determine how extreme it is compared to our expectation under the null hypothesis.  The degrees of freedom for this distribution are $df = (nRows - 1) * (nColumns - 1)$ - thus, for a 2X2 table like the one here, $df = (2-1)*(2-1)=1$.  The intuition here is that computing the expected frequencies requires us to use three values: the total number of observations and the marginal probability for each of the two variables.  Thus, once those values are computed, there is only one number that is free to vary, and thus there is one degree of freedom.  Given this, we can compute the p-value for the chi-squared statistic:
+
+```{r}
+pval = pchisq(chisq,1,lower.tail=FALSE)
+pval
+```
+
+The p value of `r I(pval)` is exceedingly small, showing that the observed data would be highly unlikely if there was truly no relationship between race and police searches.
+
+We can also perform this test easily using the `chisq.test()` function in R:
+
+```{r}
+# first need to rearrange the data into a 2x2 table
+summaryDf2wayTable = summaryDf2way %>% 
+  dplyr::select(-expected,-stdSqDiff) %>% 
+  spread(searched,n) %>%
+  dplyr::select(-driver_race)
+
+chisqTestResult = chisq.test(summaryDf2wayTable,1,correct=FALSE)
+chisqTestResult
+
+```
+
+
+## Standardized residuals
+
+When we find a significant effect with the chi-squared test, this tells us that the data are unlikely under the null hypothesis, but it doesn't tell us how the data differ.  To get a deeper insight into how the data differ from the null model, we can examine the residuals from a model, which reflects the deviation of the data from the model in each cell. Rather than looking at the raw residuals (which will vary simply depending on the number of observations in the data), it's more common to look at ther *standardized residuals*, which are computed as:
+
+$$
+standardized\ residual_{ij} = \frac{observed_{ij} - expected_{ij}}{\sqrt{expected_{ij}}}
+$$
+where $i$ and $j$ are the indices for the rows and columns respectively.  We can compute these for the police stop data:
+
+
+```{r}
+summaryDf2way = summaryDf2way %>% 
+  mutate(stdRes = (n - expected)/sqrt(expected))
+summaryDf2way
+```
+
+These standardized residuals can be interpreted as Z scores -- in this case, we see that the number of searches for black individuals are substantially higher than expected based on independence, and the number of searches for white individuals are substantially lower than expected. This provides us with context to interpret the signficant chi-squared result.
+
+## Odds ratios
+
+We can also represent the relative likelihood of different outcomes in the contingency table using the odds ratio that we introduced earlier.  First, we represent the odds of being stopped for each race:
+
+$$
+odds_{searched|black} = \frac{N_{searched\cap black}}{N_{not\ searched\cap black}} = \frac{1219}{36244} = 0.034
+$$
+
+$$
+odds_{searched|white} = \frac{N_{searched\cap white}}{N_{not\ searched\cap white}} = \frac{3108}{239241} = 0.013
+$$
+$$
+odds\ ratio = \frac{odds_{searched|black}}{odds_{searched|white}} = 2.59
+$$
+
+The odds ratio shows that the odds of being searched are 2.59 times higher for blacks than whites, based on this dataset.
+
+## Bayes factor
+
+$$ 
+K = \frac{P(data|H_A)}{P(data|H_0)} = \frac{P(H_A|data)*P(H_A)}{P(H_0|data)*P(H_0)}
+$$
+Bayes factors are similar to p-values and effect sizes in the sense that their interpretation is somewhat subjective.  There are various guidelines for their interpretation -- here is one from Kass & Rafferty (1995):
+
+| K             | Interpretation       |
+|---------------|----------------------|
+| 1 to 3        | barely worth mention |
+| 3 to 20       | positive             |
+| 20 to 150     | strong               |
+| 150 and above | very strong          |
+
+We can compute the Bayes factor for the police search data using the `contingencyTableBF()` function from the BayesFactor package:
+
+```{r}
+bf = contingencyTableBF(as.matrix(summaryDf2wayTable), sampleType = "jointMulti")
+bf
+```
+
+This shows that the evidence in favor of a relationship between race and police searches in this dataset is exceedingly strong.
+
+## Categorical analysis beyond the 2 X 2 table
+
+Categorical analysis can also be applied to contingency tables where there are more than two categories for each variable.
+
+For example, let's look at the NHANES data and compare the variable *Depressed* which denotes the "self-reported number of days where participant felt down, depressed or hopeless".  This variable is coded as ``None``, ``Several``, or  ``Most``.  Let's test whether this variable is related to the *SleepTrouble* variable which reports whether the individual has reported sleeping problems to a doctor.  
+
+```{r}
+depressedSleepTrouble = NHANES_adult %>%
+  drop_na(SleepTrouble,Depressed) %>%
+  group_by(SleepTrouble,Depressed) %>%
+  summarize(n=n()) %>%
+  arrange(SleepTrouble,Depressed)
+depressedSleepTroubleTable = depressedSleepTrouble %>% 
+  spread(SleepTrouble,n)
+depressedSleepTroubleTable
+```
+
+Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the number of people with sleep trouble is overall less than those without, for people who reporting being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test:
+
+```{r}
+# need to remove the column with the label names
+depressedSleepTroubleTable = depressedSleepTroubleTable %>%
+  dplyr::select(-Depressed)
+
+depressedSleepChisq = chisq.test(depressedSleepTroubleTable)
+depressedSleepChisq
+```
+
+We can also compute the Bayes factor to quantify the strength of the evidence in favor the alternative hypothesis:
+
+```{r}
+bf = contingencyTableBF(as.matrix(depressedSleepTroubleTable), sampleType = "jointMulti")
+bf
+```
+Here see that the Bayes factor is exceedingly large, showing that the evidence in favor of a relation between depression and sleep problems is very strong.
+
+## Beware of Simpson's paradox
+
+The contingency tables presented above represent summaries large numbers of observations, but summaries can sometimes be misleading.  Let's take an example from baseball.  The table below shows the batting data (hits/at bats and batting average) for Derek Jeter and David Justice over the years 1995-1997:
+
+| Player  | 1995    |      | 1996    |      | 1997    |      | Combined |      |
+|---------|---------|------|---------|------|---------|------|----------|------|
+| Derek Jeter  | 12/48   | .250 | 183/582 | .314 | 190/654 | .291 | 385/1284 | __.300__ |
+| David Justice | 104/411 | __.253__ | 45/140  | __.321__ | 163/495 | __.329__ | 312/1046 | .298 |
+
+If you look closely, you will see that something odd is going on: In each individual year Justice had a higher batting average than Jeter, but when we combine the data across all three years, Jeter's average is actually higher than Justice's!  This is an example of a phenomenon known as *Simpson's paradox*, in which a pattern that is present in a combined dataset may not be present in any of the subsets of the data.  This occurs when there is another variable that may be changing across the different subsets -- in this case, the number of at-bats varies across years, with Justice batting many more times in 1995 (when batting averages were low).  We refer to this as a *lurking variable*, and it's always important to be attentive to such variables whenever one examines categorical data.
