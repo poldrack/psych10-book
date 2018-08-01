@@ -7,6 +7,10 @@ jobs:
       - run: apt-get install make
       - checkout
       - run:
+           name: installing packages
+           command: |
+               Rscript setup/package_installs.R
+      - run:
            name: rendering gitbook
            command: |
              make render-gitbook
