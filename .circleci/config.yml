@@ -6,7 +6,6 @@ jobs:
     steps:
       - run: apt-get install make
       - checkout
-      - run: conda install -c r r
       - run:
            name: rendering gitbook
            command: |
