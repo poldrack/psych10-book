@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: continuumio/anaconda3:latest
+    steps:
+      - run: apt-get install make
+      - checkout
+      - run: conda install -c r r
+      - run:
+           name: rendering gitbook
+           command: |
+             make render-gitbook
