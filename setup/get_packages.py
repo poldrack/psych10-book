@@ -13,7 +13,8 @@ for file in files:
         lines=[i.strip().split('(')[1].replace(')','') for i in f.readlines() if i.find('library')==0 or i.find('require')==0]
     packages=packages+lines
 packages=list(set(packages))
+packages.append('bookdown')
 print('writing to package_installs.R')
 with open('package_installs.R','w') as f:
     for p in packages:
-        f.write('install.packages("%s",dependencies=TRUE)\n'%p)
+        f.write('if (!require("%s")) install.packages("%s",repos="https://cran.rstudio.com",dependencies=TRUE)\n'%(p,p))
