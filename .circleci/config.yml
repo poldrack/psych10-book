@@ -5,6 +5,8 @@ jobs:
       - image: rocker/tidyverse
     steps:
       - run: apt-get install make
+      - run: apt-get install jags
+      - run: apt-get install gsl-bin libgsl-dev
       - run: apt-get install libudunits2-0 
       - checkout
       - run:
