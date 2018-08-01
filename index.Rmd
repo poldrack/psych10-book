@@ -1,7 +1,11 @@
 ---
 title: "YASB (Yet Another Statistics Book)"
 site: bookdown::bookdown_site
-output: bookdown::html_book
+output:
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+  bookdown::pdf_book:
+    keep_tex: yes
 documentclass: book
 ---
 
