@@ -5,6 +5,7 @@ jobs:
       - image: rocker/tidyverse
     steps:
       - run: apt-get install make
+      - run: apt-get install libudunits2-0 
       - checkout
       - run:
            name: installing packages
