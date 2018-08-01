@@ -1,0 +1,10 @@
+Protestant	46.6
+None	22.8
+Catholic	20.8
+Jewish	1.9
+Other	1.8
+Mormon	1.6
+Other Christian	1.6
+Muslim	0.9
+Buddhist	0.7
+Dont know	0.6
