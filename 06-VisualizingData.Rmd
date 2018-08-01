@@ -1,6 +1,6 @@
 # Data Visualization
 
-```{r}
+```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
 library(ggplot2)
 library(cowplot)
