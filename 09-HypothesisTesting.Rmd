@@ -260,7 +260,7 @@ This shows that the likelihood of such a difference under the null hypothesis is
 ```{r}
 dfScram = df %>% 
   mutate(scrambledGroup=sample(group)) %>%
-  select(-group)
+  dplyr::select(-group)
 dfScram
 
 ggplot(dfScram,aes(x=scrambledGroup,y=squat)) +
@@ -284,7 +284,7 @@ shuffleAndMeasure = function(df){
 shuffleDiff=replicate(nRuns,shuffleAndMeasure(df))
 ```
 
-We can now look at the distribution of mean differences across the shuffled datasets. \@ref(fig:shuffleHist) shows the histogram of the group differences across all of the random shuffles.  As expected under the null hypothesis, this distribution is centered at zero.  
+We can now look at the distribution of mean differences across the shuffled datasets. Figure \@ref(fig:shuffleHist) shows the histogram of the group differences across all of the random shuffles.  As expected under the null hypothesis, this distribution is centered at zero.  
 
 ```{r shuffleHist, fig.cap="Histogram of differences between the football and cross-country groups after randomly shuffling group membership.  The red line denotes the actual difference observed between the two groups, and the blue line shows the theoretical t distribution for this analysis."}
 ggplot(data.frame(shuffleDiff),aes(shuffleDiff)) +
