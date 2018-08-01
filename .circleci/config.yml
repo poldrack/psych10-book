@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: continuumio/anaconda3:latest
+      - image: rocker/tidyverse
     steps:
       - run: apt-get install make
       - checkout
