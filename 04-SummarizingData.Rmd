@@ -34,10 +34,10 @@ library(NHANES)
 NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
 
 # open the help page for the dataset
-help(NHANES)
+# help(NHANES)
 ```
 
-Scroll through the help page (that should open within the Help panel if you are using RStudio), which provides some information about the dataset as well as a listing of all of the variables included in the dataset.  Let's have a look at a simple variable, called "PhysActive" in the dataset.  This variable contains one of three different values: "Yes" or "No" (indicating whether or not the person reports doing "moderate or vigorous-intensity sports, fitness or recreational activities"), or "<NA>" if the data are not available for that individual. There are different reasons that the data might be missing; for example, this question was not asked of children younger than 12 years of ago, while in other cases an adult may have declined to answer the question during the interview. 
+Type the command `help(NHANES)` in the Rstudio console.  Scroll through the help page (that should open within the Help panel if you are using RStudio), which provides some information about the dataset as well as a listing of all of the variables included in the dataset.  Let's have a look at a simple variable, called "PhysActive" in the dataset.  This variable contains one of three different values: "Yes" or "No" (indicating whether or not the person reports doing "moderate or vigorous-intensity sports, fitness or recreational activities"), or "<NA>" if the data are not available for that individual. There are different reasons that the data might be missing; for example, this question was not asked of children younger than 12 years of ago, while in other cases an adult may have declined to answer the question during the interview. 
 
 ### Frequency distributions
 
@@ -45,14 +45,14 @@ Let's look at how many people fall into each of these categories. Don't worry ri
 
 ```{r MakePhysActiveTable}
 PhysActive_table = NHANES %>%  
-  select(PhysActive) %>%
+  dplyr::select(PhysActive) %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n())
 
 PhysActive_table
 ```
 
-The R code in this cell generates a table showing the frequencies of each of the different values; there were `r I(PhysActive_table %>% subset(PhysActive=='No') %>% select(AbsoluteFrequency))` individuals who responded "No" to the question, `r I(PhysActive_table %>% subset(PhysActive=='Yes') %>% select(AbsoluteFrequency))` who responded "Yes", and `r I(PhysActive_table %>% subset(is.na(PhysActive)) %>% select(AbsoluteFrequency))` for whom no response was given.  We call this a *frequency distribution* because it tells us how each of the values is distributed across the sample.
+The R code in this cell generates a table showing the frequencies of each of the different values; there were `r I(PhysActive_table %>% subset(PhysActive=='No') %>% dplyr::select(AbsoluteFrequency))` individuals who responded "No" to the question, `r I(PhysActive_table %>% subset(PhysActive=='Yes') %>% dplyr::select(AbsoluteFrequency))` who responded "Yes", and `r I(PhysActive_table %>% subset(is.na(PhysActive)) %>% dplyr::select(AbsoluteFrequency))` for whom no response was given.  We call this a *frequency distribution* because it tells us how each of the values is distributed across the sample.
 
 Since we only want to work with people who gave an answer to the question, let's filter the dataset to only include individuals who responded to this question.
 
@@ -60,7 +60,7 @@ Since we only want to work with people who gave an answer to the question, let's
 
 PhysActive_table_filtered = NHANES %>%
   subset(!is.na(PhysActive)) %>%  
-  select(PhysActive) %>%
+  dplyr::select(PhysActive) %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n())
 
@@ -82,7 +82,7 @@ Which we can do in R as follows:
 ```{r}
 PhysActive_table_filtered = NHANES %>%
   subset(!is.na(PhysActive)) %>%  
-  select(PhysActive) %>%
+  dplyr::select(PhysActive) %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(RelativeFrequency=AbsoluteFrequency/sum(AbsoluteFrequency))
@@ -95,7 +95,7 @@ The relative frequency provides a much easier way to see how big the imbalance i
 ```{r}
 PhysActive_table_filtered = NHANES %>%
   subset(!is.na(PhysActive)) %>%  
-  select(PhysActive) %>%
+  dplyr::select(PhysActive) %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(RelativeFrequency=AbsoluteFrequency/sum(AbsoluteFrequency),
@@ -104,7 +104,7 @@ PhysActive_table_filtered = NHANES %>%
 PhysActive_table_filtered
 ```
 
-This lets us see that `r I(PhysActive_table_filtered %>% subset(PhysActive=='No') %>% select(Percentage))` percent of the individuals in the NHANES sample said "No" and `r I(PhysActive_table_filtered %>% subset(PhysActive=='Yes') %>% select(Percentage))` percent said "Yes".
+This lets us see that `r I(PhysActive_table_filtered %>% subset(PhysActive=='No') %>% dplyr::select(Percentage))` percent of the individuals in the NHANES sample said "No" and `r I(PhysActive_table_filtered %>% subset(PhysActive=='Yes') %>% dplyr::select(Percentage))` percent said "Yes".
 
 ### Cumulative distributions
 
@@ -115,7 +115,7 @@ Let's look at another variable in the NHANES dataset, called SleepHrsNight which
 ```{r}
 SleepHrsNight_table_filtered = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
-  select(SleepHrsNight) %>%
+  dplyr::select(SleepHrsNight) %>%
   group_by(SleepHrsNight) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(RelativeFrequency=AbsoluteFrequency/sum(AbsoluteFrequency),
@@ -129,7 +129,7 @@ We can already begin to summarize the dataset just by looking at the table; for 
 ```{r}
 SleepHrsNight_data_filtered = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
-  select(SleepHrsNight)
+  dplyr::select(SleepHrsNight)
 
 # setup breaks for sleep variable
 scalex=scale_x_continuous(breaks=c(min(NHANES$SleepHrsNight,na.rm=TRUE):max(NHANES$SleepHrsNight,na.rm=TRUE))) # set the break points in the graph
@@ -144,7 +144,7 @@ We can also plot the relative frequencies, which we will often refer to as *dens
 ```{r}
 SleepHrsNight_data_filtered = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
-  select(SleepHrsNight)
+  dplyr::select(SleepHrsNight)
 
 # setup breaks for sleep variable
 scalex=scale_x_continuous(breaks=c(min(NHANES$SleepHrsNight,na.rm=TRUE):max(NHANES$SleepHrsNight,na.rm=TRUE))) # set the break points in the graph
@@ -164,7 +164,7 @@ That is, to compute the cumulative frequency for some value j, we add up the fre
 ```{r}
 SleepHrsNight_cumulative = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
-  select(SleepHrsNight) %>%
+  dplyr::select(SleepHrsNight) %>%
   group_by(SleepHrsNight) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(CumulativeFrequency=cumsum(AbsoluteFrequency))
@@ -186,7 +186,7 @@ We see that the cumulative frequency is *monotonically increasing* -- that is, i
 
 SleepHrsNight_cumulative = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
-  select(SleepHrsNight) %>%
+  dplyr::select(SleepHrsNight) %>%
   group_by(SleepHrsNight) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(RelativeFrequency=AbsoluteFrequency/sum(AbsoluteFrequency),
@@ -218,7 +218,7 @@ The reason for this is that the relatively small number of individuals with very
 Let's look at another more complex variable in the NHANES dataset: Height. 
 
 ```{r}
-ggplot(NHANES %>% select(Height) %>% drop_na(), aes(Height)) + 
+ggplot(NHANES %>% dplyr::select(Height) %>% drop_na(), aes(Height)) + 
   geom_histogram(aes(y=..density..),binwidth=1,fill='blue')
 
 ```
@@ -233,7 +233,7 @@ You may have intuited that the small heights are coming from the children in the
 NHANES = NHANES %>% 
   mutate(isChild = Age<18)
 
-ggplot(NHANES %>% select(Height,isChild) %>% drop_na(), aes(Height,fill=isChild)) + 
+ggplot(NHANES %>% dplyr::select(Height,isChild) %>% drop_na(), aes(Height,fill=isChild)) + 
   geom_histogram(aes(y=..density..),binwidth=1)
 
 ```
