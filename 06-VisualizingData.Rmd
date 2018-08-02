@@ -231,7 +231,7 @@ Edward Tufte introduced the concept of the "lie factor" to describe the physical
 
 The lie factor relates to one reason that one should always include the zero point in a bar chart.  In \@ref(fig:barCharLieFactor) we plot the same data with and without zero in the Y axis.  In panel A, the proportional difference in area between the two bars is exactly the same as the proportional difference between the values (i.e. lie factor = 1), whereas in Panel B (where zero is not included) the proportional difference in area between the two bars is roughly 2.8 times bigger than the proportional difference in the values, and thus it visually exaggerates the size of the difference.  
 
-```{r}
+```{r barCharLieFactor, fig.cap="Two bar charts with associated lie factors."}
 p1 = ggplot(data.frame(y=c(100,95),x=c('condition 1','condition 2')),aes(x=x,y=y)) + 
   geom_col() +
   ggtitle('lie factor = 1')

@@ -103,16 +103,16 @@ The formula for the standard error of the mean says that the quality of our meas
 
 The Central Limit Theorem tells us that as sample sizes get larger, the sampling distribution of the mean will come to be normally distributed, *even if the data are not normally distributed*.  
 
-We can also see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in \@ref(alcoholYearDist). 
+We can also see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in \@ref(fig:alcoholYearDist). 
 
-```{r alcoholYearDist,fig.cap="Distribution of the variable AlcoholYear in the NHANES dataset, which reflects the number of days that the individual drank in a year."}
+```{r alcoholYearDist, fig.cap="Distribution of the variable AlcoholYear in the NHANES dataset, which reflects the number of days that the individual drank in a year."}
 
 ggplot(NHANES %>% drop_na(AlcoholYear),aes(AlcoholYear)) + 
   geom_histogram(binwidth=7)
 
 ```
 
-This distribution is, for lack of a better word, funky -- and definitely not normally distributed.  Now let's look at the sampling distribution of the mean for this variable. \@ref(alcDist50) shows the sampling distribution for this variable, which is obtained by repeatedly drawing samples of size 50 from the NHANES dataset and taking the mean. Despite the clear non-normality of the original data, the sampling distribution is remarkably close to the normal. 
+This distribution is, for lack of a better word, funky -- and definitely not normally distributed.  Now let's look at the sampling distribution of the mean for this variable. \@ref(fig:alcDist50) shows the sampling distribution for this variable, which is obtained by repeatedly drawing samples of size 50 from the NHANES dataset and taking the mean. Despite the clear non-normality of the original data, the sampling distribution is remarkably close to the normal. 
 
 ```{r, echo=FALSE}
 

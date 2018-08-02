@@ -365,9 +365,9 @@ As we will see later in the course when we discuss the central limit theorem, th
 
 The examples in \@ref(fig:NormalDistPlotsWithDist) followed the normal distribution fairly well, but in many cases the data will deviate in a systematic way from the normal distribution. One way in which the data can deviate is when it is asymmetric, such that one tail of the distribution is more dense than the other. We refer to this as "skewness".  Skewness commonly occurs when the measurement is constrained, such as when we are counting things or measuring elapsed times (and thus the variable can't take on negative values).  
 
-An example of skewness can be seen in the average waiting times at the airport security lines at San Francisco International Airport; these data were obtained from https://awt.cbp.gov/).  
+An example of skewness can be seen in the average waiting times at the airport security lines at San Francisco International Airport.    
 
-```{r SFOWaitTimes}
+```{r SFOWaitTimes,fig.cap="Average wait times for security at SFO Terminal A (Jan-Oct 2017), obtained from https://awt.cbp.gov/ ."}
 waittimes=read.table('data/04/sfo_wait_times_2017.csv')
 names(waittimes)=c('waittime')
 ggplot(waittimes,aes(waittime)) +

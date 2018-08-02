@@ -37,9 +37,7 @@ Psychologists have shown that humans actually have a fairly bad sense of randomn
 
 ## Generating random numbers
 
-Running a Monte Carlo simulation requires that we generate random numbers.  Generating truly random numbers (i.e. numbers that are completely unpredictable) is only possible through physical processes, such as the decay of atoms or the rolling of dice, which are difficult to obtain and/or too slow to be useful for computer simulation. 
-
-# https://www.nist.gov/programs-projects/nist-randomness-beacon
+Running a Monte Carlo simulation requires that we generate random numbers.  Generating truly random numbers (i.e. numbers that are completely unpredictable) is only possible through physical processes, such as the decay of atoms or the rolling of dice, which are difficult to obtain and/or too slow to be useful for computer simulation (though they can be obtained from the (NIST Randomness Beacon)[https://www.nist.gov/programs-projects/nist-randomness-beacon]).
 
 However, we can generate *pseudo-random* numbers using a computer algorithm; these numbers will seem random in the sense that they are difficult to predict, but the series of numbers will actually repeat at some point.  For example, the random number generator used in R will repeate after $2^{19937} - 1$ numbers.  That's far more than the number of seconds in the history of the universe, and we generally think that this is fine for most purposes.
 
@@ -51,7 +49,7 @@ In R, there is a function to generate random numbers for each of the major proba
 
 \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function, which maps cumulative probabilities into values.  Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of choice via the quantile function.
 
-```{r}
+```{r rngExamples, fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution."}
 p1=ggplot(data.frame(x=runif(10000)),aes(x)) +
   geom_histogram(bins=100)
 
@@ -81,7 +79,7 @@ rnorm(5)
 
 Let's go back to our example of exam finishing times. Let's say that I administer three exams and record the finishing times, which might look like the distributions presented in \@ref(fig:finishingTimes).
 
-```{r finishingTimes}
+```{r finishingTimes, fig.cap="Simulated finishing time distributions."}
 finishTimeDf=data.frame(finishTime=rnorm(3*150,mean=5,sd=1),
                         quiz=kronecker(c(1:3),rep(1,150)))
 
@@ -163,7 +161,7 @@ ggplot(data.frame(bootMeans=bootMeans),aes(bootMeans)) +
 
 ```
 
-\@ref(fig:boostrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the boostrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
+\@ref(fig:bootstrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the boostrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
 
 ```{r}
 bootCI=quantile(bootMeans,c(0.025,0.975))
