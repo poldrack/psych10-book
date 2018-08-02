@@ -1,5 +1,5 @@
 ---
-title: "YASB (Yet Another Statistics Book)"
+title: "Intro Statistics for the 21st Century"
 site: bookdown::bookdown_site
 output:
   bookdown::gitbook:
@@ -9,6 +9,8 @@ output:
 documentclass: book
 ---
 
-# Yet Another Statistics Book?
+# Intro Statistics for the 21st Century
+
+## What's so different about this century?
 
 ## You're not a statistician - why should we listen to you?
