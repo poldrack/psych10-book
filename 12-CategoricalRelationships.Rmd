@@ -7,6 +7,7 @@ library(tidyverse)
 library(ggplot2)
 library(kableExtra)
 library(BayesFactor)
+library(sfsmisc)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -183,7 +184,7 @@ pval = pchisq(chisq,1,lower.tail=FALSE)
 pval
 ```
 
-The p value of `r I(pval)` is exceedingly small, showing that the observed data would be highly unlikely if there was truly no relationship between race and police searches.
+The p value of $3.79e^{-182}$ is exceedingly small, showing that the observed data would be highly unlikely if there was truly no relationship between race and police searches.
 
 We can also perform this test easily using the `chisq.test()` function in R:
 

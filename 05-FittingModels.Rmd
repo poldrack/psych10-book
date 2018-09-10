@@ -607,7 +607,7 @@ ggplot(crimeData,aes(Violent.Crime.rate,ViolentCrimeRateZscore)) +
   geom_point() + xlab('Rate of violent crimes') + ylab('Z-scored rate of violent crimes')
 ```
 
-The scatterplot shows us that the process of Z-scoring doesn't change the relative distribution of the data points (visible in the fact that the orginal data and Z-scored data fall on a straight line when plotted against each other) -- it just shifts them to have a mean of zero and a standard deviation of one.  However, if you look closely, you will see that the mean isn't exactly zero -- it's `r I(mean(crimeData$ViolentCrimeRateZscore))`.  What is going on here is that the computer represents numbers with a certain amount of *numerical precision* - which means that there are numbers that are not exactly zero, but are small enough that R considers them to be zero.  
+The scatterplot shows us that the process of Z-scoring doesn't change the relative distribution of the data points (visible in the fact that the orginal data and Z-scored data fall on a straight line when plotted against each other) -- it just shifts them to have a mean of zero and a standard deviation of one.  However, if you look closely, you will see that the mean isn't exactly zero -- it's just very small.  What is going on here is that the computer represents numbers with a certain amount of *numerical precision* - which means that there are numbers that are not exactly zero, but are small enough that R considers them to be zero.  
 
 ```{r}
 print(paste("smallest number such that 1+x != 1",.Machine$double.eps))
@@ -650,8 +650,6 @@ This provides us with a slightly more interpretable view of the data. For exampl
 ### Interpreting Z-scores
 
 The "Z" in "Z-score"" comes from the fact that the standard normal distribution (that is, a normal distribution with a mean of zero and a standard deviation of 1) is often referred to as the "Z" distribution.  We can use is standard normal distribution to help us understand what specific Z scores tell us about where a data point sits with respect to the rest of the distribution.
-
-
 
 ```{r zDensityCDF,fig.cap="Density (top) and cumulative distribution (bottom) of a standard normal distribution, with cutoffs at one standard deviation above/below the mean"}
 # First, create a function to generate plots of the density and CDF

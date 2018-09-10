@@ -7,8 +7,11 @@ library(tidyverse)
 
 "Statistical thinking will one day be as necessary for efficient citizenship as the ability to read and write.” - H.G. Wells
 
-## What is statistics?
+## What is statistical thinking?
 
+Statistical thinking is a way of understanding a complex world by describing it in relatively simple terms that nonetheless capture important aspects of its structure, and that also provide us some idea of how uncertain we are about our knowledge.  The foundations of statistical thinking come from primarily from mathematics and statistics, but also from computer science, psychology, and other fields of study.  
+
+We can distinguish statsitical thinking from other forms of thinking that are less likely to accurately describe the world.  In particular, human intuition often tries to answer the same questions that we can answer using statistical thinking, but often gets the answer wrong.  For example, in recent most Americans have reported that they think that violent was worse compared to the previous year ([Pew Research Center](http://www.pewresearch.org/fact-tank/2018/01/30/5-facts-about-crime-in-the-u-s/)).  However, a statistical analysis of the actual crime data shows that in fact violent crime has steadily *decreased* since the 1990's.  Intuition fails us because we rely upon best guesses (which psychologists refer to as *heuristics*) that can often get it wrong.  For example, humans often judge the prevalence of some event (like violent crime) using an *availability heuristic* -- that is, how easily can we think of an example of violent crime.  For this reason, our judgments of increasing crime rates may be more reflective of increasing news coverage, in spite of an actual decrease.  Statistical thinking provides us with the tools to more accurately understand the world.
 
 ## What can statistics do for us?
 
@@ -16,7 +19,7 @@ There are three major things that we can do with statistics:
 
 - *Describe*: The world is complex and we often need to describe it in a way that simplifies it in a way that we can understand.  
 - *Decide*: We often need to make decisions based on data, often in the face of uncertainty.
-- *Predict*: We often wish to make predictions based on our knowledge.
+- *Predict*: We often wish to make predictions about new situations based on our knowledge of previous situations.
 
 Let's look at an example of these in action, centered on a question that many of us are interested in: How do we decide what's healthy to eat?  There are many different sources of guidance, from government dietary guidelines to diet books to bloggers.  Let's focus in on a specific question: Is saturated fat in our diet a bad thing?
 

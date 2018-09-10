@@ -138,17 +138,13 @@ Looking at the data, it seems that there may be a positive relationship between 
 One way to quantify the relationship between two variables is the *covariance*.  Remember that variance for a single variable is computed as:
 
 $$
-
 s^2 = \frac{\sum_{i=1}^n (x_i - \bar{x})^2}{N - 1}
-
 $$
 
 This tell us how far each observation is from the mean.  Covariance tells us whether there is a relation between the deviations of two different variables across observations.  It is defined as:
 
 $$
-
 covariance = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{N - 1}
-
 $$
 
 This value will be high when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.

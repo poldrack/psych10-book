@@ -97,8 +97,8 @@ meanDiff=sampleSummary[1,3] - sampleSummary[2,3]
 ```
 
 ### Step 3: Specify the null and alternative hypotheses
-For step 3, we need to specify our null hypothesis (which we call $H_0$) and our alternative hypothesis (which we call $H_A$).  $H_0$ is thebaseline against which we test our hypothesis of interest: that is, what would we expect the data to look like if there was no effect?  The null hypothesis always involves some kind of equality (=, ≤, or ≥).  
-$H_A$ describes what we expect if there actually is an effect.  The alternative hypothesis always involves some kind of inequality (≠ ,>, or <).  
+For step 3, we need to specify our null hypothesis (which we call $H_0$) and our alternative hypothesis (which we call $H_A$).  $H_0$ is the baseline against which we test our hypothesis of interest: that is, what would we expect the data to look like if there was no effect?  The null hypothesis always involves some kind of equality (=, $\le$, or $\ge$).  
+$H_A$ describes what we expect if there actually is an effect.  The alternative hypothesis always involves some kind of inequality ($\ne$, >, or <).  
 Importantly, null hypothesis testing operates under the assumption that the null hypothesis is true unless the evidence shows otherwise.
 
 We also have to decide whether to use *directional* or* non-directional* hypotheses.  A non-directional hypothesis simply predicts that there will be a difference, without predicting which direction it will go.  For the BMI/activity example, a non-directional null hypothesis would be:
@@ -187,7 +187,7 @@ p_ge_70_sim = mean(coinFlips>=70)
 p_ge_70_sim
 ```
 
-Here we can see that the probability computed via simulation (`r I(p_ge_70)`) is very close to the theoretical probability (`r I(p_ge_70_sim)`).  
+Here we can see that the probability computed via simulation (.00004) is very close to the theoretical probability (.00005).  
 
 Let's do the analogous computation for our BMI example. First we compute the t statistic using the values from our sample:
 
@@ -308,7 +308,7 @@ equalSumMinus
 
 ```
 
-There are `r I(equalSum)` shuffle runs on which the t statistic for the shuffled data was exactly the same as the observed data -- which means that shuffling resulted in the same labeling as the actual data!  This is unlikely, but not *that* unlikely, and we can actually compute its likelihood using a bit of probability theory.  The number of possible permutations of 10 items is $10!$ which comes out to `r I(factorial(10))`.  The number of possible rearrangements of each set of 5 is $5!$ which comes out to `r I(factorial(5))`, so the number of possible rearrangements of two sets of five is $5! * 5!$ or `r I(factorial(5)**2)`.  Thus, we expect that  `r I((factorial(5)**2)/factorial(10))` of the random labelings should come out exactly the same as the original, which is fairly close to the `r I(sum(shuffleDiff==tt$statistic)/length(shuffleDiff))` that we see in our simulation.
+There are `r I(equalSum)` shuffle runs on which the t statistic for the shuffled data was exactly the same as the observed data -- which means that shuffling resulted in the same labeling as the actual data!  This is unlikely, but not *that* unlikely, and we can actually compute its likelihood using a bit of probability theory.  The number of possible permutations of 10 items is $10!$ which comes out to 3628800.  The number of possible rearrangements of each set of 5 is $5!$ which comes out to 120, so the number of possible rearrangements of two sets of five is $5! * 5!$ or 14400.  Thus, we expect that 0.0039 of the random labelings should come out exactly the same as the original, which is fairly close to the 0.0033 that we see in our simulation.
 
 
 We can compute the p-value from the randomized data by measuring how many of the shuffled values are at least as extreme as the observed value:
@@ -318,7 +318,7 @@ pvalRandomization = mean(shuffleDiff >= tt$statistic)
 pvalRandomization
 ```
 
-This p-value (`r I(pvalRandomization)`) is slightly larger than the p-value that we obtained using the t distribution (`r I(sprintf('%0.5f',tt$p.value))`), though both are still quite extreme, suggesting that the observed data are very unlikely to have arisen if the null hypothesis is true - and in this case we know that it's *not* true, because we generated the data.
+This p-value (0.0033) is slightly larger than the p-value that we obtained using the t distribution (0.0004), though both are still quite extreme, suggesting that the observed data are very unlikely to have arisen if the null hypothesis is true - and in this case we know that it's *not* true, because we generated the data.
 
 
 ##### Randomization: BMI/activity example
@@ -354,7 +354,7 @@ bmiPvalRand
 bmtTTest=t.test(BMI~PhysActive,data=NHANES_sample,var.equal=TRUE)
 ```
 
-Again, the p-value obtained from randomization (`r I(bmiPvalRand)`) is similar to the one obtained using the t distribution (`r I(bmtTTest$p.value)`).  The advantage of the randomization test is that it doesn't require that we assume that the data from each of the groups are normally distributed, though the t-test is generally quite robust to violations of that assumption.  In addition, the randomization test can allow us to compute p-values for statistics when we don't have a theoretical distribution like we do for the t-test.
+Again, the p-value obtained from randomization (0.0492) is similar (though somewhat smaller) to the one obtained using the t distribution (0.088).  The advantage of the randomization test is that it doesn't require that we assume that the data from each of the groups are normally distributed, though the t-test is generally quite robust to violations of that assumption.  In addition, the randomization test can allow us to compute p-values for statistics when we don't have a theoretical distribution like we do for the t-test.
 
 We do have to make one main assumption when we use the randomization test, which we refer to as *exchangeability*.  This means that all of the observations are distributed in the same way, such that we can interchange them without changing the overall distribution.  The main place where this can break down is when there are related observations in the data; for example, if we had data from individuals in 4 different families, then we couldn't assume that individuals were exchangeable, because siblings would be closer to each other than they are to individuals from other families. In general, if the data were obtained by random sampling, then the assumption of exchangeability should hold.
 
@@ -366,7 +366,7 @@ Historically, the most common answer to this question has been that we should re
 
 > “If P is between .1 and .9 there is certainly no reason to suspect the hypothesis tested. If it is below .02 it is strongly indicated that the hypothesis fails to account for the whole of the facts. We shall not often be astray if we draw a conventional line at .05 ... it is convenient to draw the line at about the level at which we can say: Either there is something in the treatment, or a coincidence has occurred such as does not occur more than once in twenty trials” (REF)
 
-However, Fisher never intended $p<0.05$ to be a fixed rule:
+However, Fisher never intended $p < 0.05$ to be a fixed rule:
 
 > "no scientific worker has a fixed level of significance at which from year to year, and in all circumstances, he rejects hypotheses; he rather gives his mind to each particular case in the light of his evidence and his ideas" (REF)
 
@@ -507,7 +507,7 @@ print(sprintf('familywise error rate: %0.3f',mean(corOutcome>0)))
 
 ```
 
-Here we see that using the corrected alpha level of `r I(corAlpha)` instead of the nominal level of .05, we have now controlled the familywise error, such that the probability of making *any* errors in our study is controlled at .05.
+Here we see that using the corrected alpha level of 0.000005 instead of the nominal level of .05, we have now controlled the familywise error, such that the probability of making *any* errors in our study is controlled at .05.
 
 
 

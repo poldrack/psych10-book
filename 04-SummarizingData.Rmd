@@ -22,7 +22,7 @@ Psychologists have long studied all of the ways in which generalization is centr
 
 A simple way to summarize data is to generate a table representing counts of various types of observations.  This type of table has been used for thousands of years
 
-![**Figure 4.1**: A Sumerian tablet from the Louvre, showing a sales contract for a house and field.  [Public domain], via Wikimedia Commons.](https://upload.wikimedia.org/wikipedia/commons/6/69/Sales_contract_Shuruppak_Louvre_AO3760.jpg)
+![**Figure 4.1**: A Sumerian tablet from the Louvre, showing a sales contract for a house and field.  Public domain, via Wikimedia Commons.](images/Sales_contract_Shuruppak_Louvre_AO3760.jpg)
 
 Let's look at some examples of the use of tables.  We will usethe NHANES dataset:
 
@@ -272,7 +272,10 @@ $$
 
 There is no hard and fast rule for how to choose the optimal bin width.  Occasionally it will be obvious (as when there are only a few possible values), but in many cases it would require trial and error.  One reasonable heuristic is the so-called "Freedman-Diaconis" rule:
 
+$$
 bin\ size = 2 * \frac{interquartile\ range}{\sqrt[3]{n}}
+$$
+
 
 which is implemented in R using the `nclass.FD` function (which returns the optimal number of bins):
 

@@ -1,0 +1,414 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# The General Linear Model
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(fivethirtyeight)
+library(BayesMed)
+
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult = NHANES %>%
+  drop_na(Weight) %>%
+  subset(Age>=18)
+
+```
+
+Remember that early in the book we described the basic model of statistics:
+
+$$
+outcome = model + error
+$$
+where our general goal is to find the model that minimizes the error, subject to some other constraints (such as keeping the model relatively simple so that we can generalize beyond our specific dataset). In this chapter we will focus on a specific implementation of this approach, which is known as the *general linear model* (or GLM).   You have already seen the general linear model in the earlier chapter on Fitting Models to Data, where we modeled height in the NHANES dataset as a function of age; here we will provide a more general introduction to the concept of the GLM and its many uses.
+
+Before we discuss the general linear model, let's first define two terms that will be important for our discussion:
+
+- *dependent variable*: This is the outcome variable that our model aims to explain (usually referred to as *Y*)
+- *independent variable*: This is a variable that we wish to use in order to explain the dependent variable (usually referred to as *X*).  
+
+There may be multiple independent variables, but for this course there will only be one dependent variable in our analyses.
+
+A general linear model is one in which the model for the dependent variable is composed of a *linear combination* of independent variables that are each multiplied by a weight (which is often referred to as the Greek letter beta - $\beta$), which determines the relative contribution of that independent variable to the model prediction.
+
+As an example, let's generate some simulated data for the relationship between study time and exam grades (see Figure \@ref(fig:StudytimeGrades))
+
+```{r StudytimeGrades, fig.cap='Relation between study time and grades'}
+set.seed(12345)
+betas=c(6,5)  # the number of points that having a prior class increases grades
+df=data.frame(studyTime=c(2,3,5,6,6,8,10,12)/3,
+              priorClass=c(0,1,1,0,1,0,1,0)) %>%
+  mutate(grade=studyTime*betas[1]+priorClass*betas[2] +round(rnorm(8,mean=70,sd=5))) 
+df
+lmResult=lm(grade~studyTime,data=df)
+
+p=ggplot(df,aes(studyTime,grade)) +
+  geom_point(size=3) +
+  xlab('Study time (hours)') +
+  ylab('Grade (percent)') +
+  xlim(0,5) + 
+  ylim(70,100)
+
+print(p)
+```
+
+
+Given these data, we might want to engage in each of the three fundamental activities of statistics:
+
+- *Describe*: How strong is the relationship between grade and study time?
+- *Decide*: Is there a statistically significant relationship between grade and study time?
+- *Predict*: Given a particular amount of study time, what grade do we expect?
+
+In the last chapter we learned how to describe the relationship between two variables using the correlation coefficient, so we can use that to describe the relationship here, and to test whether the correlation is statistically significant:
+
+```{r}
+corTestResult = cor.test(df$grade,df$studyTime,alternative='greater')
+corTestResult
+
+```
+
+
+The correlation is quite high, but just barely reaches statistical significance because the sample size is so small.  
+
+## Linear regression
+
+We can also use the general linear model to describe the relation between two variables and to decide whether that relationship is statistically significant; in addition, the model allows us to predict the value of the dependent variable given some new value of the independent variables.  Most importantly, the general linear model will allow us to build models that incorporate multiple independent variables.
+
+The specific version of the GLM that we used for this is referred to as as *linear regression*.  The term *regression* was coined by Francis Galton, who had noted that when he compared parents and their children on some feature (such as height), the children of extreme parents (i.e. the very tall or very short parents) generally fell closer to the mean than their parents.  This is an extremely important point that we return to below.
+
+The simplest version of the linear regression model (with a single independent variable) can be expressed as follows:
+
+$$
+y = x * \beta_x + \beta_0 + \epsilon
+$$
+The $\beta_x$ value tells us how much we would expect y to change given a one-unit change in x.  The intercept $\beta_0$ is an overall offset, which tells us what value we would expect y to have when $x=0$. The error term $\epsilon$ refers to whatever is left over once the model has been fit. If we want to know how to predict y (which we call $\hat{y}$), then we can drop the error term:
+
+$$
+\hat{y} = x * \beta_x + \beta_0 
+$$
+Figure  \@ref(fig:LinearRegression) shows an example of this model applied to the study time example.
+
+```{r LinearRegression,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much it changes in y for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time."}
+
+p2=p+geom_abline(slope=lmResult$coefficients[2],
+                  intercept=lmResult$coefficients[1],
+                  color='blue')
+
+lmResult=lm(grade~studyTime,data=df)
+
+p3=p2 +
+  geom_hline(yintercept=lmResult$coefficients[1],color='black',size=0.5,linetype='dotted') +
+  annotate('segment',x=2,xend=3,color='red',linetype='dashed',
+           y=predict(lmResult,newdata=data.frame(studyTime=2))[1],
+           yend=predict(lmResult,newdata=data.frame(studyTime=2))[1]) +
+   annotate('segment',x=3,xend=3,color='red',linetype='dashed',
+           y=predict(lmResult,newdata=data.frame(studyTime=2))[1],
+           yend=predict(lmResult,newdata=data.frame(studyTime=3))[1])
+ 
+print(p3)
+
+```
+
+### Regression to the mean
+
+The concept of *regression to the mean* was one of Galton's essential contributions to science, and it remains a critical point to understand when we interpret the results of experimental data analyses.  Let's say that we want to study the effects of a reading intervention on the performance of poor readers.  To test our hypothesis, we might go into a school and recruit those individuals in the bottom 25% of the distribution on some reading test, administer the intervention, and then examine their performance.  Let's say that the intervention actually has no effect, and that reading scores for each individual are simply samples from a normal distribution.  We can simulate this:
+
+```{r}
+nstudents=100
+readingScores = data.frame(test1=rnorm(nstudents)*10 + 100,
+                           test2=rnorm(nstudents)*10 + 100)
+
+# select the students in the bottom 25% on the first test
+cutoff=quantile(readingScores$test1,0.25)
+readingScores = readingScores %>%
+  mutate(badTest1=test1<cutoff)
+
+readingScoresSummary = readingScores %>%
+  subset(badTest1==TRUE) %>%
+  summarize(test1mean=mean(test1),
+            test2mean=mean(test2))
+readingScoresSummary
+```
+
+If we look at the difference between the mean test performance at the first and second test, it appears that the intervention has helped these students substantially, as their scores have gone up by more than ten points on the test!  However, we know that in fact the students didn't improve at all, since in both cases the scores were simply selected from a random normal distribution. What has happened is that some subjects scored badly on the first test, just due to random chance. If we select just those subjects on the basis of their first test scores, they are guaranteed to move back towards the mean of the entire group on the second test. This is the reason that we need an untreated *control group* in order to interpret any changes in reading over time; otherwise we are likely to be tricked by regression to the mean.
+
+### Estimating linear regression parameters
+
+For a simple regression model $y = x * \beta + intercept$, we can estimate the value of $\beta$ and then use it to estimate the value of the intercept.  In reality we would never actually estimate the parameters this way, but it provides some insight into the interpretation of the parameters so we will walk through it.
+
+The regression slope $\beta$ is estimated as the ratio of the covariance between x and y and the variance of x:
+
+$$
+\hat{\beta_x} = \frac{covariance_{xy}}{s^2_x}
+$$
+Remember that the covariance is simply the sum of the crossproducts between x and y, whereas the variance of x is the sum of crossproducts of x with itself (i.e. $x^2$). 
+
+We can compute this for the study time data; however, before we can compute the variance and covariance, we need to center each variable around its mean (i.e. subtract the mean from each score). *NEED TO REWRITE THIS TO BE CLEARER ABOUT THE DEMEANING*
+
+```{r}
+df = df %>% 
+  mutate(studyTimeResid=studyTime-mean(df$studyTime),
+         gradeResid=grade-mean(df$grade),
+         crossproduct=studyTimeResid*gradeResid)
+df %>%
+  dplyr::select(studyTime,studyTimeResid,grade,gradeResid,crossproduct)
+```
+
+Now we can compute the slope:
+```{r}
+beta_hat = sum(df$crossproduct)/sum(df$studyTimeResid**2)
+beta_hat
+```
+Now that we have $\hat{\beta_x}$, we can compute the estimated intercept which we refer to here as $\hat{\beta_0}$ by solving for it:
+
+$$
+\begin{array}{c}
+\hat{y} = x*\hat{\beta_x} + \hat{\beta_0}\\
+\hat{\beta_0} = \hat{y} - x*\hat{\beta_x}\\
+\end{array}
+$$
+
+### The relation between correlation and regression
+
+There is a close relationship between correlation coefficients and regression coefficients.  Remember that Pearson's correlation coefficient is computed as the ratio of the covariance and the product of the standard deviations of x and y:
+
+$$
+\hat{r} = \frac{covariance_{xy}}{s_x * s_y}
+$$
+whereas the regression beta is computed as:
+
+$$
+\hat{\beta} = \frac{covariance_{xy}}{s_x*s_x}
+$$
+
+Based on these two equations, we can derive the relationship between $\hat{r}$ and $\hat{beta}$:
+
+$$
+\begin{array}{c}
+covariance_{xy} = \hat{r} * s_x * s_y \\
+\hat{\beta_x} =  \frac{\hat{r} * s_x * s_y}{s_x * s_x} = r * \frac{s_y}{s_x}
+\end{array}
+$$
+That is, the regression slope is equal to the correlation value multiplied by the ratio of standard deviations of y and x.  One thing this tells us is that when the standard deviations of x and y are the same (e.g. when the data have been turned to Z scores), then the correlation estimate is equal to the regression slope estimate.
+
+### Standard errors for regression models
+
+If we want to make inferences about the regression parameter estimates, then we also need an estimate of their variability.  To compute this, we first need to compute the *residual variance* or *error variance* for the model -- that is, how much variability remains after we fit the model.  We can compute the model residuals as follows:
+
+$$
+residual = y - \hat{y} = y - (x*\hat{\beta_x} + \hat{\beta_0})
+$$
+We then compute the *sum of squared errors (SSE)*:
+
+$$
+SS_{error} = \sum_{i=1}^n{(y_i - \hat{y_i})^2} 
+$$
+and from this we compute the *mean squared error*:
+
+$$
+MS_{error} = \frac{SS_{error}}{df} = \frac{\sum_{i=1}^n{(y_i - \hat{y_i})^2} }{N - p}
+$$
+where the degrees of freedom ($df$) are determined by subtracting the number of estimated parameters (2 in this case: $\hat{\beta_x}$ and $\hat{\beta_0}$) from the number of observations ($N$).  Once we have the mean squared error, we can compute the standard error for the model as:
+
+$$
+SE_{model} = \sqrt{MS_{error}}
+$$
+
+In order to get the standard error for a specific regression parameter estimate, we need to rescale $SE_{model}$ into the units of the particular parameter:
+
+$$
+SE_{\beta_x} = \frac{SE_{model}}{\sqrt{SS_x}}
+$$
+
+### Statistical tests for regression parameters
+
+Once we have the parameter estimates and their standard error, we can compute a t statistic to tell us the likelihood of the observed data compared to some expected value under the null hypothesis (usually $\beta=0$):
+
+$$
+\begin{array}{c}
+t_{N - p} = \frac{\hat{\beta} - \beta_{expected}}{SE_{\hat{\beta}}}\\
+t_{N - p} = \frac{\hat{\beta} - 0}{SE_{\hat{\beta}}}\\
+t_{N - p} = \frac{\hat{\beta} }{SE_{\hat{\beta}}}
+\end{array}
+$$
+
+In R, we don't need to compute these by hand, as they are automatically returned to us by the ```lm()``` function:
+
+```{r}
+summary(lmResult)
+```
+In this case we see that the intercept is significantly different from zero (which is not very interesting) and that the effect of studyTime on grades is marginally significant.
+
+### Quantifying goodness of fit of the model
+
+Sometimes it's useful to quantify how well the model fits the data overall, and one way to do this is to ask how much of the variability in the data is accounted for by the model.  This is quantified using a value called $R^2$ (also known as the *coefficient of determination*).  If there is only one x variable, then this is easy to compute:
+
+$$
+R^2 = r^2
+$$
+In the case of our study time data, $R^2$ = `r I(cor(df$studyTime,df$grade)**2)`, which means that we have accounted for about 40% of the variance in the data.
+
+More generally we can think of $R^2$ as a measure of the fraction of variance in the data that is accounted for by the model, which can be computed by breaking the variance into multiple components:
+
+$$
+SS_{total} = SS_{model} + SS_{error}
+$$
+where $SS_{total}$ is the variance of y and $SS_{model}$ and $SS_{error}$ are computed as shown earlier in this chapter.  Using this, we can then compute the coefficient of determination as:
+
+$$
+R^2 = \frac{SS_{model}}{SS_{total}} = 1 - \frac{SS_{error}}{SS_{total}}
+$$
+## Fitting more complex models
+
+Often we would like to understand the effects of multiple variables on some particular outcome, and how they relate to one another.  In the context of our study time example, let's say that we discovered that some of the students had previously taken a course on the topic.  If we plot their grades (see Figure  \@ref(fig:StudytimeGradesPrior)), we can see that those who had a preior course perform much better than those who had not, given the same amount of study time.
+
+```{r StudytimeGradesPrior, fig.cap='The relationship between study time and grades, with color identifying whether each student had taken a previous course on the topic'}
+
+p=ggplot(df,aes(studyTime,grade,color=as.factor(priorClass))) +
+  geom_point(size=3) + xlim(0,5) + ylim(70,100)
+print(p)
+
+```
+
+We would like to build a statistical model that takes this into account, which we can do by extending the model that we built above:
+
+$$
+\hat{y} = \hat{\beta_1}*studyTime + \hat{\beta_2}*priorClass + \hat{\beta_0}
+$$
+To model whether each individual has had a previous class or not, we use what we call *dummy coding* in which we create a new variable that has a value of one to represent having had a class before, and zero otherwise.  This means that for people who have had the class before, we will simply add the value of $\hat{\beta_2}$ to our predicted value for them -- that is, using dummy coding $\hat{\beta_2}$ simply reflects the difference in means between the two groups. Our estimate of $\hat{\beta_1}$ reflets the regression slope over all of the data points -- that is, we are assuming that regression slope is the same regardless of whether someone has had a class before (see Figure  \@ref(fig:LinearRegressionByPriorClass)).
+
+```{r LinearRegressionByPriorClass, fig.cap='The relation between study time and grade including prior experience as an additional component in the model.  The blue line shows the slope relating grades to study time, and the black dotted line corresponds to the difference in means between the two groups.'}
+df$priorClass=as.factor(df$priorClass)
+
+lmResultTwoVars = lm(grade ~ studyTime + priorClass,data=df)
+summary(lmResultTwoVars)
+
+p=ggplot(df,aes(studyTime,grade,color=priorClass)) +
+  geom_point(size=3) + xlim(0,5) + ylim(70,100)
+
+
+p=p+
+  geom_abline(slope=lmResultTwoVars$coefficients[2],
+              intercept=lmResultTwoVars$coefficients[1],color='red')
+
+p=p+
+  annotate('segment',x=2,xend=3,
+           y=lmResultTwoVars$coefficients[1]+
+             2*lmResultTwoVars$coefficients[2],
+           yend=lmResultTwoVars$coefficients[1]+
+             2*lmResultTwoVars$coefficients[2],
+           color='blue') +
+  annotate('segment',x=3,xend=3,
+           y=lmResultTwoVars$coefficients[1]+
+             2*lmResultTwoVars$coefficients[2],
+           yend=lmResultTwoVars$coefficients[1]+
+             3*lmResultTwoVars$coefficients[2],
+           color='blue')
+
+
+p=p+
+  geom_abline(slope=lmResultTwoVars$coefficients[2],
+              intercept=lmResultTwoVars$coefficients[1]+
+                lmResultTwoVars$coefficients[3],
+              color='green') 
+
+p=p+
+  annotate('segment',x=2,xend=2,
+           y=lmResultTwoVars$coefficients[1]+
+             2*lmResultTwoVars$coefficients[2],
+           yend=lmResultTwoVars$coefficients[1]+
+             lmResultTwoVars$coefficients[3] +
+             2*lmResultTwoVars$coefficients[2],
+           linetype='dotted',size=1) 
+print(p)
+
+
+```
+## Interactions between variables
+
+In the previous model, we assumed that the effect of study time was the same for both groups. However, in some cases we might imagine that the effect of one variable might differ depending on the value of another variable, which we refer to as an *interaction* between variables.
+
+Let's use a new example that asks the question: What is the effect of caffeine on public speaking?  First let's generate some data and plot them:
+
+```{r CaffeineSpeaking, fig.cap='The relationship between caffeine and public speaking'}
+set.seed(1234567)
+df=data.frame(group=c(rep(-1,10),rep(1,10))) %>%
+  mutate(caffeine=runif(n())*100) %>%
+  mutate(speaking=0.5*caffeine*-group + group*20 + rnorm(20)*10)
+
+p=ggplot(df,aes(caffeine,speaking)) +
+  geom_point()
+print(p)
+
+```
+
+Looking at Figure  \@ref(fig:CaffeineSpeaking), there doesn't seem to be a relationship, and we can confirm that by performing linear regression on the data:
+
+```{r}
+lmResultCaffeine = lm(speaking~caffeine,data=df)
+summary(lmResultCaffeine)
+
+```
+
+But now let's say that we find research suggesting that anxious and non-anxious people react differently to caffeine.  First let's plot the data separately for anxious and non=anxious people.
+
+```{r CaffeineSpeakingAnxiety, fig.cap='The relationship between caffeine and public speaking, with anxiety represented by the color of the data points'}
+df = df %>% mutate(anxiety=ifelse(group==1,'anxious','notAnxious'))
+p=ggplot(df,aes(caffeine,speaking,color=anxiety)) +
+  geom_point()
+print(p)
+```
+As we see from Figure  \@ref(fig:CaffeineSpeakingAnxiety), it appears that the relationship between speaking and caffeine is different for the two groups, with caffeine improving performance for people without anxiety and degrading performance for those with anxiety.  We'd like to create a statistical model that addresses this question.  First let's see what happens if we just include anxiety in the model.
+
+```{r}
+lmResultCafAnx = lm(speaking ~ caffeine + anxiety,data=df)
+summary(lmResultCafAnx)
+```
+
+Here we see there are no significant effects of either caffeine or anxiety, but that seems wrong.  The problem is that this model is trying to fit the same line relating speaking to caffeine for group. If we want to fit them using separate lines, we can include an *interaction* in the model, which is equivalent to fitting different lines for the two groups.
+
+```{r}
+lmResultInteraction = lm(speaking ~ caffeine + anxiety + caffeine*anxiety,data=df)
+summary(lmResultInteraction)
+```
+
+Now we see that there are significant effects of both caffeine and anxiety (which we call *main effects*) and an interaction between caffeine and anxiety.
+
+
+```{r CaffeineAnxietyInteraction, fig.cap='The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group.'}
+df_anx=df%>%subset(anxiety=='anxious')
+df_notanx=df%>%subset(anxiety=='notAnxious')
+
+p=ggplot(df_anx,aes(caffeine,speaking)) +
+  geom_point(color='blue') +
+  geom_line(data=data.frame(x=df$caffeine[df$anxiety=='anxious'],
+                    y=lmResultInteraction$fitted.values[df$anxiety=='anxious']),
+            aes(x,y),color='blue') +
+  geom_point(data=df_notanx,aes(caffeine,speaking),color='red')+
+  geom_line(data=data.frame(x=df$caffeine[df$anxiety=='notAnxious'],
+                    y=lmResultInteraction$fitted.values[df$anxiety=='notAnxious']),
+            aes(x,y),color='red')
+print(p)
+```
+
+
+We can also compare the goodness of fit of the model with and without the interaction, using the anova() command.
+
+```{r}
+anova(lmResultCafAnx,lmResultInteraction)
+```
+This tells us that there is good evidence to prefer the model with the interaction over the one without an interaction.
+
+### Effect sizes for linear regression
+
+*DISCUSS STANDARDIZED REGRESSION COEFFICIENTS*

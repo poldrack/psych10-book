@@ -26,7 +26,7 @@ To formalize probability theory, we first need to define a few terms:
 
 Now that we have those definitions, we can outline the formal features of a probability, which were first defined by the Russian mathematician Andrei Kolmogorov. If $P(X_i)$ is the probability of event $X_i$:
 
-- Probability cannot be negative: $P(X_i) ≥ 0$
+- Probability cannot be negative: $P(X_i) \ge 0$
 - The total probability of all outcomes in the sample space is 1. We can express this using the summation symbol:
 $$
 \sum_{i=1}^N{P(X_i)} = P(X_1) + P(X_2) + ... + P(X_N) = 1
@@ -433,13 +433,12 @@ We can also use odds to compare different probabilities, by computing what is ca
 
 $$
 prior\ odds = \frac{P(cancer)}{P(\neg cancer)} =\frac{0.058}{1 - 0.058} = 0.061
-
 $$
 
 We can then compare these with the posterior odds, which are computed using the posterior probability:
 
 $$
-odds\ ratio = \frac{posterior odds}{prior odds} = \frac{0.16}{0.061} = 2.62
+odds\ ratio = \frac{posterior\ odds}{prior\ odds} = \frac{0.16}{0.061} = 2.62
 $$
 
 This tells us that the odds of having cancer are increased by 2.62 given the positive test result.
