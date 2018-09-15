@@ -3,6 +3,10 @@
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
+
 ```
 
 One of the foundational ideas in statistics is that we can make inferences about an entire population based on a relatively small sample of individuals from that population.  In this chapter we will introduce the concept of statistical sampling and discuss why it works.
@@ -13,12 +17,12 @@ Anyone living in the United States will be familiar with the concept of sampling
 
 Our goal in sampling is to determine some feature of the full population of interest, using just a small subset of the population.  We do this primarily to save time and effort -- why go to the trouble of measuring every indivdual in the population when just a small sample is sufficient to accurately estimate the variable of interest? 
 
-In the election example, the population is all voters, and the sample is the set of 1000 individuals selected by the polling organization.  The way in which we select the sample is critical to ensuring that the sample is *representative* of the entire population, which is a main goal of statistical sampling. It's easy to imagine a non-representative sample; if a pollster only called individuals whose names they had received from the local Democratic party, then it would be unlikely that the results of the poll would be representative of the population as a whole.  In general we would define a representative poll as being one in which every member of the population has an equal chance of being selected.  When this fails, then we have to worry about whether the statistic that we compute on the sample is *biased* - that is, whether its value is systematically different from the population value (which we usually refer to as a *parameter*).  Keep in mind that we generally don't know this population parameter, because if we did then we wouldn't need to sample!  But we will use examples where we have access to the entire population, in order to explain some of the key ideas.
+In the election example, the population is all voters, and the sample is the set of 1000 individuals selected by the polling organization.  The way in which we select the sample is critical to ensuring that the sample is *representative* of the entire population, which is a main goal of statistical sampling. It's easy to imagine a non-representative sample; if a pollster only called individuals whose names they had received from the local Democratic party, then it would be unlikely that the results of the poll would be representative of the population as a whole.  In general we would define a representative poll as being one in which every member of the population has an equal chance of being selected.  When this fails, then we have to worry about whether the statistic that we compute on the sample is *biased* - that is, whether its value is systematically different from the population value (which we refer to as a *parameter*).  Keep in mind that we generally don't know this population parameter, because if we did then we wouldn't need to sample!  But we will use examples where we have access to the entire population, in order to explain some of the key ideas.
 
 It's important to also distinguish between two different ways of sampling: with replacement versus without replacement.  In sampling *with replacement*, after a member of the population has been sampled, they are put back into the pool so that they can potentially be sampled again. In *sampling without replacement*, once a member has been sampled once they are not eligible to be sampled again. It's most common to use sampling without replacement, but there will be some contexts in which we will use sampling with replacement, as when we discuss the bootstrap in a later chapter.
 
 ## Sampling error
-Regardless of how representative our sample is, it's likely that the statistic that we compute from the sample is going to differ at least slightly from the population parameter.  We refer to this as *sampling error*. The value of our statistical estimate will also vary from sample to sample, which we refer to as the *sampling distribution*.  We will use the NHANES dataset as an example; we are going to assume that NHANES is the entire population,  and then we will draw random samples from the population. We will have more to say in the next chapter about exactly how the generation of "random" samples works in a computer.
+Regardless of how representative our sample is, it's likely that the statistic that we compute from the sample is going to differ at least slightly from the population parameter.  We refer to this as *sampling error*. The value of our statistical estimate will also vary from sample to sample; we refer to this distribution across samples as the *sampling distribution*.  We will use the NHANES dataset as an example; we are going to assume that NHANES is the entire population,  and then we will draw random samples from the population. We will have more to say in the next chapter about exactly how the generation of "random" samples works in a computer.
 
 ```{r}
 # load the NHANES data library
@@ -31,8 +35,10 @@ NHANES_adult = NHANES %>%
   drop_na(Height) %>%
   subset(Age>=18)
 
-print(paste('Population height: mean = ',mean(NHANES_adult$Height)))
-print(paste('Population height: std deviation = ',sd(NHANES_adult$Height)))
+pander(sprintf('Population height: mean = %.2f\n',
+               mean(NHANES_adult$Height)))
+pander(sprintf('Population height: std deviation = %.2f\n',
+               sd(NHANES_adult$Height)))
 
 
 ```
@@ -41,12 +47,14 @@ In this case we know the population mean and standard deviation. Now let's take 
 
 ```{r}
 exampleSample = NHANES_adult %>% sample_n(50)
-print(paste('Sample height: mean = ',mean(exampleSample$Height)))
-print(paste('Sample height: std deviation = ',sd(exampleSample$Height)))
+pander(sprintf('Sample height: mean = %.2f\n',
+               mean(exampleSample$Height)))
+pander(sprintf('Sample height: std deviation = %.2f\n',
+               sd(exampleSample$Height)))
 
 ```
 
-Now let's take a large number of samples of 50 individuals, compute the mean, and look at the resulting sampling distribution. We have to decide how many samples to take in order to do a good job of estimating the sampling distribution -- in this case, let's take 5000 samples so that we are really confident in the answer. Note that simulations like this one can sometimes take a few minutes to run, and might make your computer huff and puff.
+Now let's take a large number of samples of 50 individuals, compute the mean, and look at the resulting sampling distribution. We have to decide how many samples to take in order to do a good job of estimating the sampling distribution -- in this case, let's take 5000 samples so that we are really confident in the answer. Note that simulations like this one can sometimes take a few minutes to run, and might make your computer huff and puff. The histogram in Figure \@ref(fig:samplePlot) shows that the means estimated for each of the samples of 50 individuals vary somewhat, but that overall they are centered around the population mean.  
 
 ```{r samplePlot,fig.cap="The blue histogram shows the sampling distribution of the mean over 5000 random samples from the NHANES dataset.  The histogram for the full dataset is shown in gray for reference."}
 
@@ -65,20 +73,21 @@ for (i in 1:nsamps){
 
 sampdataDf=data.frame(mean=sampMeans)
 
-print(paste('Average sample mean =',mean(sampMeans)))
+pander(sprintf('Average sample mean = %.2f\n',mean(sampMeans)))
 sampMeans_df=data.frame(sampMeans=sampMeans)
 
 ggplot(sampMeans_df,aes(sampMeans)) +
-  geom_histogram(data=NHANES_adult,aes(Height,..density..),bins=500,col='gray',fill='gray') +
-  geom_histogram(aes(y=..density..*0.2),bins=500,col='blue',fill='blue') +
-  xlab('Height (inches)') + geom_vline(xintercept = mean(NHANES_adult$Height))
+  geom_histogram(data=NHANES_adult,aes(Height,..density..),
+                 bins=500,col='gray',fill='gray') +
+  geom_histogram(aes(y=..density..*0.2),bins=500,
+                 col='blue',fill='blue') +
+  xlab('Height (inches)') + 
+  geom_vline(xintercept = mean(NHANES_adult$Height))
 ```
-
-The histogram in \@ref(fig:samplePlot) shows that the means estimated for each of the samples of 50 individuals vary somewhat, but that overall they are centered around the population mean.  
 
 ## Standard error of the mean
 
-Later in the course it will become essential to be able to characterize how variable our samples are. For the mean, we do this using a quantity called the *standard error* of the mean (SEM), which one can think of as the standard deviation of the sampling distribution.  If we know the population standard deviation, then we can compute the standard error using:
+Later in the course it will become essential to be able to characterize how variable our samples are, in order to make inferences about the sample statistics. For the mean, we do this using a quantity called the *standard error* of the mean (SEM), which one can think of as the standard deviation of the sampling distribution.  If we know the population standard deviation, then we can compute the standard error using:
 
 $$
 SEM = \frac{\sigma}{\sqrt{n}}
@@ -89,11 +98,13 @@ $$
 SEM = \frac{\hat{\sigma}}{\sqrt{n}}
 $$
 
-In general we have to be careful about doing this with smaller samples (less than about 30). Because we have many samples from the NHANES population and we actually know the population parameter, we can confirm that this works correctly by comparing the SEM estimated using the population parameter with the actual standard deviation of the samples.  
+In general we have to be careful about doing this with smaller samples (less than about 30). Because we have many samples from the NHANES population and we actually know the population parameter, we can confirm that this works correctly by comparing the SEM estimated using the population parameter with the actual standard deviation of the samples that we took from the NHANES dataset.  
 
 ```{r}
-print(paste('Estimated standard error based on population SD:',sd(NHANES_adult$Height)/sqrt(sampSize)))
-print(paste('Standard deviation of sample means =',sd(sampMeans)))
+pander(sprintf('Estimated standard error based on population SD: %.2f\n',
+               sd(NHANES_adult$Height)/sqrt(sampSize)))
+pander(sprintf('Standard deviation of sample means = %.2f\n',
+               sd(sampMeans)))
 
 ```
 
@@ -103,7 +114,7 @@ The formula for the standard error of the mean says that the quality of our meas
 
 The Central Limit Theorem tells us that as sample sizes get larger, the sampling distribution of the mean will come to be normally distributed, *even if the data are not normally distributed*.  
 
-We can also see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in \@ref(fig:alcoholYearDist). 
+We can also see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in Figure  \@ref(fig:alcoholYearDist). 
 
 ```{r alcoholYearDist, fig.cap="Distribution of the variable AlcoholYear in the NHANES dataset, which reflects the number of days that the individual drank in a year."}
 
@@ -112,7 +123,7 @@ ggplot(NHANES %>% drop_na(AlcoholYear),aes(AlcoholYear)) +
 
 ```
 
-This distribution is, for lack of a better word, funky -- and definitely not normally distributed.  Now let's look at the sampling distribution of the mean for this variable. \@ref(fig:alcDist50) shows the sampling distribution for this variable, which is obtained by repeatedly drawing samples of size 50 from the NHANES dataset and taking the mean. Despite the clear non-normality of the original data, the sampling distribution is remarkably close to the normal. 
+This distribution is, for lack of a better word, funky -- and definitely not normally distributed.  Now let's look at the sampling distribution of the mean for this variable. Figure \@ref(fig:alcDist50) shows the sampling distribution for this variable, which is obtained by repeatedly drawing samples of size 50 from the NHANES dataset and taking the mean. Despite the clear non-normality of the original data, the sampling distribution is remarkably close to the normal. 
 
 ```{r, echo=FALSE}
 
@@ -130,13 +141,11 @@ for (i in 1:nsamps){
 sampMeansFullDf=data.frame(sampMeans=sampMeansFull)
 
 ggplot(sampMeansFullDf,aes(sampMeans)) +
-  #geom_histogram(data=NHANES_clean,aes(Height,..density..),bins=500,col='gray',fill='gray') +
   geom_freqpoly(aes(y=..density..),bins=100,col='blue',fill='blue',size=0.75) +
-  stat_function(fun = dnorm, n = 100, args = list(mean = mean(sampMeansFull), sd = sd(sampMeansFull)),size=1.5,color='red') +
-  xlab('mean AlcoholYear') # + ylim(0,0.065) 
-  #annotate('text',x=100,y=0.055,label=sprintf('sample size = %d',sampSize),size=5,hjust=0) +
-  #annotate('text',x=100,y=0.05,label=sprintf('std error (observed) = %.03f',sd(sampMeansFull)),size=5,hjust=0) +
-  #annotate('text',x=100,y=0.045,label=sprintf('std error (computed) = %.03f',sd(NHANES_clean$Height)/sqrt(sampSize)),size=5,hjust=0)
+  stat_function(fun = dnorm, n = 100, 
+                args = list(mean = mean(sampMeansFull), 
+                            sd = sd(sampMeansFull)),size=1.5,color='red') +
+  xlab('mean AlcoholYear') 
 
 }
 
@@ -153,7 +162,7 @@ Most people are familiar with the idea of a "margin of error" for political poll
 
 We saw in the previous section that with sufficient sample size, the sampling distribution of the mean is normally distributed, and that the standard error describes the standard deviation of this sampling distribution.  Using this knowledge, we can ask: What is the range that we would expect to capture 95% of all estimates?  To answer this, we can use the normal distribution, for which we know the values between which we expect 95% of all samples to fall. Specifically, we use the *quantile* function for the normal distribution (`qnorm()` in R) to determine the values of the normal distribution that that fall at the 2.5% and 97.5% points in the distribution.  We choose these points because we want to find the 95% of values in the center of the distribution, so we need to cut off 2.5% on each end in order to end up with 95% in the middle.  Figure \@ref(fig:normalCutoffs) shows that this occurs for $Z \pm 1.96$.
 
-```{r,echo=FALSE}
+```{r echo=FALSE}
 
 dnormfun=function(x){
   return(dnorm(x,248))
@@ -216,11 +225,11 @@ NHANES_sample=sample_n(NHANES_adult,250)
             sem=sd(Height)/sqrt(sampSize)) %>%
     mutate(CI_upper=mean+1.96*sem,
           CI_lower=mean-1.96*sem)
-sample_summary
+pander(sample_summary)
 
 ```
 
-Confidence intervals are notoriously confusing, primarily because they don't mean what we would hope they mean. It seems natural to think that the 95% confidence interval tells us that there is a 95% chance that the population mean falls within the interval.  However, as we will see throughout the course, common methods in statsitics often don't mean what we think they should mean.  In the case of confidence intervals, we can't interpret them in this way because the population parameter has a fixed value -- it either is or isn't in the interval.  The proper interpretation of the 95% confidence interval is that it is the interval that will capture the true population mean 95% of the time. We can confirm this by resampling the NHANES data repeatedly and counting how often the interval contains the true population mean.
+Confidence intervals are notoriously confusing, primarily because they don't mean what we would hope they mean. It seems natural to think that the 95% confidence interval tells us that there is a 95% chance that the population mean falls within the interval.  However, as we will see throughout the course, concepts in statsitics often don't mean what we think they should mean.  In the case of confidence intervals, we can't interpret them in this way because the population parameter has a fixed value -- it either is or isn't in the interval.  The proper interpretation of the 95% confidence interval is that it is the interval that will capture the true population mean 95% of the time. We can confirm this by resampling the NHANES data repeatedly and counting how often the interval contains the true population mean.
 
 ```{r}
 nsamples=2500
@@ -236,7 +245,7 @@ for (i in 1:nsamples){
   ci_contains_mean[i]=(sample_summary$CI_upper>mean(NHANES_adult$Height))&(sample_summary$CI_lower<mean(NHANES_adult$Height))
 
 }
-print(mean(ci_contains_mean))
+pander(mean(ci_contains_mean))
 ```
 
 This confirms that the confidence interval does indeed capture the population mean about 95% of the time.

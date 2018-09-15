@@ -8,6 +8,10 @@ library(ggplot2)
 library(fivethirtyeight)
 library(BayesMed)
 
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
+
 set.seed(123456) # set random seed to exactly replicate results
 
 # load the NHANES data library
@@ -24,11 +28,13 @@ NHANES_adult = NHANES %>%
 
 ## An example
 
-In 2017, the web site Fivethirtyeight.com published a story titled [Higher Rates Of Hate Crimes Are Tied To Income Inequality]  (https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/) which discussed the relationship between the prevalence of hate crimes and income inequality in the wake of the 2016 Presidential election. The reported an analysis of hate crime data from the FBI and the Southern Poverty Law Center, on the basis of which they report:
+In 2017, the web site Fivethirtyeight.com published a story titled [Higher Rates Of Hate Crimes Are Tied To Income Inequality]  (https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/) which discussed the relationship between the prevalence of hate crimes and income inequality in the wake of the 2016 Presidential election. The story reported an analysis of hate crime data from the FBI and the Southern Poverty Law Center, on the basis of which they report:
 
 > "we found that income inequality was the most significant determinant of population-adjusted hate crimes and hate incidents across the United States".  
 
 The data for this analysis are included in the ``fivethirtyeight`` R package, which makes it easy for us to access them.  The ``hate_crimes`` data frame includes data from each state, with two variables specific to hate crimes:
+
+TBD: FIX FORMATTING
 
 Header | Definition
 ---|---------
@@ -55,10 +61,7 @@ $$
 G = \frac{\displaystyle{\sum_{i=1}^n \sum_{j=1}^n \left| x_i - x_j \right|}}{\displaystyle{2n\sum_{i=1}^n x_i}} 
 $$
 
-
-First, let's create an example with 10 people where everyone has exactly the same income.
-
-```{r}
+```{r echo=FALSE}
 # function to generate a plot of Lorenz curve and compute Gini coefficient
 lorenzCurve = function(df){
   df = df %>% arrange(income)
@@ -85,22 +88,27 @@ lorenzCurve = function(df){
   return(giniCoef)
 }
 
+```
+
+First, let's create an example with 10 people where everyone has exactly the same income (Figure \@ref(fig:gini0)).
+
+```{r gini0,fig.cap="Lorenz curve for Gini index of zero (i.e. perfect equality)."}
+
 incomeDf=data.frame(income=rep(40000,10))
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 ```
-Now let's look at an example where income is normally distributed.
+Now let's look at an example where income is normally distributed (Figure \ref(fig:giniNormal)).
 
-```{r}
+```{r giniNormal,fig.cap="Gini index for a population with normally distributed income."}
 incomeDf=data.frame(income=rnorm(10,mean=40000,sd=5000))
-
 
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 
 ```
 
-Now let's look at an example with high inequality; everyone has equal income ($40,000) except for one person, who has income of $40,000,000.
+Now let's look at an example with high inequality; everyone has equal income (\$40,000) except for one person, who has income of \$40,000,000 (Figure \@ref(fig:giniInequal)).
 
-```{r}
+```{r giniInequal,fig.cap="Lorenz curve for a maximally inequal population."}
 incomeDf=data.frame(income=rnorm(10,mean=40000,sd=5000))
 incomeDf$income[1]=40000000
 
@@ -108,7 +116,7 @@ print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 
 ```
 
-According to the US Census, the United States had a Gini index of 0.469 in 2010.
+According to the US Census, the United States had a Gini index of 0.469 in 2010, falling roughly half way between our normally distributed and maximally inequal examples.
 
 ## Is income inequality related to hate crimes?
 
@@ -141,7 +149,7 @@ $$
 s^2 = \frac{\sum_{i=1}^n (x_i - \bar{x})^2}{N - 1}
 $$
 
-This tell us how far each observation is from the mean.  Covariance tells us whether there is a relation between the deviations of two different variables across observations.  It is defined as:
+This tells us how far each observation is from the mean.  Covariance tells us whether there is a relation between the deviations of two different variables across observations.  It is defined as:
 
 $$
 covariance = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{N - 1}
@@ -149,18 +157,18 @@ $$
 
 This value will be high when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.
 
-```{r}
+```{r }
 df=data.frame(x=c(3,5,8,10,12)) %>%
   mutate(y=x+round(rnorm(5,sd=2))) %>%
   mutate(y_dev=y-mean(y),
          x_dev=x-mean(x)) %>%
   mutate(crossproduct=y_dev*x_dev)
 
-df
-sum(df$crossproduct)
+pander(df)
+pander(sprintf('sum of cross products = %.2f\n',sum(df$crossproduct)))
 covXY = sum(df$crossproduct)/(nrow(df)-1)
-covXY
-cov(df$x,df$y)
+pander(sprintf('covariance: %.2f\n',covXY))
+# compare to cov(df$x,df$y)
 
 ```
 
@@ -172,19 +180,17 @@ $$
 
 ```{r}
 corXY = sum(df$crossproduct)/((nrow(df)-1)*sd(df$x)*sd(df$y))
-corXY
-sd(df$x)
-sd(df$y)
-cor(df$x,df$y)
+pander(sprintf('correlation coefficient = %.2f\n',corXY))
+# compare to cor(df$x,df$y)
 ```
  
-The correlation coefficient is useful because it varies between -1 and 1 regardless of the nature of the data - in fact, we already discussed the correlation coefficient earlier in the discussion of effect sizes.  A correlation of 1 indicates a perfect linear relationship, a correlation of -1 indicates a perfect negative relationship, and a correlation of zero indicates no linear relationship.
+The correlation coefficient is useful because it varies between -1 and 1 regardless of the nature of the data - in fact, we already discussed the correlation coefficient earlier in the discussion of effect sizes.  As we saw in the previous chapter on effect sizes, a correlation of 1 indicates a perfect linear relationship, a correlation of -1 indicates a perfect negative relationship, and a correlation of zero indicates no linear relationship.
 
 We can compute the correlation coefficient for the hate crime data:
 
 ```{r}
 corGiniHC=cor(hateCrimes$gini_index,hateCrimes$avg_hatecrimes_per_100k_fbi)
-corGiniHC
+pander(sprintf('correlation coefficient = %.2f\n',corGiniHC))
 ```
 
 ### Hypothesis testing for correlations
@@ -205,7 +211,7 @@ This test shows that the likelihood of an r value this extreme or more is quite 
 
 We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis.
 
-```{r}
+```{r shuffleCorr,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line."}
 shuffleCorr=function(x,y){
   xShuffled=sample(x)
   return(cor(xShuffled,y))
@@ -225,7 +231,7 @@ Randomization gives us a reasonably similar answer to the t-test.
 
 ### Robust correlations
 
-You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positivel correlation value, even when the actual relationship between the other data points is perfectly negative.
+You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
 
 ```{r outlierCorr, fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive."}
 n=10
@@ -275,7 +281,7 @@ Notice that the correlation estimated using the Bayesian method is slightly smal
 
 When we say that one thing *causes* another, what do we mean?  There is a long history in philosophy of discussion about the meaning of causality, but in statistics one way that we commonly think of causation is in terms of experimental control.  That is, if we think that factor X causes factor Y, then manipulating the value of X should also manipulate the value of Y.
 
-In medicine, there is a set of ideas known as [*Koch's postulates*](https://en.wikipedia.org/wiki/Koch%27s_postulates) which have historically been used to determine whether a particular organism causes a disease.   The basic idea is that the organism should be present in people with the disease, and not present in those without itl thus, a treatment that eliminates the organism should also eliminate the disease.  Further, infecting someone with the organism should cause them to contract the disease.  An example of this was seen in the work of Dr. Barry Marshall, who had a hypothesis that stomach ulcers were caused by a bacterium (*Helicobacter pylori*).  To demonstrate this, he infected himself with the bacterium, and soon thereafter developed severe inflammation in his stomach.  He then treated himself with an antibiotic, and his stomach soon recovered.  He later won the Nobel Prize in Medicine for this work.
+In medicine, there is a set of ideas known as [*Koch's postulates*](https://en.wikipedia.org/wiki/Koch%27s_postulates) which have historically been used to determine whether a particular organism causes a disease.   The basic idea is that the organism should be present in people with the disease, and not present in those without it -- thus, a treatment that eliminates the organism should also eliminate the disease.  Further, infecting someone with the organism should cause them to contract the disease.  An example of this was seen in the work of Dr. Barry Marshall, who had a hypothesis that stomach ulcers were caused by a bacterium (*Helicobacter pylori*).  To demonstrate this, he infected himself with the bacterium, and soon thereafter developed severe inflammation in his stomach.  He then treated himself with an antibiotic, and his stomach soon recovered.  He later won the Nobel Prize in Medicine for this work.
 
 Often we would like to test causal hypotheses but we can't actually do an experiment, either because it's impossible ("What is the relationship between human carbon emissions and the earth's climate?") or unethical ("What are the effects of severe abuse on child brain development?"). However, we can still collect data that might be relevant to those questions.  For example, in the latter example, we can potentially collect data from children who have been abused as well as those who have not, and we can then ask whether their brain development differs.
 
@@ -340,3 +346,6 @@ Here we would say that knowledge *mediates* the relationship between study time 
 Note that if we simply measured exam grades and finishing times we would generally see negative relationship between them, because people who finish exams the fastest in general get the highest grades.  However, if we were to interpret this correlation as a causal relation, this would tell us that in order to get better grades, we should actually finish the exam more quickly! This example shows how tricky the inference of causality from non-experimental data can be.
 
 Within statistics and machine learning, there is a very active research community that is currently studying the question of when and how we can infer causal relationships from non-experimental data.  If you would like an introduction to this area, I would recommend [The Book of Why](http://bayes.cs.ucla.edu/WHY/) by Judea Pearl and Dana Mackenzie.
+
+## Suggested readings
+

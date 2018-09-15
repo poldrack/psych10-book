@@ -7,7 +7,10 @@ In this Chapter we will discuss why and how to summarize data.
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
 library(cowplot)
+library(pander)
+
 options(digits=2)
+
 ```
 
 ## Why summarize data?
@@ -16,15 +19,19 @@ When we summarize data, we are necessarily throwing away information, and there 
 
 We summarize data in general because it provides us with a way to *generalize* - that is, to make general statements that extend beyond specific observations.  The importance of generalization was highlighted by the writer Jorge Luis Borges in his short story "Funes the Memorious", which describes an individual who loses the ability to forget.  Borges focuses in on the relation between generalization (i.e. throwing away data) and thinking: "To think is to forget a difference, to generalize, to abstract. In the overly replete world of Funes, there were nothing but details."  
 
-Psychologists have long studied all of the ways in which generalization is central to thinking.  One example is categorization: We are able to easily recognize different examples of the category of "birds" even though the individual examples may be very different in their surface features (such as an ostrich, a robin, and a chicken).  Importantly, generalization lets us make predictions about these individuals -- in the case of birds, we can predict that they can fly and eat worms, and that they probably can't drive a car or speak English.  These predictions won't always be right, but they are usually good enough to be useful in the world.
+Psychologists have long studied all of the ways in which generalization is central to thinking.  One example is categorization: We are able to easily recognize different examples of the category of "birds" even though the individual examples may be very different in their surface features (such as an ostrich, a robin, and a chicken).  Importantly, generalization lets us make predictions about these individuals -- in the case of birds, we can predict that they can fly and eat worms, and that they probably can't drive a car or speak English.  These predictions won't always be right, but they are often good enough to be useful in the world.
 
 ## Summarizing data using tables
 
-A simple way to summarize data is to generate a table representing counts of various types of observations.  This type of table has been used for thousands of years
+A simple way to summarize data is to generate a table representing counts of various types of observations.  This type of table has been used for thousands of years (see Figure \@ref(fig:salesContract)).
 
-![**Figure 4.1**: A Sumerian tablet from the Louvre, showing a sales contract for a house and field.  Public domain, via Wikimedia Commons.](images/Sales_contract_Shuruppak_Louvre_AO3760.jpg)
+```{r salesContract,fig.cap="A Sumerian tablet from the Louvre, showing a sales contract for a house and field.  Public domain, via Wikimedia Commons."}
+knitr::include_graphics("images/Sales_contract_Shuruppak_Louvre_AO3760.jpg")
 
-Let's look at some examples of the use of tables.  We will usethe NHANES dataset:
+```
+
+
+Let's look at some examples of the use of tables, again using the NHANES dataset:
 
 ```{r LoadNHANES}
 # load the NHANES data library
@@ -37,7 +44,7 @@ NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
 # help(NHANES)
 ```
 
-Type the command `help(NHANES)` in the Rstudio console.  Scroll through the help page (that should open within the Help panel if you are using RStudio), which provides some information about the dataset as well as a listing of all of the variables included in the dataset.  Let's have a look at a simple variable, called "PhysActive" in the dataset.  This variable contains one of three different values: "Yes" or "No" (indicating whether or not the person reports doing "moderate or vigorous-intensity sports, fitness or recreational activities"), or "<NA>" if the data are not available for that individual. There are different reasons that the data might be missing; for example, this question was not asked of children younger than 12 years of ago, while in other cases an adult may have declined to answer the question during the interview. 
+Type the command `help(NHANES)` in the Rstudio console.  Scroll through the help page (that should open within the Help panel if you are using RStudio), which provides some information about the dataset as well as a listing of all of the variables included in the dataset.  Let's have a look at a simple variable, called "PhysActive" in the dataset.  This variable contains one of three different values: "Yes" or "No" (indicating whether or not the person reports doing "moderate or vigorous-intensity sports, fitness or recreational activities"), or "NA" if the data are not available for that individual. There are different reasons that the data might be missing; for example, this question was not asked of children younger than 12 years of ago, while in other cases an adult may have declined to answer the question during the interview. 
 
 ### Frequency distributions
 
@@ -49,7 +56,7 @@ PhysActive_table = NHANES %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n())
 
-PhysActive_table
+pander(PhysActive_table)
 ```
 
 The R code in this cell generates a table showing the frequencies of each of the different values; there were `r I(PhysActive_table %>% subset(PhysActive=='No') %>% dplyr::select(AbsoluteFrequency))` individuals who responded "No" to the question, `r I(PhysActive_table %>% subset(PhysActive=='Yes') %>% dplyr::select(AbsoluteFrequency))` who responded "Yes", and `r I(PhysActive_table %>% subset(is.na(PhysActive)) %>% dplyr::select(AbsoluteFrequency))` for whom no response was given.  We call this a *frequency distribution* because it tells us how each of the values is distributed across the sample.
@@ -59,13 +66,13 @@ Since we only want to work with people who gave an answer to the question, let's
 ```{r GetFilteredTable}
 
 PhysActive_table_filtered = NHANES %>%
-  subset(!is.na(PhysActive)) %>%  
+  drop_na(PhysActive) %>%  
   dplyr::select(PhysActive) %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n())
 
 # print the table
-PhysActive_table_filtered
+pander(PhysActive_table_filtered)
 
 ```
 
@@ -81,27 +88,27 @@ Which we can do in R as follows:
 
 ```{r}
 PhysActive_table_filtered = NHANES %>%
-  subset(!is.na(PhysActive)) %>%  
+  drop_na(PhysActive) %>%  
   dplyr::select(PhysActive) %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(RelativeFrequency=AbsoluteFrequency/sum(AbsoluteFrequency))
 
-PhysActive_table_filtered
+pander(PhysActive_table_filtered)
 ```
 
 The relative frequency provides a much easier way to see how big the imbalance is.  We can also interpret the relative frequencies as percentages by multiplying them by 100:
 
 ```{r}
 PhysActive_table_filtered = NHANES %>%
-  subset(!is.na(PhysActive)) %>%  
+  drop_na(PhysActive) %>%  
   dplyr::select(PhysActive) %>%
   group_by(PhysActive) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(RelativeFrequency=AbsoluteFrequency/sum(AbsoluteFrequency),
          Percentage=RelativeFrequency*100)
 
-PhysActive_table_filtered
+pander(PhysActive_table_filtered)
 ```
 
 This lets us see that `r I(PhysActive_table_filtered %>% subset(PhysActive=='No') %>% dplyr::select(Percentage))` percent of the individuals in the NHANES sample said "No" and `r I(PhysActive_table_filtered %>% subset(PhysActive=='Yes') %>% dplyr::select(Percentage))` percent said "Yes".
@@ -114,19 +121,19 @@ Let's look at another variable in the NHANES dataset, called SleepHrsNight which
 
 ```{r}
 SleepHrsNight_table_filtered = NHANES %>%
-  subset(!is.na(SleepHrsNight)) %>%  
+  drop_na(SleepHrsNight) %>%  
   dplyr::select(SleepHrsNight) %>%
   group_by(SleepHrsNight) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(RelativeFrequency=AbsoluteFrequency/sum(AbsoluteFrequency),
          Percentage=RelativeFrequency*100)
 
-SleepHrsNight_table_filtered
+pander(SleepHrsNight_table_filtered)
 ```
 
-We can already begin to summarize the dataset just by looking at the table; for example, we can see that most people report sleeping between 6 and 8 hours.  Let's plot the data to see this more clearly.  To do this we can plot a *histogram* which shows the number of cases having each of the different values.  The ggplot2() library has a built in histogram function which we will often use:
+We can already begin to summarize the dataset just by looking at the table; for example, we can see that most people report sleeping between 6 and 8 hours.  Let's plot the data to see this more clearly.  To do this we can plot a *histogram* which shows the number of cases having each of the different values; see Figure \@ref(fig:sleepHist).  The ggplot2() library has a built in histogram function which we will often use.  
 
-```{r}
+```{r sleepHist,fig.cap="A histogram showing the number of people reporting each possible value of the SleepHrsNight variable."}
 SleepHrsNight_data_filtered = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
   dplyr::select(SleepHrsNight)
@@ -139,9 +146,9 @@ ggplot(SleepHrsNight_data_filtered,aes(SleepHrsNight)) +
   
 ```
 
-We can also plot the relative frequencies, which we will often refer to as *densities*.
+We can also plot the relative frequencies, which we will often refer to as *densities* - see Figure \@ref(fig:sleepRelativeHist).
 
-```{r}
+```{r sleepRelativeHist,fig.cap="A relative histogram showing proportions of people reporting each possible value of the SleepHrsNight variable."}
 SleepHrsNight_data_filtered = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
   dplyr::select(SleepHrsNight)
@@ -163,26 +170,27 @@ That is, to compute the cumulative frequency for some value j, we add up the fre
 
 ```{r}
 SleepHrsNight_cumulative = NHANES %>%
-  subset(!is.na(SleepHrsNight)) %>%  
+  drop_na(SleepHrsNight) %>%  
   dplyr::select(SleepHrsNight) %>%
   group_by(SleepHrsNight) %>% 
   summarise(AbsoluteFrequency=n()) %>%
   mutate(CumulativeFrequency=cumsum(AbsoluteFrequency))
 
-SleepHrsNight_cumulative
+pander(SleepHrsNight_cumulative)
 ```
 
-Now let's plot the data to see what these representations look like; the absolute frequency values are plotted in red, and the cumulative frequencies are plotted in blue.  
 
-```{r}
+```{r sleepAbsCumulFreq,fig.cap="A plot of both the absolute (red) and cumulative (blue) frequency of the possible values of SleepHrsNight."}
 ggplot(SleepHrsNight_cumulative,aes(SleepHrsNight,AbsoluteFrequency)) +
   geom_line(color='red',size=1.25) +
-  geom_line(aes(SleepHrsNight,CumulativeFrequency),color='blue',size=1.25) + scalex
+  geom_line(aes(SleepHrsNight,CumulativeFrequency),color='blue',size=1.25) +
+  scalex +
+  ylab('Frequency')
 ```
 
-We see that the cumulative frequency is *monotonically increasing* -- that is, it can only go up or stay constant, but it can never decrease.  Again, we usually find the relative frequencies to be more useful than the absolute, so let's plot those:
+In Figure \@ref(fig:sleepAbsCumulFreq) we plot the data to see what these representations look like; the absolute frequency values are plotted in red, and the cumulative frequencies are plotted in blue. We see that the cumulative frequency is *monotonically increasing* -- that is, it can only go up or stay constant, but it can never decrease.  Again, we usually find the relative frequencies to be more useful than the absolute, so let's plot those (Figure \@ref(fig:sleepAbsCumulRelFreq))
 
-```{r}
+```{r sleepAbsCumulRelFreq,fig.cap="A plot of the relative proportion (red) and cumulative relative proportion (blue) of the possible values of SleepHrsNight."}
 
 SleepHrsNight_cumulative = NHANES %>%
   subset(!is.na(SleepHrsNight)) %>%  
@@ -195,15 +203,16 @@ SleepHrsNight_cumulative = NHANES %>%
 
 ggplot(SleepHrsNight_cumulative,aes(SleepHrsNight,RelativeFrequency)) +
   geom_line(color='red',size=1.25) + ylab('Density') + scalex +
-  geom_line(aes(SleepHrsNight,CumulativeDensity),color='blue',size=1.25)
+  geom_line(aes(SleepHrsNight,CumulativeDensity),color='blue',size=1.25) +
+  ylab('Proportion')
 
 ```
 
 ### Plotting histograms
 
-The variables that we examined above were fairly simple, having only a few possible values. Now let's look at a more complex variable: Age.  First let's plot the Age variable for all of the individuals in the NHANES dataset:
+The variables that we examined above were fairly simple, having only a few possible values. Now let's look at a more complex variable: Age.  First let's plot the Age variable for all of the individuals in the NHANES dataset (see Figure \@ref(fig:ageHist)).
 
-```{r}
+```{r ageHist,fig.cap="A histogram of the Age variable in NHANES."}
 ggplot(NHANES, aes(Age)) + 
   geom_histogram(binwidth=1,fill='blue')
 
@@ -215,9 +224,9 @@ What do you notice here?  First, you should notice that the number of individual
 
 The reason for this is that the relatively small number of individuals with very high ages would make it potentially easier to identify the specific person in the dataset;  researchers generally promise their participants to keep their identity confidential, and this is one of the things they can do to help protect their research subjects.  This also highlights the fact that it's always important to know where one's data have come from and how they have been processed; otherwise we might interpret them improperly.
 
-Let's look at another more complex variable in the NHANES dataset: Height. 
+Let's look at another more complex variable in the NHANES dataset: Height. The histogram of height values is plotted in Figure \@ref(fig:heightHist).
 
-```{r}
+```{r heightHist,fig.cap="A histogram of height values from NHANES."}
 ggplot(NHANES %>% dplyr::select(Height) %>% drop_na(), aes(Height)) + 
   geom_histogram(aes(y=..density..),binwidth=1,fill='blue')
 
@@ -225,9 +234,9 @@ ggplot(NHANES %>% dplyr::select(Height) %>% drop_na(), aes(Height)) +
 
 The first thing you should notice about this distribution is that most of its density is centered around about 170 cm, but the distribution has a "tail" on the left; there are a small number of individuals with much smaller heights. What do you think is going on here?
 
-You may have intuited that the small heights are coming from the children in the dataset.  One way to examine this is to plot the histogram with separate colors for children and adults:
+You may have intuited that the small heights are coming from the children in the dataset.  One way to examine this is to plot the histogram with separate colors for children and adults (Figure \@ref(fig:heightHistSep)).
 
-```{r}
+```{r heightHistSep,fig.cap="Histogram of heights for NHANES, separately for children (blue) and adults (red)."}
 # first create a new variable in NHANES that tell us whether
 # each individual is a child
 NHANES = NHANES %>% 
@@ -238,32 +247,34 @@ ggplot(NHANES %>% dplyr::select(Height,isChild) %>% drop_na(), aes(Height,fill=i
 
 ```
 
-This shows us that all of the very short heights were indeed coming from children in the sample. Let's create a new version of NHANES that only includes adults, and then plot the histogram just for them:
+This shows us that all of the very short heights were indeed coming from children in the sample. Let's create a new version of NHANES that only includes adults, and then plot the histogram just for them (Figure \@ref(fig:AduldHeightHist):
 
 ```{r AduldHeightHist,fig.cap='Histogram of adult heights in NHANES'}
-NHANES_adult = NHANES %>% subset(Age>17)
+NHANES_adult = NHANES %>% 
+  drop_na(Age,Height) %>%
+  subset(Age>17)
 
-ggplot(NHANES_adult %>% drop_na(Height), aes(Height)) + 
+ggplot(NHANES_adult, aes(Height)) + 
   geom_histogram(aes(y=..density..),binwidth=1)
 
 ```
 
-Now we see that the distribution looks much more reasonable.  
+Now we see that the distribution looks much more symmetric.  As we will see later,this is a nice example of a *normal* (or *Gaussian*) distribution.  
 
 ### Histogram bins
 
-In our earlier example with the sleep variable, the data were reported in whole numbers, and we simply counted the number of people who reported each possible value. However, if you look at the values of the Height variable in NHANES, you will see that it was measured in centimeters down to the first decimal place.  If we generate a histogram that counts the density of each possible value, it looks like this:
+In our earlier example with the sleep variable, the data were reported in whole numbers, and we simply counted the number of people who reported each possible value. However, if you look at the values of the Height variable in NHANES, you will see that it was measured in centimeters down to the first decimal place.  Figure \@ref(fig:AdultHistSmallBins) shows a histogram that counts the density of each possible value.
 
-```{r AdultHistSmallBins}
+```{r AdultHistSmallBins,fig.cap="A histogram of height values from NHANES, showing the frequency of values down to one tenth of a centimeter."}
+
 ggplot(NHANES_adult %>% drop_na(Height), aes(Height)) + 
   geom_histogram(aes(y=..density..),binwidth=.1)
-
+  
 ```
-
 
 That histogram looks really jagged, which is because of the variability in specific decimal place values.  For example, the value 173.2 occurs `r I(sum(NHANES_adult$Height==173.2,na.rm=TRUE))` times, while the value 173.3 only occurs `r I(sum(NHANES_adult$Height==173.3,na.rm=TRUE))` times. We probably don't think that there is really such a big difference between the prevalence of these two weights; more likely this is just due to random variability in our sample of people.  
 
-In general, when we create a histogram of data that are continuous or where there are many possible values, we will bin the values so that instead of counting and plotting the frequency of a specific value, we count and plot the frequency of values falling within a specific range.  That's why the plot looked less jagged above in \@ref(fig:AduldHeightHist); if you look at the `ggplot` command you will see that we set "binwidth=1" which told the command to compute the histogram by combining values within bins with a width of one; thus, the values 1.3, 1.5, and 1.6 would all count toward the frequency of the same bin, which would span from values equal to one up through values less than 2.  
+In general, when we create a histogram of data that are continuous or where there are many possible values, we will *bin* the values so that instead of counting and plotting the frequency of a specific value, we count and plot the frequency of values falling within a specific range.  That's why the plot looked less jagged above in \@ref(fig:AduldHeightHist); if you look at the `ggplot` command you will see that we set "binwidth=1" which told the command to compute the histogram by combining values within bins with a width of one; thus, the values 1.3, 1.5, and 1.6 would all count toward the frequency of the same bin, which would span from values equal to one up through values less than 2.  
 
 Note that once the bin size has been selected, then the number of bins is determined by the data:
 $$
@@ -276,8 +287,7 @@ $$
 bin\ size = 2 * \frac{interquartile\ range}{\sqrt[3]{n}}
 $$
 
-
-which is implemented in R using the `nclass.FD` function (which returns the optimal number of bins):
+which is implemented in R using the `nclass.FD` function (which returns the optimal number of bins) (see Figure \@ref(fig:FreedmanDiaconis)).  Don't worry right now about the "interquartile range", which is a measure of how spread out the data are; we will return to that later.
 
 ```{r FreedmanDiaconis, fig.cap='Histogram of adult height from NHANES with bin widths determined using the Freedman-Diaconis heuristic.'}
 
@@ -297,29 +307,21 @@ ggplot(NHANES_adult %>% drop_na(Height), aes(Height)) +
 
 ```
 
-
 ## Idealized representations of distributions
 
 Datasets are like snowflakes, in that every one is different, but nonetheless there are patterns that one often sees in different types of data.  This allows us to use idealized representations of the data to further summarize them.  Let's take the adult height data plotted in \@ref(fig:FreedmanDiaconis), and plot them alongside a very different variable: pulse rate (heartbeats per minute), also measured in NHANES.
 
-```{r NormalDistPlots}
-pulse_summary=NHANES_adult %>% 
-  drop_na(Pulse) %>% 
-  summarize(nbins=nclass.FD(Pulse),
-            maxPulse=max(Pulse),
-            minPulse=min(Pulse),
-            binwidth=(maxPulse - minPulse)/nbins)
-
+```{r NormalDistPlots,fig.cap=""}
 
 h1=ggplot(NHANES_adult %>% drop_na(Height), aes(Height)) + 
   geom_histogram(aes(y=..density..),binwidth=height_summary$binwidth)
 h2=ggplot(NHANES_adult %>% drop_na(Pulse), aes(Pulse)) + 
-  geom_histogram(aes(y=..density..),binwidth=pulse_summary$binwidth)
+  geom_histogram(aes(y=..density..),binwidth=2) # using fixed bin width of 2 here because FD rule resulted in a weird gap in the histogram
 plot_grid(h1,h2)
 
 ```
 
-While these plots certainly don't look exactly the same, both have the general characteristic of being relatively symmetric around a rounded peak in the middle.  This shape is in fact one of the commonly observed shapes of distributions when we collect data, which we call the *normal* (or *Gaussian*) distribution.  This distribution is defined in terms of two values (which we call *parameters* of the distribution): the location of the center peak (which we call the *mean*) and the width of the distribution (which is described in terms of a parameter called the *standard deviation*).  We can compute these values for each of the datasets, and then plot the relevant normal distribution over the data:
+While these plots certainly don't look exactly the same, both have the general characteristic of being relatively symmetric around a rounded peak in the middle.  This shape is in fact one of the commonly observed shapes of distributions when we collect data, which we call the *normal* (or *Gaussian*) distribution.  This distribution is defined in terms of two values (which we call *parameters* of the distribution): the location of the center peak (which we call the *mean*) and the width of the distribution (which is described in terms of a parameter called the *standard deviation*).  We can compute these values for each of the datasets, and then plot the relevant normal distribution on top of the data (see Figure \@ref(fig:NormalDistPlotsWithDist))
 
 ```{r NormalDistPlotsWithDist, fig.cap='Histograms for height (left) and pulse (right) in the NHANES dataset, with the normal distribution overlaid for each dataset.'}
 # first update the summary to include the mean and standard deviation of each 
@@ -330,7 +332,6 @@ pulse_summary=NHANES_adult %>%
   summarize(nbins=nclass.FD(Pulse),
             maxPulse=max(Pulse),
             minPulse=min(Pulse),
-            binwidth=(maxPulse - minPulse)/nbins,
             meanPulse=mean(Pulse),
             sdPulse=sd(Pulse))
 
@@ -354,7 +355,7 @@ h1=ggplot(NHANES_adult %>% drop_na(Height), aes(Height)) +
   geom_line(data=heightDist,aes(x=x,y=y),color='blue',size=1.2)
 
 h2=ggplot(NHANES_adult %>% drop_na(Pulse), aes(Pulse)) + 
-  geom_histogram(aes(y=..density..),binwidth=pulse_summary$binwidth)  + 
+  geom_histogram(aes(y=..density..),binwidth=2)  + 
   geom_line(data=pulseDist,aes(x=x,y=y),color='blue',size=1.2)
 plot_grid(h1,h2)
 
@@ -366,9 +367,9 @@ As we will see later in the course when we discuss the central limit theorem, th
 
 ### Skewness
 
-The examples in \@ref(fig:NormalDistPlotsWithDist) followed the normal distribution fairly well, but in many cases the data will deviate in a systematic way from the normal distribution. One way in which the data can deviate is when it is asymmetric, such that one tail of the distribution is more dense than the other. We refer to this as "skewness".  Skewness commonly occurs when the measurement is constrained, such as when we are counting things or measuring elapsed times (and thus the variable can't take on negative values).  
+The examples in \@ref(fig:NormalDistPlotsWithDist) followed the normal distribution fairly well, but in many cases the data will deviate in a systematic way from the normal distribution. One way in which the data can deviate is when they are asymmetric, such that one tail of the distribution is more dense than the other. We refer to this as "skewness".  Skewness commonly occurs when the measurement is constrained to be non-negative, such as when we are counting things or measuring elapsed times (and thus the variable can't take on negative values).  
 
-An example of skewness can be seen in the average waiting times at the airport security lines at San Francisco International Airport.    
+An example of skewness can be seen in the average waiting times at the airport security lines at San Francisco International Airport, shown in Figure \@ref(fig:SFOWaitTimes).   
 
 ```{r SFOWaitTimes,fig.cap="Average wait times for security at SFO Terminal A (Jan-Oct 2017), obtained from https://awt.cbp.gov/ ."}
 waittimes=read.table('data/04/sfo_wait_times_2017.csv')
@@ -382,9 +383,9 @@ In \@ref(fig:SFOWaitTimes) you can see that while most wait times are less than 
 
 ### Long-tailed distributions
 
-Historically, statistics has focused heavily on data that are normally distributed, but there are many data types that look nothing like the normal distribution. In particular, many real-world distributions are "long-tailed", meaning that the right tail extends far beyond the most typical members of the distribution.  One of the most interesting types of data where long-tailed distributions occur arise from the analysis of social networks.  For an example, let's the Facebook friend data from the Stanford Large Network Database: (https://snap.stanford.edu/data/egonets-Facebook.html) and plot the histogram of number of friends across the 3,663 people in the database.  We will put a blue point to denote the individual with the largest number of friends in the dataset.
+Historically, statistics has focused heavily on data that are normally distributed, but there are many data types that look nothing like the normal distribution. In particular, many real-world distributions are "long-tailed", meaning that the right tail extends far beyond the most typical members of the distribution.  One of the most interesting types of data where long-tailed distributions occur arise from the analysis of social networks.  For an example, let's look at the Facebook friend data from the Stanford Large Network Database: (https://snap.stanford.edu/data/egonets-Facebook.html) and plot the histogram of number of friends across the 3,663 people in the database (see Figure \@ref(fig:facebookFriends).  We will put a blue point to denote the individual with the largest number of friends in the dataset.
 
-```{r}
+```{r facebookFriends,fig.cap="A histogram of the number of Facebook friends amongst 3,663 individuals, obtained from the Stanford Large Network Database."}
 fbdata=read.table('data/04/facebook_combined.txt')
 
 # count how many friends each individual has
@@ -402,12 +403,15 @@ ggplot(friends_table, aes(nfriends)) +
 
 As we can see, this distribution has a very long right tail -- the average person has `r I(mean(friends_table$nfriends))` friends, while the person with the most friends has `r I(max(friends_table$nfriends))`!  
 
-Long-tailed distributions are increasingly being recognized in the real world.  In particular, many features of complex systems are characterized by these distributions, from the frequency of words in text, to the number of flights in and out of airports, to the expression of genes in cells.  There are a number of different ways that long-tailed distributions can come about, but a common one occurs in cases of the so-called "Matthew effect" from the Christian Bible:
+Long-tailed distributions are increasingly being recognized in the real world.  In particular, many features of complex systems are characterized by these distributions, from the frequency of words in text, to the number of flights in and out of airports, to the connectivity of brain networks.  There are a number of different ways that long-tailed distributions can come about, but a common one occurs in cases of the so-called "Matthew effect" from the Christian Bible:
 
 > For to every one who has will more be given, and he will have abundance; but from him who has not, even what he has will be taken away. — Matthew 25:29, Revised Standard Version
 
-often paraphrased as "the rich get richer".  In these situations, advantages compound, such that those with more friends have access to even more new friends, and those with more money have the ability do things that increase their riches even more.  As the course progresses we will see several examples of these kinds of distributions, and we should keep in mind that many of the tools in statistics fail when faced with long-tailed data.
+often paraphrased as "the rich get richer".  In these situations, advantages compound, such that those with more friends have access to even more new friends, and those with more money have the ability do things that increase their riches even more.  As the course progresses we will see several examples of these kinds of distributions, and we should keep in mind that many of the tools in statistics fail when faced with long-tailed data.  And as Nassim Nicholas Taleb pointed out in his book "The Black Swan", such long-tailed distributions played a critical role in the 2008 financial crisis, because many of the financial models used by traders assumed that financial systems would follow the normal distribution, which they clearly did not.
 
+```{r echo=FALSE, message=FALSE}
 ### Logarithms
 
-ADD HERE?
+# ADD HERE?
+```
+

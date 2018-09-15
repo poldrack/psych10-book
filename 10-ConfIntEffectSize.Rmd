@@ -12,6 +12,10 @@ library(boot)
 library(MASS)
 set.seed(123456) # set random seed to exactly replicate results
 
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
+
 # load the NHANES data library
 library(NHANES)
 
@@ -35,10 +39,10 @@ NHANES_sample=sample_n(NHANES_adult,sampSize)
 sample_summary = NHANES_sample %>%
   summarize(meanWeight=mean(Weight),
             sdWeight=sd(Weight))
-
+pander(sampleSummary)
 ```
 
-In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe the difference.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly if we have the data from the entire population!  
+In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe the difference.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly from the data of the entire population.
 
 You may also remember that earlier we introduced the concept of a *confidence interval*, which is a way of describing our uncertainty about a statistical estimate.  Remember that a confidence interval describes an interval that will on average contain the true population parameter with a given probability; for example, the 95% confidence interval is an interval that will capture the true population parameter 95% of the time.  Note again that this is not a statement about the population parameter; any particular confidence interval either does or does not contain the true parameter.  As Jerzy Neyman, the inventor of the confidence interval, said:
 
@@ -76,7 +80,7 @@ $$
 where $t_{crit}$ is the critical t value.
 For the NHANES weight example (with sample size of `r I(sampSize)`), the confidence interval would be:
 
-```{r}
+```{r messages=FALSE}
 sample_summary = sample_summary %>%
   mutate(cutoff_lower = qt(0.025,sampSize),
          cutoff_upper = qt(0.975,sampSize),
@@ -85,23 +89,23 @@ sample_summary = sample_summary %>%
 sample_summary
 ```
 
-Remember that this doesn't tell us anything about the probability of the true population value falling within this interval, since it is a fixed parameter (which we know is `r I(mean(NHANES_adult$Weight))` because we have the entire population in this case) and it either does or does not fall within this specific interval (in this case, it does).  Instead, it tells us that in the long run, if we compute the confidence interval using this procedure, 95% of the time that confidence interval will contain the true population parameter.
+Remember that this doesn't tell us anything about the probability of the true population value falling within this interval, since it is a fixed parameter (which we know is `r I(mean(NHANES_adult$Weight))` because we have the entire population in this case) and it either does or does not fall within this specific interval (in this case, it does).  Instead, it tells us that in the long run, if we compute the confidence interval using this procedure, 95% of the time that confidence interval will capture the true population parameter.
 
 ### Confidence intervals and sample size
 
-Given that the standard error decreases with sample size, that means that the confidence interval should also get narrower as the sample size increases, providing tighter bounds on our estimate.  Let's look at an example of how the confidence interval would change as a function of sample size for the weight example, using the normal distribution to generate the intervals for simplicity.
+Given that the standard error decreases with sample size, that means that the confidence interval should also get narrower as the sample size increases, providing tighter bounds on our estimate.  Figure \@ref(fig:CISampSize) shows an example of how the confidence interval would change as a function of sample size for the weight example. From the figure it's evident that the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, demonstrating the fact that denominator of the confidence interval term is proportional to the square root of the sample size.
 
-```{r confIntSampSize,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean.  This example uses the normal distribution based on the population standard deviation; the effect of sample sizes would be even larger using the t distribution."}
+
+```{r CISampSize,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean."}
 ssDf = data.frame(sampSize=2**seq(4,9)) %>%
   mutate(meanHeight=mean(NHANES_sample$Height),
-         ci.lower = meanHeight - 1.96*sd(NHANES_adult$Weight)/sqrt(sampSize),
-         ci.upper = meanHeight + 1.96*sd(NHANES_adult$Weight)/sqrt(sampSize))
+         ci.lower = meanHeight + qt(0.025,sampSize)*sd(NHANES_adult$Weight)/sqrt(sampSize),
+         ci.upper = meanHeight + qt(0.975,sampSize)*sd(NHANES_adult$Weight)/sqrt(sampSize))
 
 ggplot(ssDf, aes(sampSize, meanHeight)) +
   geom_point(size = 3) +
   geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0, size = 1)
 ```
-Figure \@ref(fig:confIntSampSize) shows how the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, demonstrating the fact that denominator of the confidence interval term includes the square root of the sample size.
 
 ### Computing confidence intervals using the bootstrap
 
@@ -120,11 +124,13 @@ print('Bootstrap confidence intervals:')
 bootci$perc[4:5]
 ```
 
+These values are fairly close to the values obtained using the t distribution above, though not exactly the same.
+
 ### Relation of confidence intervals to hypothesis tests
 
 There is a close relationship between confidence intervals and hypothesis tests.  In particular, if the confidence interval does not include the null hypothesis, then the associated statistical test would be statistically significant.  
 
-ADD DETAILS ABOUT COMPARING CIs ACROSS CONDITIONS
+TBD - ADD DETAILS ABOUT COMPARING CIs ACROSS CONDITIONS
 
 ## Effect sizes
 
@@ -134,7 +140,7 @@ In the last chapter we discussed the idea that statistical significance may not 
 
 ### An example: Should you drink less?
 
-We already saw one example of an effect size in the weight loss example in the previous chapter -- here we present another, this time based on a published research study that examined the effects of alcohol consumption on longevity (REF).  MORE HERE
+We already saw one example of an effect size in the weight loss example in the previous chapter -- here we present another, this time based on a published research study that examined the effects of alcohol consumption on longevity (REF).  TBD - MORE HERE
 
 
 ### Cohen's D
@@ -157,7 +163,7 @@ There is a commonly used scale for interpreting the size of an effect in terms o
 ```{r echo=FALSE}
 dInterp=data.frame("D"=c(0.2,0.5,0.8),
                    "Interpretation"=c('small','medium','large'))
-dInterp
+pander(dInterp)
 ```
 
 It can be useful to look at some commonly understood effects to help understand these interpretations.  
@@ -178,14 +184,14 @@ d_height_gender = (hsum$meanHeight[2] - hsum$meanHeight[1])/s_height_gender
 d_height_gender
 ```
 
-The effect size for gender differences in height (d = `r I(d_height_gender)`) is huge by reference to our table above.  We can also see this by looking at the distributions of male and female heights in our sample.  Figure \@ref(fig:genderHist) shows that the two distributions are quite well separated, though still overlapping, highlighting the fact that even when there is a large effect size in the difference between two groups, there will be individuals from each group that are more like the other group.
+The effect size for gender differences in height (d = `r I(d_height_gender)`) is huge by reference to our table above.  We can also see this by looking at the distributions of male and female heights in our sample.  Figure \@ref(fig:genderHist) shows that the two distributions are quite well separated, though still overlapping, highlighting the fact that even when there is a very large effect size for the difference between two groups, there will be individuals from each group that are more like the other group.
 
 ```{r genderHist,fig.cap="Smoothed histogram plots for male and female heights in the NHANES dataset, showing clearly distinct distributions."}
 ggplot(NHANES_sample,aes(x=Height,color=Gender)) + 
   geom_density(bins=40)
 ```
 
-It is also worth nothing that we rarely encounter effects of this magnitude in science.  As we will see in the later chapter on reproducibility, huge effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. 
+It is also worth nothing that we rarely encounter effects of this magnitude in science, in part because they are such obvious effects that we don't need science to find them.  As we will see in the later chapter on reproducibility, huge effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. 
 
 ### Pearson's r
 
@@ -222,7 +228,7 @@ The odds ratio is simply the ratio of two odds. For example, let's take the case
 smokingDf = data.frame(NeverSmoked=c(2883,220),
                        CurrentSmoker=c(3829,6784),
                        row.names=c('NoCancer','Cancer'))
-smokingDf
+pander(smokingDf)
 ```
 We can convert these numbers to odds ratios for each of the groups:
 
@@ -238,8 +244,9 @@ The odds of someone having lung cancer who has never smoked is `r I(oddsCancerNe
 
 ```{r}
 oddsRatio = oddsCancerCurrentSmoker/oddsCancerNeverSmoked
-oddsRatio
+pander(oddsRatio)
 ```
 
 The odds ratio of `r I(oddsRatio)` tells us that the odds of cancer in smokers is roughly 23 times higher than never-smokers. 
 
+## Suggested readings

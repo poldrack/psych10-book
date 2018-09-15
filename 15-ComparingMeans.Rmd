@@ -23,20 +23,25 @@ NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
 NHANES_adult = NHANES %>%
   subset(Age>=18)
 
+
 ```
 
-One of the most common questions that we want to ask in statistics is whether there is a difference between the means of two different groups.  Let's say that we would like to know whether smokers and nonsmokers differ in their blood pressure.  We can ask this question using the NHANES dataset; let's take a sample of 200 individuals from the dataset and test whether mean blood pressure differs between these two groups.
+One of the most common questions that we want to ask in statistics is whether there is a difference between the means of two different groups.  Let's say that we would like to know whether regular marijuana smokers watch more television.  We can ask this question using the NHANES dataset; let's take a sample of 200 individuals from the dataset and test whether the number of hours of television watching per day is related to regular marijuana use.  Figure \@ref(fig:PotTVViolin) shows these data using a violin plot.
 
 ```{r}
-NHANES_sample=NHANES %>% 
-  drop_na(SmokeNow,BPSysAve) %>%
+NHANES_sample=NHANES_adult %>% 
+  drop_na(TVHrsDay,RegularMarij) %>%
+  mutate(TVHrsNum=recode(TVHrsDay,'More_4_hr'=5,
+                         '4_hr'=4,'2_hr'=2,
+                         '1_hr'=1,'3_hr'=3,'0_to_1_hr'=0.5,
+                         '0_hrs'=0)) %>%
   sample_n(200)
 
 
 ```
 
-```{r SmokingBPViolin,fig.cap='Violin plot showing distributions of systolic blood pressure separately for smokers and nonsmokers.'}
-ggplot(NHANES_sample,aes(SmokeNow,BPSysAve)) +
+```{r PotTVViolin,fig.cap='Violin plot showing distributions of TV watching separated by regular marijuana use.'}
+ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
   geom_violin(draw_quantiles=.50)
 ```
 
@@ -51,9 +56,9 @@ $$
 where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances for each the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  Under the null hypothesis of no difference between means, this statistic is distributed according to a t distribution with n-2 degrees of freedom (since we have computed two parameter estimates, namely the means of the two groups).  We can compute the t-test in R using the ```t.test()``` function:
 
 ```{r}
-t.test(BPSysAve~SmokeNow,data=NHANES_sample,var.equal=TRUE)
+t.test(TVHrsNum~RegularMarij,data=NHANES_sample,var.equal=TRUE)
 ```
-In this case we see that there is a statstically significant difference between groups, though it goes in a direction that we might not have predicted -- smokers actually have *lower* blood pressure than non-smokers.
+In this case we see that there is a statstically significant difference between groups, in the expected direction - regular pot smokers watch more TV.
 
 ## The t-test as a linear model
 
@@ -65,16 +70,16 @@ $$
 However, smoking is a binary variable, so we treat as a *dummy variable* like we discussed in the previous chapter, setting it to a value of 1 for smokers and zero for nonsmokers.  In that case, $\hat{\beta_1}$ is simply the difference in means between the two groups, and $\hat{\beta_0}$ is the mean for the group that was coded as zero.  We can fit this model using the ```lm()``` function, and see that it gives the same t statistic as the t-test above:
 
 ```{r}
-s=summary(lm(BPSysAve~SmokeNow,data=NHANES_sample))
+s=summary(lm(TVHrsNum~RegularMarij,data=NHANES_sample))
 s
 ```
 
-We can also view this graphically:
+We can also view this graphically (see Figure :
 
-```{r}
-ggplot(NHANES_sample,aes(SmokeNow,BPSysAve)) +
+```{r ttestFig,fig.cap="Violin plots showing data for each group, with a blue line connecting the predicted values for each group, computed on the basis of the results of the linear model."}
+ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
   geom_violin() +
-  annotate('segment',x=1,y=s$coefficients[1,1],xend=2,yend=s$coefficients[1,1]+s$coefficients[2,1])
+  annotate('segment',x=1,y=s$coefficients[1,1],xend=2,yend=s$coefficients[1,1]+s$coefficients[2,1],color='blue')
 
 ```
 
@@ -84,14 +89,14 @@ To compute the standard errors for this analysis, we can use exactly the same eq
 
 ### Effect sizes for comparing two means
 
-The most commonly used effect size for a comparison between two means is Cohen's d, which you may remember from the chapter on effect sizes is an expression of the effect in terms of standard error units.  For the t-test estimated using the general linear model outlined above, this is expressed as:
+The most commonly used effect size for a comparison between two means is Cohen's d, which (as you may remember from the chapter on effect sizes) is an expression of the effect in terms of standard error units.  For the t-test estimated using the general linear model outlined above, this is expressed as:
 
 $$
 d = \frac{\hat{beta_1}}{SE_{residual}}
 $$
-We can obtain these values from the analysis output above, giving us a d = `r I(s$coefficients[2,1]/s$sigma)`, which we would generally interpret as a moderately strong effect.
+We can obtain these values from the analysis output above, giving us a d = `r I(s$coefficients[2,1]/s$sigma)`, which we would generally interpret as a medium sized effect.
 
-We can also compute $R^2$ for this analysis, which tells us how much variance in blood pressure is accounted for by smoking.  This value (which is reported in the summary of the lm() analysis) is 0.0008, which tells us that while the effect may be statistically significant, it accounts for relatively little of the variance in blood pressure.
+We can also compute $R^2$ for this analysis, which tells us how much variance in TV watching is accounted for.  This value (which is reported in the summary of the lm() analysis) is `r I(s$r.squared)`, which tells us that while the effect may be statistically significant, it accounts for relatively little of the variance in TV watching.
 
 ## Bayes factor for mean differences
 
@@ -99,7 +104,7 @@ As we discussed in the chapter on Bayesian analysis, Bayes factors provide a way
 
 ```{r}
 bf = ttestBF(formula = 
-    BPSysAve~SmokeNow,data=NHANES_sample)
+    TVHrsNum~RegularMarij,data=NHANES_sample)
 bf
 ```
 This shows us that although the difference between groups is highly significant, the evidence against the null hypothesis is only suggestive. 
@@ -168,7 +173,7 @@ bt=binom.test(npos,nrow(NHANES_sample))
 bt
 ```
 
-Here we see that the proportion of individuals with positive signs (`r I(bt$estimate)`) is not large enough to be surprising under the null hypothesis of $p=0.5$. However, one problem with the sign test is that it is throwing away information about the magnitude of the differences, and thus might be missing somethign.
+Here we see that the proportion of individuals with positive signs (`r I(bt$estimate)`) is not large enough to be surprising under the null hypothesis of $p=0.5$. However, one problem with the sign test is that it is throwing away information about the magnitude of the differences, and thus might be missing something.
 
 ### Paired t-test
 A more common strategy is to use a *paired t-test*, which is equivalent to a one-sample t-test for whether the mean difference between the measurements is zero.  We can compute this using the ```t.test()``` function in R and setting ```paired=TRUE```.  
@@ -190,7 +195,7 @@ This shows us that although the effect was significant in a paired t-test, it ac
 
 We can also define the paired t-test in terms of a general linear model.  To do this, we include all of the measurements for each subject as data points (within a tidy data frame).  We then include in the model a variable that codes for the identity of each individual (in this case, the ID variable that contains a subject ID for each person). The standard model fitting procedure ```lm()``` can't do this, but we can do it using the ```lmer()``` function from a popular R package called *lme4*.  The ```(1|ID)``` in the lmer formula tells the function to estimate a separate intercept (which is what the ```1``` refers to) for each value of the ```ID``` variable, and then estimate a common slope relating timepoint to BP.
 
-```{r}
+```{r,messages=FALSE}
 library(lme4)
 library(lmerTest)
 
@@ -232,7 +237,7 @@ $$
 $$
 MS_{error} = \frac{SS_{error}}{df_{error}} = \frac{SS_{error}}{N - p}
 $$
-With ANOVA, we want to test whether the variance accounted for by the model is greater than what we would expect by chance, under the null hypothesis of no differences between means.  Whereas for the t distribution the expected value is zero under the null hypothesis, that's not the case here, since sums of squares are always positive numbers.  Fortunately, there is another standard distribution that describes how ratios of sums of squares are distributed under the null hypothesis: The *F* disribution (see figure \@ref(fig:FDist)). This distrbution has two degrees of freedom, which corresponds to the degrees of freedom for the numerator (which in this case is the model), and the denominator (which in this case is the error).
+With ANOVA, we want to test whether the variance accounted for by the model is greater than what we would expect by chance, under the null hypothesis of no differences between means.  Whereas for the t distribution the expected value is zero under the null hypothesis, that's not the case here, since sums of squares are always positive numbers.  Fortunately, there is another standard distribution that describes how ratios of sums of squares are distributed under the null hypothesis: The *F* disribution (see figure \@ref(fig:FDist)). This distribution has two degrees of freedom, which correspond to the degrees of freedom for the numerator (which in this case is the model), and the denominator (which in this case is the error).
 
 ```{r FDist, fig.cap='F distributions under the null hypothesis, for different values of degrees of freedom.'}
 fdata=data.frame(x=seq(0.1,10,.1)) %>%
@@ -264,4 +269,6 @@ Now we can fit a model using the same approach that we used in the previous chap
 lmResultANOVA=lm(sysBP ~ d1 + d2, data=df)
 summary(lmResultANOVA)
 ```
-The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, remember that the hypothesis that we started out wanting to test was whether there was any difference between any of the conditions; we refer to this as an "omnibus" hypothesis test, and it is the test that is provided by the F statistic, which basically tells us whether our model is better than a simple model that just includes an intercept.  In this case we see that the F test is highly significant, consistent with our impression that there did seem to be a difference between the groups.
+The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, keep in mind that if we wanted to compare interpret these tests, we would need to correct the p-values to account for the fact that we have done multiple hypothesis tests; we will see an example of how to do this in the next chapter.
+
+Remember that the hypothesis that we started out wanting to test was whether there was any difference between any of the conditions; we refer to this as an "omnibus" hypothesis test, and it is the test that is provided by the F statistic, which basically tells us whether our model is better than a simple model that just includes an intercept.  In this case we see that the F test is highly significant, consistent with our impression that there did seem to be a difference between the groups (which in fact we know there was, because we created the data).

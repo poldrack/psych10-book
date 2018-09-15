@@ -1,6 +1,6 @@
 # Modeling categorical relationships
 
-So far we have discussed the general concept of statistical modeling and hypothesis, and applied them to some simple analyses. In this chapter we will focus on the modeling of *categorical* relationships, by which we mean relationships variables that are measured on a nominal (and sometimes ordinal) scale.  These data are usually expressed in terms of counts; that is, for each value of the variable (or combination of values of multiple variables), how many observations take that value.  For example, when we count how many people from each major are in the class, we are fitting a categorical model to the data.
+So far we have discussed the general concept of statistical modeling and hypothesis testing, and applied them to some simple analyses. In this chapter we will focus on the modeling of *categorical* relationships, by which we mean relationships variables that are measured on a nominal (and sometimes ordinal) scale.  These data are usually expressed in terms of counts; that is, for each value of the variable (or combination of values of multiple variables), how many observations take that value?  For example, when we count how many people from each major are in our class, we are fitting a categorical model to the data.
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -8,6 +8,10 @@ library(ggplot2)
 library(kableExtra)
 library(BayesFactor)
 library(sfsmisc)
+
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -47,11 +51,10 @@ The Pearson chi-squared test provides us with a way to test whether observed cou
 $$
 \chi^2 = \sum_i\frac{(observed_i - expected_i)^2}{expected_i}
 $$
-In the case of our web site traffic example, the null hypothesis of interest is that the number of visits is the same every day -- which means that we would expect under the null hypothesis that the number of visits each day is simply equivalent to the mean across all days (denoted by the dashed line in Figure \@ref(fig:openfmriTraffic)). 
+In the case of our web site traffic example, the null hypothesis is that the number of visits is the same every day -- which means that we would expect under the null hypothesis that the number of visits each day is simply equivalent to the mean across all days (denoted by the dashed line in Figure \@ref(fig:openfmriTraffic)). 
 
 ```{r}
 chisqVal = sum(((openfmriData$sumUsers - mean(openfmriData$sumUsers))**2)/mean(openfmriData$sumUsers))
-chisqVal
 ```
 
 The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together.  Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
@@ -70,7 +73,7 @@ ggplot(chisqDf,aes(xvals,chisqNorm,group=as.factor(dfvals),color=as.factor(dfval
   geom_line()
 ```
 
-Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables.
+Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables.  Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of the simulation.
 
 ```{r chisqSim,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the blue line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom."}
 d=replicate(50000,rnorm(8)**2)
@@ -95,7 +98,7 @@ This shows that our observed data are exceedingly unlikely under the null hypoth
 
 ## Contingency tables and the two-way test
 
-Another way that we often use the chi-squared test is to ask whether two categorical variables are related to one another.  As an example, let's take the question of whether a black individual is more likely to be searched when they are pulled over by a police officer, compared to a white individual.  The Stanford Open Policing Project (https://openpolicing.stanford.edu/) has studied this, and provides data that we can use to analyze the question.  We will use the data from the State of Connecticut since they are fairly small.  These data were first cleaned up to remove all unnecessary data (see code/process_CT_data.py).
+Another way that we often use the chi-squared test is to ask whether two categorical variables are related to one another.  As an example, let's take the question of whether a black driver is more likely to be searched when they are pulled over by a police officer, compared to a white driver  The Stanford Open Policing Project (https://openpolicing.stanford.edu/) has studied this, and provides data that we can use to analyze the question.  We will use the data from the State of Connecticut since they are fairly small.  These data were first cleaned up to remove all unnecessary data (see code/process_CT_data.py).
 
 ```{r}
 stopData=read.table('data/CT_data_cleaned.csv',header=TRUE,sep=',') %>%
@@ -118,7 +121,7 @@ summaryDf2way=stopData %>%
 summaryContingencyTable = summaryDf2way %>% 
   spread(driver_race,n)
 
-summaryContingencyTable
+pander(summaryContingencyTable)
 
 ```
 
@@ -128,7 +131,7 @@ It can also be useful to look at the contingency table using proportions rather 
 summaryContingencyTableProportion = summaryContingencyTable %>%
   mutate(Black=Black/nrow(stopData),
          White=White/nrow(stopData))
-summaryContingencyTableProportion
+pander(summaryContingencyTableProportion,round=4)
 ```
 
 The Pearson chi-squared test allows us to test whether observed frequencies are different from expected frequencies, so we need to determine what frequencies we would expect in each cell if searches and race were unrelated -- which we can defined as being *independent.*  Remember from the chapter on probability that if X and Y are independent, then:
@@ -170,11 +173,11 @@ summaryDf2way = summaryDf2way %>%
 summaryDf2way$expected = expectedDfTidy$n
 summaryDf2way = summaryDf2way %>% 
   mutate(stdSqDiff = (n - expected)**2/expected)
-summaryDf2way
+pander(summaryDf2way)
 
 # compute chi-squared statistic by summing standarized squared differences
 chisq=sum(summaryDf2way$stdSqDiff)
-print(chisq)
+pander(chisq)
 ```
 
 Having computed the chi-squared statistic, we now need to compare it to the chi-squared distribution in order to determine how extreme it is compared to our expectation under the null hypothesis.  The degrees of freedom for this distribution are $df = (nRows - 1) * (nColumns - 1)$ - thus, for a 2X2 table like the one here, $df = (2-1)*(2-1)=1$.  The intuition here is that computing the expected frequencies requires us to use three values: the total number of observations and the marginal probability for each of the two variables.  Thus, once those values are computed, there is only one number that is free to vary, and thus there is one degree of freedom.  Given this, we can compute the p-value for the chi-squared statistic:
@@ -214,14 +217,14 @@ where $i$ and $j$ are the indices for the rows and columns respectively.  We can
 ```{r}
 summaryDf2way = summaryDf2way %>% 
   mutate(stdRes = (n - expected)/sqrt(expected))
-summaryDf2way
+pander(summaryDf2way)
 ```
 
 These standardized residuals can be interpreted as Z scores -- in this case, we see that the number of searches for black individuals are substantially higher than expected based on independence, and the number of searches for white individuals are substantially lower than expected. This provides us with context to interpret the signficant chi-squared result.
 
 ## Odds ratios
 
-We can also represent the relative likelihood of different outcomes in the contingency table using the odds ratio that we introduced earlier.  First, we represent the odds of being stopped for each race:
+We can also represent the relative likelihood of different outcomes in the contingency table using the odds ratio that we introduced earlier, in order to better understand the size of the effect.  First, we represent the odds of being stopped for each race:
 
 $$
 odds_{searched|black} = \frac{N_{searched\cap black}}{N_{not\ searched\cap black}} = \frac{1219}{36244} = 0.034
@@ -238,12 +241,13 @@ The odds ratio shows that the odds of being searched are 2.59 times higher for b
 
 ## Bayes factor
 
+We discussed Bayes factors in the earlier chapter on Bayesian statistics -- you may remember that it represents the ratio of the likelihood of the data under eac of the two hypotheses:
 $$ 
 K = \frac{P(data|H_A)}{P(data|H_0)} = \frac{P(H_A|data)*P(H_A)}{P(H_0|data)*P(H_0)}
 $$
-Bayes factors are similar to p-values and effect sizes in the sense that their interpretation is somewhat subjective.  There are various guidelines for their interpretation -- here is one from Kass & Rafferty (1995):
+Bayes factors are similar to p-values and effect sizes in one way, which is that their interpretation is somewhat subjective.  There are various guidelines for their interpretation -- here is one from Kass & Rafferty (1995):
 
-| K             | Interpretation       |
+| BF             | Interpretation       |
 |---------------|----------------------|
 | 1 to 3        | barely worth mention |
 | 3 to 20       | positive             |
@@ -257,7 +261,7 @@ bf = contingencyTableBF(as.matrix(summaryDf2wayTable), sampleType = "jointMulti"
 bf
 ```
 
-This shows that the evidence in favor of a relationship between race and police searches in this dataset is exceedingly strong.
+This shows that the evidence in favor of a relationship between driver race and police searches in this dataset is exceedingly strong.
 
 ## Categorical analysis beyond the 2 X 2 table
 
@@ -273,7 +277,7 @@ depressedSleepTrouble = NHANES_adult %>%
   arrange(SleepTrouble,Depressed)
 depressedSleepTroubleTable = depressedSleepTrouble %>% 
   spread(SleepTrouble,n)
-depressedSleepTroubleTable
+pander(depressedSleepTroubleTable)
 ```
 
 Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the number of people with sleep trouble is overall less than those without, for people who reporting being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test:

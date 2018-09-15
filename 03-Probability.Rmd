@@ -10,9 +10,10 @@ library(dplyr)
 library(reshape2)
 library(tidyr)
 library(ggplot2)
+library(pander)
 ```
 
-Probability theory is the branch of mathematics that deals with chance and uncertainty.  It forms an important part of the foundation for statistics, because it provides us with the tools to describe uncertain events.  The study of probability arose in part due to interests in understanding games of chance, like cards or dice.  These games provide useful examples of many statistical concepts, because we can repeat them and the likelihood of different outcomes remains (mostly) the same. However, there are deep questions about the meaning of probability that we will not address here; see Suggested Readings at the end if you are interested in learning more about this fascinating topic and its history.
+Probability theory is the branch of mathematics that deals with chance and uncertainty.  It forms an important part of the foundation for statistics, because it provides us with the mathematical tools to describe uncertain events.  The study of probability arose in part due to interests in understanding games of chance, like cards or dice.  These games provide useful examples of many statistical concepts, because we can repeat them and the likelihood of different outcomes remains (mostly) the same. However, there are deep questions about the meaning of probability that we will not address here; see Suggested Readings at the end if you are interested in learning more about this fascinating topic and its history.
 
 ## What is probability?
 
@@ -43,7 +44,7 @@ Let's say that I asked you what the probability was that Bernie Sanders would ha
 
 ### Empirical frequency
 
-Another way to determine the probability of an event is to do the experiment many times and count how often each event happens.  From the relative frequency of the different outcomes, we can compute the probability of each.  For example, let's say that we are interested in knowing the probability of rain in San Francisco.  We first have to define the experiment --- let's say that we will simply look at the National Weather Service data for each day in 2017 and determine whether there was any rain at the downtown San Francisco weather station (which can be downloaded from https://www.ncdc.noaa.gov/).
+Another way to determine the probability of an event is to do the experiment many times and count how often each event happens.  From the relative frequency of the different outcomes, we can compute the probability of each.  For example, let's say that we are interested in knowing the probability of rain in San Francisco.  We first have to define the experiment --- let's say that we will simply look at the National Weather Service data for each day in 2017 (which can be downloaded from https://www.ncdc.noaa.gov/) and determine whether there was any rain at the downtown San Francisco weather station.
 
 ```{r RainInSF,warning=FALSE}
 SFrain=read.csv('data/SanFranciscoRain/1329219.csv',sep=',')
@@ -56,7 +57,7 @@ SFrain_summary = SFrain %>%
             nDaysMeasured = n(),
             pRainInSF = nRainyDays/nDaysMeasured)
 
-SFrain_summary
+pander(SFrain_summary)
 ```
 According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays)` rainy days.  To compute the probability, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017)=`r I(SFrain_summary$pRainInSF)`.
 
@@ -79,9 +80,9 @@ ggplot(sampDf[10:nsamples,],aes(x=x,y=mean)) +
   xlab('Number of trials') + ylab('Estimated probability of heads')
 ```
 
-\@ref(fig:FlipSim) shows that as the number of samples increases, the estimated probability of heads converges onto the true value of 0.5. However, note that the estimates can be very far off from the true value when the sample sizes are small.  A real-world example of this was seen in the 2017 special election for the US Senate in Georgia, which pitted the Republican Roy Moore against Democrat Doug Jones.  \@ref(fig:ElectionResults) shows the relative amount of the vote reported for each of the candidates over the course of the evening, as an increasing number of ballots were counted. Early in the evening the vote counts were especially volatile, swinging from a large initial lead for Jones to a long period where Moore had the lead, until finally Jones took the lead to win the race.  
+Figure \@ref(fig:FlipSim) shows that as the number of samples increases, the estimated probability of heads converges onto the true value of 0.5. However, note that the estimates can be very far off from the true value when the sample sizes are small.  A real-world example of this was seen in the 2017 special election for the US Senate in Georgia, which pitted the Republican Roy Moore against Democrat Doug Jones.  Figure \@ref(fig:ElectionResults) shows the relative amount of the vote reported for each of the candidates over the course of the evening, as an increasing number of ballots were counted. Early in the evening the vote counts were especially volatile, swinging from a large initial lead for Jones to a long period where Moore had the lead, until finally Jones took the lead to win the race.  
 
-```{r ElectionResults, fig.cap='Relative proportion of the vote in the Dec 12, 2017 special election for the US Senate seat in Georgia, as a function of the number of precincts reporting. These data were transcribed from https://www.ajc.com/news/national/alabama-senate-race-live-updates-roy-moore-doug-jones/KPRfkdaweoiXICW3FHjXqI/'}
+```{r ElectionResults, fig.cap='Relative proportion of the vote in the Dec 12, 2017 special election for the US Senate seat in Georgia, as a function of the percentage of precincts reporting. These data were transcribed from https://www.ajc.com/news/national/alabama-senate-race-live-updates-roy-moore-doug-jones/KPRfkdaweoiXICW3FHjXqI/'}
 electionReturns=read.table('data/03/alabama_election_returns.csv',sep=',',
                            col.names=c('pctResp','Jones','Moore'),header=TRUE) %>%
   gather(candidate,pctVotes,-pctResp)
@@ -94,15 +95,15 @@ ggplot(electionReturns,aes(pctResp,pctVotes,color=candidate)) +
 
 ```
 
-These two examples show that while large samples will ultimately converge on the true probability, the results with small samples can be far off.  Unfortunately, many people forget this and overinterpret results from small samples.  This was referred to as the *law of small numbers* by the psychologists Danny Kahneman and Amos Tversky, who showed that people (even trained researchers) often behave as if the law of large numbers applies even to small samples.  We will see examples throughout the course of just how unstable statistical results can be when they are generated on the basis of small samples.
+These two examples show that while large samples will ultimately converge on the true probability, the results with small samples can be far off.  Unfortunately, many people forget this and overinterpret results from small samples.  This was referred to as the *law of small numbers* by the psychologists Danny Kahneman and Amos Tversky, who showed that people (even trained researchers) often behave as if the law of large numbers applies even to small samples, giving too much credence to results from small datasets.  We will see examples throughout the course of just how unstable statistical results can be when they are generated on the basis of small samples.
 
 ### Classical probability
 
-None of us has ever flipped a coin tens of thousands of times, but we are nonetheless willing to believe that the probability of flipping heads is 0.5.  This reflects the use of yet another approach to computing probabilities, which we refer to as *classical probability*.  In this approach, we compute the probability directly based on our knowledge of the situation.  
+It's unlikely that any of us has ever flipped a coin tens of thousands of times, but we are nonetheless willing to believe that the probability of flipping heads is 0.5.  This reflects the use of yet another approach to computing probabilities, which we refer to as *classical probability*.  In this approach, we compute the probability directly based on our knowledge of the situation.  
 
 Classical probability arose from the study of games of chance such as dice and cards.  A famous example arose from a problem encountered by an  French gambler who went by the name of Chevalier de Méré.  de Méré played two different dice games: In the first he bet on the chance of at least one six on four rolls of a six-sided die, while in the second he bet on the chance of at least one double-six on 24 rolls of two dice.  He expected to win money on both of these gambles, but he found that while he won money on the first gamble, he actually lost money when he played the second gamble. To understand this he turned to his friend, the mathematician Blaise Pascal, who is now recognized as one of the founders of probability theory. 
 
-How can we understand this question using probability theory?  In classical probability, we start with the assumption that all of the elementary events in the sample space are equally likely; that is, when you roll a die, all of the possible outcomes ({1,2,3,4,5,6}) are equally likely to occur.  Given this, we can compute the probability of any individual outcome as:
+How can we understand this question using probability theory?  In classical probability, we start with the assumption that all of the elementary events in the sample space are equally likely; that is, when you roll a die, all of the possible outcomes ({1,2,3,4,5,6}) are equally likely to occur.  (No loaded dice allowed!)  Given this, we can compute the probability of any individual outcome as:
 
 $$
 P(outcome_i) = \frac{1}{number\ of\ possible\ outcomes}
@@ -151,7 +152,8 @@ Let's use a graphical depiction to get a different view of this rule.
 imgmtx <- matrix(0, nrow=6, ncol=6)
 imgmtx[,1]=1
 imgmtx[1,]=1
-g=ggplot(melt(imgmtx), aes(Var1,Var2, fill=value)) + geom_raster()
+g=ggplot(melt(imgmtx), aes(Var1,Var2, fill=value)) + 
+  geom_raster(interpolate=FALSE)
 for (i in seq(0.5,6.5)) {
   g=g+geom_hline(yintercept=i,color='white')
   g=g+geom_vline(xintercept=i,color='white')
@@ -167,7 +169,7 @@ g=g+xlab('Throw 1') + ylab('Throw 2')
 g
 ```
 
-\@ref(fig:ThrowMatrix) shows a matrix representing all possible throws, and highlights the cells that involve a one on either the first or second throw. If you count up the cells in light blue you will see that there are 11 such cells. This shows why the addition rule gives a different answer from de Méré's; if we were to simply add together the probabilities for the two throws as he did, then we would count (1,1) towards both, when it should really only be counted once.
+Figure \@ref(fig:ThrowMatrix) shows a matrix representing all possible throws, and highlights the cells that involve a one on either the first or second throw. If you count up the cells in light blue you will see that there are 11 such cells. This shows why the addition rule gives a different answer from de Méré's; if we were to simply add together the probabilities for the two throws as he did, then we would count (1,1) towards both, when it should really only be counted once.
 
 ### Solving de Méré's problem
 
@@ -234,27 +236,44 @@ $$
 P(k\le2)= P(k=2) + P(k=1) + P(k=0) = 6e^{-5} + .002 + .040 = .043  
 $$
 
-In many cases the number of possible outcomes would be too large for us to compute the cumulative probability; fortunately, it can be computed directly. For the binomial, we can do this in R using the `pbinom()` function:
+In many cases the number of possible outcomes would be too large for us to compute the cumulative probability by enumerating all possible values; fortunately, it can be computed directly. For the binomial, we can do this in R using the `pbinom()` function:
 
 ```{r}
 pFreeThrows=dbinom(seq(0,4),4,0.91)
 cumulative_dist = data.frame(numSuccesses=seq(0,4)) %>%
           mutate(probability=pbinom(numSuccesses,4,0.91))
-cumulative_dist
+pander(cumulative_dist)
 
 ```
 
-From this we can see that the probability of Curry landing 2 or fewer free throws out of 4 attempts is `r I(cumulative_dist$probability[3])`.
-
+From this we can see that the probability of Curry landing 2 or fewer free throws out of 4 attempts is 0.043.
 
 ## Conditional probability
 
-So far we have limited ourselves to simple probabilities - that is, the probability of a single event.  However, we often wish to determine the probability of some event given that some other event has occurred, which are known as *conditional probabilities*.  
+So far we have limited ourselves to simple probabilities - that is, the probability of a single event.  However, we often wish to determine the probability of some event given that some other event has occurred, which are known as *conditional probabilities*.    
 
-**GET BETTER EXAMPLE**
-For many examples in this course we will use the National Health and Nutrition Examination Survey (NHANES).  NHANES is a large ongoing study organized by the US Centers for Disease Control that is designed to provide an overall picture of the health and nutritional status of both adults and children in the US.  Every year, the survey examines a sample of about 5000 people across the US using both interviews and physical and medical tests.  The NHANES data is included as a package in R, making it easy to access and work with.  It also provides us with a large, realistic dataset that will serve as an example for many different statistical tools.
+Let's take the 2016 US Presidential election as an example.  There are two simple probabilities that we could use to describe the electorate. First, we know  the probability that a voter in the US affiliated with the Republican party: $p(Republican) = 0.44$.  We also know that probability that a voter cast their vote in favor of Donald Trump: $p(Trump voter)=0.46$.  However, let's say that we want to know the following: What is the probability that a person cast their vote for Donald Trump, *given that they are a Republican*?  
 
-Let's say that we are interested in smoking behavior. NHANES records two variables that we will use to identify smoking behavior.  The first asks whether the person has smoked 100 or more cigarettes in their entire life.  The second asks whether they currently smoke cigarettes.  Putting these two variables together, we can determine the probability that someone is currently a smoker.
+To compute the conditional probability of A given B (which we write as $P(A|B)$, "probability of A, given B"), we need to know the *joint probability* (that is, the probability A and B) as well as the overall probability of B:
+
+$$
+P(A|B) = \frac{P(A \cap B)}{P(B)}
+$$
+
+That is, we want to know the probability that both things are true, given that the one being conditioned upon is true.  
+
+It can be useful think of this is graphically. Figure \@ref(fig:conditionalProbability)) shows a flow chart depicting how the full population of voters breaks down into Republicans and Democrats, and how the conditional probability (conditioning on party) further breaks down the members of each party according to their vote.
+
+```{r conditionalProbability,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data."}
+knitr::include_graphics("images/conditional_probability.png")
+
+```
+
+## Computing conditional probabilities from data
+
+For many examples in this course we will use data obtained from the National Health and Nutrition Examination Survey (NHANES).  NHANES is a large ongoing study organized by the US Centers for Disease Control that is designed to provide an overall picture of the health and nutritional status of both adults and children in the US.  Every year, the survey examines a sample of about 5000 people across the US using both interviews and physical and medical tests.  The NHANES data is included as a package in R, making it easy to access and work with.  It also provides us with a large, realistic dataset that will serve as an example for many different statistical tools.
+
+Let's say that we are interested in the following question: What is the probability that someone is has diabetes, given that they are not physically active; that is, $P(diabetes|inactive)$. NHANES records two variables that address the two parts of this question.  The first (```Diabetes```) asks whether the person has ever been told that they have diabetes, and the second (```PhysActive```) records whether the engages in sports, fitness, or recreational activities that are at least of moderate intensity.  Let's first compute the simple probabilities.
 
 ```{r}
 # load the NHANES data library
@@ -263,53 +282,43 @@ library(NHANES)
 # drop duplicated IDs within the NHANES dataset
 NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_smoking = NHANES %>% 
-  drop_na(Smoke100) # %>%
- # mutate(SmokeNow = if_else(Smoke100=='No',0,SmokeNow))
-         
-NHANES_smoking = NHANES_smoking %>% 
-  mutate(CurrentSmoker=if_else(Smoke100=='No',0,if_else(SmokeNow=='Yes',1,0)))
+NHANES_diabetes_activity = NHANES %>% 
+  drop_na(PhysActive,Diabetes) 
 
-NHANES_CurrentSmoker_stats = NHANES_smoking %>%
-  group_by(CurrentSmoker) %>%
-  summarize(prob=n()/length(NHANES_smoking$CurrentSmoker))
-NHANES_CurrentSmoker_stats
-  
+NHANES_diabetes_stats = NHANES_diabetes_activity %>%
+  group_by(Diabetes) %>%
+  summarize(prob=n()/length(NHANES_diabetes_activity$Diabetes))
+pander(NHANES_diabetes_stats)
+
+NHANES_activity_stats = NHANES_diabetes_activity %>%
+  group_by(PhysActive) %>%
+  summarize(prob=n()/length(NHANES_diabetes_activity$PhysActive))
+pander(NHANES_activity_stats)
+
+
 ```
 
-This shows that the probability that someone in the NHANES dataset is currently a smoker ($P(current\ smoker)$) is `r I(NHANES_CurrentSmoker_stats$prob[1])`. Now let's say that we want to know the probability that someone is currently a smoker, *given that they have ever smoked 100 cigarettes.*  In conditional probability notation, that would be $P(current\ smoker|smoked\ 100\ cigarettes)$.
-
-
-One way to think of this is graphically.
-ADD IGRAPH PLOT
-
-To compute the conditional probability of A given B (which we write as $P(A|B)$), we need to know the *joint probability* (that is, the probability A and B) as well as the overall probability of B:
-
-$$
-P(A|B) = \frac{P(A \cap B)}{P(B)}
-$$
-
-In our example, to compute  $P(current\ smoker|smoked\ 100\ cigarettes)$ we would need to know the joint probability of being a current smoker *and* having smoked 100 cigarettes, along with the simple probability of having smoked 100 cigarettes.
+This shows that the probability that someone in the NHANES dataset has diabetes is .101, and the probability that someone is inactive is .454.  
+To compute  $P(diabetes|inactive)$ we would also need to know the joint probability of being diabetic *and* inactive, in addition to the simple probabilities of each:
 
 ```{r}
-NHANES_smoking_stats_by_smoke100 = NHANES_smoking %>%
-  group_by(CurrentSmoker,Smoke100) %>%
-  summarize(prob=n()/length(NHANES_smoking$CurrentSmoker))
-NHANES_smoking_stats_by_smoke100
+NHANES_diabetes_stats_by_activity = NHANES_diabetes_activity %>%
+  group_by(Diabetes,PhysActive) %>%
+  summarize(prob=n()/length(NHANES_diabetes_activity$PhysActive))
+pander(NHANES_diabetes_stats_by_activity)
 
 ```
 
-Note that there is one row missing here: there is no one who reports being a current smoker but has not ever smoked 100 cigarettes in their life. 
-
-Let's compute $P(current\ smoker|smoked\ 100\ cigarettes)$:
+Based on these joint probabilities, we can compute $P(diabetes|inactive)$:
 
 ```{r}
-P_Smoke100=mean(NHANES_smoking$Smoke100=='Yes')
-P_currentSmoker_given_Smoke100 = NHANES_smoking_stats_by_smoke100$prob[2]/P_Smoke100
-P_currentSmoker_given_Smoke100
+P_inactive = mean(NHANES_diabetes_activity$PhysActive=='No')
+P_diabetes_and_inactive = NHANES_diabetes_stats_by_activity[3,3]
+P_diabetes_given_inactive = P_diabetes_and_inactive/P_inactive
+P_diabetes_given_inactive
 ```
 
-The first line of code in this chunk computed $P(smoked\ 100\ cigarettes)$ by taking the mean of a test for whether the Smoke100 variable was equal to "Yes" for each indivdual.  This trick works because TRUE/FALSE values are treated as 1/0 respectively by R; thus, if we want to know the probaility of some event, we can generate a boolean variable that tests for that event, and then simply take the mean of that variable.  We then use that value to compute the conditional probability, where we find that the probability of someone being a current smoker, given that they have ever smoked 100 cigarettes in their life, is `r I(P_currentSmoker_given_Smoke100)`.
+The first line of code in this chunk computed $P(inactive)$ by taking the mean of a test for whether the PhysActive variable was equal to "No" for each indivdual.  This trick works because TRUE/FALSE values are treated as 1/0 respectively by R; thus, if we want to know the probaility of some event, we can generate a boolean variable that tests for that event, and then simply take the mean of that variable.  We then use that value to compute the conditional probability, where we find that the probability of someone having diabetes given that they are physically active is 0.141.
 
 
 ## Independence
@@ -322,7 +331,7 @@ $$
 
 That is, the probability of A given some value of B is just the same as the overall probability of A.  Looking at it this way, we see that many cases of what we would call "independence" in the world are not actually statistically independent.  For example, there is currently a move by a small group of California citizens to declare a new independent state called Jefferson, which would comprise a number of counties in northern California and Oregon. If this were to happen, then the probability that a current California resident would now live in the state of Jefferson would be $P(Jefferson)=0.014$, whereas the proability that they would remain a California resident would be $P(California)=0.986$.  The new states might be politically independent, but they would *not* be statistically independent, because $P(California|Jefferson) = 0$!  That is, while independence in common language often refers to sets that are exclusive, statistical independence refers to the case where one cannot predict anything about one variable from the value of another variable.
 
-Let's look at another example, using the NHANES data: Are physical health and mental health independent of one another?  NHANES includes two relevant questions: *PhysActive*, which asks whether the individual is physically active, and *DaysMentHlthBad*, which asks how many days out of the last 30 that the individual experienced bad mental health.  We will define a new variable called badMentalHealth as having more than 7 days in the last month of bad mental health, and then determine whether they are indepndent by asking whether the simple probability of bad mental health is different from the conditional probability of bad mental health given that one is physically active.
+Let's look at another example, using the NHANES data: Are physical health and mental health independent of one another?  NHANES includes two relevant questions: *PhysActive*, which asks whether the individual is physically active, and *DaysMentHlthBad*, which asks how many days out of the last 30 that the individual experienced bad mental health.  We will define a new variable called badMentalHealth as having more than 7 days in the last month of bad mental health, and then determine whether they are independent by asking whether the simple probability of bad mental health is different from the conditional probability of bad mental health given that one is physically active.
 
 ```{r}
 NHANES_adult=NHANES %>%
@@ -331,18 +340,19 @@ NHANES_adult = NHANES_adult %>%
   mutate(badMentalHealth=DaysMentHlthBad>7)
 NHANES_MentalHealth_summary=NHANES_adult %>% 
   summarize(badMentalHealth=mean(badMentalHealth))
-NHANES_MentalHealth_summary
+pander(NHANES_MentalHealth_summary)
+
 NHANES_MentalHealth_by_PhysActive =NHANES_adult %>% 
   group_by(PhysActive) %>% 
   summarize(badMentalHealth=mean(badMentalHealth))
-NHANES_MentalHealth_by_PhysActive
+pander(NHANES_MentalHealth_by_PhysActive)
 ```
 
 From this we see that $P(bad\ mental\ health)$ is `r I(NHANES_MentalHealth_summary$badMentalHealth)` while $P(bad\ mental\ health|physically\ active)$ is `r I(NHANES_MentalHealth_by_PhysActive$badMentalHealth[2])`.  Thus, it seems that the conditional probability is somewhat smaller than the overall probability, suggesting that they are not independent, though we can't know for sure just by looking at the numbers. Later in the course we will encounter tools that will let us more directly quantify whether two variables are independent.
 
-## Reversing a conditional proability: Bayes' rule
+## Reversing a conditional probability: Bayes' rule
 
-In many cases, we know $P(A|B)$ but we really want to know $P(B|A)$. This commonly occurs in medical screening, where we know $P(positive\ test\ result|disease)$ but what we want to know is $P(disease|positive\ test\ result)$.  For example, some doctors recommend that men over the age of 50 undergo screening using a test called prostate specific antigen (PSA) to screen for possible prostate cancer.  Before a test is approved for use in medical practice, we need to know two things about it. First, we need to know how *sensitive* it is -- that is, how likely is it to find the disease when it is present: $sensitivity = P(positive\ test| disease)$.  We also need to know how *specific* it is: what is, how likely is it to give a negative result when there is no disease present: $specificity = P(nnegative\ test|no disease)$.  For the PSA test, we know that sensitivty is about 80% and specificity is about 70%.  However, these don't answer the question that we need to answer for any patient: what is the likelihood that hey actually have cancer, given that the test is positive? This requires that we reverse the conditional probability that defines sensitivity: instead of  $P(positive\ test| disease)$ we want to know $P(disease|positive\ test)$. 
+In many cases, we know $P(A|B)$ but we really want to know $P(B|A)$. This commonly occurs in medical screening, where we know $P(positive\ test\ result|disease)$ but what we want to know is $P(disease|positive\ test\ result)$.  For example, some doctors recommend that men over the age of 50 undergo screening using a test called prostate specific antigen (PSA) to screen for possible prostate cancer.  Before a test is approved for use in medical practice, we need to know two things about it. First, we need to know how *sensitive* it is -- that is, how likely is it to find the disease when it is present: $sensitivity = P(positive\ test| disease)$.  We also need to know how *specific* it is: what is, how likely is it to give a negative result when there is no disease present: $specificity = P(negative\ test|no\ disease)$.  For the PSA test, we know that sensitivity is about 80% and specificity is about 70%.  However, these don't answer the question that the physician wants to answer for any particular patient: what is the likelihood that they actually have cancer, given that the test is positive? This requires that we reverse the conditional probability that defines sensitivity: instead of  $P(positive\ test| disease)$ we want to know $P(disease|positive\ test)$. 
 
 In order to reverse a conditional probability, we can use *Bayes' rule*:
 
@@ -388,26 +398,27 @@ $$
 P(cancer|test) = \frac{P(test|cancer)*P(cancer)}{P(test|disease)*P(disease) + P(test|\neg disease)*P(\neg disease)} = \frac{0.8*0.058}{0.8*0.058 +0.3*0.942 } = 0.14
 $$
 
+That's pretty small -- do you find that surprising? Many people do, and in fact there is a substantial psychological literature showing that people systematically neglect *base rates* (i.e. overall prevalence) in their judgments.  
+
 ## Learning from data
 
-Another way to think of Bayes' theorem is as a way to update our beliefs on the basis of data -- that is, learning about the world using data.  Let's look at Bayes' thereom again:
+Another way to think of Bayes' rule is as a way to update our beliefs on the basis of data -- that is, learning about the world using data.  Let's look at Bayes' rule again:
 
 $$
 P(B|A) =  \frac{P(A|B)*P(B)}{P(A)}
 $$
 
-The different parts of Bayes' theorem have specific names, that relate to their role in using Bayes theorem to update our beliefs. We start out with an initial guess about the probability of B ($P(B)$), which we refer to as the *prior* probability.  In the example we used the base rate for the prior, since it was our best guess before we knew the test result.  We then collect some data, which in our example was the test result.  The effect of the test result on our belief is determined by $P(A|B)$, which we refer to as the *likelihood*.  You can think of this as how likely the data are, given the particular hypothesis being tested.  In our example, the hypothesis being tested was whether the individual had cancer, and the likelihood was based on our knowledge about the specficity of the test.
-The denominator ($P(A)$) is referred to as the *marginal likelihood*, because it expresses the likelihood averaged across all of the possible values of A (which in our example were the positive and negative test results).
-The outcome to the left ($P(B|A)$) is referred to as the *posterior* - because it's what comes out the back end of the computation.  The conditional probability of A given B ()
+The different parts of Bayes' rule have specific names, that relate to their role in using Bayes rule to update our beliefs. We start out with an initial guess about the probability of B ($P(B)$), which we refer to as the *prior* probability.  In the PSA example we used the base rate for the prior, since it was our best guess before we knew the test result.  We then collect some data, which in our example was the test result.  The degree to which the data A are consistent with outcome B is given by $P(A|B)$, which we refer to as the *likelihood*.  You can think of this as how likely the data are, given the particular hypothesis being tested.  In our example, the hypothesis being tested was whether the individual had cancer, and the likelihood was based on our knowledge about the specficity of the test.
+The denominator ($P(A)$) is referred to as the *marginal likelihood*, because it expresses the overall likelihood of the data, averaged across all of the possible values of A (which in our example were the positive and negative test results).
+The outcome to the left ($P(B|A)$) is referred to as the *posterior* - because it's what comes out the back end of the computation.  
 
-
-There is a another way of writing Bayes theorem that makes this a bit clearer:
+There is a another way of writing Bayes rule that makes this a bit clearer:
 
 $$
 P(B|A) = \frac{P(A|B)}{P(A)}*P(B)
 $$
 
-The part on the left 
+The part on the left ($\frac{P(A|B)}{P(A)}$) tells us how much more or less likely the data A are given B, relative to the overall (marginal) likelihood of the data, while the prior on the right side ($P(B)$) tells us how likely we think B is (before we know anything about the data).  This makes it clearer that the role of Bayes theorem is to update our prior knowledge based on the degree to which the data are more likely given B than they would be overall.
 
 ## Odds and odds ratios
 
@@ -422,12 +433,13 @@ $$
 odds\ of\ cancer = \frac{P(cancer)}{P(\neg cancer)} =\frac{0.14}{1 - 0.14} = 0.16
 $$
 
-This tells us that the that the odds are fairly low of having cancer.  For comparison, the odds of rolling a 6 in a single dice throw are:
+This tells us that the that the odds are fairly low of having cancer, even though the test was positive.  For comparison, the odds of rolling a 6 in a single dice throw are:
 
 $$
 odds\ of\ 6 = \frac{1}{5} = 0.2
 $$
 
+As an aside, this is a reason why many medical researchers have become increasingly wary of the use of widespread screening tests for relatively uncommon conditions; most positive results will turn out to be false positives.
 
 We can also use odds to compare different probabilities, by computing what is called an *odds ratio* - which is exactly what it sounds like.  For example, let's say that we want to know how much the positive test increases the individual's odds of having cancer. We can first compute the *prior odds* -- that is, the odds before we knew that the person had tested positvely.  These are computed using the base rate:
 
@@ -445,8 +457,12 @@ This tells us that the odds of having cancer are increased by 2.62 given the pos
 
 ## What do probabilities mean?
 
-It might strike you that it is a bit odd to talk about the odds of a person having cancer depending on a test result; after all, the person either has cancer or they don't.  Historically, there have been two different ways that probabilities have been interpreted.  The first (known as the *frequentist* interpretation) interprets probabilities in terms of long-run frequencies.  For example, in the case of a coin flip, it would reflect the relative frequencies of heads in the long run after a large number of flips.  While this interpretation might make sense for events that can be repeated many times like a coin flip, it makes less sense for events that will only happen once, like an individual person's life; as the famous economist John Maynard Keynes said, "In the long run, we are all dead."
+It might strike you that it is a bit odd to talk about the odds of a person having cancer depending on a test result; after all, the person either has cancer or they don't.  Historically, there have been two different ways that probabilities have been interpreted.  The first (known as the *frequentist* interpretation) interprets probabilities in terms of long-run frequencies.  For example, in the case of a coin flip, it would reflect the relative frequencies of heads in the long run after a large number of flips.  While this interpretation might make sense for events that can be repeated many times like a coin flip, it makes less sense for events that will only happen once, like an individual person's life or a particular presidential election; and as the famous economist John Maynard Keynes said, "In the long run, we are all dead."
 
-The other interpretation of probablities is as a degree of belief in a particular proposition.  One way to understand this is in terms of gambling: How much would we pay to gamble on the occurrence of the event?  MORE HERE
+The other interpretation of probablities (known as the "Bayesian" interpretation) is as a degree of belief in a particular proposition. If were to ask you "How likely is it that the US will return to the moon by 2026", you can provide an answer to this question based on your knowledge and beliefs, even though there are no relevant frequencies to compute a frequentist probability.  One way that we often frame subjective probabilities is in terms of one's willingness to accept a particular gamble.  For example, if you think that the probability of the US landing on the moon by 2026 is 0.1 (i.e. odds of 9 to 1), then that means that you should be willing to accept a gamble that would pay off with anything more than 9 to 1 odds if the event occurs.  
+
+As we will see these two different definitions of probability are very relevant to the two different ways that statisticians think about testing statistical hypotheses, which we will encounter in later chapters.
+
+## Suggested readings
 
 

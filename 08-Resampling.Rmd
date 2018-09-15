@@ -6,6 +6,10 @@ library(ggplot2)
 library(cowplot)
 set.seed(123456) # set random seed to exactly replicate results
 
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
+
 ```
 One of the most important books in practical computer science, called *Numerical Recipes*, said the following:
 
@@ -25,7 +29,7 @@ There are four steps to performing a Monte Carlo simulation:
 3. Perform a computation using the random numbers
 4. Combine the results across many repetitions
 
-As an example, let's say that I want to figure out how long to give for an in-class quiz.  Say that we know that the distribution of quiz completion times is normal, with mean of 5 mins and standard deviation of 1 min.  Given this, how long does the test period need to be so that we expect everyone to finish 99% of the time?
+As an example, let's say that I want to figure out how much time to allow for an in-class quiz.  Say that we know that the distribution of quiz completion times is normal, with mean of 5 mins and standard deviation of 1 min.  Given this, how long does the test period need to be so that we expect everyone to finish 99% of the time?
 There are two ways to solve this problem.  The first is to calculate the answer using a mathematical theory known as the statistics of extreme values. However, this is quite complicated mathematically. Alternatively, we could use Monte Carlo simulation. 
 To do this, we need to generate random samples from a normal distribution.  
 
@@ -33,13 +37,13 @@ To do this, we need to generate random samples from a normal distribution.
 
 The term "random" is often used colloquiually to refer to things that are bizarre or unexpected, but in statistics the term has a very specific meaning: A process is *random* if it is unpredictable.  For example, if I flip a fair coin 10 times, the value of the outcome on one flip does not provide me with any information that lets us predict the outcome on the next flip. It's important to note that the fact that something is unpredictable doesn't necessarily mean that it is not deterministic.  For example, when we flip a coin, the outcome of the flip is determined by the laws of physics; if we knew all of the conditions in enough detail, we should be able to predict the outcome of the flip.  However, many factors combine to make the outcome of the coin flip unpredictable in practice.
 
-Psychologists have shown that humans actually have a fairly bad sense of randomness. First, we tend to see patterns when they don't exist. In the extreme, this leads to the phenomenon of *pareidolia*, in which people will perceive familiar objects within random patterns (such as perceiving a cloud as a human face or seeing the Virgin Mary in a piece of toast).  SEcond, humans tend to think of random processes as self-correcting, which leads us to expect that we are "due for a win" after losing many rounds in a game, a phenonenon known as the "gambler's fallacy". 
+Psychologists have shown that humans actually have a fairly bad sense of randomness. First, we tend to see patterns when they don't exist. In the extreme, this leads to the phenomenon of *pareidolia*, in which people will perceive familiar objects within random patterns (such as perceiving a cloud as a human face or seeing the Virgin Mary in a piece of toast).  Second, humans tend to think of random processes as self-correcting, which leads us to expect that we are "due for a win" after losing many rounds in a game, a phenonenon known as the "gambler's fallacy". 
 
 ## Generating random numbers
 
-Running a Monte Carlo simulation requires that we generate random numbers.  Generating truly random numbers (i.e. numbers that are completely unpredictable) is only possible through physical processes, such as the decay of atoms or the rolling of dice, which are difficult to obtain and/or too slow to be useful for computer simulation (though they can be obtained from the (NIST Randomness Beacon)[https://www.nist.gov/programs-projects/nist-randomness-beacon]).
+Running a Monte Carlo simulation requires that we generate random numbers.  Generating truly random numbers (i.e. numbers that are completely unpredictable) is only possible through physical processes, such as the decay of atoms or the rolling of dice, which are difficult to obtain and/or too slow to be useful for computer simulation (though they can be obtained from the [NIST Randomness Beacon](https://www.nist.gov/programs-projects/nist-randomness-beacon]).
 
-However, we can generate *pseudo-random* numbers using a computer algorithm; these numbers will seem random in the sense that they are difficult to predict, but the series of numbers will actually repeat at some point.  For example, the random number generator used in R will repeate after $2^{19937} - 1$ numbers.  That's far more than the number of seconds in the history of the universe, and we generally think that this is fine for most purposes.
+In general, instead of truly random numbers we use *pseudo-random* numbers generated using a computer algorithm; these numbers will seem random in the sense that they are difficult to predict, but the series of numbers will actually repeat at some point.  For example, the random number generator used in R will repeate after $2^{19937} - 1$ numbers.  That's far more than the number of seconds in the history of the universe, and we generally think that this is fine for most purposes in statistical analysis.
 
 In R, there is a function to generate random numbers for each of the major probability distributions, such as:
 
@@ -47,37 +51,37 @@ In R, there is a function to generate random numbers for each of the major proba
 * `rnorm()` - normal distribution
 * `rbinom()` - binomial distribution (e.g. rolling the dice, coin flips)
 
-\@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function, which maps cumulative probabilities into values.  Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of choice via the quantile function.
+Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function, which maps cumulative probabilities into values.  Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of interest via its quantile function.
 
 ```{r rngExamples, fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution."}
 p1=ggplot(data.frame(x=runif(10000)),aes(x)) +
-  geom_histogram(bins=100)
+  geom_histogram(bins=100)  + ggtitle('Uniform')
 
 p2=ggplot(data.frame(x=rnorm(10000)),aes(x)) +
-  geom_histogram(bins=100)
+  geom_histogram(bins=100) + ggtitle('Normal')
 
 
 plot_grid(p1,p2,ncol=3)
 ```
 
-By default, R will generate a different set of random numbers every time you run it. However, it is also possible to generate exactly the same set of random numbers, by setting what is called the *random seed* to a specific value.  We will do this in many of the exzamples in this book, in order to make sure that the examples are reproducible.
+By default, R will generate a different set of random numbers every time you run it. However, it is also possible to generate exactly the same set of random numbers, by setting what is called the *random seed* to a specific value.  We will do this in many of the examples in this book, in order to make sure that the examples are reproducible.
 
 ```{r}
 # if we run the rnorm() command twice, it will give us different sets of pseudorandom numbers each time
-rnorm(5)
-rnorm(5)
+add.blank.lines(pander(rnorm(5)))
+add.blank.lines(pander(rnorm(5)))
 
 # if we set the random seed to the same value each time, then it will give us the same series of pseudorandom numbers each time.
 set.seed(12345)
-rnorm(5)
+add.blank.lines(pander(rnorm(5)))
 set.seed(12345)
-rnorm(5)
+add.blank.lines(pander(rnorm(5)))
 
 ```
 
 ## Using Monte Carlo simulation
 
-Let's go back to our example of exam finishing times. Let's say that I administer three exams and record the finishing times, which might look like the distributions presented in \@ref(fig:finishingTimes).
+Let's go back to our example of exam finishing times. Let's say that I administer three exams and record the finishing times, which might look like the distributions presented in Figure \@ref(fig:finishingTimes).
 
 ```{r finishingTimes, fig.cap="Simulated finishing time distributions."}
 finishTimeDf=data.frame(finishTime=rnorm(3*150,mean=5,sd=1),
@@ -90,9 +94,9 @@ ggplot(finishTimeDf,aes(finishTime)) +
 
 ```
 
-However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate a large number of quizzes (using the assumption that the finishing times are distributed normally, as stated above), and each time we can record the finishing time.  To do this, we create a new function in R called `sampleMax()` which takes a sample of the appropriate size (i.e. the number of students in the class) from the appropriate distribution, and returns the maximum value in the sample.  We then repeat this a large number of times (5000 should be enough) using the `replicate()` function, which will store all of the outputs into a single variable.
+However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate a large number of quizzes (using the assumption that the finishing times are distributed normally, as stated above), and each time we can record the longest finishing time.  To do this, we create a new function in R called `sampleMax()` which takes a sample of the appropriate size (i.e. the number of students in the class) from the appropriate distribution, and returns the maximum value in the sample.  We then repeat this a large number of times (5000 should be enough) using the `replicate()` function, which will store all of the outputs into a single variable.  The distribution of finishing times is shown in Figure \@ref(fig:finishTimeSim).
 
-```{r}
+```{r finishTimeSim,fig.cap="Distribution of maximum finishing times across simulations."}
 nRuns=5000
 sampSize=150
 
@@ -106,9 +110,9 @@ maxTime=replicate(nRuns,sampleMax())
 ggplot(data.frame(maxTime),aes(maxTime)) +
   geom_histogram(bins=100)
 
-print('99th percentile of maxTime distribution:')
 cutoff=quantile(maxTime,0.99)
-print(cutoff)
+pander(sprintf('99th percentile of maxTime distribution: %.2f\n',cutoff))
+
 
 ```
 
@@ -119,7 +123,7 @@ It's always important to remember that our assumptions matter -- if they are wro
 
 So far we have used simulation to demonstrate statistical principles, but we can also use simulation to answer real statistical questions.  In this section we will introduce a concept known as the *bootstrap* that lets us use simulation to quantify our uncertainty about statistical estimates. Later in the course we will see other examples of how simulation can often be used to answer statistical questions, especially when theoretical statistical methods are not available or when their assumptions are too stifling.
 
-### The bootstrap
+### Computing the bootstrap
 
 In the section above, we used our knowledge of the sampling distribution of the mean to compute the standard error of the mean and conidence intervals.  But what if we can't assume that the estimates are normally distributed, or we don't know their distribution?  The idea of the bootstrap is to use the data themselves to estimate an answer.  The name comes from the idea of pulling one's self up by their own boostraps, expressing the idea that we don't have any external source of leverage so we have to rely upon the data themselves.  The bootstrap method was conceived by Bradley Efron of the Stanford Department of Statistics, who is one of the world's most influential statisticians.
 
@@ -161,12 +165,12 @@ ggplot(data.frame(bootMeans=bootMeans),aes(bootMeans)) +
 
 ```
 
-\@ref(fig:bootstrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the boostrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
+Figure \@ref(fig:bootstrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the boostrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
 
 ```{r}
 bootCI=quantile(bootMeans,c(0.025,0.975))
-print("boostrap confidence limits")
-bootCI
+pander("boostrap confidence limits:")
+pander(bootCI)
 
 #now let's compute the confidence intervals using the sample mean and SD
 sampleMean=mean(heightSample$Height)
@@ -174,11 +178,10 @@ sampleMean=mean(heightSample$Height)
 normalCI = c("2.5%" = sampleMean - 1.96*SEM_standard,
           "97.5%"=sampleMean + 1.96*SEM_standard) 
 
-print("confidence limits based on sample SD and normal distribution")
-
-normalCI
+pander("confidence limits based on sample SD and normal distribution:")
+pander(normalCI)
 ```
 
-We would usually never employ the bootstrap to compute confidence intervals for the mean, but this example shows how the method gives us roughly the same result as the standard method based on the normal distribution.  The bootstrap would more often be used to generate standard errors for estimates of other statistics where we know or suspect that the normal distribution is not appropriate.
+We would usually never employ the bootstrap to compute confidence intervals for the mean (since we can generally assume that the normal distribution is appropriate for the sampling distribution of the mean), but this example shows how the method gives us roughly the same result as the standard method based on the normal distribution.  The bootstrap would more often be used to generate standard errors for estimates of other statistics where we know or suspect that the normal distribution is not appropriate.
 
 

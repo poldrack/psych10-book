@@ -260,7 +260,7 @@ ggplot(df,aes(steps,posteriors_fair)) +
 
 This example also highlights the sequential nature of Bayesian analysis -- the posterior from one analysis can become the prior for the next analysis.
 
-Finally, it is important to realize that if the priors are strong enough, they can completely overwhelm the data.  Let's say that you have an absolute prior that $p_{heads$ is between 0.2 and 0.3, such that you set the prior likelihood of all other values to zero.  What happens if we then compute the posterior?
+Finally, it is important to realize that if the priors are strong enough, they can completely overwhelm the data.  Let's say that you have an absolute prior that $p_{heads}$ is between 0.2 and 0.3, such that you set the prior likelihood of all other values to zero.  What happens if we then compute the posterior?
 
 ```{r absolutePrior,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 5 heads out of 10 flips.  The dotted black line shows the prior based on 50 heasd out of 100 flips, and the red line shows the posterior based on that prior."}
 
