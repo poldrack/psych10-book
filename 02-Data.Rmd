@@ -1,4 +1,8 @@
-
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Working with data
 
 ## What are data?

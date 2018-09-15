@@ -87,6 +87,7 @@ summaryDf
 ```
 
 Now that we have the data, let's visualize them to make sure that there are no outliers.  First, we will look at box plots for each condition (Figure \@ref(fig:AtoZBMIChange)).  
+
 ```{r AtoZBMIChange,fig.cap="A box plot showing the distribution of change in BMI for each diet group."}
 ggplot(summaryDf,aes(x=diet,y=meanBMIChange12Months)) +
   geom_point(size=2) + 
@@ -95,6 +96,7 @@ ggplot(summaryDf,aes(x=diet,y=meanBMIChange12Months)) +
 
 
 ```
+
 That looks pretty reasonable - in particular, there are no big outliers. Violin plots are also useful to see the shape of the distributions, as shown in Figure \@ref(fig:AtoZBMIChangeDensity).
 
 ```{r AtoZBMIChangeDensity,fig.cap="Violin plots for each condition, with the 50th percentile (i.e the median) shown as a black line for each group."}
@@ -102,6 +104,7 @@ ggplot(dietDf,aes(diet,BMIChange12Months)) +
   geom_violin(draw_quantiles=.5)
 
 ```
+
 One thing this shows us is that the distributions seem to vary a bit in the variance, with Atkins and Ornish showing greater variability than the others.  This means that any analyses that assume the variances are equal across groups could be inappropriate.
 
 ### 4. Determine the appropriate model
@@ -124,17 +127,19 @@ Let's run an ANOVA on BMI change to compare it across the four diets. It turns o
 lmResult=lm(BMIChange12Months ~ diet, data = dietDf)
 lmResult
 ```
+
 Note that lm automatically generated dummy variables that correspond to three of the four diets, leaving the Atkins diet without a dummy variable.  This means that the intercept models the Atkins diet, and the other three variable model the difference between each of the those diets and the Atkins diet.
 
 ### 6. Criticize the model to make sure it fits properly
 
-The first thing we want to do is to critique the model to make sure that it is appropriate. One thing we can do is to look at the residuals from the model. In this case, we will plot the residuals for each individual grouped by diet. We will jitter the points so that we can see all of them.
+The first thing we want to do is to critique the model to make sure that it is appropriate. One thing we can do is to look at the residuals from the model. In Figure \@ref(fig:residPlot), we will plot the residuals for each individual grouped by diet. We have jittered the points so that we can see all of them.
 
-```{r}
+```{r residPlot,fig.cap="Residuals from model plotted for each group separately."}
 ggplot(data.frame(residuals=lmResult$residuals,diet=dietDf$diet),aes(x=diet,y=residuals)) +
   geom_point(position=position_jitter(.1))
 
 ```
+
 There are no obvious differences in the residuals across conditions, suggesting that we can move forward and interpret the model outputs.
 
 ### 7. Test hypothesis and quantify effect size

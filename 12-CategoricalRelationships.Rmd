@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Modeling categorical relationships
 
 So far we have discussed the general concept of statistical modeling and hypothesis testing, and applied them to some simple analyses. In this chapter we will focus on the modeling of *categorical* relationships, by which we mean relationships variables that are measured on a nominal (and sometimes ordinal) scale.  These data are usually expressed in terms of counts; that is, for each value of the variable (or combination of values of multiple variables), how many observations take that value?  For example, when we count how many people from each major are in our class, we are fitting a categorical model to the data.
@@ -29,7 +34,7 @@ NHANES_adult = NHANES %>%
 
 ## Example: Does traffic to a web site vary across days of the week?
 
-Let's say that we want to know whether the traffic to a specific web site differs across different days of the week.  As an example, we can use data collected using Google Analytics for the Openfmri.org web site (which is run by my lab).  These data are shown in Figure \@ref(fig:openfmriTraffic).
+Let's say that we want to know whether the traffic to a specific web site differs across different days of the week.  As an example, we can use data collected using Google Analytics for the Openfmri.org web site (which is run by my lab). 
 
 ```{r openfmriTraffic,fig.cap='Traffic to openfmri.org during the month of June, 2018, separated by days of the week.'}
 openfmriData=read.table('data/openfmri_analytics.csv',sep=',',header=1) %>%
@@ -42,7 +47,8 @@ ggplot(openfmriData,aes(DayOfWeek,sumUsers,group=1)) +
   scale_x_discrete(limits=c('Mon','Tue','Wed','Thu','Fri','Sat','Sun')) +
   geom_hline(yintercept = mean(openfmriData$sumUsers),linetype='dashed')
 ```
-Looking at the data, it certainly seems like traffic is higher early in the week and declines over the course of the week, hitting its lowest point on the weekend.  However, how can we tell whether this apparent pattern is simply due to random fluctuations?  
+
+Looking at the data shown in Figure \@ref(fig:openfmriTraffic), it certainly seems like traffic is higher early in the week and declines over the course of the week, hitting its lowest point on the weekend.  However, how can we tell whether this apparent pattern is simply due to random fluctuations?  
 
 ## Pearson's chi-squared test
 
@@ -51,6 +57,7 @@ The Pearson chi-squared test provides us with a way to test whether observed cou
 $$
 \chi^2 = \sum_i\frac{(observed_i - expected_i)^2}{expected_i}
 $$
+
 In the case of our web site traffic example, the null hypothesis is that the number of visits is the same every day -- which means that we would expect under the null hypothesis that the number of visits each day is simply equivalent to the mean across all days (denoted by the dashed line in Figure \@ref(fig:openfmriTraffic)). 
 
 ```{r}
@@ -203,7 +210,6 @@ chisqTestResult
 
 ```
 
-
 ## Standardized residuals
 
 When we find a significant effect with the chi-squared test, this tells us that the data are unlikely under the null hypothesis, but it doesn't tell us how the data differ.  To get a deeper insight into how the data differ from the null model, we can examine the residuals from a model, which reflects the deviation of the data from the model in each cell. Rather than looking at the raw residuals (which will vary simply depending on the number of observations in the data), it's more common to look at ther *standardized residuals*, which are computed as:
@@ -297,6 +303,7 @@ We can also compute the Bayes factor to quantify the strength of the evidence in
 bf = contingencyTableBF(as.matrix(depressedSleepTroubleTable), sampleType = "jointMulti")
 bf
 ```
+
 Here see that the Bayes factor is exceedingly large, showing that the evidence in favor of a relation between depression and sleep problems is very strong.
 
 ## Beware of Simpson's paradox

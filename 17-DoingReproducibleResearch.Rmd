@@ -113,6 +113,7 @@ ggplot(df,aes(power,PPV,color=as.factor(priorVal))) +
   ylab('Posterior predictive value (PPV)')
 
 ```
+
 Unfortunately, statistical power remains low in many areas of science ([Smaldino & McElreath, 2016](https://arxiv.org/abs/1605.09511)), suggesting that many published research findings are false.
 
 ### The winner's curse

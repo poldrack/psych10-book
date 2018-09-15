@@ -1,4 +1,9 @@
-# Confidence intervals and effect sizes
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Confidence intervals, effect sizes, and statistical power
 
 In the previous chapter we discussed how we can use data to test hypotheses.  Those methods provided a binary answer: we either reject or fail to reject the null hypothesis. However, this kind of decision overlooks a couple of important questions.  First, we would like to know how much uncertainty we have about the answer (regardless of which way it goes).  In addition, sometimes we don't have a clear null hypothesis, so we would like to see what range of estimates are consistent with the data.  Second, we would like to know how large the effect actually is, since as we saw in the weight loss example in the previous chapter, a statisticially significant effect is not necessarily a practically important effect.
 
@@ -248,5 +253,82 @@ pander(oddsRatio)
 ```
 
 The odds ratio of `r I(oddsRatio)` tells us that the odds of cancer in smokers is roughly 23 times higher than never-smokers. 
+
+
+## Statistical power
+
+Remember from the previous chapter that under the Neyman-Pearson hypothesis testing approach, we have to specify our level of tolerance for two kinds of errors: False positives (which they called *Type I error*) and false negatives (which they called *Type II error*). People often focus heavily on Type I error, because making a false positive claim is generally viewed as a bad idea.  For example, we don't want to claim that a drug cures a disease if it really doesn't.  That's why the tolerance for Type I errors is generally set fairly low, usually at $\alpha = 0.05$.  But what about Type II errors?  
+
+The concept of *statistical power* is the complement of Type II error -- that is, it is the likelihood of finding a positive result given that it is true:
+
+$$ 
+power = 1 - \beta
+$$
+
+Another important aspect of the Neyman-Pearson model that we didn't discuss above is the fact that in addition to specifying the acceptable levels of Type I and Type II errors, we also have to specify a specific alternative hypothesis -- that is, what is the size of the effect that we wish to detect?   Otherwise, we can't interpret $\beta$ -- the likelihood of finding a large effect is always going to be higher than finding a small effect, so $\beta$ will be different depending on the size of effect we are trying to detect
+
+There are three factors that can affect power:
+
+- sample size: Larger samples provide greater statistical power
+- effect size: A given design will always have greater power to find a large effect than a small effect (because finding large effects is easier)
+- Type I error rate: There is a tradeoff between Type I error and power, such that (all else being equal) decreasing Type I error will also decrease power.
+
+We can see this through simulation.  First let's simulate a single experiment, in which we compare the means of two groups using a standard t-test.  We will vary the size of the effect (specified in terms of Cohen's d), the Type I error rate, and the sample size, and for each of these we will examine how the proportion of significant results (i.e. power) is affected. Figure \@ref(fig:powerSim) shows an example of how power changes as a function of these factors.  
+
+```{r powerSim}
+
+powerDf = expand.grid(sampSizePerGroup = c(12,24,48,96),
+                     effectSize=c(.2,.5,.8),
+                     alpha=c(0.005,0.05)) %>%
+  tidyr::expand(effectSize,sampSizePerGroup,alpha) %>%
+  group_by(effectSize,sampSizePerGroup,alpha)
+
+runPowerSim = function(df,nsims=1000){
+  p=array(NA,dim=nsims)
+  for (s in 1:nsims){
+    data=data.frame(y=rnorm(df$sampSizePerGroup*2),
+                    group=array(0,dim=df$sampSizePerGroup*2))
+    
+    data$group[1:df$sampSizePerGroup]=1
+    data$y[data$group==1]=data$y[data$group==1]+df$effectSize
+    tt=t.test(y~group,data=data)
+    p[s]=tt$p.value
+  }
+  return(data.frame(power=mean(p<df$alpha)))
+}
+
+powerSimResults = powerDf %>% do(runPowerSim(.))
+
+
+```
+
+```{r plotPowerSim,fig.cap="Results from power simulation, showing power as a function of sample size, with effect sizes shown as different colors, and alpha shown as line type. The standard criterion of 80% power is shown by the dotted black line."}
+ggplot(powerSimResults,
+       aes(sampSizePerGroup,power,color=as.factor(effectSize),linetype=as.factor(alpha))) +
+  geom_line(size=1) +
+  annotate('segment',x=0,xend=max(powerDf$sampSizePerGroup),
+           y=0.8,yend=0.8,linetype='dotted',size=.5) +
+  scale_x_continuous( breaks=unique(powerDf$sampSizePerGroup))
+```
+
+There are at least two important reasons to care about statistical power, one of which we discuss here and the other of which we will return to in the final chapter.  If you are a researcher, you probably don't want to spend your time doing futile experiments.  However, running an underpowered study is essentially futile, because it means that there is a very low likelihood that one will find an effect, even if it exists.  
+
+### Power analysis
+
+Fortunately, there are tools available that allow us to determine the statistical power of an experiment. The most common use of these tools is in planning an experiment, when we would like to determine how large our sample needs to be in order to be adqequately powered to find our effect of interest.
+
+Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the ```pwr.t.test()``` function from the pwr library.  
+
+```{r}
+pwr.t.test(d=0.5,power=0.8,sig.level=0.05)
+```
+
+This tells us that we would need about 64 subjects in each group in order to have sufficient power to find a medium-sized effect.  It's always important to run a power analysis before one starts a new study, to make sure that the study won't be futile due to a sample that is too small.
+
+```{r echo=FALSE}
+p = pwr.t.test(d=3,power=0.8,sig.level=0.05)
+```
+
+It might have occurred to you that if the effect size is large enough, then the necessary sample will be very small.  For example, if we run the same power analysis with an effect size of d=3, then we will see that we only need about 3 subjects in each group to have sufficient power to find the difference.  However, it's rare in science to be doing an experiment where we expect to find such a large effect -- just as we don't need statistics to tell us that 16-year-olds are taller than than 6-year-olds.  When we run a power analysis, we need to specify an effect size that is plausible for our study, which would usually come from previous research.  However, in the final chapter we will discuss a phenomenon known as the "winner's curse" that likely results in published effect sizes being larger than the true effect size, so this should also be kept in mind.  
 
 ## Suggested readings

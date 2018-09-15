@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Modeling continuous relationships
 
 Most people are familiar with the concept of *correlation*, and in this chapter we will provide a more formal understanding for this commonly used and misunderstood concept.
@@ -97,7 +102,7 @@ First, let's create an example with 10 people where everyone has exactly the sam
 incomeDf=data.frame(income=rep(40000,10))
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 ```
-Now let's look at an example where income is normally distributed (Figure \ref(fig:giniNormal)).
+Now let's look at an example where income is normally distributed (Figure \@ref(fig:giniNormal)).
 
 ```{r giniNormal,fig.cap="Gini index for a population with normally distributed income."}
 incomeDf=data.frame(income=rnorm(10,mean=40000,sd=5000))

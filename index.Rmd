@@ -10,6 +10,7 @@ output:
     keep_tex: yes
 documentclass: book
 ---
+# Statistical thinking for the 21st century
 
 ## Why does this book exist?
 

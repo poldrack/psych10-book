@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Hypothesis testing
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
@@ -5,6 +10,10 @@ library(tidyverse)
 library(ggplot2)
 library(cowplot)
 set.seed(123456) # set random seed to exactly replicate results
+
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
 
 # load the NHANES data library
 library(NHANES)
@@ -128,7 +137,7 @@ $$
 
 where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  The t-statistic is distributed according to a probability distribution known as a *t* distribution.  The *t* distribution looks quite similar to a normal distribution, but it differs depending on the number of degrees of freedom, which for this example is the number of observations minus 2, since we have computed two means and thus given up two degrees of freedom.  When the degrees of freedom are large (say 1000), then the *t* distribution looks essentialy like the normal distribution, but when they are small then the *t* distribution has longer tails than the normal (see Figure \@ref(fig:tVersusNormal)).
 
-```{r tVersusNormal, fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 10 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal."}
+```{r tVersusNormal,fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 10 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal."}
 distDf = data.frame(x=seq(-4,4,0.01))
 p1=ggplot(distDf,aes(x)) + 
     stat_function(fun = dnorm, n = 100,size=1.5,color='red') +
@@ -139,7 +148,8 @@ p2=ggplot(distDf,aes(x)) +
 
 plot_grid(p1,p2)
 ```
-### Step 5: Determine the probability of the data under the null hypothesis
+
+###Step 5: Determine the probability of the data under the null hypothesis
 
 This is the step where NHST starts to violate our intuition -- rather than determining the likelihood the the null hypothesis is true given the data, we instead determine the likelihood of the data under the null hypothesis - because we started out by assuming that the null hypothesis is true!  To do this, we need to know the probability distribution for the statistic under the null hypothesis, so that we can ask how likely the data are under that distribution. Before we move to our BMI data, let's start with some simpler examples. 
 
@@ -394,7 +404,7 @@ Neyman and Pearson coined two terms to describe the probability of these two typ
 - P(Type I error) = $\alpha$
 - P(Type II error) = $\beta$
 
-That is, if we set $\alpha$ to .05, then in the long run we should make a Type I error 5% of the time.  Whereas it's common to set $\alpha$ as .05, the standard value for $\beta$ is .2 - that is, we are willing to accept that 20% of the time we will fail to detect a true effect.  We will return to this later when we discuss statistical power, which is the converse of Type II error.
+That is, if we set $\alpha$ to .05, then in the long run we should make a Type I error 5% of the time.  Whereas it's common to set $\alpha$ as .05, the standard value for $\beta$ is .2 - that is, we are willing to accept that 20% of the time we will fail to detect a true effect.  We will return to this below when we discuss statistical power, which is the converse of Type II error.
 
 ### What does a significant result mean?
 
@@ -503,16 +513,6 @@ ggplot(data.frame(nsig=corOutcome),aes(nsig)) +
 print(sprintf('familywise error rate: %0.3f',mean(corOutcome>0)))
 
 ```
-
-## Statistical power
-
-*TBD*
-
-
-
-
-
-
 
 
 

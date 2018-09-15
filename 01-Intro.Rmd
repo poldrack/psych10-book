@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Introduction
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
