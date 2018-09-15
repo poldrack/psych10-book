@@ -15,6 +15,7 @@ library(ggplot2)
 library(cowplot)
 library(boot)
 library(MASS)
+library(pwr)
 set.seed(123456) # set random seed to exactly replicate results
 
 library(pander)
