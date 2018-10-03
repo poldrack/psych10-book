@@ -13,12 +13,13 @@ The first important point about data is that data are - meaning that the word "d
 Data are composed of *variables*, where a variable reflects a unique measurement or quantity.  Some variables are *qualitative*, meaning that they describe a quality rather than a numeric quantity.  For example, in my stats course I generally give an introductory survey, both to obtain data to use in class and to learn more about the students. One of the questions that I ask is "What is your favorite food?", to which some of the answers have been: blueberries, chocolate, tamales, pasta, pizza, and mango.  Those data are not intrinsically numerical; we could assign numbers to each one (1=blueberries, 2=chocolate, etc), but we would just be using the numbers as labels rather than as real numbers; for example, it wouldn't make sense to add the numbers together in this case.  However, we will often code qualitative data using numbers in order to make them easier to work with, as you will see later.
 
 ### Quantitative data
-More commonly in statistics we will work with *quantitative* data, meaning data that are numerical.  For example, here Table \@ref(tab:WhyTakingClass) showing the results from another question that I ask in my introductory class, which is "Why are you taking this class?"
+More commonly in statistics we will work with *quantitative* data, meaning data that are numerical.  For example, here Table \@ref(tab:WhyTakingClass) shows the results from another question that I ask in my introductory class, which is "Why are you taking this class?"
 
 ```{r WhyTakingClass,echo=FALSE}
 
 knitr::kable(
-  head(mtcars[, 1:8], 10), booktabs = TRUE,
+  head(mtcars[, 1:8], 10), 
+  booktabs = TRUE,
   caption = 'REPLACE WITH CORRECT TABLE.'
 )
 ```
@@ -38,22 +39,22 @@ everHadMigraine
 I could instead recode these into truth values:
 
 ```{r}
-everHadMigraineTF = everHadMigraine=='Yes'
+everHadMigraineTF = everHadMigraine == 'Yes'
 everHadMigraineTF
 ```
 
 R treats truth values and binary numbers eqivalently:
 
 ```{r}
-TRUE==1
-FALSE==0
-TRUE==0
+TRUE == 1
+FALSE == 0
+TRUE == 0
 ```
 
 And we can also turn our list of truth values into integers explicitly:
 
 ```{r}
-everHadMigraineBinary=as.integer(everHadMigraineTF)
+everHadMigraineBinary <- as.integer(everHadMigraineTF)
 everHadMigraineBinary
 ```
 
@@ -70,21 +71,21 @@ All variables take on at least two different values, but different values of the
 - *Identity*: Each value of the variable has a unique meaning.  
 - *Magnitude*: The values of the variable reflect different magnitudes and have an ordered relationship to one another --- that is, some values are larger and some are smaller.
 - *Equal intervals*: Units along the scale of measurement are equal to one another. This means, for example, that the difference between 1 and 2 would be equal in its magnitude to the difference between 19 and 20.
-- *A minimum value of zero*:  The scale has a true zero point, below which no values exist. For example, it's not possible to for a person's weight to be negative.
+- *Zero is the minimum value*:  The scale has a true zero point, below which no values exist. For example, it's not possible to for a person's weight to be negative.
 
 There are four different scales of measurement that go along with these different ways that values of a variable can differ.
 
-*Nominal scale*.  A nominal variable satisfies the criterion of identity, such that each value of the variable represents something different.  For example, we might ask people for their political party affiliation, and then code those as numbers: 1=Republican, 2=Democrat, 3=Libertarian, and so on. However, the different numbers do not have any ordered relationship with one another.  
+*Nominal scale*.  A nominal variable satisfies the criterion of identity, such that each value of the variable represents something different.  For example, we might ask people for their political party affiliation, and then code those as numbers: 1 = "Republican", 2 = "Democrat", 3 = "Libertarian", and so on. However, the different numbers do not have any ordered relationship with one another.  
 
 *Ordinal scale*. An ordinal variable satisfies the criteria of identity and magnitude, such that the values can be ordered in terms of their magnitude.  For example, a personality test might as someone to rate how extroverted they are, using a 1-7 numeric scale. Note that while a person who rates themself a four is more extroverted than someone who rates themself a two, but it wouldn't make sense to say that the former is twice as extroverted as the latter; the ordering gives us information about relative magnitude, but the differences between values are not necessarily equal in magnitude.
 
 *Interval scale*. An interval scale has all of the features of an ordinal scale, but in addition the intervals between units on the measurement scale can be treated as equal.  A standard example is physical temperature measured in Celsius or Farenheit; the physical difference between 10 and 20 degrees is the same as the physical difference between 90 and 100 degrees, but each scale can also take on negative values.
 
-*Ratio scale*. A ratio scale variable has all four of the features outlined above.  The difference between a ratio scale variable and an interval scale variable is that the ratio scale variable has a true zero point.  Examples of ratio scale variables include physical height and weight, along with temperature measured in Kelvin.
+*Ratio scale*. A ratio scale variable has all four of the features outlined above: identity, magnitude, equal intervals, and a minimum value of zero.  The difference between a ratio scale variable and an interval scale variable is that the ratio scale variable has a true zero point.  Examples of ratio scale variables include physical height and weight, along with temperature measured in Kelvin.
 
 ### Why do scales of measurement matter?
 
-There are two important reasons that we just pay attention to the scale of measurement of a variable.  First, it determines what kind of mathematical operations we can apply to the data (see Table \@ref(tab:MeasurementTypes)).  A nominal variable can only be compared for equality; that is, do two observations on that variable have the same value?  It would not make sense to apply other mathematical operations to a nominal variable, since they don't really function as numbers in a nominal variable, but rather as labels.  With ordinal variables, we can also test whether one value is greater or lesser than another, but we can't do any arithmetic.  Interval and ratio variables allow us to perform arithmetic; with interval variables we can only add or subtract values, whereas with ratio variables we can also multiply and divide values.  
+There are two important reasons that we must pay attention to the scale of measurement of a variable.  First, the scale determines what kind of mathematical operations we can apply to the data (see Table \@ref(tab:MeasurementTypes)).  A nominal variable can only be compared for equality; that is, do two observations on that variable have the same value?  It would not make sense to apply other mathematical operations to a nominal variable, since they don't really function as numbers in a nominal variable, but rather as labels.  With ordinal variables, we can also test whether one value is greater or lesser than another, but we can't do any arithmetic.  Interval and ratio variables allow us to perform arithmetic; with interval variables we can only add or subtract values, whereas with ratio variables we can also multiply and divide values.  
 
 Table: (\#tab:MeasurementTypes) Different scales of measurement admit different types of numeric operations
 |          | equal/not equal | Greater than/less than | Add/subtract | Multiply/divide |
@@ -99,7 +100,7 @@ These constraints also imply that there are certain kinds of statistics that we 
 
 ## What makes a good measurement?
 
-In many fields such as psychology, the thing that we are measuring is not a physical feature, but instead is an unobservable theoretical concept, which we usually refer to as a *construct*.  For example, let's say that I want to test how well you understand the distinction between the four different scales of measurement described above.  I could give you a pop quiz that would ask you several questions about these concepts and count how many you got right.  This test might or might not be a good measurement of your actual knowledge --- for example, if I were to write the test in a confusing way or use language that you don't understand, then the test might suggest you don't understand the concepts when really you do. On the other hand, if I give a multiple choice test with very obvious wrong answers, then you might be able to perform well on the test even if you don't actually understand the material.  
+In many fields such as psychology, the thing that we are measuring is not a physical feature, but instead is an unobservable theoretical concept, which we usually refer to as a *construct*.  For example, let's say that I want to test how well you understand the distinction between the four different scales of measurement described above.  I could give you a pop quiz that would ask you several questions about these concepts and count how many you got right.  This test might or might not be a good measurement of the construct of your actual knowledge --- for example, if I were to write the test in a confusing way or use language that you don't understand, then the test might suggest you don't understand the concepts when really you do. On the other hand, if I give a multiple choice test with very obvious wrong answers, then you might be able to perform well on the test even if you don't actually understand the material.  
 
 It is usually impossible to measure a construct without some amount of error.  In the example above, you might know the answer but you might mis-read the question and get it wrong.  In other cases there is error intrinsic to the thing being measured, such as when we measure how long it takes a person to respond on a simple reaction time test, which will vary from trial to trial for many reasons. We generally want our measurement error to be as low as possible.  
 
@@ -110,7 +111,7 @@ When we think about what makes a good measurement, we usually distinguish two di
 
 ### *Reliability*
 
-Reliabilty quantifies the consistency of our measurements.  One common form of reliability, known as "test-retest reliability", measures how well the measurements agree if the same measurement is performed twice.  For example, I might give you a questionnaire about your attitude towards statistics today and then again tomorrow, and compare your answers on the two; we would hope that they would be very similar to one another, unless something happened in between the two tests that should have changed your view of statistics (like reading this book!).  
+Reliabilty quantifies the consistency of our measurements.  One common form of reliability, known as "test-retest reliability", measures how well the measurements agree if the same measurement is performed twice.  For example, I might give you a questionnaire about your attitude towards statistics today, repeat this same questionnaire tomorrow, and compare your answers on the two days; we would hope that they would be very similar to one another, unless something happened in between the two tests that should have changed your view of statistics (like reading this book!).  
 
 Another way to assess reliability comes in cases where the data includes subjective judgments.  For example, let's say that a researcher wants to determine whether a treatment changes how well an autistic child interacts with other children, which is measured by having experts watch the child and rate their interactions with the other children.  In this case we would like to make sure that the answers don't depend on the rater --- that is, we would like for there to be high *inter-rater reliability*.  This can be assessed by having more than one rater perform the rating, and then comparing their ratings to make sure that they agree well with one another.
 
@@ -127,7 +128,7 @@ knitr::include_graphics("images/Reliability_and_validity.png")
 
 *Face validity*. Does the measurement make sense on its face?  If I were to tell you that I was going to measure a person's blood pressure by looking at the color of their tongue, you would probably think that this was not a valid measure on its face.  On the other hand, using a blood pressure cuff would have face validity.  This is usually a first reality check before we dive into more complicated aspects of validity.
 
-*Construct validity*.  Is the measurement related to other measurements in an appropriate way?  This is often subdivided into two aspects.  *Convergent validity* means that the measurement should be closely related to other measures that are thought to reflect the sane construct.  Let's say that I am interested in measuring how extroverted a person is using a questionnaire or an interview.  Convergent validity would be demonstrated if both of these different measurements are closely related to one another.  On the other hand, measurements though to reflect different constructs should be unrelated, known as *divergent validity*.  If my theory of personality says that extraversion and conscientiousness are two different constructs, then I should also see that my measurements of extraversion are *unrelated* to measurements of conscientiousness.  
+*Construct validity*.  Is the measurement related to other measurements in an appropriate way?  This is often subdivided into two aspects.  *Convergent validity* means that the measurement should be closely related to other measures that are thought to reflect the same construct. Let's say that I am interested in measuring how extroverted a person is using a questionnaire or an interview.  Convergent validity would be demonstrated if both of these different measurements are closely related to one another.  On the other hand, measurements thought to reflect different constructs should be unrelated, known as *divergent validity*.  If my theory of personality says that extraversion and conscientiousness are two different constructs, then I should also see that my measurements of extraversion are *unrelated* to measurements of conscientiousness.  
 
 *Predictive validity*.  If our measurements are a truly valid measure, then they should also be predictive of other outcomes.  For example, let's say that we think that the psychological trait of sensation seeking (the desire for new experiences) is related to risk taking in the real world.  To test for predictive validity of a measurement of sensation seeking, we would test how well scores on the test predict scores on a different survey that measures real-world risk taking. 
 
