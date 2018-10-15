@@ -13,17 +13,17 @@ library(ggplot2)
 library(pander)
 ```
 
-Probability theory is the branch of mathematics that deals with chance and uncertainty.  It forms an important part of the foundation for statistics, because it provides us with the mathematical tools to describe uncertain events.  The study of probability arose in part due to interests in understanding games of chance, like cards or dice.  These games provide useful examples of many statistical concepts, because we can repeat them and the likelihood of different outcomes remains (mostly) the same. However, there are deep questions about the meaning of probability that we will not address here; see Suggested Readings at the end if you are interested in learning more about this fascinating topic and its history.
+Probability theory is the branch of mathematics that deals with chance and uncertainty.  It forms an important part of the foundation for statistics, because it provides us with the mathematical tools to describe uncertain events.  The study of probability arose in part due to interests in understanding games of chance, like cards or dice.  These games provide useful examples of many statistical concepts, because when we repeat these games the likelihood of different outcomes remains (mostly) the same. However, there are deep questions about the meaning of probability that we will not address here; see Suggested Readings at the end if you are interested in learning more about this fascinating topic and its history.
 
 ## What is probability?
 
-Informally we usually think of probability as a number that describes the likelihood of some event occurring, which ranges from zero (impossibility) and one (certainty).  Sometimes they will instead be expressed in percentages, which range from zero to one hundred, as when the weather forecast predicts a twenty percent chance of rain today.  In each case, these numbers are expressing how likely that particular event is.  
+Informally, we usually think of probability as a number that describes the likelihood of some event occurring, which ranges from zero (impossibility) to one (certainty).  Sometimes probabilities will instead be expressed in percentages, which range from zero to one hundred, as when the weather forecast predicts a twenty percent chance of rain today.  In each case, these numbers are expressing how likely that particular event is.  
 
 To formalize probability theory, we first need to define a few terms:
 
 - An **experiment** is any activity that produces or observes an outcome.  Examples are flipping a coin, rolling a 6-sided die, or trying a new route to work to see if it's faster than the old route.
 - The **sample space** is the set of possible outcomes for an experiment.  For a coin flip, the sample space is {H,T} where the brackets represent the sample space and H/T represent heads/tails respectively.  For the die, the sample space is {1,2,3,4,5,6}.  For the amount of time it takes to get to work, the sample space is all possible real numbers greater than zero (since it can't take a negative amount of time to get somewhere, at least not yet). 
-- An **event** is a subset of the sample size.  Here we will focus primarily on *elementary events* which consist of exactly one possible outcome, such as heads in a coin flip, a roll of 4 in dice, or 21 minutes to get home by the new route. 
+- An **event** is a subset of the sample space.  Here we will focus primarily on *elementary events* which consist of exactly one possible outcome, such as heads in a coin flip, a roll of 4 in dice, or 21 minutes to get home by the new route. 
 
 Now that we have those definitions, we can outline the formal features of a probability, which were first defined by the Russian mathematician Andrei Kolmogorov. If $P(X_i)$ is the probability of event $X_i$:
 
@@ -47,52 +47,70 @@ Let's say that I asked you what the probability was that Bernie Sanders would ha
 Another way to determine the probability of an event is to do the experiment many times and count how often each event happens.  From the relative frequency of the different outcomes, we can compute the probability of each.  For example, let's say that we are interested in knowing the probability of rain in San Francisco.  We first have to define the experiment --- let's say that we will simply look at the National Weather Service data for each day in 2017 (which can be downloaded from https://www.ncdc.noaa.gov/) and determine whether there was any rain at the downtown San Francisco weather station.
 
 ```{r RainInSF,warning=FALSE}
-SFrain=read.csv('data/SanFranciscoRain/1329219.csv',sep=',')
-# create a new variable indicating whether it rained on each day
-SFrain = SFrain %>%
-  mutate(rainToday=as.integer(PRCP>0))
+SFrain <- read_csv("data/SanFranciscoRain/1329219.csv")
 
-SFrain_summary = SFrain %>%
-  summarize(nRainyDays = sum(rainToday),
-            nDaysMeasured = n(),
-            pRainInSF = nRainyDays/nDaysMeasured)
+# create a new variable indicating whether it rained on each day
+SFrain <- 
+  SFrain %>%
+  mutate(rainToday = as.integer(PRCP > 0))
+
+SFrain_summary <- 
+  SFrain %>%
+  summarize(
+    nRainyDays = sum(rainToday),
+    nDaysMeasured = n(),
+    pRainInSF = nRainyDays / nDaysMeasured
+  ) 
 
 pander(SFrain_summary)
 ```
-According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays)` rainy days.  To compute the probability, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017)=`r I(SFrain_summary$pRainInSF)`.
+According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays)` rainy days.  To compute the probability of rain in San Francisco, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017)=`r I(SFrain_summary$pRainInSF)`.
 
-How do we know that empirical probability gives us the right number? The answer to this question comes from the *law of large numbers*, which shows that the empirical probability will approach the true probability as the sample size increases.  We can see this by simulating a large number of coin flips, and looking at our our estimate of the probability of heads after each flip.  We will spend much more time discussing simulation in a later chapter; for now, just assume that we have a computational way to generate a random outcome for each coin flip.
+How do we know that empirical probability gives us the right number? The answer to this question comes from the *law of large numbers*, which shows that the empirical probability will approach the true probability as the sample size increases.  We can see this by simulating a large number of coin flips, and looking at our estimate of the probability of heads after each flip.  We will spend much more time discussing simulation in a later chapter; for now, just assume that we have a computational way to generate a random outcome for each coin flip.
 
 ```{r FlipSim,fig.cap='A demonstration of the law of large numbers.  A coin was flipped 30,000 times, and after each flip the probability of heads was computed based on the number of heads and tail collected up to that point.  It takes about 15,000 flips for the probability to settle at the true probability of 0.5.'}
-set.seed(12345) # set the seed so that the outcome is consistent
-nsamples=30000 # how many flips do we want to make?
 
+set.seed(12345) # set the seed so that the outcome is consistent
+nsamples <- 30000 # how many flips do we want to make?
 # create some random coin flips using the rbinom() function with
 # a true probability of 0.5
 
-sampDf=data.frame(x=seq(nsamples),samples=rbinom(nsamples,1,0.5)) %>%
-  mutate(mean=cumsum(samples)/seq_along(samples))
+sampDf <- 
+  tibble( 
+    trial_number = seq(nsamples), 
+    outcomes = rbinom(nsamples, 1, 0.5)
+  ) %>%
+  mutate(mean_probability = cumsum(outcomes) / seq_along(outcomes))
 
-# start with a minimum sample of 10 flips
-ggplot(sampDf[10:nsamples,],aes(x=x,y=mean)) + 
-  geom_hline(yintercept = 0.5,color='blue',linetype='dashed') +
-  geom_line() + 
-  xlab('Number of trials') + ylab('Estimated probability of heads')
+sampDf %>% 
+  slice(10:nsamples) %>% # start with a minimum sample of 10 flips
+  ggplot(aes(x = trial_number, y = mean_probability)) +
+  geom_hline(yintercept = 0.5, color = "blue", linetype = "dashed") +
+  geom_line() +
+  labs(
+    x = "Number of trials",
+    y = "Estimated probability of heads"
+  )
 ```
 
-Figure \@ref(fig:FlipSim) shows that as the number of samples increases, the estimated probability of heads converges onto the true value of 0.5. However, note that the estimates can be very far off from the true value when the sample sizes are small.  A real-world example of this was seen in the 2017 special election for the US Senate in Georgia, which pitted the Republican Roy Moore against Democrat Doug Jones.  Figure \@ref(fig:ElectionResults) shows the relative amount of the vote reported for each of the candidates over the course of the evening, as an increasing number of ballots were counted. Early in the evening the vote counts were especially volatile, swinging from a large initial lead for Jones to a long period where Moore had the lead, until finally Jones took the lead to win the race.  
+Figure \@ref(fig:FlipSim) shows that as the number of samples (i.e., coin flip trials) increases, the estimated probability of heads converges onto the true value of 0.5. However, note that the estimates can be very far off from the true value when the sample sizes are small.  A real-world example of this was seen in the 2017 special election for the US Senate in Georgia, which pitted the Republican Roy Moore against Democrat Doug Jones.  Figure \@ref(fig:ElectionResults) shows the relative amount of the vote reported for each of the candidates over the course of the evening, as an increasing number of ballots were counted. Early in the evening the vote counts were especially volatile, swinging from a large initial lead for Jones to a long period where Moore had the lead, until finally Jones took the lead to win the race.  
 
 ```{r ElectionResults, fig.cap='Relative proportion of the vote in the Dec 12, 2017 special election for the US Senate seat in Georgia, as a function of the percentage of precincts reporting. These data were transcribed from https://www.ajc.com/news/national/alabama-senate-race-live-updates-roy-moore-doug-jones/KPRfkdaweoiXICW3FHjXqI/'}
-electionReturns=read.table('data/03/alabama_election_returns.csv',sep=',',
-                           col.names=c('pctResp','Jones','Moore'),header=TRUE) %>%
-  gather(candidate,pctVotes,-pctResp)
 
-ggplot(electionReturns,aes(pctResp,pctVotes,color=candidate)) +
-  geom_line(size=1) +
-  scale_color_manual(values=c( "#9999CC","#CC6666")) +
-  xlab('Percentage of precincts reporting') +
-  ylab('Percentage of votes')
+electionReturns <- 
+  read_csv(
+    "data/03/alabama_election_returns.csv"
+  ) %>%
+  gather(candidate, pctVotes, -pctResp)
 
+electionReturns %>% 
+  ggplot(aes(pctResp, pctVotes, color = candidate)) +
+  geom_line(size = 1) +
+  scale_color_manual(values = c("#9999CC", "#CC6666")) +
+  labs(
+    x = "Percentage of precincts reporting",
+    y = "Percentage of votes"
+  )
 ```
 
 These two examples show that while large samples will ultimately converge on the true probability, the results with small samples can be far off.  Unfortunately, many people forget this and overinterpret results from small samples.  This was referred to as the *law of small numbers* by the psychologists Danny Kahneman and Amos Tversky, who showed that people (even trained researchers) often behave as if the law of large numbers applies even to small samples, giving too much credence to results from small datasets.  We will see examples throughout the course of just how unstable statistical results can be when they are generated on the basis of small samples.
@@ -101,7 +119,7 @@ These two examples show that while large samples will ultimately converge on the
 
 It's unlikely that any of us has ever flipped a coin tens of thousands of times, but we are nonetheless willing to believe that the probability of flipping heads is 0.5.  This reflects the use of yet another approach to computing probabilities, which we refer to as *classical probability*.  In this approach, we compute the probability directly based on our knowledge of the situation.  
 
-Classical probability arose from the study of games of chance such as dice and cards.  A famous example arose from a problem encountered by an  French gambler who went by the name of Chevalier de Méré.  de Méré played two different dice games: In the first he bet on the chance of at least one six on four rolls of a six-sided die, while in the second he bet on the chance of at least one double-six on 24 rolls of two dice.  He expected to win money on both of these gambles, but he found that while he won money on the first gamble, he actually lost money when he played the second gamble. To understand this he turned to his friend, the mathematician Blaise Pascal, who is now recognized as one of the founders of probability theory. 
+Classical probability arose from the study of games of chance such as dice and cards.  A famous example arose from a problem encountered by a  French gambler who went by the name of Chevalier de Méré.  de Méré played two different dice games: In the first he bet on the chance of at least one six on four rolls of a six-sided die, while in the second he bet on the chance of at least one double-six on 24 rolls of two dice.  He expected to win money on both of these gambles, but he found that while he won money on the first gamble, he actually lost money when he played the second gamble. To understand this he turned to his friend, the mathematician Blaise Pascal, who is now recognized as one of the founders of probability theory. 
 
 How can we understand this question using probability theory?  In classical probability, we start with the assumption that all of the elementary events in the sample space are equally likely; that is, when you roll a die, all of the possible outcomes ({1,2,3,4,5,6}) are equally likely to occur.  (No loaded dice allowed!)  Given this, we can compute the probability of any individual outcome as:
 
@@ -127,7 +145,7 @@ $$
 
 where $\bar{A}$ means "not A". This rule derives directly from the axioms that we discussed above; since A and $\bar{A}$ are the only possible outcomes, then their total probability must sum to 1.  For example, if the probability of rolling a one in a single throw is $\frac{1}{6}$, then the probability of rolling anything other than a one is $\frac{5}{6}$.
 
-A second rule tells us how to compute the probability of a conjoint event -- that is, of both of two events occurring. This special version of the rule tells us how to compute this quantity in the special case when the two events are independent from one another; we will learn later exactly what the concept of *independence* means, but for now we can just take it for granted that the two die throws are independent events.
+A second rule tells us how to compute the probability of a conjoint event -- that is, of both of two events occurring. This  version of the rule tells us how to compute this quantity in the special case when the two events are independent from one another; we will learn later exactly what the concept of *independence* means, but for now we can just take it for granted that the two die throws are independent events.
 
 $$
 P(A \cap B) = P(A) * P(B)\ iff\ A\ and\ B\ are\ independent
@@ -148,25 +166,48 @@ $$
 
 Let's use a graphical depiction to get a different view of this rule.  
 
-```{r ThrowMatrix, fig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second row. Cells shown in light blue represent the cells with a one in either the first or second throw; the rest are shown in dark blue.'}
-imgmtx <- matrix(0, nrow=6, ncol=6)
-imgmtx[,1]=1
-imgmtx[1,]=1
-g=ggplot(melt(imgmtx), aes(Var1,Var2, fill=value)) + 
-  geom_raster(interpolate=FALSE)
-for (i in seq(0.5,6.5)) {
-  g=g+geom_hline(yintercept=i,color='white')
-  g=g+geom_vline(xintercept=i,color='white')
-  for (j in seq(0.5,6.5)) {
-    g=g+annotate("text", x = i+0.5, y = j+0.5, label = sprintf('%d,%d',i+0.5,j+0.5),color='white')
+```{r ThrowMatrix, fig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second throw. Cells shown in light blue represent the cells with a one in either the first or second throw; the rest are shown in dark blue.'}
+imgmtx <-
+  matrix(0, nrow = 6, ncol = 6) 
+
+imgmtx[, 1] <- 1
+imgmtx[1, ] <- 1
+
+plot <- 
+  imgmtx %>% 
+  melt() %>% 
+  ggplot(aes(Var1, Var2, fill = value)) +
+  geom_raster(interpolate = FALSE)
+
+for (i in seq(0.5, 6.5)) {
+  plot <- 
+    plot + geom_hline(yintercept = i, color = "white")
+  plot <- 
+    plot + geom_vline(xintercept = i, color = "white")
+  for (j in seq(0.5, 6.5)) {
+    plot <- 
+      plot + annotate(
+        "text", 
+        x = i + 0.5, y = j + 0.5, 
+        label = sprintf("%d,%d", i + 0.5, j + 0.5), 
+        color = "white")
   }
 }
-g=g+theme(axis.line=element_blank(),axis.text.x=element_blank(),
-          axis.text.y=element_blank(),axis.ticks=element_blank(),
-          legend.position="none",
-) 
-g=g+xlab('Throw 1') + ylab('Throw 2')
-g
+
+plot +
+  theme_minimal() +
+  theme(
+    axis.line = element_blank(), 
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(), 
+    axis.ticks = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(
+    x = "Throw 1",
+    y = "Throw 2"
+  )
+
 ```
 
 Figure \@ref(fig:ThrowMatrix) shows a matrix representing all possible throws, and highlights the cells that involve a one on either the first or second throw. If you count up the cells in light blue you will see that there are 11 such cells. This shows why the addition rule gives a different answer from de Méré's; if we were to simply add together the probabilities for the two throws as he did, then we would count (1,1) towards both, when it should really only be counted once.
@@ -179,15 +220,15 @@ $$
 P(no\ sixes\ in\ four\ rolls) = \frac{5}{6}*\frac{5}{6}*\frac{5}{6}*\frac{5}{6}=\bigg(\frac{5}{6}\bigg)^4=0.482
 $$
 
-He then used the fact that the complement of no sixes in at four rolls is the complement of at least one six in four rolls, and used the rule of subtraction to compute the probability of interest:
+He then used the fact that the complement of no sixes in four rolls is the complement of at least one six in four rolls, and used the rule of subtraction to compute the probability of interest:
 
 $$
 P(at\ least\ one\ six\ in\ four\ rolls) = 1 - \bigg(\frac{5}{6}\bigg)^4=0.517
 $$
 
-This gamble has a probability of greater than 0.5, explaning why de Méré made money on this bet on average. 
+de Méré's gamble that he would throw at least one six in four rolls has a probability of greater than 0.5, explaning why de Méré made money on this bet on average. 
 
-What about the second bet?  Pascal used the same trick:
+But what about de Méré's second bet?  Pascal used the same trick:
 
 $$
 P(no\ double\ six\ in\ 24\ rolls) = \bigg(\frac{35}{36}\bigg)^{24}=0.509
@@ -200,13 +241,13 @@ The probability of this outcome was slightly below 0.5, showing why de Méré lo
 
 ## Probability distributions
 
-We often want to be able to quantify the probability of any possible value in an experiment.  For example, on Jan 20 2018, the basketball player Steph Curry hit only 2 out of 4 free throws in a game against the Houston Rockets. We know that Curry's overall probability of hitting free throws across the entire season was 0.91, so it seems pretty unlikely that he would hit only 50% of his free throws in a game, but exactly how unlikely is it?  We can determine this using a theoretical probability distribution; during this course we will encounter a number of these probability distributions, each of which is appropriate to describe different types of data.  In this case, we use the binomial distribution, which provides a way to compute the probability of some number of successes out of a number of Bernoulli trials (i.e. trials on which there is either success or failure) given some known probability of success on each trial.  This distribution is defined as:
+We often want to be able to quantify the probability of any possible value in an experiment.  For example, on Jan 20 2018, the basketball player Steph Curry hit only 2 out of 4 free throws in a game against the Houston Rockets. We know that Curry's overall probability of hitting free throws across the entire season was 0.91, so it seems pretty unlikely that he would hit only 50% of his free throws in a game, but exactly how unlikely is it?  We can determine this using a theoretical probability distribution; during this course we will encounter a number of these probability distributions, each of which is appropriate to describe different types of data.  In this case, we use the binomial distribution, which provides a way to compute the probability of some number of successes out of a number of "Bernoulli trials" (i.e. trials on which there is either success or failure and nothing in between) given some known probability of success on each trial.  This distribution is defined as:
 
 $$
 P(k; n,p) = P(X=k) = \binom{n}{k} p^k(1-p)^{n-k}
 $$
 
-This refers to the probability of k successes on n trials when the probability of success is p.  You may not be familiar with $\binom{n}{k}$, which is referred to as the *binomial coefficient* or "n-choose-k" because it describes the number of different ways that one can choose k items out of n total items.  The binomial coefficient is computed as:
+This refers to the probability of k successes on n trials when the probability of success is p.  You may not be familiar with $\binom{n}{k}$, which is referred to as the *binomial coefficient*. The binomial coefficient is also referred to as "n-choose-k" because it describes the number of different ways that one can choose k items out of n total items.  The binomial coefficient is computed as:
 
 $$
 \binom{n}{k} = \frac{n!}{k!(n-k)!}
@@ -239,11 +280,16 @@ $$
 In many cases the number of possible outcomes would be too large for us to compute the cumulative probability by enumerating all possible values; fortunately, it can be computed directly. For the binomial, we can do this in R using the `pbinom()` function:
 
 ```{r}
-pFreeThrows=dbinom(seq(0,4),4,0.91)
-cumulative_dist = data.frame(numSuccesses=seq(0,4)) %>%
-          mutate(probability=pbinom(numSuccesses,4,0.91))
-pander(cumulative_dist)
+pFreeThrows <- 
+  dbinom(seq(0, 4), 4, 0.91)
 
+tibble(
+  numSuccesses = seq(0, 4)
+) %>%
+  mutate(
+    probability = pbinom(numSuccesses, size = 4, prob = 0.91)
+  ) %>% 
+  pander()
 ```
 
 From this we can see that the probability of Curry landing 2 or fewer free throws out of 4 attempts is 0.043.
@@ -252,7 +298,7 @@ From this we can see that the probability of Curry landing 2 or fewer free throw
 
 So far we have limited ourselves to simple probabilities - that is, the probability of a single event.  However, we often wish to determine the probability of some event given that some other event has occurred, which are known as *conditional probabilities*.    
 
-Let's take the 2016 US Presidential election as an example.  There are two simple probabilities that we could use to describe the electorate. First, we know  the probability that a voter in the US affiliated with the Republican party: $p(Republican) = 0.44$.  We also know that probability that a voter cast their vote in favor of Donald Trump: $p(Trump voter)=0.46$.  However, let's say that we want to know the following: What is the probability that a person cast their vote for Donald Trump, *given that they are a Republican*?  
+Let's take the 2016 US Presidential election as an example.  There are two simple probabilities that we could use to describe the electorate. First, we know  the probability that a voter in the US affiliated with the Republican party: $p(Republican) = 0.44$.  We also know the probability that a voter cast their vote in favor of Donald Trump: $p(Trump voter)=0.46$.  However, let's say that we want to know the following: What is the probability that a person cast their vote for Donald Trump, *given that they are a Republican*?  
 
 To compute the conditional probability of A given B (which we write as $P(A|B)$, "probability of A, given B"), we need to know the *joint probability* (that is, the probability A and B) as well as the overall probability of B:
 
@@ -262,7 +308,7 @@ $$
 
 That is, we want to know the probability that both things are true, given that the one being conditioned upon is true.  
 
-It can be useful think of this is graphically. Figure \@ref(fig:conditionalProbability)) shows a flow chart depicting how the full population of voters breaks down into Republicans and Democrats, and how the conditional probability (conditioning on party) further breaks down the members of each party according to their vote.
+It can be useful to think of this is graphically. Figure \@ref(fig:conditionalProbability)) shows a flow chart depicting how the full population of voters breaks down into Republicans and Democrats, and how the conditional probability (conditioning on party) further breaks down the members of each party according to their vote.
 
 ```{r conditionalProbability,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data."}
 knitr::include_graphics("images/conditional_probability.png")
@@ -273,48 +319,66 @@ knitr::include_graphics("images/conditional_probability.png")
 
 For many examples in this course we will use data obtained from the National Health and Nutrition Examination Survey (NHANES).  NHANES is a large ongoing study organized by the US Centers for Disease Control that is designed to provide an overall picture of the health and nutritional status of both adults and children in the US.  Every year, the survey examines a sample of about 5000 people across the US using both interviews and physical and medical tests.  The NHANES data is included as a package in R, making it easy to access and work with.  It also provides us with a large, realistic dataset that will serve as an example for many different statistical tools.
 
-Let's say that we are interested in the following question: What is the probability that someone is has diabetes, given that they are not physically active; that is, $P(diabetes|inactive)$. NHANES records two variables that address the two parts of this question.  The first (```Diabetes```) asks whether the person has ever been told that they have diabetes, and the second (```PhysActive```) records whether the engages in sports, fitness, or recreational activities that are at least of moderate intensity.  Let's first compute the simple probabilities.
+Let's say that we are interested in the following question: What is the probability that someone has diabetes, given that they are not physically active?; that is, $P(diabetes|inactive)$. NHANES records two variables that address the two parts of this question.  The first (```Diabetes```) asks whether the person has ever been told that they have diabetes, and the second (```PhysActive```) records whether the person engages in sports, fitness, or recreational activities that are at least of moderate intensity.  Let's first compute the simple probabilities.
 
 ```{r}
 # load the NHANES data library
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES_diabetes_activity <- 
+  NHANES %>% 
+  distinct(ID, .keep_all = TRUE) %>% 
+  drop_na(PhysActive, Diabetes)
 
-NHANES_diabetes_activity = NHANES %>% 
-  drop_na(PhysActive,Diabetes) 
+NHANES_diabetes_activity %>%
+  count(Diabetes) %>% 
+  mutate(
+    prob = n / sum(n)
+  ) %>% 
+  pander()
 
-NHANES_diabetes_stats = NHANES_diabetes_activity %>%
-  group_by(Diabetes) %>%
-  summarize(prob=n()/length(NHANES_diabetes_activity$Diabetes))
-pander(NHANES_diabetes_stats)
-
-NHANES_activity_stats = NHANES_diabetes_activity %>%
-  group_by(PhysActive) %>%
-  summarize(prob=n()/length(NHANES_diabetes_activity$PhysActive))
-pander(NHANES_activity_stats)
-
-
+NHANES_diabetes_activity %>%
+  count(PhysActive) %>%
+  mutate(
+    prob = n / sum(n)
+  ) %>% 
+  pander()
 ```
 
 This shows that the probability that someone in the NHANES dataset has diabetes is .101, and the probability that someone is inactive is .454.  
+
 To compute  $P(diabetes|inactive)$ we would also need to know the joint probability of being diabetic *and* inactive, in addition to the simple probabilities of each:
 
 ```{r}
-NHANES_diabetes_stats_by_activity = NHANES_diabetes_activity %>%
-  group_by(Diabetes,PhysActive) %>%
-  summarize(prob=n()/length(NHANES_diabetes_activity$PhysActive))
-pander(NHANES_diabetes_stats_by_activity)
+NHANES_diabetes_stats_by_activity <- 
+  NHANES_diabetes_activity %>% 
+  count(Diabetes, PhysActive) %>% 
+  mutate(
+    prob = n / sum(n)
+  ) 
 
+pander(NHANES_diabetes_stats_by_activity)
 ```
 
 Based on these joint probabilities, we can compute $P(diabetes|inactive)$:
 
 ```{r}
-P_inactive = mean(NHANES_diabetes_activity$PhysActive=='No')
-P_diabetes_and_inactive = NHANES_diabetes_stats_by_activity[3,3]
-P_diabetes_given_inactive = P_diabetes_and_inactive/P_inactive
+P_inactive <- 
+  NHANES_diabetes_activity %>% 
+  summarise(
+    mean(PhysActive == "No")
+  ) %>% 
+  pull()
+
+P_diabetes_and_inactive <-
+  NHANES_diabetes_stats_by_activity %>% 
+  filter(Diabetes == "Yes", PhysActive == "No") %>% 
+  pull(prob)
+
+P_diabetes_given_inactive <-
+  P_diabetes_and_inactive / P_inactive
+
 P_diabetes_given_inactive
 ```
 
@@ -334,17 +398,26 @@ That is, the probability of A given some value of B is just the same as the over
 Let's look at another example, using the NHANES data: Are physical health and mental health independent of one another?  NHANES includes two relevant questions: *PhysActive*, which asks whether the individual is physically active, and *DaysMentHlthBad*, which asks how many days out of the last 30 that the individual experienced bad mental health.  We will define a new variable called badMentalHealth as having more than 7 days in the last month of bad mental health, and then determine whether they are independent by asking whether the simple probability of bad mental health is different from the conditional probability of bad mental health given that one is physically active.
 
 ```{r}
-NHANES_adult=NHANES %>%
-  subset(subset=Age>=18 & !is.na(PhysActive) & !is.na(DaysMentHlthBad))
-NHANES_adult = NHANES_adult %>% 
-  mutate(badMentalHealth=DaysMentHlthBad>7)
-NHANES_MentalHealth_summary=NHANES_adult %>% 
-  summarize(badMentalHealth=mean(badMentalHealth))
+NHANES_adult <- 
+  NHANES %>%
+  filter(
+    Age >= 18,
+    !is.na(PhysActive),
+    !is.na(DaysMentHlthBad)
+  ) %>% 
+  mutate(badMentalHealth = DaysMentHlthBad > 7)
+
+NHANES_MentalHealth_summary <-
+  NHANES_adult %>%
+  summarize(badMentalHealth = mean(badMentalHealth))
+
 pander(NHANES_MentalHealth_summary)
 
-NHANES_MentalHealth_by_PhysActive =NHANES_adult %>% 
-  group_by(PhysActive) %>% 
-  summarize(badMentalHealth=mean(badMentalHealth))
+NHANES_MentalHealth_by_PhysActive <-
+  NHANES_adult %>%
+  group_by(PhysActive) %>%
+  summarize(badMentalHealth = mean(badMentalHealth)) 
+
 pander(NHANES_MentalHealth_by_PhysActive)
 ```
 
@@ -352,7 +425,7 @@ From this we see that $P(bad\ mental\ health)$ is `r I(NHANES_MentalHealth_summa
 
 ## Reversing a conditional probability: Bayes' rule
 
-In many cases, we know $P(A|B)$ but we really want to know $P(B|A)$. This commonly occurs in medical screening, where we know $P(positive\ test\ result|disease)$ but what we want to know is $P(disease|positive\ test\ result)$.  For example, some doctors recommend that men over the age of 50 undergo screening using a test called prostate specific antigen (PSA) to screen for possible prostate cancer.  Before a test is approved for use in medical practice, we need to know two things about it. First, we need to know how *sensitive* it is -- that is, how likely is it to find the disease when it is present: $sensitivity = P(positive\ test| disease)$.  We also need to know how *specific* it is: what is, how likely is it to give a negative result when there is no disease present: $specificity = P(negative\ test|no\ disease)$.  For the PSA test, we know that sensitivity is about 80% and specificity is about 70%.  However, these don't answer the question that the physician wants to answer for any particular patient: what is the likelihood that they actually have cancer, given that the test is positive? This requires that we reverse the conditional probability that defines sensitivity: instead of  $P(positive\ test| disease)$ we want to know $P(disease|positive\ test)$. 
+In many cases, we know $P(A|B)$ but we really want to know $P(B|A)$. This commonly occurs in medical screening, where we know $P(positive\ test\ result|disease)$ but what we want to know is $P(disease|positive\ test\ result)$.  For example, some doctors recommend that men over the age of 50 undergo screening using a test called prostate specific antigen (PSA) to screen for possible prostate cancer.  Before a test is approved for use in medical practice, we need to know two things about it. First, we need to know how *sensitive* it is -- that is, how likely is it to find the disease when it is present: $sensitivity = P(positive\ test| disease)$.  We also need to know how *specific* it is: that is, how likely is it to give a negative result when there is no disease present: $specificity = P(negative\ test|no\ disease)$.  For the PSA test, we know that sensitivity is about 80% and specificity is about 70%.  However, these don't answer the question that the physician wants to answer for any particular patient: what is the likelihood that they actually have cancer, given that the test is positive? This requires that we reverse the conditional probability that defines sensitivity: instead of  $P(positive\ test| disease)$ we want to know $P(disease|positive\ test)$. 
 
 In order to reverse a conditional probability, we can use *Bayes' rule*:
 
