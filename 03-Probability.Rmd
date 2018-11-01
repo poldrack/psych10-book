@@ -264,7 +264,7 @@ That is, we want to know the probability that both things are true, given that t
 
 It can be useful think of this is graphically. Figure \@ref(fig:conditionalProbability)) shows a flow chart depicting how the full population of voters breaks down into Republicans and Democrats, and how the conditional probability (conditioning on party) further breaks down the members of each party according to their vote.
 
-```{r conditionalProbability,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data."}
+```{r conditionalProbability,echo=FALSE,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data."}
 knitr::include_graphics("images/conditional_probability.png")
 
 ```
@@ -461,8 +461,8 @@ It might strike you that it is a bit odd to talk about the odds of a person havi
 
 The other interpretation of probablities (known as the "Bayesian" interpretation) is as a degree of belief in a particular proposition. If were to ask you "How likely is it that the US will return to the moon by 2026", you can provide an answer to this question based on your knowledge and beliefs, even though there are no relevant frequencies to compute a frequentist probability.  One way that we often frame subjective probabilities is in terms of one's willingness to accept a particular gamble.  For example, if you think that the probability of the US landing on the moon by 2026 is 0.1 (i.e. odds of 9 to 1), then that means that you should be willing to accept a gamble that would pay off with anything more than 9 to 1 odds if the event occurs.  
 
-As we will see these two different definitions of probability are very relevant to the two different ways that statisticians think about testing statistical hypotheses, which we will encounter in later chapters.
+As we will see, these two different definitions of probability are very relevant to the two different ways that statisticians think about testing statistical hypotheses, which we will encounter in later chapters.
 
 ## Suggested readings
 
-
+- *The Drunkard's Walk: How Randomness Rules Our Lives*, by Leonard Mlodinow

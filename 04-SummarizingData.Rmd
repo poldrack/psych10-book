@@ -420,3 +420,7 @@ often paraphrased as "the rich get richer".  In these situations, advantages com
 # ADD HERE?
 ```
 
+## Suggested readings
+
+- *The Black Swan: The Impact of the Highly Improbable*, by Nassim Nicholas Taleb
+

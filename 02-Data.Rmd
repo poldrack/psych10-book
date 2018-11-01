@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 # Working with data
 
@@ -16,10 +16,17 @@ Data are composed of *variables*, where a variable reflects a unique measurement
 More commonly in statistics we will work with *quantitative* data, meaning data that are numerical.  For example, here Table \@ref(tab:WhyTakingClass) showing the results from another question that I ask in my introductory class, which is "Why are you taking this class?"
 
 ```{r WhyTakingClass,echo=FALSE}
+classData=data.frame(why=c("It fulfills a degree plan requirement",
+                           "It fulfills a General Education Breadth Requirement",
+                           "It is not required but I am interested in the topic",
+                           "Other"),
+                     nResponses=c(105,32,11,4))
 
+ 
 knitr::kable(
-  head(mtcars[, 1:8], 10), booktabs = TRUE,
-  caption = 'REPLACE WITH CORRECT TABLE.'
+  classData, booktabs = TRUE,
+  caption = 'Counts of the prevalence of different responses to the question "Why are you taking this class?"',
+  col.names=c('Why are you taking this class?',"Number of students")
 )
 ```
 
@@ -86,14 +93,21 @@ There are four different scales of measurement that go along with these differen
 
 There are two important reasons that we just pay attention to the scale of measurement of a variable.  First, it determines what kind of mathematical operations we can apply to the data (see Table \@ref(tab:MeasurementTypes)).  A nominal variable can only be compared for equality; that is, do two observations on that variable have the same value?  It would not make sense to apply other mathematical operations to a nominal variable, since they don't really function as numbers in a nominal variable, but rather as labels.  With ordinal variables, we can also test whether one value is greater or lesser than another, but we can't do any arithmetic.  Interval and ratio variables allow us to perform arithmetic; with interval variables we can only add or subtract values, whereas with ratio variables we can also multiply and divide values.  
 
-Table: (\#tab:MeasurementTypes) Different scales of measurement admit different types of numeric operations
-|          | equal/not equal | Greater than/less than | Add/subtract | Multiply/divide |
-|----------|-----------------|------------------------|--------------|-----------------|
-| Nominal  | OK              |                        |              |                 |
-| Ordinal  | OK              | OK                     |              |                 |
-| Interval | OK              | OK                     | OK           |                 |
-| Ratio    | OK              | OK                     | OK           | OK              |
+```{r}
 
+measTypes=data.frame(equal=c('OK','OK','OK','OK'),
+                     gtlt=c('','OK','OK','OK'),
+                     addsub=c('','','OK','OK'),
+                     multdiv=c('','','','OK'),
+                     row.names=c('Nominal','Ordinal','Interval','Ratio'))
+knitr::kable(
+  measTypes, booktabs = TRUE,
+  caption = 'Different scales of measurement admit different types of numeric operations',
+  col.names=c("Equal/not equal","Greater than/less than", "Add/subtract", "Multiply/divide")
+)
+
+
+```
 
 These constraints also imply that there are certain kinds of statistics that we can compute on each type of variable.  Statistics that simply involve counting of different values (such as the most comnon value, known as the *mode*), can be calculated on any of the variable types.  Other statistics are based on ordering or ranking of values (such as the *median*, which is the middle value when all of the values are ordered by their magnitude), and these require that the value at least be on an ordinal scale.  Finally, statistics that involve adding up values (such as the average, or *mean*), require that the variables be at least on an interval scale.
 
