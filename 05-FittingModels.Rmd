@@ -285,8 +285,8 @@ Let's use an example to show this.  Rather than using real data, we will generat
 
 ```{r, BACrt,fig.cap="Simulated relationship between blood alcohol content and reaction time on a driving test."}
 dataDf <-  
-  tibble(BAC = runif(100) * 0.3) %>% 
-  mutate(
+  tibble(
+    BAC = runif(100) * 0.3,
     ReactionTime = BAC * 1 + 1 + rnorm(100) * 0.01
   )
 
@@ -302,8 +302,8 @@ We could also imagine data that show the same linear relationship, but have much
 
 ```{r BACrt2,fig.cap="Simulated relationship between BAC and reaction time, with greater noise."}
 dataDf <-  
-  tibble(BAC = runif(100) * 0.3) %>% 
-  mutate(
+  tibble(
+    BAC = runif(100) * 0.3,
     ReactionTime = BAC * 2 + 1 + rnorm(100) * 0.2
   )
 
