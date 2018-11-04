@@ -259,8 +259,12 @@ There is an increasing move in psychology towards open sharing of code and data;
 he ability to reproduce analyses is one reason that we strongly advocate for the use of scripted analyses (such as those using R) rather than using a "point-and-click" software package.  It's also a reason that we advocate the use of free and open-source software (like R) as opposed to commercial software packages, which will require others to buy the software in order to reproduce any analyses. 
  There are many ways to share both code and data.  A common way to share code is via web sites that support *version control* for software, such as [Github](http://github.com).  Small datasets can also be shared via these same sites; larger datasets can be shared through data sharing portals such as [Zenodo](https://zenodo.org/), or through specialized portals for specific types of data (such as [OpenNeuro](http://openneuro.org) for neuroimaging data).#
 
-# Conclusion: Doing better science
+## Conclusion: Doing better science
 
 
 It is every scientist's responsibility to improve their research practices in order to increase the reproducibility of their research.  It is essential to remember that the goal of research is not to find a significant result; rather, it is to ask and answer questions about nature in the most truthful way possible.  Most of our hypotheses will be wrong, and we should be comfortable with that, so that when we find one that's right, we will be even more confident in its truth.
+
+## Suggested Readings
+
+- [Rigor Mortis: How Sloppy Science Creates Worthless Cures, Crushes Hope, and Wastes Billions, by Richard Harris](https://www.amazon.com/dp/B01K3WN72C)
 

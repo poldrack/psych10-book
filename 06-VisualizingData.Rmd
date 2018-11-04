@@ -327,7 +327,4 @@ ggplot(gasPriceData,aes(year,gasPrice)) +
 
 ## Suggested readings
 
-* Tufte books
-* Cleveland books
-* others? kosslyn?
-
+- *Visual Explanations*, by Edward Tufte

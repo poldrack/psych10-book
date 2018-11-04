@@ -59,10 +59,10 @@ In R, there is a function to generate random numbers for each of the major proba
 Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function, which maps cumulative probabilities into values.  Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of interest via its quantile function.
 
 ```{r rngExamples, fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution."}
-p1=ggplot(data.frame(x=runif(10000)),aes(x)) +
+p1 <- ggplot(data.frame(x=runif(10000)),aes(x)) +
   geom_histogram(bins=100)  + ggtitle('Uniform')
 
-p2=ggplot(data.frame(x=rnorm(10000)),aes(x)) +
+p2 <- ggplot(data.frame(x=rnorm(10000)),aes(x)) +
   geom_histogram(bins=100) + ggtitle('Normal')
 
 
@@ -89,7 +89,7 @@ add.blank.lines(pander(rnorm(5)))
 Let's go back to our example of exam finishing times. Let's say that I administer three exams and record the finishing times, which might look like the distributions presented in Figure \@ref(fig:finishingTimes).
 
 ```{r finishingTimes, fig.cap="Simulated finishing time distributions."}
-finishTimeDf=data.frame(finishTime=rnorm(3*150,mean=5,sd=1),
+finishTimeDf <- tibble(finishTime=rnorm(3*150,mean=5,sd=1),
                         quiz=kronecker(c(1:3),rep(1,150)))
 
 ggplot(finishTimeDf,aes(finishTime)) + 
@@ -102,20 +102,20 @@ ggplot(finishTimeDf,aes(finishTime)) +
 However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate a large number of quizzes (using the assumption that the finishing times are distributed normally, as stated above), and each time we can record the longest finishing time.  To do this, we create a new function in R called `sampleMax()` which takes a sample of the appropriate size (i.e. the number of students in the class) from the appropriate distribution, and returns the maximum value in the sample.  We then repeat this a large number of times (5000 should be enough) using the `replicate()` function, which will store all of the outputs into a single variable.  The distribution of finishing times is shown in Figure \@ref(fig:finishTimeSim).
 
 ```{r finishTimeSim,fig.cap="Distribution of maximum finishing times across simulations."}
-nRuns=5000
-sampSize=150
+nRuns <- 5000
+sampSize <- 150
 
-sampleMax = function(sampSize=150){
-  samp=rnorm(sampSize,mean=5,sd=1)
+sampleMax <- function(sampSize=150){
+  samp <- rnorm(sampSize,mean=5,sd=1)
   return(max(samp))
 }
 
-maxTime=replicate(nRuns,sampleMax())
+maxTime <- replicate(nRuns,sampleMax())
 
 ggplot(data.frame(maxTime),aes(maxTime)) +
   geom_histogram(bins=100)
 
-cutoff=quantile(maxTime,0.99)
+cutoff <- quantile(maxTime,0.99)
 pander(sprintf('99th percentile of maxTime distribution: %.2f\n',cutoff))
 
 
@@ -137,31 +137,32 @@ The idea behind the boostrap is that we repeatedly sample from the actual datase
 Let's start by using the bootstrap to estimate the sampling distribution of the mean, so that we can compare the result to the SEM that we discussed earlier.
 
 ```{r bootstrapSEM,fig.cap="An example of bootstrapping to compute the standard error of the mean. The histogram shows the distribution of means across bootstrap samples, while the red line shows the normal distribution based on the sample mean and standard deviation."}
-nRuns=2500
-sampleSize=32
+nRuns <- 2500
+sampleSize <- 32
 # load the NHANES data library
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES <- NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_adult = NHANES %>%
+NHANES_adult <- NHANES %>%
   drop_na(Height) %>%
   subset(Age>=18)
 
 
-heightSample = NHANES_adult %>%
+heightSample <- NHANES_adult %>%
   sample_n(sampleSize)
 
-bootMeanHeight = function(df){
-  bootSample = sample_n(df,dim(df)[1],replace = TRUE)
+bootMeanHeight <- function(df){
+  bootSample <- sample_n(df,dim(df)[1],replace = TRUE)
   return(mean(bootSample$Height))
 }
-bootMeans = replicate(nRuns,bootMeanHeight(heightSample))
+bootMeans <- replicate(nRuns,bootMeanHeight(heightSample))
 
-SEM_standard = sd(heightSample$Height)/sqrt(sampleSize)
+SEM_standard <- sd(heightSample$Height)/sqrt(sampleSize)
 print(sprintf('SEM computed using sample SD: %f',SEM_standard))
-SEM_bootstrap = sd(bootMeans)
+SEM_bootstrap <- sd(bootMeans)
 print(sprintf('SEM computed using SD of bootstrap estimates: %f',SEM_bootstrap))
 
 ggplot(data.frame(bootMeans=bootMeans),aes(bootMeans)) + 
@@ -173,14 +174,14 @@ ggplot(data.frame(bootMeans=bootMeans),aes(bootMeans)) +
 Figure \@ref(fig:bootstrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the boostrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
 
 ```{r}
-bootCI=quantile(bootMeans,c(0.025,0.975))
+bootCI <- quantile(bootMeans,c(0.025,0.975))
 pander("boostrap confidence limits:")
 pander(bootCI)
 
 #now let's compute the confidence intervals using the sample mean and SD
 sampleMean=mean(heightSample$Height)
 
-normalCI = c("2.5%" = sampleMean - 1.96*SEM_standard,
+normalCI <- c("2.5%" = sampleMean - 1.96*SEM_standard,
           "97.5%"=sampleMean + 1.96*SEM_standard) 
 
 pander("confidence limits based on sample SD and normal distribution:")
@@ -189,4 +190,6 @@ pander(normalCI)
 
 We would usually never employ the bootstrap to compute confidence intervals for the mean (since we can generally assume that the normal distribution is appropriate for the sampling distribution of the mean), but this example shows how the method gives us roughly the same result as the standard method based on the normal distribution.  The bootstrap would more often be used to generate standard errors for estimates of other statistics where we know or suspect that the normal distribution is not appropriate.
 
+## Suggested readings
 
+- *Computer Age Statistical Inference:Algorithms, Evidence and Data Science*, by Bradley Efron and Trevor Hastie

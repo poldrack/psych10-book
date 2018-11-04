@@ -34,9 +34,10 @@ Regardless of how representative our sample is, it's likely that the statistic t
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES <- NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_adult = NHANES %>%
+NHANES_adult <- NHANES %>%
   drop_na(Height) %>%
   subset(Age>=18)
 
@@ -51,7 +52,8 @@ pander(sprintf('Population height: std deviation = %.2f\n',
 In this case we know the population mean and standard deviation. Now let's take a single sample of 50 individuals from the NHANES population, and compare the resulting statistics to the population parameters.
 
 ```{r}
-exampleSample = NHANES_adult %>% sample_n(50)
+exampleSample <- NHANES_adult %>% 
+  sample_n(50)
 pander(sprintf('Sample height: mean = %.2f\n',
                mean(exampleSample$Height)))
 pander(sprintf('Sample height: std deviation = %.2f\n',
@@ -63,23 +65,25 @@ Now let's take a large number of samples of 50 individuals, compute the mean, an
 
 ```{r samplePlot,fig.cap="The blue histogram shows the sampling distribution of the mean over 5000 random samples from the NHANES dataset.  The histogram for the full dataset is shown in gray for reference."}
 
-sampSize=50  # size of sample
-nsamps=5000  # number of samples we will take
+sampSize <- 50  # size of sample
+nsamps <- 5000  # number of samples we will take
 
 # set up variable to store all of the results
 
-sampMeans=array(NA,nsamps)
+sampMeans <- array(NA,nsamps)
 
 # Loop through and repeatedly sample and compute the mean
 for (i in 1:nsamps){
-  NHANES_sample=sample_n(NHANES_adult,sampSize)
-  sampMeans[i]=mean(NHANES_sample$Height)
+  NHANES_sample <- sample_n(NHANES_adult,sampSize)
+  sampMeans[i] <- mean(NHANES_sample$Height)
 }
 
-sampdataDf=data.frame(mean=sampMeans)
+sampdataDf <- tibble(mean=sampMeans)
 
-pander(sprintf('Average sample mean = %.2f\n',mean(sampMeans)))
-sampMeans_df=data.frame(sampMeans=sampMeans)
+pander(sprintf('Average sample mean = %.2f\n',
+               mean(sampMeans)))
+
+sampMeans_df <- tibble(sampMeans=sampMeans)
 
 ggplot(sampMeans_df,aes(sampMeans)) +
   geom_histogram(data=NHANES_adult,aes(Height,..density..),
@@ -122,8 +126,9 @@ The Central Limit Theorem tells us that as sample sizes get larger, the sampling
 We can also see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in Figure  \@ref(fig:alcoholYearDist). 
 
 ```{r alcoholYearDist, fig.cap="Distribution of the variable AlcoholYear in the NHANES dataset, which reflects the number of days that the individual drank in a year."}
-
-ggplot(NHANES %>% drop_na(AlcoholYear),aes(AlcoholYear)) + 
+NHANES_cleanAlc <- NHANES %>% 
+  drop_na(AlcoholYear)
+ggplot(NHANES_cleanAlc,aes(AlcoholYear)) + 
   geom_histogram(binwidth=7)
 
 ```
@@ -132,25 +137,25 @@ This distribution is, for lack of a better word, funky -- and definitely not nor
 
 ```{r, echo=FALSE}
 
-get_sampling_dist = function(sampSize,nsamps=2500) {
+get_sampling_dist <- function(sampSize,nsamps=2500) {
   
-sampMeansFull=array(NA,nsamps)
-NHANES_clean = NHANES %>%
-  drop_na(AlcoholYear)
-
-for (i in 1:nsamps){
-  NHANES_sample=sample_n(NHANES_clean,sampSize)
-  sampMeansFull[i]=mean(NHANES_sample$AlcoholYear)
-
-}
-sampMeansFullDf=data.frame(sampMeans=sampMeansFull)
-
-ggplot(sampMeansFullDf,aes(sampMeans)) +
-  geom_freqpoly(aes(y=..density..),bins=100,col='blue',fill='blue',size=0.75) +
-  stat_function(fun = dnorm, n = 100, 
-                args = list(mean = mean(sampMeansFull), 
-                            sd = sd(sampMeansFull)),size=1.5,color='red') +
-  xlab('mean AlcoholYear') 
+  sampMeansFull <- array(NA,nsamps)
+  NHANES_clean <- NHANES %>%
+    drop_na(AlcoholYear)
+  
+  for (i in 1:nsamps){
+    NHANES_sample <- sample_n(NHANES_clean,sampSize)
+    sampMeansFull[i] <- mean(NHANES_sample$AlcoholYear)
+  
+  }
+  sampMeansFullDf <- data.frame(sampMeans=sampMeansFull)
+  
+  ggplot(sampMeansFullDf,aes(sampMeans)) +
+    geom_freqpoly(aes(y=..density..),bins=100,col='blue',fill='blue',size=0.75) +
+    stat_function(fun = dnorm, n = 100, 
+                  args = list(mean = mean(sampMeansFull), 
+                              sd = sd(sampMeansFull)),size=1.5,color='red') +
+    xlab('mean AlcoholYear') 
 
 }
 
@@ -169,20 +174,20 @@ We saw in the previous section that with sufficient sample size, the sampling di
 
 ```{r echo=FALSE}
 
-dnormfun=function(x){
+dnormfun <- function(x){
   return(dnorm(x,248))
 }
 
 
-plot_CI_cutoffs = function(pct,zmin=-4,zmax=4,zmean=0,zsd=1) {
-  zcut=qnorm(1 - (1-pct)/2,mean=zmean,sd=zsd)
-  zmin=zmin*zsd + zmean
-  zmax=zmax*zsd + zmean
-  x=seq(zmin,zmax,0.1*zsd)
-  zdist=dnorm(x,mean=zmean,sd=zsd)
-  area=pnorm(zcut) - pnorm(-zcut)
+plot_CI_cutoffs <- function(pct,zmin=-4,zmax=4,zmean=0,zsd=1) {
+  zcut <- qnorm(1 - (1-pct)/2,mean=zmean,sd=zsd)
+  zmin <- zmin*zsd + zmean
+  zmax <- zmax*zsd + zmean
+  x <- seq(zmin,zmax,0.1*zsd)
+  zdist <- dnorm(x,mean=zmean,sd=zsd)
+  area <- pnorm(zcut) - pnorm(-zcut)
 
-  p2=ggplot(data.frame(zdist=zdist,x=x),aes(x,zdist)) +
+  p2 <- ggplot(data.frame(zdist=zdist,x=x),aes(x,zdist)) +
     xlab('Z score') + xlim(zmin,zmax) + ylab('density')+
     geom_line(aes(x,zdist),color='red',size=2) +
     stat_function(fun = dnorm, args=list(mean=zmean,sd=zsd),
@@ -211,7 +216,7 @@ plot_CI_cutoffs = function(pct,zmin=-4,zmax=4,zmean=0,zsd=1) {
 ```
 
 ```{r normalCutoffs,fig.cap="Normal distribution, with the orange section in the center denoting the range in which we expect 95% of all values to fall.  The green sections show the portions of the distribution that are more extreme, which we would expect to occur less than 5% of the time."}
-zcut = plot_CI_cutoffs(0.95)
+zcut <- plot_CI_cutoffs(0.95)
 
 ```
 
@@ -224,8 +229,9 @@ $$
 Let's compute the confidence interval for the NHANES height data,
 
 ```{r}
-NHANES_sample=sample_n(NHANES_adult,250)
-  sample_summary = NHANES_sample %>%
+NHANES_sample <- sample_n(NHANES_adult,250)
+
+sample_summary <- NHANES_sample %>%
     summarize(mean=mean(Height),
             sem=sd(Height)/sqrt(sampSize)) %>%
     mutate(CI_upper=mean+1.96*sem,
@@ -237,17 +243,22 @@ pander(sample_summary)
 Confidence intervals are notoriously confusing, primarily because they don't mean what we would hope they mean. It seems natural to think that the 95% confidence interval tells us that there is a 95% chance that the population mean falls within the interval.  However, as we will see throughout the course, concepts in statsitics often don't mean what we think they should mean.  In the case of confidence intervals, we can't interpret them in this way because the population parameter has a fixed value -- it either is or isn't in the interval.  The proper interpretation of the 95% confidence interval is that it is the interval that will capture the true population mean 95% of the time. We can confirm this by resampling the NHANES data repeatedly and counting how often the interval contains the true population mean.
 
 ```{r}
-nsamples=2500
-ci_contains_mean=array(NA,nsamples)
-sampSize=100
+nsamples <- 2500
+ci_contains_mean <- array(NA,nsamples)
+sampSize <- 100
+
 for (i in 1:nsamples){
-  NHANES_sample=sample_n(NHANES_adult,sampSize)
-  sample_summary = NHANES_sample %>%
-    summarize(mean=mean(Height),
-            sem=sd(Height)/sqrt(sampSize)) %>%
-    mutate(CI_upper=mean+1.96*sem,
-          CI_lower=mean-1.96*sem)
-  ci_contains_mean[i]=(sample_summary$CI_upper>mean(NHANES_adult$Height))&(sample_summary$CI_lower<mean(NHANES_adult$Height))
+  NHANES_sample <- sample_n(NHANES_adult,sampSize)
+  sample_summary <- NHANES_sample %>%
+    summarize(
+      mean = mean(Height),
+      sem = sd(Height)/sqrt(sampSize)
+    ) %>%
+    mutate(
+      CI_upper = mean+1.96*sem,
+      CI_lower = mean-1.96*sem
+          )
+  ci_contains_mean[i] <- (sample_summary$CI_upper>mean(NHANES_adult$Height))&(sample_summary$CI_lower<mean(NHANES_adult$Height))
 
 }
 pander(mean(ci_contains_mean))
@@ -255,4 +266,7 @@ pander(mean(ci_contains_mean))
 
 This confirms that the confidence interval does indeed capture the population mean about 95% of the time.
 
+## Suggested readings
+
+- *The Signal and the Noise: Why So Many Predictions Fail - But Some Don't*, by Nate Silver
 
