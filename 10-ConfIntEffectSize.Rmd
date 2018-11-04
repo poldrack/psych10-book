@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 # Confidence intervals, effect sizes, and statistical power
 
@@ -26,9 +26,12 @@ panderOptions('digits',7)
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES <-
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_adult = NHANES %>%
+NHANES_adult <- 
+  NHANES %>%
   drop_na(Weight) %>%
   subset(Age>=18)
 
@@ -42,10 +45,13 @@ So far in the book we have focused on estimating the specific value of a statist
 sampSize=250
 NHANES_sample=sample_n(NHANES_adult,sampSize)
 
-sample_summary = NHANES_sample %>%
-  summarize(meanWeight=mean(Weight),
-            sdWeight=sd(Weight))
-pander(sampleSummary)
+sample_summary <- 
+  NHANES_sample %>%
+  summarize(
+    meanWeight=mean(Weight),
+    sdWeight=sd(Weight)
+  )
+pander(sample_summary)
 ```
 
 In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe the difference.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly from the data of the entire population.
@@ -87,11 +93,14 @@ where $t_{crit}$ is the critical t value.
 For the NHANES weight example (with sample size of `r I(sampSize)`), the confidence interval would be:
 
 ```{r messages=FALSE}
-sample_summary = sample_summary %>%
-  mutate(cutoff_lower = qt(0.025,sampSize),
-         cutoff_upper = qt(0.975,sampSize),
-        CI_lower = meanWeight + cutoff_lower*sdWeight/sqrt(sampSize),
-         CI_upper = meanWeight + cutoff_upper*sdWeight/sqrt(sampSize))
+sample_summary <- 
+  sample_summary %>%
+  mutate(
+    cutoff_lower = qt(0.025,sampSize),
+    cutoff_upper = qt(0.975,sampSize),
+    CI_lower = meanWeight + cutoff_lower*sdWeight/sqrt(sampSize),
+    CI_upper = meanWeight + cutoff_upper*sdWeight/sqrt(sampSize)
+  )
 sample_summary
 ```
 
@@ -103,10 +112,13 @@ Given that the standard error decreases with sample size, that means that the co
 
 
 ```{r CISampSize,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean."}
-ssDf = data.frame(sampSize=2**seq(4,9)) %>%
-  mutate(meanHeight=mean(NHANES_sample$Height),
-         ci.lower = meanHeight + qt(0.025,sampSize)*sd(NHANES_adult$Weight)/sqrt(sampSize),
-         ci.upper = meanHeight + qt(0.975,sampSize)*sd(NHANES_adult$Weight)/sqrt(sampSize))
+ssDf <- 
+  tibble(sampSize=2**seq(4,9)) %>%
+  mutate(
+    meanHeight=mean(NHANES_sample$Height),
+    ci.lower = meanHeight + qt(0.025,sampSize)*sd(NHANES_adult$Weight)/sqrt(sampSize),
+    ci.upper = meanHeight + qt(0.975,sampSize)*sd(NHANES_adult$Weight)/sqrt(sampSize)
+  )
 
 ggplot(ssDf, aes(sampSize, meanHeight)) +
   geom_point(size = 3) +
@@ -120,12 +132,12 @@ In some cases we can't assume normality, or we don't know the sampling distribut
 Earlier we ran the bootstrap using hand-crafted code, but R includes a package called `boot` that we can use to run the bootstrap and compute confidence intervals.  Let's use it to compute the confidence interval for weight in our NHANES sample.
 
 ```{r}
-meanWeight = function(df,foo){
+meanWeight <- function(df,foo){
   return(mean(df[foo,]$Weight))
 }
-bs=boot(NHANES_sample,meanWeight,1000)
+bs <- boot(NHANES_sample,meanWeight,1000)
 # use the percentile bootstrap
-bootci=boot.ci(bs,type='perc')
+bootci <- boot.ci(bs,type='perc')
 print('Bootstrap confidence intervals:')
 bootci$perc[4:5]
 ```
@@ -167,26 +179,31 @@ where $n_1$ and $n_2$ are the sample sizes and $s^2_1$ and $s^2_2$ are the stand
 There is a commonly used scale for interpreting the size of an effect in terms of Cohen's d:
 
 ```{r echo=FALSE}
-dInterp=data.frame("D"=c(0.2,0.5,0.8),
-                   "Interpretation"=c('small','medium','large'))
+dInterp=tibble("D"=c(0.2,0.5,0.8),
+                   "Interpretation"=c('small','medium','large')
+                  )
 pander(dInterp)
 ```
 
 It can be useful to look at some commonly understood effects to help understand these interpretations.  
 
 ```{r}
-NHANES_sample=NHANES_adult %>% 
+NHANES_sample <- 
+  NHANES_adult %>% 
   drop_na(Height) %>%
   sample_n(250)
 
-hsum = NHANES_sample  %>%
+hsum <- 
+  NHANES_sample  %>%
   group_by(Gender) %>%
-  summarize(meanHeight=mean(Height),
-            varHeight=var(Height),
-            n=n())
+  summarize(
+    meanHeight=mean(Height),
+    varHeight=var(Height),
+    n=n()
+  )
 
-s_height_gender = sqrt(((hsum$n[1]-1)*hsum$varHeight[1] +(hsum$n[2]-1)*hsum$varHeight[2])/(hsum$n[1]+hsum$n[2]-2))
-d_height_gender = (hsum$meanHeight[2] - hsum$meanHeight[1])/s_height_gender
+s_height_gender <- sqrt(((hsum$n[1]-1)*hsum$varHeight[1] +(hsum$n[2]-1)*hsum$varHeight[2])/(hsum$n[1]+hsum$n[2]-2))
+d_height_gender <- (hsum$meanHeight[2] - hsum$meanHeight[1])/s_height_gender
 d_height_gender
 ```
 
@@ -194,7 +211,7 @@ The effect size for gender differences in height (d = `r I(d_height_gender)`) is
 
 ```{r genderHist,fig.cap="Smoothed histogram plots for male and female heights in the NHANES dataset, showing clearly distinct distributions."}
 ggplot(NHANES_sample,aes(x=Height,color=Gender)) + 
-  geom_density(bins=40)
+  geom_density()
 ```
 
 It is also worth nothing that we rarely encounter effects of this magnitude in science, in part because they are such obvious effects that we don't need science to find them.  As we will see in the later chapter on reproducibility, huge effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. 
@@ -208,11 +225,13 @@ Pearson's *r*, also known as the *correlation coefficient*, is a measure of the 
 ```{r corrFig,fig.cap="Examples of various levels of Pearson's r."}
 set.seed(123456789)
 p <- list()
-corrvals=c(1,0.5,0,-0.5,-1)
+corrvals <- c(1,0.5,0,-0.5,-1)
+
 for (i in 1:length(corrvals)){
-  simdata=data.frame(mvrnorm(n=50,mu=c(0,0),
-                  Sigma=matrix(c(1,corrvals[i],corrvals[i],1),2,2)))
-  tmp=ggplot(simdata,aes(X1,X2)) + 
+  simdata <- data.frame(mvrnorm(n=50,mu=c(0,0),
+                  Sigma=matrix(c(1,corrvals[i],corrvals[i],1),2,2))
+                )
+  tmp <- ggplot(simdata,aes(X1,X2)) + 
     geom_point(size=0.5) +
     ggtitle(sprintf('r = %.02f',cor(simdata)[1,2]))
   p[[i]] = tmp 
@@ -231,25 +250,28 @@ $$
 The odds ratio is simply the ratio of two odds. For example, let's take the case of smoking and lung cancer.  A study published in the International Journal of Cancer in 2012 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3296911/) combined data regarding the occurrence of lung cancer in smokers and individuals who have never smoked across a number of different studies.  Note that these data come from case-control studies, which means that participants in the studies were recruited because they either did or did not have cancer; their smoking status was then examined. These numbers thus do not represent the prevalence of cancer amongst smokers in the general population -- but they can tell us about the relationship between cancer and smoking.
 
 ```{r}
-smokingDf = data.frame(NeverSmoked=c(2883,220),
-                       CurrentSmoker=c(3829,6784),
-                       row.names=c('NoCancer','Cancer'))
+smokingDf <- tibble(NeverSmoked=c(2883,220),
+                    CurrentSmoker=c(3829,6784),
+                    row.names=c('NoCancer','Cancer'))
 pander(smokingDf)
 ```
 We can convert these numbers to odds ratios for each of the groups:
 
 ```{r}
-smokingDf = smokingDf %>%
-  mutate(pNeverSmoked=NeverSmoked/sum(NeverSmoked),
-         pCurrentSmoker=CurrentSmoker/sum(CurrentSmoker))
-oddsCancerNeverSmoked = smokingDf$NeverSmoked[2]/smokingDf$NeverSmoked[1]
-oddsCancerCurrentSmoker = smokingDf$CurrentSmoker[2]/smokingDf$CurrentSmoker[1]
+smokingDf <- 
+  smokingDf %>%
+  mutate(
+    pNeverSmoked=NeverSmoked/sum(NeverSmoked),
+    pCurrentSmoker=CurrentSmoker/sum(CurrentSmoker)
+  )
+oddsCancerNeverSmoked <- smokingDf$NeverSmoked[2]/smokingDf$NeverSmoked[1]
+oddsCancerCurrentSmoker <- smokingDf$CurrentSmoker[2]/smokingDf$CurrentSmoker[1]
 ```
 
 The odds of someone having lung cancer who has never smoked is `r I(oddsCancerNeverSmoked)` whereas the odds of a current smoker having lung cancer is `r I(oddsCancerCurrentSmoker)`.  The ratio of these odds tells us about the relatively likelihood of cancer between the two groups:
 
 ```{r}
-oddsRatio = oddsCancerCurrentSmoker/oddsCancerNeverSmoked
+oddsRatio <- oddsCancerCurrentSmoker/oddsCancerNeverSmoked
 pander(oddsRatio)
 ```
 
@@ -274,34 +296,38 @@ There are three factors that can affect power:
 - effect size: A given design will always have greater power to find a large effect than a small effect (because finding large effects is easier)
 - Type I error rate: There is a tradeoff between Type I error and power, such that (all else being equal) decreasing Type I error will also decrease power.
 
-We can see this through simulation.  First let's simulate a single experiment, in which we compare the means of two groups using a standard t-test.  We will vary the size of the effect (specified in terms of Cohen's d), the Type I error rate, and the sample size, and for each of these we will examine how the proportion of significant results (i.e. power) is affected. Figure \@ref(fig:powerSim) shows an example of how power changes as a function of these factors.  
+We can see this through simulation.  First let's simulate a single experiment, in which we compare the means of two groups using a standard t-test.  We will vary the size of the effect (specified in terms of Cohen's d), the Type I error rate, and the sample size, and for each of these we will examine how the proportion of significant results (i.e. power) is affected. Figure \@ref(fig:plotPowerSim) shows an example of how power changes as a function of these factors.  
 
 ```{r powerSim}
 
-powerDf = expand.grid(sampSizePerGroup = c(12,24,48,96),
-                     effectSize=c(.2,.5,.8),
-                     alpha=c(0.005,0.05)) %>%
+powerDf <- 
+  expand.grid(sampSizePerGroup = c(12,24,48,96),
+              effectSize=c(.2,.5,.8),
+              alpha=c(0.005,0.05)
+    ) %>%
   tidyr::expand(effectSize,sampSizePerGroup,alpha) %>%
   group_by(effectSize,sampSizePerGroup,alpha)
 
-runPowerSim = function(df,nsims=1000){
-  p=array(NA,dim=nsims)
+runPowerSim <- function(df,nsims=1000){
+  p <- array(NA,dim=nsims)
   for (s in 1:nsims){
-    data=data.frame(y=rnorm(df$sampSizePerGroup*2),
+    data <- data.frame(y=rnorm(df$sampSizePerGroup*2),
                     group=array(0,dim=df$sampSizePerGroup*2))
     
     data$group[1:df$sampSizePerGroup]=1
     data$y[data$group==1]=data$y[data$group==1]+df$effectSize
-    tt=t.test(y~group,data=data)
-    p[s]=tt$p.value
+    tt <- t.test(y~group,data=data)
+    p[s] <- tt$p.value
   }
   return(data.frame(power=mean(p<df$alpha)))
 }
 
-powerSimResults = powerDf %>% do(runPowerSim(.))
+powerSimResults <- powerDf %>% 
+  do(runPowerSim(.))
 
 
 ```
+
 
 ```{r plotPowerSim,fig.cap="Results from power simulation, showing power as a function of sample size, with effect sizes shown as different colors, and alpha shown as line type. The standard criterion of 80% power is shown by the dotted black line."}
 ggplot(powerSimResults,
@@ -327,7 +353,7 @@ pwr.t.test(d=0.5,power=0.8,sig.level=0.05)
 This tells us that we would need about 64 subjects in each group in order to have sufficient power to find a medium-sized effect.  It's always important to run a power analysis before one starts a new study, to make sure that the study won't be futile due to a sample that is too small.
 
 ```{r echo=FALSE}
-p = pwr.t.test(d=3,power=0.8,sig.level=0.05)
+p <- pwr.t.test(d=3,power=0.8,sig.level=0.05)
 ```
 
 It might have occurred to you that if the effect size is large enough, then the necessary sample will be very small.  For example, if we run the same power analysis with an effect size of d=3, then we will see that we only need about 3 subjects in each group to have sufficient power to find the difference.  However, it's rare in science to be doing an experiment where we expect to find such a large effect -- just as we don't need statistics to tell us that 16-year-olds are taller than than 6-year-olds.  When we run a power analysis, we need to specify an effect size that is plausible for our study, which would usually come from previous research.  However, in the final chapter we will discuss a phenomenon known as the "winner's curse" that likely results in published effect sizes being larger than the true effect size, so this should also be kept in mind.  
