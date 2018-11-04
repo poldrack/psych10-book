@@ -204,7 +204,7 @@ Let's say that we want to have a better way to describe the amount of evidence p
 brmFullModel <- brm(BMIChange12Months ~ diet, data = dietDf,
                     save_all_pars = TRUE)
 
-brmReducedMode <- brm(BMIChange12Months ~ 1, data = dietDf,
+brmReducedModel <- brm(BMIChange12Months ~ 1, data = dietDf,
                       save_all_pars = TRUE)
 ```
 
