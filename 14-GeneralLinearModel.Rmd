@@ -21,9 +21,12 @@ set.seed(123456) # set random seed to exactly replicate results
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_adult = NHANES %>%
+NHANES_adult <- 
+  NHANES %>%
   drop_na(Weight) %>%
   subset(Age>=18)
 
@@ -49,14 +52,20 @@ As an example, let's generate some simulated data for the relationship between s
 
 ```{r StudytimeGrades, fig.cap='Relation between study time and grades'}
 set.seed(12345)
-betas=c(6,5)  # the number of points that having a prior class increases grades
-df=data.frame(studyTime=c(2,3,5,6,6,8,10,12)/3,
-              priorClass=c(0,1,1,0,1,0,1,0)) %>%
+
+# the number of points that having a prior class increases grades
+betas <- c(6,5)  
+
+df <- 
+  data.frame(
+    studyTime=c(2,3,5,6,6,8,10,12)/3,
+    priorClass=c(0,1,1,0,1,0,1,0)
+  ) %>%
   mutate(grade=studyTime*betas[1]+priorClass*betas[2] +round(rnorm(8,mean=70,sd=5))) 
 pander(df)
-lmResult=lm(grade~studyTime,data=df)
+lmResult <- lm(grade~studyTime,data=df)
 
-p=ggplot(df,aes(studyTime,grade)) +
+p <- ggplot(df,aes(studyTime,grade)) +
   geom_point(size=3) +
   xlab('Study time (hours)') +
   ylab('Grade (percent)') +
@@ -76,7 +85,7 @@ Given these data, we might want to engage in each of the three fundamental activ
 In the last chapter we learned how to describe the relationship between two variables using the correlation coefficient, so we can use that to describe the relationship here, and to test whether the correlation is statistically significant:
 
 ```{r}
-corTestResult = cor.test(df$grade,df$studyTime,alternative='greater')
+corTestResult <- cor.test(df$grade,df$studyTime,alternative='greater')
 corTestResult
 
 ```
@@ -104,13 +113,13 @@ Figure  \@ref(fig:LinearRegression) shows an example of this model applied to th
 
 ```{r LinearRegression,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much it changes in y for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time."}
 
-p2=p+geom_abline(slope=lmResult$coefficients[2],
+p2 <- p+geom_abline(slope=lmResult$coefficients[2],
                   intercept=lmResult$coefficients[1],
                   color='blue')
 
-lmResult=lm(grade~studyTime,data=df)
+lmResult <- lm(grade~studyTime,data=df)
 
-p3=p2 +
+p3 <- p2 +
   geom_hline(yintercept=lmResult$coefficients[1],color='black',size=0.5,linetype='dotted') +
   annotate('segment',x=2,xend=3,color='red',linetype='dashed',
            y=predict(lmResult,newdata=data.frame(studyTime=2))[1],
@@ -128,19 +137,25 @@ print(p3)
 The concept of *regression to the mean* was one of Galton's essential contributions to science, and it remains a critical point to understand when we interpret the results of experimental data analyses.  Let's say that we want to study the effects of a reading intervention on the performance of poor readers.  To test our hypothesis, we might go into a school and recruit those individuals in the bottom 25% of the distribution on some reading test, administer the intervention, and then examine their performance.  Let's say that the intervention actually has no effect, and that reading scores for each individual are simply samples from a normal distribution.  We can simulate this:
 
 ```{r}
-nstudents=100
-readingScores = data.frame(test1=rnorm(nstudents)*10 + 100,
-                           test2=rnorm(nstudents)*10 + 100)
+nstudents <- 100
+readingScores  <-  data.frame(
+  test1=rnorm(nstudents)*10 + 100,
+  test2=rnorm(nstudents)*10 + 100
+)
 
 # select the students in the bottom 25% on the first test
-cutoff=quantile(readingScores$test1,0.25)
-readingScores = readingScores %>%
+cutoff <- quantile(readingScores$test1,0.25)
+readingScores <- 
+  readingScores %>%
   mutate(badTest1=test1<cutoff)
 
-readingScoresSummary = readingScores %>%
+readingScoresSummary <- 
+  readingScores %>%
   subset(badTest1==TRUE) %>%
-  summarize(test1mean=mean(test1),
-            test2mean=mean(test2))
+  summarize(
+    test1mean=mean(test1),
+    test2mean=mean(test2)
+  )
 pander(readingScoresSummary)
 ```
 
@@ -162,16 +177,18 @@ We can compute this for the study time data; however, before we can compute the 
 
 ```{r}
 df = df %>% 
-  mutate(studyTimeResid=studyTime-mean(df$studyTime),
-         gradeResid=grade-mean(df$grade),
-         crossproduct=studyTimeResid*gradeResid)
+  mutate(
+    studyTimeResid=studyTime-mean(df$studyTime),
+    gradeResid=grade-mean(df$grade),
+    crossproduct=studyTimeResid*gradeResid
+  )
 df %>%
   dplyr::select(studyTime,studyTimeResid,grade,gradeResid,crossproduct)
 ```
 
 Now we can compute the slope:
 ```{r}
-beta_hat = sum(df$crossproduct)/sum(df$studyTimeResid**2)
+beta_hat <- sum(df$crossproduct)/sum(df$studyTimeResid**2)
 beta_hat
 ```
 
@@ -283,7 +300,7 @@ Often we would like to understand the effects of multiple variables on some part
 
 ```{r StudytimeGradesPrior, fig.cap='The relationship between study time and grades, with color identifying whether each student had taken a previous course on the topic'}
 
-p=ggplot(df,aes(studyTime,grade,color=as.factor(priorClass))) +
+p <- ggplot(df,aes(studyTime,grade,color=as.factor(priorClass))) +
   geom_point(size=3) + xlim(0,5) + ylim(70,100)
 print(p)
 
@@ -297,20 +314,21 @@ $$
 To model whether each individual has had a previous class or not, we use what we call *dummy coding* in which we create a new variable that has a value of one to represent having had a class before, and zero otherwise.  This means that for people who have had the class before, we will simply add the value of $\hat{\beta_2}$ to our predicted value for them -- that is, using dummy coding $\hat{\beta_2}$ simply reflects the difference in means between the two groups. Our estimate of $\hat{\beta_1}$ reflects the regression slope over all of the data points -- that is, we are assuming that regression slope is the same regardless of whether someone has had a class before (see Figure  \@ref(fig:LinearRegressionByPriorClass)).
 
 ```{r LinearRegressionByPriorClass, fig.cap='The relation between study time and grade including prior experience as an additional component in the model.  The blue line shows the slope relating grades to study time, and the black dotted line corresponds to the difference in means between the two groups.'}
-df$priorClass=as.factor(df$priorClass)
 
-lmResultTwoVars = lm(grade ~ studyTime + priorClass,data=df)
+df$priorClass <- as.factor(df$priorClass)
+
+lmResultTwoVars <- lm(grade ~ studyTime + priorClass,data=df)
 summary(lmResultTwoVars)
 
-p=ggplot(df,aes(studyTime,grade,color=priorClass)) +
+p <- ggplot(df,aes(studyTime,grade,color=priorClass)) +
   geom_point(size=3) + xlim(0,5) + ylim(70,100)
 
 
-p=p+
+p <- p+
   geom_abline(slope=lmResultTwoVars$coefficients[2],
               intercept=lmResultTwoVars$coefficients[1],color='red')
 
-p=p+
+p <- p+
   annotate('segment',x=2,xend=3,
            y=lmResultTwoVars$coefficients[1]+
              2*lmResultTwoVars$coefficients[2],
@@ -325,13 +343,13 @@ p=p+
            color='blue')
 
 
-p=p+
+p <- p+
   geom_abline(slope=lmResultTwoVars$coefficients[2],
               intercept=lmResultTwoVars$coefficients[1]+
                 lmResultTwoVars$coefficients[3],
               color='green') 
 
-p=p+
+p <- p+
   annotate('segment',x=2,xend=2,
            y=lmResultTwoVars$coefficients[1]+
              2*lmResultTwoVars$coefficients[2],
@@ -350,11 +368,17 @@ Let's use a new example that asks the question: What is the effect of caffeine o
 
 ```{r CaffeineSpeaking, fig.cap='The relationship between caffeine and public speaking'}
 set.seed(1234567)
-df=data.frame(group=c(rep(-1,10),rep(1,10))) %>%
+
+df <- 
+  data.frame(
+    group=c(rep(-1,10),
+            rep(1,10)
+          )
+  ) %>%
   mutate(caffeine=runif(n())*100) %>%
   mutate(speaking=0.5*caffeine*-group + group*20 + rnorm(20)*10)
 
-p=ggplot(df,aes(caffeine,speaking)) +
+p <- ggplot(df,aes(caffeine,speaking)) +
   geom_point()
 print(p)
 
@@ -363,7 +387,7 @@ print(p)
 Looking at Figure  \@ref(fig:CaffeineSpeaking), there doesn't seem to be a relationship, and we can confirm that by performing linear regression on the data:
 
 ```{r}
-lmResultCaffeine = lm(speaking~caffeine,data=df)
+lmResultCaffeine <- lm(speaking~caffeine,data=df)
 summary(lmResultCaffeine)
 
 ```
@@ -371,8 +395,10 @@ summary(lmResultCaffeine)
 But now let's say that we find research suggesting that anxious and non-anxious people react differently to caffeine.  First let's plot the data separately for anxious and non-anxious people.
 
 ```{r CaffeineSpeakingAnxiety,fig.cap='The relationship between caffeine and public speaking, with anxiety represented by the color of the data points'}
-df = df %>% mutate(anxiety=ifelse(group==1,'anxious','notAnxious'))
-p=ggplot(df,aes(caffeine,speaking,color=anxiety)) +
+df <- 
+  df %>% 
+  mutate(anxiety=ifelse(group==1,'anxious','notAnxious'))
+p <- ggplot(df,aes(caffeine,speaking,color=anxiety)) +
   geom_point()
 print(p)
 ```
@@ -380,14 +406,15 @@ print(p)
 As we see from Figure \@ref(fig:CaffeineSpeakingAnxiety), it appears that the relationship between speaking and caffeine is different for the two groups, with caffeine improving performance for people without anxiety and degrading performance for those with anxiety.  We'd like to create a statistical model that addresses this question.  First let's see what happens if we just include anxiety in the model.
 
 ```{r}
-lmResultCafAnx = lm(speaking ~ caffeine + anxiety,data=df)
+lmResultCafAnx <- lm(speaking ~ caffeine + anxiety,data=df)
 summary(lmResultCafAnx)
 ```
 
 Here we see there are no significant effects of either caffeine or anxiety, but that seems wrong.  The problem is that this model is trying to fit the same line relating speaking to caffeine for both groups. If we want to fit them using separate lines, we can include an *interaction* in the model, which is equivalent to fitting different lines for each of the two groups.
 
 ```{r}
-lmResultInteraction = lm(speaking ~ caffeine + anxiety + caffeine*anxiety,data=df)
+lmResultInteraction <- lm(speaking ~ caffeine + anxiety + caffeine*anxiety,
+                          data=df)
 summary(lmResultInteraction)
 ```
 
@@ -395,10 +422,16 @@ Now we see that there are significant effects of both caffeine and anxiety (whic
 
 
 ```{r CaffeineAnxietyInteraction, fig.cap='The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group.'}
-df_anx=df%>%subset(anxiety=='anxious')
-df_notanx=df%>%subset(anxiety=='notAnxious')
 
-p=ggplot(df_anx,aes(caffeine,speaking)) +
+df_anx <- 
+  df %>%
+  subset(anxiety=='anxious')
+
+df_notanx <- 
+  df %>%
+  subset(anxiety=='notAnxious')
+
+p <- ggplot(df_anx,aes(caffeine,speaking)) +
   geom_point(color='blue') +
   geom_line(data=data.frame(x=df$caffeine[df$anxiety=='anxious'],
                     y=lmResultInteraction$fitted.values[df$anxiety=='anxious']),
