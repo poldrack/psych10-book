@@ -23,9 +23,12 @@ set.seed(123456) # set random seed to exactly replicate results
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_adult = NHANES %>%
+NHANES_adult <- 
+  NHANES %>%
   drop_na(Weight) %>%
   subset(Age>=18)
 
@@ -69,20 +72,20 @@ $$
 ```{r echo=FALSE}
 # function to generate a plot of Lorenz curve and compute Gini coefficient
 lorenzCurve = function(df){
-  df = df %>% arrange(income)
-  sumIncome=sum(df$income)
-  lc=array(NA,nrow(df)+1)
-  p=array(NA,nrow(df)+1)
-  lc[1]=0
-  p[1]=0
+  df <- df %>% arrange(income)
+  sumIncome <- sum(df$income)
+  lc <- array(NA,nrow(df)+1)
+  p <- array(NA,nrow(df)+1)
+  lc[1] <- 0
+  p[1] <- 0
   for (i in 1:nrow(df)){
-    lc[i+1]=sum(df$income[1:i])/sumIncome
-    p[i+1]=i/nrow(df)
+    lc[i+1] <- sum(df$income[1:i])/sumIncome
+    p[i+1] <- i/nrow(df)
   }
-  S=sum(lc)
-  giniCoef=1 + (1-2*S)/nrow(df)
+  S <- sum(lc)
+  giniCoef <- 1 + (1-2*S)/nrow(df)
 
-  p=ggplot(data.frame(p,lc),aes(p,lc)) + 
+  p <- ggplot(data.frame(p,lc),aes(p,lc)) + 
     geom_line(color='blue') + 
     geom_point() + 
     xlim(0,1) + ylim(0,1) + 
@@ -99,13 +102,13 @@ First, let's create an example with 10 people where everyone has exactly the sam
 
 ```{r gini0,fig.cap="Lorenz curve for Gini index of zero (i.e. perfect equality)."}
 
-incomeDf=data.frame(income=rep(40000,10))
+incomeDf <- data.frame(income=rep(40000,10))
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 ```
 Now let's look at an example where income is normally distributed (Figure \@ref(fig:giniNormal)).
 
 ```{r giniNormal,fig.cap="Gini index for a population with normally distributed income."}
-incomeDf=data.frame(income=rnorm(10,mean=40000,sd=5000))
+incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
 
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 
@@ -114,8 +117,8 @@ print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 Now let's look at an example with high inequality; everyone has equal income (\$40,000) except for one person, who has income of \$40,000,000 (Figure \@ref(fig:giniInequal)).
 
 ```{r giniInequal,fig.cap="Lorenz curve for a maximally inequal population."}
-incomeDf=data.frame(income=rnorm(10,mean=40000,sd=5000))
-incomeDf$income[1]=40000000
+incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
+incomeDf$income[1] <- 40000000
 
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 
@@ -129,7 +132,8 @@ Now that we understand the Gini index, we can look at the relationship between i
 
 ```{r hateCrimeGini, fig.cap="Plot of rates of hate crimes vs. Gini index."}
 
-hateCrimes = hate_crimes %>%
+hateCrimes <- 
+  hate_crimes %>%
   mutate(state_abb = state.abb[match(state,state.name)]) %>%
   drop_na(avg_hatecrimes_per_100k_fbi)
 
@@ -163,15 +167,18 @@ $$
 This value will be high when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.
 
 ```{r }
-df=data.frame(x=c(3,5,8,10,12)) %>%
+df <- 
+  data.frame(x=c(3,5,8,10,12)) %>%
   mutate(y=x+round(rnorm(5,sd=2))) %>%
-  mutate(y_dev=y-mean(y),
-         x_dev=x-mean(x)) %>%
+  mutate(
+    y_dev=y-mean(y),
+    x_dev=x-mean(x)
+  ) %>%
   mutate(crossproduct=y_dev*x_dev)
 
 pander(df)
 pander(sprintf('sum of cross products = %.2f\n',sum(df$crossproduct)))
-covXY = sum(df$crossproduct)/(nrow(df)-1)
+covXY <- sum(df$crossproduct)/(nrow(df)-1)
 pander(sprintf('covariance: %.2f\n',covXY))
 # compare to cov(df$x,df$y)
 
@@ -184,7 +191,7 @@ r = \frac{covariance}{s_xs_y} = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y}
 $$
 
 ```{r}
-corXY = sum(df$crossproduct)/((nrow(df)-1)*sd(df$x)*sd(df$y))
+corXY <- sum(df$crossproduct)/((nrow(df)-1)*sd(df$x)*sd(df$y))
 pander(sprintf('correlation coefficient = %.2f\n',corXY))
 # compare to cor(df$x,df$y)
 ```
@@ -194,7 +201,8 @@ The correlation coefficient is useful because it varies between -1 and 1 regardl
 We can compute the correlation coefficient for the hate crime data:
 
 ```{r}
-corGiniHC=cor(hateCrimes$gini_index,hateCrimes$avg_hatecrimes_per_100k_fbi)
+corGiniHC <- cor(hateCrimes$gini_index,
+                 hateCrimes$avg_hatecrimes_per_100k_fbi)
 pander(sprintf('correlation coefficient = %.2f\n',corGiniHC))
 ```
 
@@ -209,7 +217,8 @@ $$
 Under the null hypothesis $H_0:r=0$, this statistic is distributed as a t distribution with $N - 2$ degrees of freedom.  We can compute this using the ``cor.test()`` function in R:
 
 ```{r}
-cor.test(hateCrimes$avg_hatecrimes_per_100k_fbi,hateCrimes$gini_index)
+cor.test(hateCrimes$avg_hatecrimes_per_100k_fbi,
+         hateCrimes$gini_index)
 ```
 
 This test shows that the likelihood of an r value this extreme or more is quite low, so we would reject the null hypothesis of $r=0$.  Note that this test assumes that both variables are normally distributed.
@@ -217,12 +226,12 @@ This test shows that the likelihood of an r value this extreme or more is quite 
 We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis.
 
 ```{r shuffleCorr,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line."}
-shuffleCorr=function(x,y){
+shuffleCorr <- function(x,y){
   xShuffled=sample(x)
   return(cor(xShuffled,y))
 }
 
-shuffleDist=replicate(2500,shuffleCorr(hateCrimes$avg_hatecrimes_per_100k_fbi,hateCrimes$gini_index))
+shuffleDist <- replicate(2500,shuffleCorr(hateCrimes$avg_hatecrimes_per_100k_fbi,hateCrimes$gini_index))
 
 ggplot(data.frame(shuffleDist),aes(shuffleDist)) + 
   geom_histogram(bins=100) +
@@ -239,16 +248,19 @@ Randomization gives us a reasonably similar answer to the t-test.
 You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
 
 ```{r outlierCorr, fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive."}
-n=10
+n <- 10
 set.seed(1234)
-dfOutlier=data.frame(x=rnorm(n)) %>%
-  mutate(y=x*-1)
-dfOutlier$x[1]=10
-dfOutlier$y[1]=10
-cc=cor(dfOutlier$x,dfOutlier$y)
-ccSpearman=cor(dfOutlier$x,dfOutlier$y,method='spearman')
 
-p=ggplot(dfOutlier,aes(x,y))+
+dfOutlier <- 
+  data.frame(x=rnorm(n)) %>%
+  mutate(y=x*-1)
+
+dfOutlier$x[1] <- 10
+dfOutlier$y[1] <- 10
+cc <- cor(dfOutlier$x,dfOutlier$y)
+ccSpearman <- cor(dfOutlier$x,dfOutlier$y,method='spearman')
+
+p <- ggplot(dfOutlier,aes(x,y))+
    geom_point() +
    ggtitle(sprintf('r = %0.2f (without outlier: r = %.2f)',cc,cor(dfOutlier$x[2:n],dfOutlier$y[2:n]))) +
    theme(plot.title = element_text(size = 20, face = "bold"))
@@ -262,7 +274,7 @@ One way to address outliers is to compute the correlation on the ranks of the da
 We can compute the rank correlation on the hate crime data using the `cor.test` function:
 
 ```{r}
-corTestSpearman = cor.test(dfOutlier$x,dfOutlier$y,method='spearman')
+corTestSpearman <- cor.test(dfOutlier$x,dfOutlier$y,method='spearman')
 corTestSpearman
 ```
 
@@ -274,7 +286,7 @@ We can also analyze the FiveThirtyEight data using Bayesian analysis, which has 
 
 
 ```{r}
-bayesCor = jzs_cor(hateCrimes$avg_hatecrimes_per_100k_fbi,
+bayesCor <- jzs_cor(hateCrimes$avg_hatecrimes_per_100k_fbi,
         hateCrimes$gini_index)
 bayesCor
 
