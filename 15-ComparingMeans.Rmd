@@ -12,15 +12,22 @@ library(fivethirtyeight)
 library(BayesMed)
 library(BayesFactor)
 
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
+
 set.seed(123456) # set random seed to exactly replicate results
 
 # load the NHANES data library
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_adult = NHANES %>%
+NHANES_adult <- 
+  NHANES %>%
   subset(Age>=18)
 
 
@@ -29,12 +36,15 @@ NHANES_adult = NHANES %>%
 One of the most common questions that we want to ask in statistics is whether there is a difference between the means of two different groups.  Let's say that we would like to know whether regular marijuana smokers watch more television.  We can ask this question using the NHANES dataset; let's take a sample of 200 individuals from the dataset and test whether the number of hours of television watching per day is related to regular marijuana use.  Figure \@ref(fig:PotTVViolin) shows these data using a violin plot.
 
 ```{r}
-NHANES_sample=NHANES_adult %>% 
+NHANES_sample <- 
+  NHANES_adult %>% 
   drop_na(TVHrsDay,RegularMarij) %>%
-  mutate(TVHrsNum=recode(TVHrsDay,'More_4_hr'=5,
+  mutate(
+    TVHrsNum=recode(TVHrsDay,'More_4_hr'=5,
                          '4_hr'=4,'2_hr'=2,
                          '1_hr'=1,'3_hr'=3,'0_to_1_hr'=0.5,
-                         '0_hrs'=0)) %>%
+                         '0_hrs'=0)
+    ) %>%
   sample_n(200)
 
 
@@ -56,7 +66,8 @@ $$
 where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances for each the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  Under the null hypothesis of no difference between means, this statistic is distributed according to a t distribution with n-2 degrees of freedom (since we have computed two parameter estimates, namely the means of the two groups).  We can compute the t-test in R using the ```t.test()``` function:
 
 ```{r}
-t.test(TVHrsNum~RegularMarij,data=NHANES_sample,var.equal=TRUE)
+t.test(TVHrsNum~RegularMarij,data=NHANES_sample,
+       var.equal=TRUE)
 ```
 In this case we see that there is a statstically significant difference between groups, in the expected direction - regular pot smokers watch more TV.
 
@@ -70,7 +81,7 @@ $$
 However, smoking is a binary variable, so we treat as a *dummy variable* like we discussed in the previous chapter, setting it to a value of 1 for smokers and zero for nonsmokers.  In that case, $\hat{\beta_1}$ is simply the difference in means between the two groups, and $\hat{\beta_0}$ is the mean for the group that was coded as zero.  We can fit this model using the ```lm()``` function, and see that it gives the same t statistic as the t-test above:
 
 ```{r}
-s=summary(lm(TVHrsNum~RegularMarij,data=NHANES_sample))
+s <- summary(lm(TVHrsNum~RegularMarij,data=NHANES_sample))
 s
 ```
 
@@ -103,7 +114,7 @@ We can also compute $R^2$ for this analysis, which tells us how much variance in
 As we discussed in the chapter on Bayesian analysis, Bayes factors provide a way to better quantify evidence in favor or against the null hypothesis of no difference.  
 
 ```{r}
-bf = ttestBF(formula = 
+bf <- ttestBF(formula = 
     TVHrsNum~RegularMarij,data=NHANES_sample)
 bf
 ```
@@ -114,41 +125,51 @@ This shows us that although the difference between groups is highly significant,
 In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)).
 
 ```{r BPfig, fig.cap='Violin plot of systolic blood pressure on first and second recording, from NHANES.'}
+
 set.seed(12345678)
-NHANES_sample = NHANES %>% 
+
+NHANES_sample <- 
+  NHANES %>% 
   dplyr::filter(Age>17 & !is.na(BPSys2) & !is.na(BPSys1)) %>%
   dplyr::select(BPSys1,BPSys2,ID) %>%
   sample_n(200)
 
-NHANES_sample_tidy=NHANES_sample %>%
+NHANES_sample_tidy <- 
+  NHANES_sample %>%
   gather(timepoint,BPsys,-ID)
 
-NHANES_sample = NHANES_sample %>%
-  mutate(diff=BPSys1-BPSys2,
-         diffPos=as.integer(diff>0),
-         meanBP=(BPSys1+BPSys2)/2)
+NHANES_sample <- 
+  NHANES_sample %>%
+  mutate(
+    diff=BPSys1-BPSys2,
+    diffPos=as.integer(diff>0),
+    meanBP=(BPSys1+BPSys2)/2
+  )
 
-p=ggplot(NHANES_sample_tidy,aes(timepoint,BPsys)) + 
+p <- ggplot(NHANES_sample_tidy,aes(timepoint,BPsys)) + 
   geom_violin()
 print(p)
 
-NHANES_sample_tidy %>% 
+summary  <- 
+  NHANES_sample_tidy %>% 
   group_by(timepoint) %>%
   summarize(meanTimepointBP=mean(BPsys))
+pander(summary)
 
 ```
 
 We see that there does not seem to be much of a difference overall between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that the pairs of data points from the the same individuals.   
 
 ```{r}
-t.test(BPsys~timepoint,data=NHANES_sample_tidy,paired=FALSE,var.equal=TRUE)
+t.test(BPsys~timepoint,data=NHANES_sample_tidy,
+       paired=FALSE,var.equal=TRUE)
 ```
 
 This analysis shows no significant difference. However, this analysis is inappropriate since it assumes that the two samples are independent, when in fact they are not, since the data come from the same individuals.  We can plot the data with a line for each individual to show this (see Figure \@ref(fig:BPLinePlot)).
 
 ```{r BPLinePlot,fig.cap='Violin plot of systolic BP on each recording, with lines connecting the two data points for each individual.'}
 
-p=p+geom_line(aes(group=ID))
+p <- p+geom_line(aes(group=ID))
 print(p)
 
 ```
@@ -168,8 +189,8 @@ ggplot(NHANES_sample,aes(diff)) +
 One simple way to test for differences is using a test called the *sign test*, which asks whether the proportion of positive differences (ignoring their magnitude) is different than what we would espect by chance.  To do this, we take the differences and compute their sign, and then we use a binomial test to ask whether the proportion of positive signs differs from 0.5.
 
 ```{r}
-npos=sum(NHANES_sample$diffPos)
-bt=binom.test(npos,nrow(NHANES_sample))
+npos <- sum(NHANES_sample$diffPos)
+bt <- binom.test(npos,nrow(NHANES_sample))
 bt
 ```
 
@@ -199,7 +220,7 @@ We can also define the paired t-test in terms of a general linear model.  To do 
 library(lme4)
 library(lmerTest)
 
-lmrResult = lmer(BPsys~timepoint + (1|ID),data=NHANES_sample_tidy)
+lmrResult <- lmer(BPsys~timepoint + (1|ID),data=NHANES_sample_tidy)
 
 summary(lmrResult)
 ```
@@ -211,15 +232,22 @@ You can see that this shows us the same result as the paired t-test using the ``
 Often we want to compare more than two means to determine whether any of them differ from one another.  Let's say that we are analyzing data from a clinical trial for the treatment of high blood pressure.  In the study, volunteers are randomized to one of three conditions: Drug 1, Drug 2 or placebo.  Let's generate some data and plot them (see Figure \@ref(fig:DrugTrial))
 
 ```{r DrugTrial, fig.cap='Box plots showing blood pressure for three different groups in our clinical trial.'}
+
 set.seed(123456)
-nPerGroup=36
-noiseSD=10
-meanSysBP=140
-effectSize=0.8
-df=data.frame(group=as.factor(c(rep('placebo',nPerGroup),rep('drug1',nPerGroup),rep('drug2',nPerGroup))),sysBP=NA) 
-df$sysBP[df$group=='placebo']=rnorm(nPerGroup,mean=meanSysBP,sd=noiseSD)
-df$sysBP[df$group=='drug1']=rnorm(nPerGroup,mean=meanSysBP-noiseSD*effectSize,sd=noiseSD)
-df$sysBP[df$group=='drug2']=rnorm(nPerGroup,mean=meanSysBP,sd=noiseSD)
+
+nPerGroup <- 36
+noiseSD <- 10
+meanSysBP <- 140
+effectSize <- 0.8
+df <- data.frame(
+  group=as.factor(c(rep('placebo',nPerGroup),
+                    rep('drug1',nPerGroup),
+                    rep('drug2',nPerGroup))),
+  sysBP=NA) 
+
+df$sysBP[df$group=='placebo'] <- rnorm(nPerGroup,mean=meanSysBP,sd=noiseSD)
+df$sysBP[df$group=='drug1'] <- rnorm(nPerGroup,mean=meanSysBP-noiseSD*effectSize,sd=noiseSD)
+df$sysBP[df$group=='drug2'] <- rnorm(nPerGroup,mean=meanSysBP,sd=noiseSD)
 
 ggplot(df,aes(group,sysBP)) + geom_boxplot()
 ```
@@ -240,10 +268,13 @@ $$
 With ANOVA, we want to test whether the variance accounted for by the model is greater than what we would expect by chance, under the null hypothesis of no differences between means.  Whereas for the t distribution the expected value is zero under the null hypothesis, that's not the case here, since sums of squares are always positive numbers.  Fortunately, there is another standard distribution that describes how ratios of sums of squares are distributed under the null hypothesis: The *F* disribution (see figure \@ref(fig:FDist)). This distribution has two degrees of freedom, which correspond to the degrees of freedom for the numerator (which in this case is the model), and the denominator (which in this case is the error).
 
 ```{r FDist, fig.cap='F distributions under the null hypothesis, for different values of degrees of freedom.'}
-fdata=data.frame(x=seq(0.1,10,.1)) %>%
-  mutate(f_1_1=df(x,1,1),
-         f_1_50=df(x,1,50),
-         f_10_50=df(x,10,50))
+fdata <- 
+  data.frame(x=seq(0.1,10,.1)) %>%
+  mutate(
+    f_1_1=df(x,1,1),
+    f_1_50=df(x,1,50),
+    f_10_50=df(x,10,50)
+  )
 
 ggplot(fdata,aes(x,f_1_1)) +
   geom_line() +
@@ -257,16 +288,19 @@ ggplot(fdata,aes(x,f_1_1)) +
 To create an ANOVA model, we extend the idea of *dummy coding* that you encountered in the last chapter. Remember that for the t-test comparing two means, we created a single dummy variable that took the value of 1 for one of the conditions and zero for the others.  Here we extend that idea by creating two dummy variables, one that codes for the Drug 1 condition and the other that codes for the Drug 2 condition.  Just as in the t-test, we will have one condition (in this case, placebo) that doesn't have a dummy variable, and thus represents the baseline against which the others are compared. Let's create the dummy coding for drugs 1 and 2.
 
 ```{r}
-df = df %>% 
-  mutate(d1=as.integer(group=='drug1'),
-         d2=as.integer(group=='drug2'))
+df <- 
+  df %>% 
+  mutate(
+    d1=as.integer(group=='drug1'),
+    d2=as.integer(group=='drug2')
+  )
 
 ```
 
 Now we can fit a model using the same approach that we used in the previous chapter:
 
 ```{r}
-lmResultANOVA=lm(sysBP ~ d1 + d2, data=df)
+lmResultANOVA <- lm(sysBP ~ d1 + d2, data=df)
 summary(lmResultANOVA)
 ```
 The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, keep in mind that if we wanted to compare interpret these tests, we would need to correct the p-values to account for the fact that we have done multiple hypothesis tests; we will see an example of how to do this in the next chapter.

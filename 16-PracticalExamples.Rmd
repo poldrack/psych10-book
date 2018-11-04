@@ -12,15 +12,22 @@ library(BayesFactor)
 library(emmeans)
 library(brms)
 
+library(pander)
+panderOptions('round',2)
+panderOptions('digits',7)
+
 set.seed(123456) # set random seed to exactly replicate results
 
 # load the NHANES data library
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
-NHANES=NHANES %>% dplyr::distinct(ID,.keep_all=TRUE)
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
 
-NHANES_adult = NHANES %>%
+NHANES_adult <- 
+  NHANES %>%
   subset(Age>=18)
 
 ```
@@ -62,26 +69,44 @@ The actual data from the A to Z study are not publicly available, so we will use
 
 set.seed(123456)
 # generate a dataset based on the results of Gardner et al. Table 3
-dietDf = data.frame(diet=c(rep('Atkins',77),rep('Zone',79),
-                           rep('LEARN',79),rep('Ornish',76))) %>%
-  mutate(BMIChange12Months=ifelse(diet=='Atkins',rnorm(n=77,mean=-1.65,sd=2.54),
-                                  ifelse(diet=='Zone',rnorm(n=79,mean=-0.53,sd=2.0),
-                                  ifelse(diet=='LEARN',rnorm(n=79,mean=-0.92,sd=2.0),
-                                         rnorm(n=76,mean=-0.77,sd=2.14) ))),
-         physicalActivity=ifelse(diet=='Atkins',rnorm(n=77,mean=34,sd=6),
-                                  ifelse(diet=='Zone',rnorm(n=79,mean=34,sd=6.0),
-                                  ifelse(diet=='LEARN',rnorm(n=79,mean=34,sd=5.0),
-                                         rnorm(n=76,mean=35,sd=7) ))))
-summaryDf=dietDf %>% 
+dietDf <- 
+  data.frame(diet=c(rep('Atkins',77),
+                    rep('Zone',79),
+                    rep('LEARN',79),
+                    rep('Ornish',76))) %>%
+  mutate(
+    BMIChange12Months=ifelse(diet=='Atkins',
+                             rnorm(n=77,mean=-1.65,sd=2.54),
+                      ifelse(diet=='Zone',
+                             rnorm(n=79,mean=-0.53,sd=2.0),
+                      ifelse(diet=='LEARN',
+                             rnorm(n=79,mean=-0.92,sd=2.0),
+                      rnorm(n=76,mean=-0.77,sd=2.14)))),
+    physicalActivity=ifelse(diet=='Atkins',
+                            rnorm(n=77,mean=34,sd=6),
+                     ifelse(diet=='Zone',
+                            rnorm(n=79,mean=34,sd=6.0),
+                     ifelse(diet=='LEARN',
+                            rnorm(n=79,mean=34,sd=5.0),
+                      rnorm(n=76,mean=35,sd=7) )))
+  )
+
+summaryDf <- 
+  dietDf %>% 
   group_by(diet) %>% 
-  summarize(n=n(),
-            meanBMIChange12Months=mean(BMIChange12Months),
-            varBMIChange12Months=var(BMIChange12Months)) %>%
-  mutate(crit_val_lower = qt(.05, n - 1),
-         crit_val_upper = qt(.95, n - 1),
-         ci.lower=meanBMIChange12Months+(sqrt(varBMIChange12Months)*crit_val_lower)/sqrt(n),
-         ci.upper=meanBMIChange12Months+(sqrt(varBMIChange12Months)*crit_val_upper)/sqrt(n))
-summaryDf
+  summarize(
+    n=n(),
+    meanBMIChange12Months=mean(BMIChange12Months),
+    varBMIChange12Months=var(BMIChange12Months)
+  ) %>%
+  mutate(
+    crit_val_lower = qt(.05, n - 1),
+    crit_val_upper = qt(.95, n - 1),
+    ci.lower=meanBMIChange12Months+(sqrt(varBMIChange12Months)*crit_val_lower)/sqrt(n),
+    ci.upper=meanBMIChange12Months+(sqrt(varBMIChange12Months)*crit_val_upper)/sqrt(n)
+  )
+
+pander(summaryDf)
 
 
 ```
@@ -124,7 +149,7 @@ There are several questions that we need to ask in order to determine the approp
 Let's run an ANOVA on BMI change to compare it across the four diets. It turns out that we don't actually need to generate the dummy-coded variables ourselves; if we give lm() a categorical variable, it will automatically generate them for us.
 
 ```{r}
-lmResult=lm(BMIChange12Months ~ diet, data = dietDf)
+lmResult <- lm(BMIChange12Months ~ diet, data = dietDf)
 lmResult
 ```
 
@@ -157,7 +182,7 @@ We can find out more by comparing means across conditions using the ```emmeans()
 
 ```{r}
 # compute the differences between each of the means
-leastsquare = emmeans(lmResult, 
+leastsquare <- emmeans(lmResult, 
                       pairwise ~ diet,
                       adjust="tukey")
  
@@ -176,8 +201,11 @@ The letters in the rightmost column show us which of the groups differ from noe 
 Let's say that we want to have a better way to describe the amount of evidence provided by the data.  One way we can do this is to compute a Bayes factor, which we can do by fitting the full model (including diet) and the reduced model (without diet) and the compare their fit. For the reduced model, we just include a 1, which tells the fitting program to only fit an intercept.  
 
 ```{r results='hide',message=FALSE}
-brmFullModel=brm(BMIChange12Months ~ diet, data = dietDf,save_all_pars = TRUE)
-brmReducedModel=brm(BMIChange12Months ~ 1, data = dietDf,save_all_pars = TRUE)
+brmFullModel <- brm(BMIChange12Months ~ diet, data = dietDf,
+                    save_all_pars = TRUE)
+
+brmReducedMode <- brm(BMIChange12Months ~ 1, data = dietDf,
+                      save_all_pars = TRUE)
 ```
 
 ```{r}
@@ -191,9 +219,12 @@ This shows us that there is very strong evidence (Bayes factor of nearly 100) fo
 If we look more closely at the Garder paper, we will see that they also report statistics on how many individuals in each group had been diagnosed with *metabolic syndrome*, which is a syndrome characterized by high blood pressure, high blood glucose, excess body fat around the waist, and abnormal cholesterol levels and is associated with increased risk for cardiovascular problems. Let's first add those data into the summary data frame:
 
 ```{r}
-summaryDf=summaryDf %>% 
-                    mutate(nMetSym=c(22,20,29,27),
-                           nNoMetSym=n-nMetSym)
+summaryDf <- 
+  summaryDf %>% 
+  mutate(
+    nMetSym=c(22,20,29,27),
+    nNoMetSym=n-nMetSym
+  )
 ```
 
 Let's say that we are interested in testing whether the rate of metabolic syndrome was significantly different between the groups, since this might make us concerned that these differences could have affected the results of the diet outcomes. 
@@ -218,7 +249,9 @@ What if we want to quantify the evidence for or against the null?  We can do thi
 
 ```{r}
 
-bf = contingencyTableBF(as.matrix(summaryDf[,9:10]), sampleType = "indepMulti", fixedMargin = "cols")
+bf <- contingencyTableBF(as.matrix(summaryDf[,9:10]), 
+                         sampleType = "indepMulti", 
+                         fixedMargin = "cols")
 bf
 ```
 
