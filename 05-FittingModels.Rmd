@@ -772,7 +772,7 @@ plot_map + fifty_states_inset_boxes()
 
 ```
 
- It may have occurred to you, however, that CA also has the largest population of any state in the US, so it's reasonable that it will also have a larger number of crimes.  If we plot the two against one another (see Figure \@ref(fig:popVsCrime)), we see that there is a direct relationship population and the number of crimes.  
+ It may have occurred to you, however, that CA also has the largest population of any state in the US, so it's reasonable that it will also have a larger number of crimes.  If we plot the two against one another (see Figure \@ref(fig:popVsCrime)), we see that there is a direct relationship between population and the number of crimes.  
 
 ```{r popVsCrime,fig.cap="A plot of number of crimes versus population by state."}
 crimeData %>%
