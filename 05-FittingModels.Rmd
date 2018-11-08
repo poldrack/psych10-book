@@ -95,7 +95,7 @@ ggplot(NULL, aes(error_mode)) +
 pander(paste("average error (centimeters):", mean(error_mode)))
 ```
 
-What we notice here is that the average individual has a pretty large error of `r I(mean(error_mode))` centimeters. We would like to have a model where the average error is zero, and it turns out that if we use the arithmetic mean (commonly known as the *average*) this will be the case. 
+What we notice here is that the average individual has a pretty large error of `r I(mean(error_mode))` centimeters. We would like to have a model where the average error is zero, and it turns out that if we use the arithmetic mean (commonly known as the *average*) as our model then this will be the case. 
 
 The mean (ofted denoted by a bar over the variable, such as $\bar{X}$) is defined as:
 
@@ -142,9 +142,9 @@ print(paste("average error (inches):", mean(error_mean)))
 ```
 
 
-The average error here is a very small number, though not technically zero; we will discuss later in the course why this happens, but for now you can just treat it as being close enough to zero to call it zero.
+The average error here is a very small number, though not technically zero; we will discuss later in the course why this happens (which is due to how computers represent numbers), but for now you can just treat it as being close enough to zero to call it zero.
 
-Even though the average of errors from the mean is zero, we can see from the histogram in Figure \@ref(fig:meanError) that each individual still has some degree of error; some are positive and some are negative, and those cancel each other out.  For this reason, we generally summarize errors in terms of some kind of measure that counts both positive and negative errors as bad; we could use the absolute value of each error value, but it's more common to use the squared errors, for reasons that we will see later in the course.  After averaging the squared errors, we take the square root of that value, so that it is in the same units as the original.
+Even though the average of errors from the mean is zero, we can see from the histogram in Figure \@ref(fig:meanError) that each individual still has some degree of error; some are positive and some are negative, and those cancel each other out. For this reason, we generally summarize errors in terms of some kind of measure that counts both positive and negative errors as bad; we could use the absolute value of each error value, but it's more common to use the squared errors, for reasons that we will see later in the course.  There are two common ways to summarize the squared error in statistics.  We could just take the mean of the squared error values, which is referred to as the *mean squared error (MSE)*.  However, because we squared the values before averaging, they are not on the same scale as the original data; they are in $centimeters^2$.  For this reason, it's also common to take the square root of the MSE, which we refer to as the *root mean squared error (RMSE)*, so that it is in the same units as the original values (in this exzample, centimeters).
 
 ```{r}
 rmse_mean <- sqrt(mean(error_mean**2))
