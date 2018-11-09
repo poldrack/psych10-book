@@ -144,7 +144,9 @@ print(paste("average error (inches):", mean(error_mean)))
 
 The average error here is a very small number, though not technically zero; we will discuss later in the course why this happens (which is due to how computers represent numbers), but for now you can just treat it as being close enough to zero to call it zero.
 
-Even though the average of errors from the mean is zero, we can see from the histogram in Figure \@ref(fig:meanError) that each individual still has some degree of error; some are positive and some are negative, and those cancel each other out. For this reason, we generally summarize errors in terms of some kind of measure that counts both positive and negative errors as bad; we could use the absolute value of each error value, but it's more common to use the squared errors, for reasons that we will see later in the course.  There are two common ways to summarize the squared error in statistics.  We could just take the mean of the squared error values, which is referred to as the *mean squared error (MSE)*.  However, because we squared the values before averaging, they are not on the same scale as the original data; they are in $centimeters^2$.  For this reason, it's also common to take the square root of the MSE, which we refer to as the *root mean squared error (RMSE)*, so that it is in the same units as the original values (in this exzample, centimeters).
+Even though the average of errors from the mean is zero, we can see from the histogram in Figure \@ref(fig:meanError) that each individual still has some degree of error; some are positive and some are negative, and those cancel each other out. For this reason, we generally summarize errors in terms of some kind of measure that counts both positive and negative errors as bad; we could use the absolute value of each error value, but it's more common to use the squared errors, for reasons that we will see later in the course.  
+
+There are several common ways to summarize the squared error that you will encounter at various points in this book, so it's important to understand how they relate to one another.  First, we could simply add them up; this is referred to as the *sum of squared errors*.  The reason we don't usually use this is that its magnitude depends on the number of data points, so it can be difficult to interpret.  Second, we could  take the mean of the squared error values, which is referred to as the *mean squared error (MSE)*.  However, because we squared the values before averaging, they are not on the same scale as the original data; they are in $centimeters^2$.  For this reason, it's also common to take the square root of the MSE, which we refer to as the *root mean squared error (RMSE)*, so that it is in the same units as the original values (in this example, centimeters).
 
 ```{r}
 rmse_mean <- sqrt(mean(error_mean**2))
@@ -167,14 +169,48 @@ NHANES_child %>%
 
 ```
 
-The black points in Figure \@ref(fig:childAgeHeight) show individuals in the dataset, and there seems to be a strong relationship between height and age, as we would expect.  Thus, our model should look something like:
+The black points in Figure \@ref(fig:childAgeHeight) show individuals in the dataset, and there seems to be a strong relationship between height and age, as we would expect.  Thus, we might build a model that relates height to age:
+
+
+$$
+height_i =  \beta * age_i + error_i
+$$
+
+where $\beta$ is a *parameter* that we multiply by age to get the smallest error.  You might have noticed that this is simply a line with a slope of $\beta$ - to see this, let's plot the best fitting line on top of the data (Figure \@ref(fig:childHeight)).
+
+```{r childHeightLine,fig.cap="Height of children in NHANES, plotted as a function of age, with the best fitting model using only height showing in blue. Notice that the line systematically misses the data points."}
+
+lmResultHeightOnly <- lm(Height ~ Age + 0, data=NHANES_child)
+rmse_heightOnly <- sqrt(mean(lmResultHeightOnly$residuals**2))
+NHANES_child %>% 
+  ggplot(aes(x = Age, y = Height)) +
+  geom_point(position = "jitter") +
+  scale_x_continuous(breaks = seq.int(0, 20, 2)) + 
+  annotate('segment',x=0,xend=max(NHANES_child$Age),
+           y=0,yend=max(lmResultHeightOnly$fitted.values),
+           color='blue',lwd=1)
+  
+
+```
+
+Somethis is clearly wrong with this model, as the line doesn't seem to follow the data very well.  In fact, the RMSE for this model (`r I(rmse_heightOnly)`) is actually higher than the model that only includes the mean! The problem comes from the fact that our model only includes age, which means that the predicted value of height from the model must take on a value of zero when age is zero.  Even though the data do not include any children with an age of zero, the line is mathematically constrained to have a y-value of zero when x is zero, which explains why the line is pulled down below the younger datapoints.  We can fix this by including a constant value in our model, which basically represents the estimated value of height when age is equal to zero; even though an age of zero is not plausible in this dataset, this is a mathematical trick that will allow the model to account for the overall magnitude of the data.  The model is:
 
 $$
 height_i = constant + \beta * age_i + error_i
 $$
 
-where $\beta$ is a *parameter* that we multiply by age to get the smallest error, and constant is a constant value added to the prediction for all individuals (which we also call the *intercept* for reasons that will become clear when we discuss linear regression later in the course).  We will also learn later how it is that we actually compute these values; for now, we will use the ``lm()'' function in R to compute the values of the constant and $\beta$ that give us the smallest error.  Figure \@ref(fig:ageHeightError) plots the distriubtion of errors from this model.  
+where *constant* is a constant value added to the prediction for all individuals (which we also call the *intercept*, since it maps onto the intercept in the equation for a line).  We will also learn later how it is that we actually compute these values; for now, we will use the ``geom_smooth()'' function in R to compute the values of the constant and $\beta$ that give us the smallest error.  Figure \@ref(fig:childHeightConstLine) shows this model fitted to the NHANES data, where we see that the line matches the data much better than the one without a constant. 
 
+```{r childHeightConstLine,fig.cap="Height of children in NHANES, plotted as a function of age, with the best fitting model including both age and a constabnt shown in blue."}
+
+NHANES_child %>% 
+  ggplot(aes(x = Age, y = Height)) +
+  geom_point(position = "jitter") +
+  scale_x_continuous(breaks = seq.int(0, 20, 2)) + 
+  geom_smooth(method='lm',se=FALSE)
+  
+
+```
 
 ```{r ageHeightError,fig.cap="Distribution of errors from model including constant and age."}
 # find the best fitting model to predict height given age
@@ -223,7 +259,7 @@ NHANES_child %>%
 
 ```
 
-From the plot, it seems that there is a difference between males and females, but it only emerges after the age of puberty.  Let's estimate this model and see how the errors look:
+From the plot, it seems that there is a difference between males and females, but it is relatively small and only emerges after the age of puberty.  Let's estimate this model and see how the errors look:
 
 ```{r}
 
@@ -459,7 +495,7 @@ We have already seen the formula for computing the mean of a sample of data:
 $$
 \bar{X} = \frac{\sum_{i=1}^{n}x_i}{n}
 $$
-Note that I said that this formula was specifically for a *sample* of data, which is a set of data points selected from a larger population. Using a sample, we wish  to characterize a larger population.  Later in the course we will talk in more detail about sampling, but for now the important point is that statisticians generally like to use different symbols to differentiate statistics that describe values for a sample from parameters that describe values for a population; in this case, the formula for the population mean (denoted as $\mu$) is:
+Note that I said that this formula was specifically for a *sample* of data, which is a set of data points selected from a larger population. Using a sample, we wish to characterize a larger population -- the full set of individuals that we are interested in. For example, if we are a political pollster our population of interest might be all registered voters, whereas our sample might just include a few thousand people sampled from this population.  Later in the course we will talk in more detail about sampling, but for now the important point is that statisticians generally like to use different symbols to differentiate statistics that describe values for a sample from parameters that describe values for a population; in this case, the formula for the population mean (denoted as $\mu$) is:
 
 $$
 \mu = \frac{\sum_{i=1}^{N}x_i}{N}
@@ -557,21 +593,6 @@ pander(dataDf)
 
 Then the median is the middle value -- in this case, the 5th of the 9 values.
 
-Another way to view the median is that it is the value at the 50th percentile of the cumulative distribution.  We can see this in Figure \@ref(fig:medianDist), where we out the previous values.
-
-```{r medianDist,fig.cap="A demonstration of the median as the 50th percentile of the cumulative distribution.  The dashed blue line cuts the cumulative distribution at 50%, and the dotted red line shows the place where the cumulative distribution crosses the 50% mark, which is the median."}
-
-dataDf %>% 
-  ggplot(aes(values)) +
-  stat_ecdf() +
-  geom_hline(yintercept = 0.5, color = "blue", linetype = "dashed") +
-  geom_vline(xintercept = median(dataDf$values), color = "red", linetype = "dotted") +
-  scale_x_continuous(
-    limits = c(min(dataDf$values), max(dataDf$values)),
-    breaks = c(min(dataDf$values):max(dataDf$values))
-  )
-```
-
 Whereas the mean minimizes the sum of squared errors, the median minimizes a slighty different quantity: The sum of *absolute* errors.  This explains why it is less sensitive to outliers -- squaring is going to exacerbate the effect of large errors compared to taking the absolute value.  We can see this in the case of the income example:
 
 ```{r}
@@ -616,13 +637,13 @@ If we were to take the average of these values, we would see that the mean iPhon
 
 Once we have described the central tendency of the data, we often also want to describe how variable the data are -- this is sometimes also referred to as "dispersion", reflecting the fact that it describes how widely dispersed the data are.  
 
-We have already encountered the sum of squared errors above, which is the basis for the most commonly used measures of variability: the *variance* and the *standard deviation*.  The variance for a population (referred to as $\sigma^2$) is simply the sum of squared errors divided by the number of observations:
+We have already encountered the sum of squared errors above, which is the basis for the most commonly used measures of variability: the *variance* and the *standard deviation*.  The variance for a population (referred to as $\sigma^2$) is simply the sum of squared errors divided by the number of observations - that is, the *mean squared error* that you encountered earlier:
 
 $$
 \sigma^2 = \frac{SSE}{N} = \frac{\sum_{i=1}^n (x_i - \mu)^2}{N}
 $$
 
-where $\mu$ is the population mean.  If you look closely you will see that this is just the mean of the squared errors - and in fact you will sometimes see the term *mean squared error*. The standard deviation is simply the square root of this -- we do this so that the errors are in the same units as the original data (undoing the square that we applied to the errors).
+where $\mu$ is the population mean. The standard deviation is simply the square root of this -- that is, the *root mean squared error* that we saw before.  The standard deviation is useful because the errors are in the same units as the original data (undoing the squaring that we applied to the errors).
 
 We usually don't have access to the entire population, so we have to compute the variance using a sample, which we refer to as $\hat{\sigma}^2$, with the "hat" representing the fact that this is an estimate based on a sample. The equation for  $\hat{\sigma}^2$ is similar to the one for  $\sigma^2$:
 
@@ -886,7 +907,7 @@ plot_map_z <-
   ) +
   coord_map() +
   expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-  labs(x = "", y = "") +
+  labs(x = "", y = "") 
 
 # add border boxes to AK/HI
 plot_map_z + fifty_states_inset_boxes() 
