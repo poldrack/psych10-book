@@ -20,7 +20,7 @@ options(digits = 2)
 
 ## Why summarize data?
 
-When we summarize data, we are necessarily throwing away information, and there are many conceivable objections to this.  As an example, let's go back to the PURE study that we discussed in Chapter 1.  Are we not supposed to be believe that all of the details about each individual matter, beyond those that are summarized in the dataset?  What about the specific details of how the data were collected, such as the time of day or the mood of the participant?  Most of these details are lost when we summarize the data.
+When we summarize data, we are necessarily throwing away information, and there are many conceivable objections to this.  As an example, let's go back to the PURE study that we discussed in Chapter 1.  Are we not supposed to be believe that all of the details about each individual matter, beyond those that are summarized in the dataset?  What about the specific details of how the data were collected, such as the time of day or the mood of the participant?  All of these details are lost when we summarize the data.
 
 We summarize data in general because it provides us with a way to *generalize* - that is, to make general statements that extend beyond specific observations.  The importance of generalization was highlighted by the writer Jorge Luis Borges in his short story "Funes the Memorious", which describes an individual who loses the ability to forget.  Borges focuses in on the relation between generalization (i.e. throwing away data) and thinking: "To think is to forget a difference, to generalize, to abstract. In the overly replete world of Funes, there were nothing but details."  
 
@@ -30,7 +30,7 @@ Psychologists have long studied all of the ways in which generalization is centr
 
 A simple way to summarize data is to generate a table representing counts of various types of observations.  This type of table has been used for thousands of years (see Figure \@ref(fig:salesContract)).
 
-```{r salesContract,fig.cap="A Sumerian tablet from the Louvre, showing a sales contract for a house and field.  Public domain, via Wikimedia Commons."}
+```{r salesContract,echo=FALSE,fig.cap="A Sumerian tablet from the Louvre, showing a sales contract for a house and field.  Public domain, via Wikimedia Commons."}
 knitr::include_graphics("images/Sales_contract_Shuruppak_Louvre_AO3760.jpg")
 
 ```
@@ -50,7 +50,7 @@ NHANES <-
 # help(NHANES)
 ```
 
-Type the command `help(NHANES)` in the RStudio console.  Scroll through the help page (that should open within the Help panel if you are using RStudio), which provides some information about the dataset as well as a listing of all of the variables included in the dataset.  Let's have a look at a simple variable, called "PhysActive" in the dataset.  This variable contains one of three different values: "Yes" or "No" (indicating whether or not the person reports doing "moderate or vigorous-intensity sports, fitness or recreational activities"), or "NA" if the data are not available for that individual. There are different reasons that the data might be missing; for example, this question was not asked of children younger than 12 years of age, while in other cases an adult may have declined to answer the question during the interview. 
+Type the command `help(NHANES)` in the RStudio console.  Scroll through the help page (that should open within the Help panel if you are using RStudio), which provides some information about the dataset as well as a listing of all of the variables included in the dataset.  Let's have a look at a simple variable, called "PhysActive" in the dataset.  This variable contains one of three different values: "Yes" or "No" (indicating whether or not the person reports doing "moderate or vigorous-intensity sports, fitness or recreational activities"), or "NA" if the data are missing for that individual. There are different reasons that the data might be missing; for example, this question was not asked of children younger than 12 years of age, while in other cases an adult may have declined to answer the question during the interview. 
 
 ### Frequency distributions
 
@@ -89,10 +89,7 @@ This shows us the absolute frequency of the two responses, for everyone who actu
 $$
 relative\ frequency_i = \frac{absolute\ frequency_i}{\sum_{j=1}^N absolute\ frequency_j}
 $$
-
-You may not be familiar with the $\sum$ symbol, which we call the *summation* symbol. It basically means that you should loop through all of the values of the index variable (j in this case, which goes from 1 to N) and add up all of the values. In the case of the PhysActive variable, N is equal to two (because there are two possible values).
-
-Which we can do in R as follows:
+We can do this in in R as follows:
 
 ```{r}
 PhysActive_table_filtered <- 
@@ -146,7 +143,7 @@ SleepHrsNight_table_filtered <-
 pander(SleepHrsNight_table_filtered)
 ```
 
-We can already begin to summarize the dataset just by looking at the table; for example, we can see that most people report sleeping between 6 and 8 hours.  Let's plot the data to see this more clearly.  To do this we can plot a *histogram* which shows the number of cases having each of the different values; see Figure \@ref(fig:sleepHist).  The ggplot2() library has a built in histogram function which we will often use.  
+We can already begin to summarize the dataset just by looking at the table; for example, we can see that most people report sleeping between 6 and 8 hours.  Let's plot the data to see this more clearly.  To do this we can plot a *histogram* which shows the number of cases having each of the different values; see Figure \@ref(fig:sleepHist).  The ggplot2() library has a built in histogram function (`geom_histogram()`) which we will often use.  
 
 ```{r sleepHist,fig.cap="A histogram showing the number of people reporting each possible value of the SleepHrsNight variable."}
 SleepHrsNight_data_filtered <- 
@@ -287,7 +284,7 @@ NHANES %>%
   geom_histogram(aes(y = ..density..), binwidth = 1)
 ```
 
-This shows us that all of the very short heights were indeed coming from children in the sample. Let's create a new version of NHANES that only includes adults, and then plot the histogram just for them (Figure \@ref(fig:AduldHeightHist):
+This shows us that all of the very short heights were indeed coming from children in the sample. Let's create a new version of NHANES that only includes adults, and then plot the histogram just for them (Figure \@ref(fig:AduldHeightHist)):
 
 ```{r AduldHeightHist,fig.cap='Histogram of adult heights in NHANES'}
 
@@ -301,7 +298,7 @@ NHANES_adult %>%
   geom_histogram(aes(y = ..density..), binwidth = 1)
 ```
 
-Now we see that the distribution looks much more symmetric.  As we will see later,this is a nice example of a *normal* (or *Gaussian*) distribution.  
+Now we see that the distribution looks much more symmetric.  As we will see later, this is a nice example of a *normal* (or *Gaussian*) distribution.  
 
 ### Histogram bins
 
@@ -324,53 +321,25 @@ $$
 number\, of\, bins  = \frac{range\, of\, scores}{bin\, width}
 $$
 
-There is no hard and fast rule for how to choose the optimal bin width.  Occasionally it will be obvious (as when there are only a few possible values), but in many cases it would require trial and error.  One reasonable heuristic is the so-called "Freedman-Diaconis" rule:
-
-$$
-bin\ size = 2 * \frac{interquartile\ range}{\sqrt[3]{n}}
-$$
-
-which is implemented in R using the `nclass.FD` function (which returns the optimal number of bins) (see Figure \@ref(fig:FreedmanDiaconis)).  Don't worry right now about the "interquartile range", which is a measure of how spread out the data are; we will return to that later.
-
-```{r FreedmanDiaconis, fig.cap='Histogram of adult height from NHANES with bin widths determined using the Freedman-Diaconis heuristic.'}
-
-# use Freedman-Diaconis to compute the optimal number of bins
-# then compute bin width using range and nbins
-
-height_summary <- 
-  NHANES_adult %>%
-  drop_na(Height) %>%
-  summarize(
-    nbins = nclass.FD(Height),
-    maxHeight = max(Height),
-    minHeight = min(Height),
-    binwidth = (maxHeight - minHeight) / nbins
-  )
-
-NHANES_adult %>% 
-  drop_na(Height) %>% 
-  ggplot(aes(Height)) +
-  geom_histogram(aes(y = ..density..), binwidth = height_summary$binwidth)
-
-```
+There is no hard and fast rule for how to choose the optimal bin width.  Occasionally it will be obvious (as when there are only a few possible values), but in many cases it would require trial and error.  
 
 ## Idealized representations of distributions
 
-Datasets are like snowflakes, in that every one is different, but nonetheless there are patterns that one often sees in different types of data.  This allows us to use idealized representations of the data to further summarize them.  Let's take the adult height data plotted in \@ref(fig:FreedmanDiaconis), and plot them alongside a very different variable: pulse rate (heartbeats per minute), also measured in NHANES.
+Datasets are like snowflakes, in that every one is different, but nonetheless there are patterns that one often sees in different types of data.  This allows us to use idealized representations of the data to further summarize them.  Let's take the adult height data plotted in \@ref(fig:AduldHeightHist), and plot them alongside a very different variable: pulse rate (heartbeats per minute), also measured in NHANES (see Figure \@ref(fig:NormalDistPlots))
 
 ```{r NormalDistPlots,fig.cap=""}
 h1 <- 
   NHANES_adult %>% 
   drop_na(Height) %>% 
   ggplot(aes(Height)) +
-  geom_histogram(aes(y = ..density..), binwidth = height_summary$binwidth)
+  geom_histogram(aes(y = ..density..), binwidth = 1)
 
 
 h2 <- 
   NHANES_adult %>% 
   drop_na(Pulse) %>% 
   ggplot(aes(Pulse)) +
-  geom_histogram(aes(y = ..density..), binwidth = 2) # using fixed bin width of 2 here because FD rule resulted in a weird gap in the histogram
+  geom_histogram(aes(y = ..density..), binwidth = 2) 
 
 plot_grid(h1, h2)
 ```
@@ -473,22 +442,21 @@ The examples in \@ref(fig:NormalDistPlotsWithDist) followed the normal distribut
 
 An example of skewness can be seen in the average waiting times at the airport security lines at San Francisco International Airport, shown in Figure \@ref(fig:SFOWaitTimes).   
 
-```{r SFOWaitTimes,fig.cap="Average wait times for security at SFO Terminal A (Jan-Oct 2017), obtained from https://awt.cbp.gov/ ."}
+```{r SFOWaitTimes,messages=FALSE,,fig.cap="Average wait times for security at SFO Terminal A (Jan-Oct 2017), obtained from https://awt.cbp.gov/ ."}
 waittimes <- 
   read_csv("data/04/sfo_wait_times_2017.csv")
 
-names(waittimes) <- c("waittime")
 
 waittimes %>% 
   ggplot(aes(waittime)) +
   geom_histogram(binwidth = 1)
 ```
 
-In \@ref(fig:SFOWaitTimes) you can see that while most wait times are less than 20 minutes, there are a number of cases where they are much longer, over 60 minutes!  This is an example of a "right-skewed" distribution, where the right tail is longer than the left; these are common when looking at counts or measured times, which can't be less than zero.  It's less common to see "left-skewed" distributions, but they can occur, for example when looking at fractional values that can't take a value greater than one.
+In Figure \@ref(fig:SFOWaitTimes) you can see that while most wait times are less than 20 minutes, there are a number of cases where they are much longer, over 60 minutes!  This is an example of a "right-skewed" distribution, where the right tail is longer than the left; these are common when looking at counts or measured times, which can't be less than zero.  It's less common to see "left-skewed" distributions, but they can occur, for example when looking at fractional values that can't take a value greater than one.
 
 ### Long-tailed distributions
 
-Historically, statistics has focused heavily on data that are normally distributed, but there are many data types that look nothing like the normal distribution. In particular, many real-world distributions are "long-tailed", meaning that the right tail extends far beyond the most typical members of the distribution.  One of the most interesting types of data where long-tailed distributions occur arise from the analysis of social networks.  For an example, let's look at the Facebook friend data from the Stanford Large Network Database: (https://snap.stanford.edu/data/egonets-Facebook.html) and plot the histogram of number of friends across the 3,663 people in the database (see Figure \@ref(fig:facebookFriends).  We will put a blue point to denote the individual with the largest number of friends in the dataset.
+Historically, statistics has focused heavily on data that are normally distributed, but there are many data types that look nothing like the normal distribution. In particular, many real-world distributions are "long-tailed", meaning that the right tail extends far beyond the most typical members of the distribution.  One of the most interesting types of data where long-tailed distributions occur arise from the analysis of social networks.  For an example, let's look at the Facebook friend data from the [Stanford Large Network Database] (https://snap.stanford.edu/data/egonets-Facebook.html) and plot the histogram of number of friends across the 3,663 people in the database (see Figure \@ref(fig:facebookFriends)).  We will put a blue point to denote the individual with the largest number of friends in the dataset.
 
 ```{r facebookFriends,fig.cap="A histogram of the number of Facebook friends amongst 3,663 individuals, obtained from the Stanford Large Network Database."}
 fbdata <- 
@@ -519,13 +487,9 @@ Long-tailed distributions are increasingly being recognized in the real world.  
 
 > For to every one who has will more be given, and he will have abundance; but from him who has not, even what he has will be taken away. — Matthew 25:29, Revised Standard Version
 
-often paraphrased as "the rich get richer".  In these situations, advantages compound, such that those with more friends have access to even more new friends, and those with more money have the ability do things that increase their riches even more.  As the course progresses we will see several examples of these kinds of distributions, and we should keep in mind that many of the tools in statistics fail when faced with long-tailed data.  And as Nassim Nicholas Taleb pointed out in his book "The Black Swan", such long-tailed distributions played a critical role in the 2008 financial crisis, because many of the financial models used by traders assumed that financial systems would follow the normal distribution, which they clearly did not.
+often paraphrased as "the rich get richer".  In these situations, advantages compound, such that those with more friends have access to even more new friends, and those with more money have the ability do things that increase their riches even more.  
 
-```{r echo=FALSE, message=FALSE}
-### Logarithms
-
-# ADD HERE?
-```
+As the course progresses we will see several examples of long-tailed distributions, and we should keep in mind that many of the tools in statistics can fail when faced with long-tailed data.  As Nassim Nicholas Taleb pointed out in his book "The Black Swan", such long-tailed distributions played a critical role in the 2008 financial crisis, because many of the financial models used by traders assumed that financial systems would follow the normal distribution, which they clearly did not.
 
 ## Suggested readings
 
