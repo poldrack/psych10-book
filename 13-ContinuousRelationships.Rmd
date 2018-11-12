@@ -34,32 +34,13 @@ NHANES_adult <-
 
 ```
 
-## An example
+## An example: Hate crimes and income inequality
 
-In 2017, the web site Fivethirtyeight.com published a story titled [Higher Rates Of Hate Crimes Are Tied To Income Inequality]  (https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/) which discussed the relationship between the prevalence of hate crimes and income inequality in the wake of the 2016 Presidential election. The story reported an analysis of hate crime data from the FBI and the Southern Poverty Law Center, on the basis of which they report:
+In 2017, the web site Fivethirtyeight.com published a story titled [Higher Rates Of Hate Crimes Are Tied To Income Inequality](https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/) which discussed the relationship between the prevalence of hate crimes and income inequality in the wake of the 2016 Presidential election. The story reported an analysis of hate crime data from the FBI and the Southern Poverty Law Center, on the basis of which they report:
 
 > "we found that income inequality was the most significant determinant of population-adjusted hate crimes and hate incidents across the United States".  
 
-The data for this analysis are included in the ``fivethirtyeight`` R package, which makes it easy for us to access them.  The ``hate_crimes`` data frame includes data from each state, with two variables specific to hate crimes:
-
-TBD: FIX FORMATTING
-
-Header | Definition
----|---------
-`state` | State name
-`median_household_income` | Median household income, 2016
-`share_unemployed_seasonal` | Share of the population that is unemployed (seasonally adjusted), Sept. 2016
-`share_population_in_metro_areas` | Share of the population that lives in metropolitan areas, 2015
-`share_population_with_high_school_degree` | Share of adults 25 and older with a high-school degree, 2009
-`share_non_citizen` | Share of the population that are not U.S. citizens, 2015
-`share_white_poverty` | Share of white residents who are living in poverty, 2015
-`gini_index` | Gini Index, 2015
-`share_non_white` | Share of the population that is not white, 2015
-`share_voters_voted_trump` | Share of 2016 U.S. presidential voters who voted for Donald Trump
-`hate_crimes_per_100k_splc` | Hate crimes per 100,000 population, Southern Poverty Law Center, Nov. 9-18, 2016
-`avg_hatecrimes_per_100k_fbi` | Average annual hate crimes per 100,000 population, FBI, 2010-2015
-
-The analysis reported in the story focused on the relationship between income inequality (defined by a quantity called the *Gini index*) and the prevalence of hate crimes in each state.  
+The data for this analysis are included in the ``fivethirtyeight`` R package, which makes it easy for us to access them.  The analysis reported in the story focused on the relationship between income inequality (defined by a quantity called the *Gini index*) and the prevalence of hate crimes in each state.  
 
 ### Quantifying inequality: The Gini index
 
@@ -101,13 +82,16 @@ lorenzCurve = function(df){
 First, let's create an example with 10 people where everyone has exactly the same income (Figure \@ref(fig:gini0)).
 
 ```{r gini0,fig.cap="Lorenz curve for Gini index of zero (i.e. perfect equality)."}
+# Create Lorenz curve for Gini index of zero (i.e. perfect equality)
 
 incomeDf <- data.frame(income=rep(40000,10))
-print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
+lc=lorenzCurve(incomeDf)
+sprintf('Gini index = %0.2f',lc)
 ```
 Now let's look at an example where income is normally distributed (Figure \@ref(fig:giniNormal)).
 
 ```{r giniNormal,fig.cap="Gini index for a population with normally distributed income."}
+# Create Lorenz curve for a population with normally distributed income.
 incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
 
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
@@ -117,9 +101,10 @@ print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 Now let's look at an example with high inequality; everyone has equal income (\$40,000) except for one person, who has income of \$40,000,000 (Figure \@ref(fig:giniInequal)).
 
 ```{r giniInequal,fig.cap="Lorenz curve for a maximally inequal population."}
+# Create Lorenz curve for a maximally inequal population
+
 incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
 incomeDf$income[1] <- 40000000
-
 print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
 
 ```
@@ -145,7 +130,6 @@ ggplot(hateCrimes,aes(gini_index,avg_hatecrimes_per_100k_fbi,label=state_abb)) +
   xlab('Gini index') + 
   ylab('Avg hate crimes per 100K population (FBI)')
   
-
 ```
 
 Looking at the data, it seems that there may be a positive relationship between the two variables.  How can we quantify that relationship?
@@ -167,6 +151,7 @@ $$
 This value will be high when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.
 
 ```{r }
+# create data for toy example of covariance
 df <- 
   data.frame(x=c(3,5,8,10,12)) %>%
   mutate(y=x+round(rnorm(5,sd=2))) %>%
@@ -177,10 +162,15 @@ df <-
   mutate(crossproduct=y_dev*x_dev)
 
 pander(df)
-pander(sprintf('sum of cross products = %.2f\n',sum(df$crossproduct)))
+
+```
+
+```{r}
+# compute covariance
+
+sprintf('sum of cross products = %.2f',sum(df$crossproduct))
 covXY <- sum(df$crossproduct)/(nrow(df)-1)
-pander(sprintf('covariance: %.2f\n',covXY))
-# compare to cov(df$x,df$y)
+sprintf('covariance: %.2f',covXY)
 
 ```
 
@@ -203,7 +193,7 @@ We can compute the correlation coefficient for the hate crime data:
 ```{r}
 corGiniHC <- cor(hateCrimes$gini_index,
                  hateCrimes$avg_hatecrimes_per_100k_fbi)
-pander(sprintf('correlation coefficient = %.2f\n',corGiniHC))
+sprintf('correlation coefficient = %.2f',corGiniHC)
 ```
 
 ### Hypothesis testing for correlations
@@ -217,6 +207,7 @@ $$
 Under the null hypothesis $H_0:r=0$, this statistic is distributed as a t distribution with $N - 2$ degrees of freedom.  We can compute this using the ``cor.test()`` function in R:
 
 ```{r}
+# perform correlation test on hate crime data
 cor.test(hateCrimes$avg_hatecrimes_per_100k_fbi,
          hateCrimes$gini_index)
 ```
@@ -225,7 +216,7 @@ This test shows that the likelihood of an r value this extreme or more is quite 
 
 We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis.
 
-```{r shuffleCorr,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line."}
+```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line."}
 shuffleCorr <- function(x,y){
   xShuffled=sample(x)
   return(cor(xShuffled,y))
@@ -241,13 +232,13 @@ ggplot(data.frame(shuffleDist),aes(shuffleDist)) +
 
 ```
 
-Randomization gives us a reasonably similar answer to the t-test.
+The p-value computed using randomization is reasonably similar to the answer give by the t-test.
 
 ### Robust correlations
 
 You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
 
-```{r outlierCorr, fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive."}
+```{r outlierCorr, echo=FALSE,fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive."}
 n <- 10
 set.seed(1234)
 
@@ -308,7 +299,7 @@ Let's say that we did such an analysis, and we found that abused children had po
 
 One useful way to describe causal relations between variables is through a *causal graph*, which shows variables as circles and causal relations between them as arrows.  For example, Figure \@ref(fig:simpleCausalGraph) shows the causal relationships between study time and two variables that we think should be affected by it: exam grades and exam finishing times.  
 
-```{r simpleCausalGraph, fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam)."}
+```{r simpleCausalGraph, echo=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam)."}
 
 library(DiagrammeR)
 grViz("
@@ -334,7 +325,7 @@ digraph boxes_and_circles {
 
 However, in reality the effects on finishing time and grades are not due directly to the amount of time spent studying, but rather to the amount of knowledge that the student gains by studying.  We would usually say that knowledge is a *latent* variable -- that is, we can't measure it directly but we can see it reflected in variables that we can measure (like grades and finishing times).  Figure \@ref(fig:latentCausalGraph) shows this.
 
-```{r latentCausalGraph, fig.cap="A graph showing the same causal relationships as above, but now also showing the latent variable (knowledge) using a square box."}
+```{r latentCausalGraph, echo=FALSE,fig.cap="A graph showing the same causal relationships as above, but now also showing the latent variable (knowledge) using a square box."}
 
 library(DiagrammeR)
 grViz("
@@ -362,7 +353,9 @@ Here we would say that knowledge *mediates* the relationship between study time 
 
 Note that if we simply measured exam grades and finishing times we would generally see negative relationship between them, because people who finish exams the fastest in general get the highest grades.  However, if we were to interpret this correlation as a causal relation, this would tell us that in order to get better grades, we should actually finish the exam more quickly! This example shows how tricky the inference of causality from non-experimental data can be.
 
-Within statistics and machine learning, there is a very active research community that is currently studying the question of when and how we can infer causal relationships from non-experimental data.  If you would like an introduction to this area, I would recommend [The Book of Why](http://bayes.cs.ucla.edu/WHY/) by Judea Pearl and Dana Mackenzie.
+Within statistics and machine learning, there is a very active research community that is currently studying the question of when and how we can infer causal relationships from non-experimental data.  However, these methods often require strong assumptions, and must generally be used with great caution.
 
 ## Suggested readings
+
+- [The Book of Why](http://bayes.cs.ucla.edu/WHY/) - an excellent introduction to the ideas behind causal inference.
 
