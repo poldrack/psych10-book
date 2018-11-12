@@ -111,7 +111,7 @@ The relative frequency provides a much easier way to see how big the imbalance i
 ```{r}
 # compute percentages for physical activity categories
 
-NHANES %>%
+PhysActive_table_filtered <- NHANES %>%
   drop_na(PhysActive) %>%
   select(PhysActive) %>%
   group_by(PhysActive) %>%
@@ -119,8 +119,9 @@ NHANES %>%
   mutate(
     RelativeFrequency = AbsoluteFrequency / sum(AbsoluteFrequency),
     Percentage = RelativeFrequency * 100
-  ) %>%
-  pander()
+  )
+
+pander(PhysActive_table_filtered)
 
 ```
 
