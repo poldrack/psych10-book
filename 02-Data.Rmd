@@ -63,7 +63,7 @@ R treats truth values and binary numbers eqivalently:
 # 1 is equal to TRUE - should return TRUE
 TRUE == 1
 
-# 0 is equal to FALSE - should return FALSE
+# 0 is equal to FALSE - should return TRUE
 FALSE == 0
 
 # 0 is equal to true - should return FALSE
