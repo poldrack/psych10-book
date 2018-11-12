@@ -16,13 +16,15 @@ Data are composed of *variables*, where a variable reflects a unique measurement
 More commonly in statistics we will work with *quantitative* data, meaning data that are numerical.  For example, here Table \@ref(tab:WhyTakingClass) shows the results from another question that I ask in my introductory class, which is "Why are you taking this class?"
 
 ```{r WhyTakingClass,echo=FALSE}
+# create table showing frequency of responses to question about why students
+# are taking statistics class
+
 classData=data.frame(why=c("It fulfills a degree plan requirement",
                            "It fulfills a General Education Breadth Requirement",
                            "It is not required but I am interested in the topic",
                            "Other"),
                      nResponses=c(105,32,11,4))
 
- 
 knitr::kable(
   classData, booktabs = TRUE,
   caption = 'Counts of the prevalence of different responses to the question "Why are you taking this class?"',
@@ -38,6 +40,8 @@ There are several different types of numbers that we work with in statistics.  I
 **Binary numbers**. The simplest are binary numbers -- that is, zero or one.  We will often use binary numbers to represent whether something is true or false, or present or absent.  For example, I might ask 10 people if they have ever experienced a migraine headache.  If their answers were:
 
 ```{r}
+# create variable containing responses to migraine question
+
 everHadMigraine = c('Yes','No','Yes','No','No','No','Yes','No','No','No')
 everHadMigraine
 ```
@@ -45,6 +49,8 @@ everHadMigraine
 we could instead recode these into truth values:
 
 ```{r}
+# create truth values from everHadMigraine variable
+
 everHadMigraineTF = everHadMigraine == 'Yes'
 everHadMigraineTF
 ```
@@ -52,14 +58,23 @@ everHadMigraineTF
 R treats truth values and binary numbers eqivalently:
 
 ```{r}
+# evaluate truth of a set of assertions
+
+# 1 is equal to TRUE - should return TRUE
 TRUE == 1
+
+# 0 is equal to FALSE - should return FALSE
 FALSE == 0
+
+# 0 is equal to true - should return FALSE
 TRUE == 0
 ```
 
 And we can also turn our list of truth values into integers explicitly:
 
 ```{r}
+# create integer values from truth values using as.integer()
+
 everHadMigraineBinary <- as.integer(everHadMigraineTF)
 everHadMigraineBinary
 ```
@@ -93,7 +108,7 @@ There are four different scales of measurement that go along with these differen
 
 There are two important reasons that we must pay attention to the scale of measurement of a variable.  First, the scale determines what kind of mathematical operations we can apply to the data (see Table \@ref(tab:MeasurementTypes)).  A nominal variable can only be compared for equality; that is, do two observations on that variable have the same value?  It would not make sense to apply other mathematical operations to a nominal variable, since they don't really function as numbers in a nominal variable, but rather as labels.  With ordinal variables, we can also test whether one value is greater or lesser than another, but we can't do any arithmetic.  Interval and ratio variables allow us to perform arithmetic; with interval variables we can only add or subtract values, whereas with ratio variables we can also multiply and divide values.  
 
-```{r MeasurementTypes}
+```{r echo=FALSE,MeasurementTypes}
 
 measTypes=data.frame(equal=c('OK','OK','OK','OK'),
                      gtlt=c('','OK','OK','OK'),
