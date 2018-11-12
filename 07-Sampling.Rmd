@@ -9,7 +9,7 @@ output:
 library(tidyverse)
 library(ggplot2)
 library(pander)
-panderOptions('round',2)
+panderOptions('round',3)
 panderOptions('digits',7)
 
 ```
@@ -41,10 +41,10 @@ NHANES_adult <- NHANES %>%
   drop_na(Height) %>%
   subset(Age>=18)
 
-pander(sprintf('Population height: mean = %.2f\n',
-               mean(NHANES_adult$Height)))
-pander(sprintf('Population height: std deviation = %.2f\n',
-               sd(NHANES_adult$Height)))
+sprintf('Population height: mean = %.2f\n',
+               mean(NHANES_adult$Height))
+sprintf('Population height: std deviation = %.2f\n',
+               sd(NHANES_adult$Height))
 
 ```
 
@@ -55,16 +55,17 @@ In this case we know the population mean and standard deviation. Now let's take 
 
 exampleSample <- NHANES_adult %>% 
   sample_n(50)
-pander(sprintf('Sample height: mean = %.2f\n',
-               mean(exampleSample$Height)))
-pander(sprintf('Sample height: std deviation = %.2f\n',
-               sd(exampleSample$Height)))
+sprintf('Sample height: mean = %.2f\n',
+               mean(exampleSample$Height))
+sprintf('Sample height: std deviation = %.2f\n',
+               sd(exampleSample$Height))
 
 ```
 
 Now let's take a large number of samples of 50 individuals, compute the mean, and look at the resulting sampling distribution. We have to decide how many samples to take in order to do a good job of estimating the sampling distribution -- in this case, let's take 5000 samples so that we are really confident in the answer. Note that simulations like this one can sometimes take a few minutes to run, and might make your computer huff and puff. The histogram in Figure \@ref(fig:samplePlot) shows that the means estimated for each of the samples of 50 individuals vary somewhat, but that overall they are centered around the population mean.  
 
-```{r samplePlot,echo=FALSE,fig.cap="The blue histogram shows the sampling distribution of the mean over 5000 random samples from the NHANES dataset.  The histogram for the full dataset is shown in gray for reference."}
+```{r}
+# compute sample means across 5000 samples from NHANES data
 
 sampSize <- 50  # size of sample
 nsamps <- 5000  # number of samples we will take
@@ -81,10 +82,14 @@ for (i in 1:nsamps){
 
 sampdataDf <- tibble(mean=sampMeans)
 
-pander(sprintf('Average sample mean = %.2f\n',
-               mean(sampMeans)))
+sprintf('Average sample mean = %.2f\n',
+               mean(sampMeans))
 
 sampMeans_df <- tibble(sampMeans=sampMeans)
+
+```
+
+```{r samplePlot,echo=FALSE,fig.cap="The blue histogram shows the sampling distribution of the mean over 5000 random samples from the NHANES dataset.  The histogram for the full dataset is shown in gray for reference."}
 
 ggplot(sampMeans_df,aes(sampMeans)) +
   geom_histogram(data=NHANES_adult,aes(Height,..density..),
@@ -113,10 +118,10 @@ In general we have to be careful about doing this with smaller samples (less tha
 ```{r}
 # compare standard error based on population to standard deviation 
 # of sample means
-pander(sprintf('Estimated standard error based on population SD: %.2f\n',
-               sd(NHANES_adult$Height)/sqrt(sampSize)))
-pander(sprintf('Standard deviation of sample means = %.2f\n',
-               sd(sampMeans)))
+sprintf('Estimated standard error based on population SD: %.2f\n',
+               sd(NHANES_adult$Height)/sqrt(sampSize))
+sprintf('Standard deviation of sample means = %.2f\n',
+               sd(sampMeans))
 
 ```
 
@@ -270,7 +275,7 @@ for (i in 1:nsamples){
   ci_contains_mean[i] <- (sample_summary$CI_upper>mean(NHANES_adult$Height))&(sample_summary$CI_lower<mean(NHANES_adult$Height))
 
 }
-pander(mean(ci_contains_mean))
+sprintf('proportion of confidence intervals containing population mean: %.3f',mean(ci_contains_mean))
 ```
 
 This confirms that the confidence interval does indeed capture the population mean about 95% of the time.
