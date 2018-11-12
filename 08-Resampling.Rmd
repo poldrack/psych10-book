@@ -12,7 +12,7 @@ library(cowplot)
 set.seed(123456) # set random seed to exactly replicate results
 
 library(pander)
-panderOptions('round',2)
+panderOptions('round',3)
 panderOptions('digits',7)
 
 ```
@@ -101,7 +101,9 @@ ggplot(finishTimeDf,aes(finishTime)) +
 
 However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate a large number of quizzes (using the assumption that the finishing times are distributed normally, as stated above), and each time we can record the longest finishing time.  To do this, we create a new function in R called `sampleMax()` which takes a sample of the appropriate size (i.e. the number of students in the class) from the appropriate distribution, and returns the maximum value in the sample.  We then repeat this a large number of times (5000 should be enough) using the `replicate()` function, which will store all of the outputs into a single variable.  The distribution of finishing times is shown in Figure \@ref(fig:finishTimeSim).
 
-```{r finishTimeSim,echo=FALSE,fig.cap="Distribution of maximum finishing times across simulations."}
+```{r}
+# sample maximum value 5000 times and compute 99th percentile
+
 nRuns <- 5000
 sampSize <- 150
 
@@ -112,11 +114,15 @@ sampleMax <- function(sampSize=150){
 
 maxTime <- replicate(nRuns,sampleMax())
 
-ggplot(data.frame(maxTime),aes(maxTime)) +
-  geom_histogram(bins=100)
-
 cutoff <- quantile(maxTime,0.99)
 pander(sprintf('99th percentile of maxTime distribution: %.2f\n',cutoff))
+
+```
+
+```{r finishTimeSim,echo=FALSE,fig.cap="Distribution of maximum finishing times across simulations."}
+tibble(maxTime) %>% 
+  ggplot(aes(maxTime)) +
+  geom_histogram(bins=100)
 
 
 ```
@@ -136,7 +142,7 @@ The idea behind the boostrap is that we repeatedly sample from the actual datase
 
 Let's start by using the bootstrap to estimate the sampling distribution of the mean, so that we can compare the result to the SEM that we discussed earlier.
 
-```{r bootstrapSEM,echo=FALSE,fig.cap="An example of bootstrapping to compute the standard error of the mean. The histogram shows the distribution of means across bootstrap samples, while the red line shows the normal distribution based on the sample mean and standard deviation."}
+```{r}
 nRuns <- 2500
 sampleSize <- 32
 # load the NHANES data library
@@ -165,9 +171,18 @@ print(sprintf('SEM computed using sample SD: %f',SEM_standard))
 SEM_bootstrap <- sd(bootMeans)
 print(sprintf('SEM computed using SD of bootstrap estimates: %f',SEM_bootstrap))
 
-ggplot(data.frame(bootMeans=bootMeans),aes(bootMeans)) + 
+```
+
+```{r bootstrapSEM,echo=FALSE,fig.cap="An example of bootstrapping to compute the standard error of the mean. The histogram shows the distribution of means across bootstrap samples, while the red line shows the normal distribution based on the sample mean and standard deviation."}
+
+tibble(bootMeans=bootMeans) %>%
+  ggplot(aes(bootMeans)) + 
     geom_histogram(aes(y=..density..),bins=50) + 
-  stat_function(fun = dnorm, n = 100, args = list(mean = mean(heightSample$Height), sd = SEM_standard),size=1.5,color='red') 
+  stat_function(fun = dnorm, n = 100, 
+                args = list(mean = mean(heightSample$Height), 
+                            sd = SEM_standard),
+                size=1.5,color='red'
+                ) 
 
 ```
 
@@ -183,7 +198,7 @@ pander(bootCI)
 #now let's compute the confidence intervals using the sample mean and SD
 sampleMean=mean(heightSample$Height)
 
-normalCI <- c("2.5%" = sampleMean - 1.96*SEM_standard,
+normalCI <- tibble("2.5%" = sampleMean - 1.96*SEM_standard,
           "97.5%"=sampleMean + 1.96*SEM_standard) 
 
 pander("confidence limits based on sample SD and normal distribution:")
