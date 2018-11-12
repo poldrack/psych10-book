@@ -3,6 +3,9 @@ title: "Statistical thinking for the 21st Century"
 author: "Copyright 2018 Russell A. Poldrack"
 date: "Draft: `r Sys.Date()`"
 site: bookdown::bookdown_site
+bibliography: ["psych10-book.bib"]
+biblio-style: "apalike"
+link-citations: true
 output:
   bookdown::gitbook:
     lib_dir: "book_assets"
@@ -10,6 +13,11 @@ output:
     keep_tex: yes
 documentclass: book
 ---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, #echo=FALSE, 
+                      warning=FALSE, message=FALSE)
+```
 
 # Preface {-}
 
