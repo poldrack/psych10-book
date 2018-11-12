@@ -3,6 +3,7 @@ render-gitbook:
 
 render-pdf:
 	echo "rendering pdf - TBD"
+	echo "bookdown::render_book('index.Rmd', 'bookdown::pdf_book')" | R --no-save
 
 pkgsetup:
 	cd setup && python get_packages.py 
