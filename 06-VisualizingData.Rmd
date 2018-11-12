@@ -34,7 +34,7 @@ knitr::include_graphics("images/thiokol_blowby_chart.png")
 
 The visualization expert Edward Tufte has argued that with a proper presentation of all of the data, the engineers could have been much more persuasive.  In particular, they could have show a figure like that shown in Figure \@ref(fig:challengerTemps), which highlights two important facts. First, it shows that the amount of O-ring damage (defined by the amount of erosion and soot found outside the rings after the solid rocket boosters were retrieved from the ocean in previous flights) was closely related to the temperature at takeoff.  Second, it shows that the range of forecasted temperatures for the morning of January 28 (shown in the shaded red area) was well outside of the range of all previous launches.  While we can't know for sure, it seems at least plausible that this could have been more persuasive. 
 
-```{r challengerTemps, fig.cap="A replotting of Tufte's damage index data. The blue line shows the trend in the data, and the red patch shows the projected temperatures for the morning of the launch."}
+```{r challengerTemps, echo=FALSE,fig.cap="A replotting of Tufte's damage index data. The blue line shows the trend in the data, and the red patch shows the projected temperatures for the morning of the launch."}
 oringDf=read.table('data/orings.csv',sep=',',header=TRUE)
 
 ggplot(oringDf,aes(x=Temperature,y=DamageIndex)) +
@@ -62,7 +62,7 @@ Here is our distillation of some important principles for data visualization.
 
 Let's say that I had performed a study that examined the relationship between dental health and time spent flossing, and I would like to visualize my data. Figure \@ref(fig:dentalFigs) shows four possible presentations of these data.  In panel A, we don't actually show the data, just a line expressing the relationship between the data.  This is clearly not optimal, because we can't actually see what the underlying data look like.  PAnels B-D show three possible outcomes from plotting the actual data, where each plot shows a different way that the data could have been generated. If we saw the plot in Panel B, we would probably be suspicious -- rarely would real data follow such a precise pattern.  The data in Panel C, on the other hand, look like real data -- they show a general trend, but they are messy, as data in the world usually are.  The data in Panel D show us that the apparent relationship between the two variables is solely caused by one individual, which we would refer to as an *outlier* because they fall so far outside of the pattern in the rest of the group.  In a later chapter we will learn how to deal with outliers, but it should be clear that we probably don't want to conclude very much from an effect that is driven by one data point.  This figure highlights why it is *always* important to look at the raw data before putting too much faith in any summary of the data.
 
-```{r dentalFigs,fig.cap="Four different possible presentations of data for the dental health example. Each point in the scatter plot represents one data point in the dataset, and the line in each plot represents the linear trend in the data."}
+```{r dentalFigs,echo=FALSE,fig.cap="Four different possible presentations of data for the dental health example. Each point in the scatter plot represents one data point in the dataset, and the line in each plot represents the linear trend in the data."}
 
 set.seed(1234567)
 npts=12
@@ -104,7 +104,7 @@ plot_grid(p1,p2,p3,p4,nrow=2,labels='AUTO')
 
 Let's look at another example. We are interested in charactrizing the difference in height between men and women in the NHANES dataset. Figure \@ref(fig:plotHeight) shows four different ways to plot these data. The bar graph in panel A shows the difference in means, but does't show us how much spread there is in the data around these means -- and as we will see later, knowing this is essential to determine whether we think the difference between the groups is large enough to be important.  The second plot shows the bars with all of the data points overlaid - this  makes it a bit clearer that the distributions of height for men and women are overlapping, but it's still hard to see due to the large number of data points.  In general we prefer using a plotting technique that provides a clearely view of the distribution of the data points.  In panel C we see one example, known as a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  Another option is the *box plot* shown in panel D, which shows the median (central line), a measure of variability (the width of the box, which is based on a measure called the interquartile range), and any outliers (noted by the points at the ends of the lines). These are both effective ways to show data that provide a good feel for the distribution of the data.
 
-```{r plotHeight,fig.cap="Four different ways of plotting the difference in height between men and women in the NHANES dataset.  Panel A plots the means of the two groups, which gives no way to assess the relative overlap of the two distributions.  Panel B shows the same bars, but also overlays the data points, jittering them so that we can see their overall distribution.  Panel C shows a violin plot, which shows the distribution of the dataset.  PAnel D shows a box plot, which highlights the spread of the distribution along with any outliers."}
+```{r plotHeight,echo=FALSE,fig.cap="Four different ways of plotting the difference in height between men and women in the NHANES dataset.  Panel A plots the means of the two groups, which gives no way to assess the relative overlap of the two distributions.  Panel B shows the same bars, but also overlays the data points, jittering them so that we can see their overall distribution.  Panel C shows a violin plot, which shows the distribution of the dataset.  PAnel D shows a box plot, which highlights the spread of the distribution along with any outliers."}
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
@@ -159,7 +159,7 @@ data/ink\ ratio = \frac{amount\, of\, ink\, used\, on\, data}{total\, amount\, o
 $$
 The point of this is to minimize visual clutter and let the data show through.  For example, take the two presentations of the dental health data in \@ref(fig:dataInkExample). Both panels show the same data, but panel A is much easier to apprehend, because of its relatively higher data/ink ratio.
 
-```{r dataInkExample,fig.cap="An example of the same data plotted with two different data/ink ratios."}
+```{r dataInkExample,echo=FALSE,fig.cap="An example of the same data plotted with two different data/ink ratios."}
 p1 = ggplot(df,aes(x,yDirty)) + 
   geom_point(size=2) +
   geom_smooth(method='lm',se=FALSE)+ ylim(-5,20) +
@@ -186,18 +186,16 @@ One good way to avoid chartjunk is to avoid using popular spreadsheet programs t
 - it has a distracting background texture.
 - it uses three-dimensional bars
 
-```{r chartJunk,fig.cap="An example of chart junk."}
+```{r chartJunk,echo=FALSE,fig.cap="An example of chart junk."}
 knitr::include_graphics('images/excel_chartjunk.png')
 ```
-
-
 
 ## Avoid distorting the data
 
 It's often possible to use visualization to distort the message of a dataset.  A very common one is use of different axis scaling to either exaggerate or hide a pattern of data.  For example, let's say that we are interested in seeing whether rates of violent crime have changed in the US.  In Figure \@ref(fig:crimePlotAxes), we can see these data plotted in ways that either make it look like crime has remained constant, or that it has plummeted.  The same data can tell two very different stories!
 
 
-```{r crimePlotAxes,fig.cap="Crime data from 1990 to 2014 plotted over time.  Panels A and B show the same data, but with different axis ranges. Data obtained from https://www.ucrdatatool.gov/Search/Crime/State/RunCrimeStatebyState.cfm"}
+```{r crimePlotAxes,echo=FALSE,fig.cap="Crime data from 1990 to 2014 plotted over time.  Panels A and B show the same data, but with different axis ranges. Data obtained from https://www.ucrdatatool.gov/Search/Crime/State/RunCrimeStatebyState.cfm"}
 
 
 crimeData=read.table('data/CrimeStatebyState.csv',sep=',',header=TRUE) %>%
@@ -220,7 +218,7 @@ One of the major controversies in statistical data visualization is how to choos
 
 There are certainly cases where using the zero point makes no sense at all. Let's say that we are interested in plotting body temperate for an individual over time.  In Figure \@ref(fig:bodyTempAxis) we plot the same (simulated) data with or without zero in the Y axis. It should be obvious that by plotting these data with zero in the Y axis (Panel A) we are wasting a lot of space in the figure, given that body temperature of a living person could never go to zero! By including zero, we are also making the apparent jump in temperature during days 21-30 much less evident. In general, my inclination for line plots and scatterplots is to use all of the space in the graph, unless the zero point is truly important to highlight.
 
-```{r bodyTempAxis,fig.cap="Body temperature over time, plotted with or without the zero point in the Y axis."}
+```{r bodyTempAxis,echo=FALSE,fig.cap="Body temperature over time, plotted with or without the zero point in the Y axis."}
 bodyTempDf=data.frame(days=c(1:40),temp=rnorm(40)*0.3 + 98.6)
 bodyTempDf$temp[21:30]=bodyTempDf$temp[21:30]+3
 
@@ -240,7 +238,7 @@ Edward Tufte introduced the concept of the "lie factor" to describe the degree t
 
 The lie factor supports the argument that one should always include the zero point in a bar chart.  In Figure \@ref(fig:barCharLieFactor) we plot the same data with and without zero in the Y axis.  In panel A, the proportional difference in area between the two bars is exactly the same as the proportional difference between the values (i.e. lie factor = 1), whereas in Panel B (where zero is not included) the proportional difference in area between the two bars is roughly 2.8 times bigger than the proportional difference in the values, and thus it visually exaggerates the size of the difference.  
 
-```{r barCharLieFactor, fig.cap="Two bar charts with associated lie factors."}
+```{r barCharLieFactor, echo=FALSE,fig.cap="Two bar charts with associated lie factors."}
 p1 = ggplot(data.frame(y=c(100,95),x=c('condition 1','condition 2')),aes(x=x,y=y)) + 
   geom_col() +
   ggtitle('lie factor = 1')
@@ -263,7 +261,7 @@ Humans have both perceptual and cognitive limitations that can make some visuali
 
 One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" pallettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R
 
-```{r badColors,fig.cap="Example of a bad figure that relies solely on color contrast."}
+```{r badColors,echo=FALSE,fig.cap="Example of a bad figure that relies solely on color contrast."}
 exampleDf = data.frame(value=c(3,5,4,6,2,5,8,8),
                        v1=as.factor(c(1,1,2,2,3,3,4,4)),
                        v2=as.factor(c(1,2,1,2,1,2,1,2)))
@@ -275,7 +273,7 @@ ggplot(exampleDf,aes(v1,value)) +
 
 Even for people with perfect color vision, there are perceptual limitations that can make some plots ineffective.  This is one reason why statisticians never use pie charts: It can be very difficult for humans to apprehend differences in the volume of shapes. The piechart in Figure \@ref(fig:pieChart) (presenting the same data on religious affiliation that we showed above) shows how tricky this can be. 
 
-```{r pieChart,fig.cap="An example of a pie chart, highlighting the difficult in apprehending the relative volume of the different pie slices."}
+```{r pieChart,echo=FALSE,fig.cap="An example of a pie chart, highlighting the difficult in apprehending the relative volume of the different pie slices."}
 knitr::include_graphics("images/religion_piechart.png")
 ```
 
@@ -283,7 +281,7 @@ This plot is terrible for several reasons.  First, it requires distingishing a l
 
 Plotting the data using a more reasonable plot (Figure \@ref(fig:religionBars)), we can see the pattern much more clearly. This plot may not look as flashy as the pie chart generated using Excel, but it's a much more effective and accurate representation of the data.
 
-```{r religionBars,fig.cap="A clearer presentation of the religious affiliation data (obtained from http://www.pewforum.org/religious-landscape-study/)."}
+```{r religionBars,echo=FALSE,fig.cap="A clearer presentation of the religious affiliation data (obtained from http://www.pewforum.org/religious-landscape-study/)."}
 religionData=read.table('data/religion_data.txt',sep='\t')
 
 names(religionData)=c('Religion','Percentage')
@@ -300,7 +298,7 @@ ggplot(religionData,aes(Religion,Percentage,label=Percentage)) +
 Often we are interested in plotting data where the variable of interest is affected by other factors than the one we are interested in.  For example, let's say that we want to understand how the price of gasoline has changed over time.  Figure \@ref(fig:gasPrices) shows historical gas price data, plotted either with or without adjustment for inflation. Whereas the unadjusted data show a huge increase, the adjusted data show that this is mostly just reflective of inflation.  Other examples where one needs to adjust data for other factors include population size (as we saw in the crime rate examples in an earlier chapter) and data collected across different seasons.
 
 
-```{r gasPrices,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation  Inflation correction based on Consumer Price Index data obtained from https://inflationdata.com/Inflation/Consumer_Price_Index/HistoricalCPI.aspx?reloaded=true#Table."}
+```{r gasPrices,echo=FALSE,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation  Inflation correction based on Consumer Price Index data obtained from https://inflationdata.com/Inflation/Consumer_Price_Index/HistoricalCPI.aspx?reloaded=true#Table."}
 
 # load CPI data 
 cpiData=read.table('data/cpi_data.txt')
