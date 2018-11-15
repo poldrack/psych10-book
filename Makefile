@@ -1,3 +1,6 @@
+clean:
+	rm -rf _bookdown_files bookdown-demo.*
+
 render-gitbook:
 	echo "bookdown::render_book('index.Rmd', 'bookdown::gitbook')" | R --no-save
 
