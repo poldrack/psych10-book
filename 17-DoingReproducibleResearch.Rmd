@@ -25,7 +25,7 @@ Let's say that we are interested in a research project on how children choose wh
 - You collect some data
   * Offer children the choice between a cookie and an apple with either an Elmo-branded sticker or a control sticker, and record what they choose
 - You do statistics to test the null hypothesis
-  * "The preplanned comparison shows Elmo-branded apples were associated with an increase in a child’s selection of an apple over a cookie, from 20.7% to 33.8% ($\chi^2$=5.158; P=.02)" (Wansink, Just, & Payne, 2012, JAMA Pediatrics)
+  * "The preplanned comparison shows Elmo-branded apples were associated with an increase in a child’s selection of an apple over a cookie, from 20.7% to 33.8% ($\chi^2$=5.158; P=.02)" [@wans:just:payn:2012]
   
 ## How science (sometimes) actually works
 
@@ -37,14 +37,16 @@ Wansink also acknowledged the paper was weak as he was preparing to submit it to
 “It seems to me it should be lower,” he wrote, attaching a draft. “Do you want to take a look at it and see what you think. If you can get the data, and it needs some tweeking, it would be good to get that one value below .05.” ...
 Later in 2012, the study appeared in the prestigious JAMA Pediatrics, the 0.06 p-value intact. But in September 2017, it was retracted and replaced with a version that listed a p-value of 0.02. And a month later, it was retracted yet again for an entirely different reason: Wansink admitted that the experiment had not been done on 8- to 11-year-olds, as he’d originally claimed, but on preschoolers.
 
+This kind of behavior finally caught up with Wansink; [fifteen of his research study have been retracted](https://www.vox.com/science-and-health/2018/9/19/17879102/brian-wansink-cornell-food-brand-lab-retractions-jama) and in 2018 he resigned from his faculty position at Cornell University.
+
 ## The reproducibility crisis in science
 
-One might hope that Brian Wansink was a rare outlier, but it has become increasingly clear that problems with reproducibility are much more widespread in science than previously thought.  This became clear in 2015, when a large group of researchers published a study in the journal *Science* titled ["Estimating the reproducibility of psychological science."](http://science.sciencemag.org/content/349/6251/aac4716)  In this study, they took the results from 100 published studies in psychology, and attempted to reproduce the findings reported in the papers.  Their findings were shocking: Whereas 97% of the original papers had reported statistically significant findings, only 37% of these significant findings were replicated in the study.  
-Although the problems in psychology have received a great deal of attention, they seem to be present in nearly every area of science, from cancer biology (REF) to XXX.
+One might hope that Brian Wansink was a rare outlier, but it has become increasingly clear that problems with reproducibility are much more widespread in science than previously thought.  This became clear in 2015, when a large group of researchers published a study in the journal *Science* titled "Estimating the reproducibility of psychological science"[@open:2015]. In this study, the researchers took 100 published studies in psychology and attempted to reproduce the results originally reported in the papers.  Their findings were shocking: Whereas 97% of the original papers had reported statistically significant findings, only 37% of these effects were statistically significant in the replication study.  
+Although the problems in psychology have received a great deal of attention, they seem to be present in nearly every area of science, from cancer biology [@erri:iorn:gunn:2014] and chemistry [@bake:2017] to economics [@NBERw22989] and the social sciences [@Camerer2018EvaluatingTR].
 
-The reproducibility crisis that emerged after 2010 was actually predicted by John Ioannidis, a physician from Stanford who wrote a paper in 2005 titled ["Why most published research findings are false."](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0020124)  In this article, Ioannidis argued that the use of null hypothesis statistical testing in the context of modern science will necessarily lead to high levels of false results.  
+The reproducibility crisis that emerged after 2010 was actually predicted by John Ioannidis, a physician from Stanford who wrote a paper in 2005 titled "Why most published research findings are false."[@ioan:2005]  In this article, Ioannidis argued that the use of null hypothesis statistical testing in the context of modern science will necessarily lead to high levels of false results.  
 
-### Positive predictive values
+### Positive predictive value and statistical significance
 
 Ioannidis' analysis focused on a concept known as the *positive predictive value*, which is defined as the proportion of positive results (which generally translates to "statistically significant findings") that are true:
 
@@ -81,11 +83,11 @@ $$
 PPV = \frac{0.1 * (1 - 0.2)}{0.1 * (1 - 0.2) + (1 - 0.1) * 0.05} = 0.307
 $$
 
-This means that in a field where most of the hypotheses are likely to be wrong (that is, an interesting scientific field), even when we find a positive result it is more likely to be false than true!
+This means that in a field where most of the hypotheses are likely to be wrong (that is, an interesting scientific field where researchers are testing risky hypotheses), even when we find a positive result it is more likely to be false than true!  In fact, this is just another example of the base rate effect that we discussed in the context of hypothesis testing -- when an outcome is unlikely, then it's almost certain that most positive outcomes will be false positives.
 
 We can simulate this to show how PPV relates to statistical power, as a function of the prior probability of the hypothesis being true (see Figure \@ref(fig:PPVsim))
 
-```{r PPVsim, fig.cap='A simulation of posterior predictive value as a function of statistical power (plotted on the x axis) and prior probability of the hypothesis being true (plotted as separate lines).'}
+```{r PPVsim, echo=FALSE,fig.cap='A simulation of posterior predictive value as a function of statistical power (plotted on the x axis) and prior probability of the hypothesis being true (plotted as separate lines).'}
 
 alpha=0.05  # false positive rate
 beta = seq(1.,0.05,-0.05)  # false negative rate
@@ -114,7 +116,7 @@ ggplot(df,aes(power,PPV,color=as.factor(priorVal))) +
 
 ```
 
-Unfortunately, statistical power remains low in many areas of science ([Smaldino & McElreath, 2016](https://arxiv.org/abs/1605.09511)), suggesting that many published research findings are false.
+Unfortunately, statistical power remains low in many areas of science [@smal:mcel:2016], suggesting that many published research findings are false.
 
 ### The winner's curse
 
@@ -122,7 +124,7 @@ Another kind of error can also occur when statistical power is low: Our estimate
 
 We can simulate this in order to see how the estimated effect size for significant results is related to the actual underlying effect size. Let's generate data for which there is a true effect size of 0.2, and estimate the effect size for those results where there is a significant effect detected. Figure \@ref(fig:CurseSim) shows that when power is low, the estimated effect size for significant results can be highly inflated compared to the actual effect size.
 
-```{r CurseSim, message=FALSE,fig.cap="A simulation of the winner's curse as a function of statistical power (x axis). The black line shows the estimated effect size, and the red dashed line shows the actual effect size. "}
+```{r CurseSim, echo=FALSE,message=FALSE,fig.cap="A simulation of the winner's curse as a function of statistical power (x axis). The black line shows the estimated effect size, and the red dashed line shows the actual effect size. "}
 
 trueEffectSize=0.2
 dfCurse=data.frame(sampSize=seq(20,300,20)) %>%
@@ -154,7 +156,7 @@ ggplot(dfCurse,aes(power,effectSizeEstimate)) +
 ```
 
 
-```{r curseSimSingle, fig.cap="A histogram showing sample sizes for a number of samples from a dataset, with significant results shown in blue and non-significant results in red."}
+```{r curseSimSingle, echo=FALSE,fig.cap="A histogram showing sample sizes for a number of samples from a dataset, with significant results shown in blue and non-significant results in red."}
 sampSize=60
 effectSize=0.2
 nruns=1000
@@ -184,19 +186,19 @@ ggplot(df,aes(estimate,fill=significant)) +
 
 ```
 
-We can look at a single simulation to see why this is the case.  In Figure \@ref(fig:curseSimSingle), you can see a histogram of the estimated effect sizes for 1000 samples, separated by whether the test was statistically significant.  It should be clear from the figure that if we estimate the effect size only based on significant results, then our estimate will be inflated; only when most results are significant (i.e. power is high) will our estimate come near the actual effect size.  
+We can look at a single simulation to see why this is the case.  In Figure \@ref(fig:curseSimSingle), you can see a histogram of the estimated effect sizes for 1000 samples, separated by whether the test was statistically significant.  It should be clear from the figure that if we estimate the effect size only based on significant results, then our estimate will be inflated; only when most results are significant (i.e. power is high and the effect is relatively large) will our estimate come near the actual effect size.  
 
 ## Questionable research practices
 
-A popular book entitled "The Compleat Academic: A Career Guide", published by the American Psychological Association, aims to provide aspiring researchers with guidance on how to build a career.  In a chapter by well-known social psychologist Daryl Bem titled "Writing the Empirical Journal Article", Bem provides some suggestions about how to write a research paper. Unfortunately, the practices that he suggests are deeply problematic, and have come to be known as *questionable research practices* (QRPs).
+A popular book entitled "The Compleat Academic: A Career Guide", published by the American Psychological Association [@darl:zann:roed:2004], aims to provide aspiring researchers with guidance on how to build a career.  In a chapter by well-known social psychologist Daryl Bem titled "Writing the Empirical Journal Article", Bem provides some suggestions about how to write a research paper. Unfortunately, the practices that he suggests are deeply problematic, and have come to be known as *questionable research practices* (QRPs).
 
 > **Which article should you write?** There are two possible articles you can write: (1) the article you planned to write when you designed your study or (2) the article that makes the most sense now that you have seen the results. They are rarely the same, and the correct answer is (2).
 
-What Bem suggests here is known as *HARKing* (Hypothesizing After the Results are Known) (Kerr, 1988).  This might seem innocuous, but is problematic because it allows the research to re-frame a post-hoc conclusion (which we should take with a grain of salt) as an a priori prediction (in which we would have stronger faith).  In essence, it allows the researcher to rewrite their theory based on the facts, rather that using the theory to make predictions and then test them -- akin to moving the goalpost so that it ends up whereever the ball goes.  It thus becomes very difficult to disconfirm incorrect ideas, since the goalpost can always be moved.
+What Bem suggests here is known as *HARKing* (Hypothesizing After the Results are Known)[@kerr:1998].  This might seem innocuous, but is problematic because it allows the research to re-frame a post-hoc conclusion (which we should take with a grain of salt) as an a priori prediction (in which we would have stronger faith).  In essence, it allows the researcher to rewrite their theory based on the facts, rather that using the theory to make predictions and then test them -- akin to moving the goalpost so that it ends up whereever the ball goes.  It thus becomes very difficult to disconfirm incorrect ideas, since the goalpost can always be moved to match the data.
 
 > **Analyzing data** Examine them from every angle. Analyze the sexes separately. Make up new composite indices. If a datum suggests a new hypothesis, try to find further evidence for itelsewhere in the data. If you see dim traces of interesting patterns, try to reorganize the data to bring them into bolder relief. If there are participants you don’t like, or trials, observers, or interviewers who gave you anomalous results,drop them (temporarily). Go on a fishing expedition for something — anything — interesting. No, this is not immoral. 
 
-What Bem suggests here is known as *p-hacking*, which refers to trying many different analyses until one finds a significant result.  Bem is correct that if one were to report every analysis done on the data then this approach would not be "immoral". However, it is rare to see a paper discuss all of the analyses that were performed on a dataset; rather, papers generally only present the analyses that *worked* - which usually means that they found a statistically significant result.  There are many different ways that one might p-hack:
+What Bem suggests here is known as *p-hacking*, which refers to trying many different analyses until one finds a significant result.  Bem is correct that if one were to report every analysis done on the data then this approach would not be "immoral". However, it is rare to see a paper discuss all of the analyses that were performed on a dataset; rather, papers often only present the analyses that *worked* - which usually means that they found a statistically significant result.  There are many different ways that one might p-hack:
 
 - Analyze data after every subject, and stop collecting data once p<.05
 - Analyze many different variables, but only report those with p<.05
@@ -204,12 +206,11 @@ What Bem suggests here is known as *p-hacking*, which refers to trying many diff
 - Exclude participants to get p<.05
 - Transform the data to get p<.05
 
-A well-known paper by [Simmons, Nelson, & Simonsohn (2011)](http://journals.sagepub.com/doi/abs/10.1177/0956797611417632) showed that the use of these kinds of p-hacking strategies could greatly increase the actual false positive rate, resulting in a high number of false positive results.
-
+A well-known paper by @simm:nels:simo:2011 showed that the use of these kinds of p-hacking strategies could greatly increase the actual false positive rate, resulting in a high number of false positive results.
 
 ### ESP or QRP?
 
-In 2011, Daryl Bem published an [article](https://www.ncbi.nlm.nih.gov/pubmed/21280961) that claimed to have found scientific evidence for extrasensory perception.  The article states:
+In 2011, Daryl Bem published an article [@bem:2011] that claimed to have found scientific evidence for extrasensory perception.  The article states:
 
 >This article reports 9 experiments, involving more than 1,000 participants, that test for retroactive influence by “time-reversing” well-established psychological effects so that the individual’s responses are obtained before the putatively causal stimulus events occur. …The mean effect size (d) in psi performance across all 9 experiments was 0.22, and all but one of the experiments yielded statistically significant results.
 
@@ -230,11 +231,11 @@ In the years since the reproducibility crisis arose, there has been a robust mov
 
 One of the ideas that has gained the greatest traction is *pre-registration*, in which one submits a detailed description of a study (including all data analyses) to a trusted repository (such as the (Open Science Framework)[http://osf.io] or (AsPredicted.org)[http://aspredicted.org]).  By specifying one's plans in detail prior to analyzing the data, pre-registration provides greater faith that the analyses do not suffer from p-hacking or other questionable research practices.  
 
-The effects of pre-registration have been seen in clinical trials in medicine.  In 2000, the National Heart, Lung, and Blood Institute (NHLBI) began requiring all clinical trials to be pre-registered using the [ClinicalTrials.gov](http://clinicaltrials.gov).  This provides a natural experiment to observe the effects of study pre-registration.  When [Kaplan and Irvin (2015)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0132382) examined clinical trial outcomes over time, they found that the number of positive outcomes in clnical trials was reduced after 2000 compared to before. While there are many possible causes, it seems likely that prior to study registration researchers were able to change their methods in order to find a positive result, which became more difficult after registration was required.
+The effects of pre-registration have been seen in clinical trials in medicine.  In 2000, the National Heart, Lung, and Blood Institute (NHLBI) began requiring all clinical trials to be pre-registered using the [ClinicalTrials.gov](http://clinicaltrials.gov).  This provides a natural experiment to observe the effects of study pre-registration.  When @kapl:irvi:2015 examined clinical trial outcomes over time, they found that the number of positive outcomes in clnical trials was reduced after 2000 compared to before. While there are many possible causes, it seems likely that prior to study registration researchers were able to change their methods in order to find a positive result, which became more difficult after registration was required.
  
 ### Reproducible practices
 
-The paper by Simmons et al (2011) laid out a set of suggested practices for making research more reproducible, all of which should become standard for researchers:
+The paper by @simm:nels:simo:2011 laid out a set of suggested practices for making research more reproducible, all of which should become standard for researchers:
 
 > - Authors must decide the rule for terminating data collection before data collection begins and report this rule in the article. 
 - Authors must collect at least 20 observations per cell or else provide a compelling cost-of-data-collection justification. 
@@ -247,7 +248,7 @@ The paper by Simmons et al (2011) laid out a set of suggested practices for maki
 
 One of the hallmarks of science is the idea of *replication* -- that is, other researchers should be able to perform the same study and obtain the same result.  Unfortunately, as we saw in the outcome of the Replication Project discussed earlier, many findings are not replicable.  The best way to ensure replicability of one's research is to first replicate it on your own; for some studies this just won't be possible, but whenever it is possible one should make sure that one's finding holds up in a new sample.  That new sample should be sufficiently powered to find the effect size of interest; in many cases, this will actually require a larger sample than the original. 
 
-It's important to keep a couple of things in mind with regard to replication.  First, the fact that a replication attempt fails does not necessarily mean that the original finding was false; remember that with the standard level of 80% power, there is still a one in five chance that the result will be nonsignificant, even if there is a true effect. For this reason, we generally want to see multiple replications of any important finding before we come to believe it.  Unfortunately, many fields including psychology have failed to follow this advice in the past, leading to "textbook" findings that turn out to be likely false.  With regard to Daryl Bem's studies of ESP, a large replication attempt involving 7 studies failed to replicate his findings (Galak et al., 2012).
+It's important to keep a couple of things in mind with regard to replication.  First, the fact that a replication attempt fails does not necessarily mean that the original finding was false; remember that with the standard level of 80% power, there is still a one in five chance that the result will be nonsignificant, even if there is a true effect. For this reason, we generally want to see multiple replications of any important finding before we come to believe it.  Unfortunately, many fields including psychology have failed to follow this advice in the past, leading to "textbook" findings that turn out to be likely false.  With regard to Daryl Bem's studies of ESP, a large replication attempt involving 7 studies failed to replicate his findings [@gala:lebo:nels:2012].
 
 Second, remember that the p-value doesn't provide us with a measure of the likelihood of a finding to replicate.  As we discussed previously, the p-value is a statement about the likelihood of one's data under a specific null hypothesis; it doesn't tell us anything about the probability that the finding is actually true (as we learned in the chapter on Bayesian analysis).  In order to know the likelihood of replication we need to know the probability that the finding is true, which we generally don't know.
 
@@ -256,8 +257,9 @@ Second, remember that the p-value doesn't provide us with a measure of the likel
 So far we have focused on the ability to replicate other researchers' findings in new experiments, but another important aspect of reproducibility is to be able to reproduce someone's analyses on their own data, which we refer to a *computational reproducibility.*  This requires that researchers share both their data and their analysis code, so that other researchers can both try to reproduce the result as well as potentially test different analysis methods on the same data.  
 There is an increasing move in psychology towards open sharing of code and data; for example, the journal *Psychological Science* now provides "badges" to papers that share research materials, data, and code, as well as for pre-registration.
 
-he ability to reproduce analyses is one reason that we strongly advocate for the use of scripted analyses (such as those using R) rather than using a "point-and-click" software package.  It's also a reason that we advocate the use of free and open-source software (like R) as opposed to commercial software packages, which will require others to buy the software in order to reproduce any analyses. 
- There are many ways to share both code and data.  A common way to share code is via web sites that support *version control* for software, such as [Github](http://github.com).  Small datasets can also be shared via these same sites; larger datasets can be shared through data sharing portals such as [Zenodo](https://zenodo.org/), or through specialized portals for specific types of data (such as [OpenNeuro](http://openneuro.org) for neuroimaging data).#
+The ability to reproduce analyses is one reason that we strongly advocate for the use of scripted analyses (such as those using R) rather than using a "point-and-click" software package.  It's also a reason that we advocate the use of free and open-source software (like R) as opposed to commercial software packages, which will require others to buy the software in order to reproduce any analyses.
+
+There are many ways to share both code and data.  A common way to share code is via web sites that support *version control* for software, such as [Github](http://github.com).  Small datasets can also be shared via these same sites; larger datasets can be shared through data sharing portals such as [Zenodo](https://zenodo.org/), or through specialized portals for specific types of data (such as [OpenNeuro](http://openneuro.org) for neuroimaging data).#
 
 ## Conclusion: Doing better science
 
