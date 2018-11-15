@@ -26,9 +26,13 @@ There are three major things that we can do with statistics:
 - *Decide*: We often need to make decisions based on data, usually in the face of uncertainty.
 - *Predict*: We often wish to make predictions about new situations based on our knowledge of previous situations.
 
-Let's look at an example of these in action, centered on a question that many of us are interested in: How do we decide what's healthy to eat?  There are many different sources of guidance, from government dietary guidelines to diet books to bloggers.  Let's focus in on a specific question: Is saturated fat in our diet a bad thing?
+Let's look at an example of these in action, centered on a question that many of us are interested in: How do we decide what's healthy to eat?  
+There are many different sources of guidance, from government dietary guidelines to diet books to bloggers.  
+Let's focus in on a specific question: Is saturated fat in our diet a bad thing?
 
-One way that we might answer this question is common sense.  If we eat fat then it's going to turn straight into fat in our bodies, right?  And we have all seen photos of arteries clogged with fat, so eating fat is going to clog our arteries, right?
+One way that we might answer this question is common sense.  
+If we eat fat then it's going to turn straight into fat in our bodies, right?  
+And we have all seen photos of arteries clogged with fat, so eating fat is going to clog our arteries, right?
 
 Another way that we might answer this question is by listening to authority figures.  The Dietary Guidelines from the US Food and Drug Administration have as one of their Key Recommendations that "A healthy eating pattern limits saturated fats".You might hope that these guidelines would be based on good science, and in some cases they are, but as Nina Teicholz outlined in her book "Big Fat Surprise"[@teic:2014], this particular recommendation seems to be based more on the dogma of nutrition researchers than on actual evidence.
 
@@ -60,6 +64,7 @@ df  %>%
   )
 ```
 
+
 This plot is based on ten numbers.  To obtain these numbers, the researchers split the  group of 135,335 study participants (which we call the "sample") into 5 groups ("quintiles") after ordering them in terms of their intake of either of the nutrients; the first quintile contains the 20% of people with the lowest intake, and the 5th quintile contains the 20% with the highest intake.  The researchers then computed how often people in each of those groups died during the time they were being followed.  The figure expresses this in terms of the *relative risk* of dying in comparison to the lowest quintile: If this number is greater than 1 it means that people in the group are _more_ likely to die than are people in the lowest quintile, whereas if it's less than one it means that people in the group are _less_ likely to die.  The figure is pretty clear: People who ate more saturated fat were *less* likely to die during the study, and the more they ate, the bigger this effect was.  The opposite is seen for carbohydrates; the more carbs a person ate, the more likely they were to die during the study. This example shows how we can use statistics to *describe* a complex dataset in terms of a much simpler set of numbers; if we had to look at the data from each of the study participants at the same time, we would be overloaded with data and it would be hard to see the pattern that emerges when they are described more simply.
 
 The numbers in Figure \@ref(fig:PureDeathSatFat) seem to show that deaths decrease with saturated fat and increase with carbohydrate intake, but we also know that there is a lot of uncertainty in the data; there are some people who died early even though they ate a low-carb diet, and, similarly, some people who ate a ton of carbs but lived to a ripe old age.  Given this variability, we want to *decide* whether the relationships that we see in the data are large enough that we wouldn't expect them to occur randomly if there was not truly a relationship between diet and longevity.  Statistics provide us with the tools to make these kinds of decisions, and often people from the outside view this as *the* main purpose of statistics.  But as we will see throughout the book, this need for black-and-white decisions based on fuzzy evidence has often led researchers astray.
@@ -70,7 +75,8 @@ For example, a life insurance company might want to use data about a particular 
 
 ## Fundamental concepts of statistics
 
-There are a number of very basic ideas that cut through nearly all aspects of statistical thinking.  Several of these are outlined by @stig: in his outstanding book "The Seven Pillars of Statistical Wisdom", which I have augmented here.
+There are a number of very basic ideas that cut through nearly all aspects of statistical thinking.  
+Several of these are outlined by @stig: in his outstanding book "The Seven Pillars of Statistical Wisdom", which I have augmented here.
 
 ### Learning from data
 
@@ -80,8 +86,7 @@ Statistics provides us with a way to describe how new data can be best used to u
 
 ### Aggregation
 
-Another way to think of statistics is "the science of throwing away data".  
-In the example of the PURE study above, we took more than 100,000 numbers and condensed them into ten.  It is this kind of *aggregation* that is one of the most important concepts in statistics.  When it was first advanced, this was revolutionary: If we throw out all of the details about every one of the participants, then how can we be sure that we aren't missing something important?  
+Another way to think of statistics is "the science of throwing away data".  In the example of the PURE study above, we took more than 100,000 numbers and condensed them into ten.  It is this kind of *aggregation* that is one of the most important concepts in statistics.  When it was first advanced, this was revolutionary: If we throw out all of the details about every one of the participants, then how can we be sure that we aren't missing something important?  
 As we will see, statistics provides us ways to characterize the structure of aggregates of data, and with theoretical foundations that explain why this usually works well.  However, it's also important to keep in mind that aggregation can go too far, and later we will encounter cases where the summary can provide a misleading picture of the data being summarized.
 
 ### Uncertainty
