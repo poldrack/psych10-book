@@ -156,12 +156,6 @@ p <- ggplot(NHANES_sample_tidy,aes(timepoint,BPsys)) +
   geom_violin()
 print(p)
 
-summary  <- 
-  NHANES_sample_tidy %>% 
-  group_by(timepoint) %>%
-  summarize(meanTimepointBP=mean(BPsys))
-pander(summary)
-
 ```
 
 We see that there does not seem to be much of a difference overall between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that pairs of data points come from the the same individuals.   
