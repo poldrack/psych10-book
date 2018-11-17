@@ -145,14 +145,13 @@ Another way to assess reliability comes in cases where the data includes subject
 
 Reliability is important if we want to compare one measurement to another.  The relationship between two different measurements can't be any stronger than the relationship between either of the measurements and itself (i.e., its reliability).  This means that an unreliable measure can never have a strong statistical relationship with any other measure.  For this reason, researchers developing a new measurement (such as a new survey) will often go to great lengths to test its reliability.
 
-### *Validity* 
-
-Reliability is important, but on its own it's not enough: After all, I could create a highly reliable measurement on a personality test by coding every answer using a single number, regardless of how the person answers.  We want our measurements to also be *valid* --- that is, we want to make sure that we are actually measuring the construct that we think we are measuring (Figure \@ref(fig:ReliabilityValidity)). There are many different types of validity that are commonly discussed; we will focus on three of them.
-
-```{r ReliabilityValidity, echo=FALSE,fig.width=6, fig.height=6,fig.cap="A figure demonstrating the distinction between reliability and valdity.  Copyright Nevit Dilmen/CC-BY-SA-3.0",fig.width=8,fig.height=8,out.height='50%'}
+```{r ReliabilityValidity, echo=FALSE,fig.width=6, fig.height=6,fig.cap="A figure demonstrating the distinction between reliability and valdity.  Copyright Nevit Dilmen/CC-BY-SA-3.0",fig.width=6,fig.height=6,out.height='33%'}
 knitr::include_graphics("images/Reliability_and_validity.png")
 ```
 
+### *Validity* 
+
+Reliability is important, but on its own it's not enough: After all, I could create a highly reliable measurement on a personality test by coding every answer using a single number, regardless of how the person answers.  We want our measurements to also be *valid* --- that is, we want to make sure that we are actually measuring the construct that we think we are measuring (Figure \@ref(fig:ReliabilityValidity)). There are many different types of validity that are commonly discussed; we will focus on three of them.
 
 *Face validity*. Does the measurement make sense on its face?  If I were to tell you that I was going to measure a person's blood pressure by looking at the color of their tongue, you would probably think that this was not a valid measure on its face.  On the other hand, using a blood pressure cuff would have face validity.  This is usually a first reality check before we dive into more complicated aspects of validity.
 
