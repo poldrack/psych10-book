@@ -38,7 +38,7 @@ Another way that we might answer this question is by listening to authority figu
 
 Finally, we might look at actual scientific research.  Let's start by looking at a large study called the PURE study, which has examined diets and health outcomes (including death) in more than 135,000 people from 18 different countries.  In one of the analyses of this dataset (published in *The Lancet* in 2017; @dehg:ment:zhan:2017), the PURE investigators reported an analysis of how intake of various classes of macronutrients (including saturated fats and carbohydrates) was related to the likelihood of dying during the time that people were followed. People were followed for a *median* of 7.4 years, meaning that half of the people in the study were followed for less and half were followed for more than 7.4 years. Figure \@ref(fig:PureDeathSatFat) plots some of the data from the study (extracted from the paper), showing the relationship between the intake of both saturated fats and carbohydrates and the risk of dying from any cause.
 
-```{r PureDeathSatFat, echo=FALSE,fig.cap="A plot of data from the PURE study, showing the relationship between death from any cause and the relative intake of saturated fats and carbohydrates."}
+```{r PureDeathSatFat, echo=FALSE,fig.cap="A plot of data from the PURE study, showing the relationship between death from any cause and the relative intake of saturated fats and carbohydrates.",fig.width=4,fig.height=4,out.height='50%'}
 
 carb_rr <- c(1, 1.07, 1.06, 1.17, 1.28)
 satfat_rr <- c(1, 0.96, 0.92, 0.85, 0.86)
