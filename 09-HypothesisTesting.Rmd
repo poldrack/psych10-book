@@ -28,8 +28,6 @@ NHANES_adult <-
   drop_na(PhysActive,BMI) %>%
   subset(Age>=18)
 
-
-
 ```
 
 In the first chapter we discussed the three major goals of statistics:
@@ -107,7 +105,7 @@ pander(sampleSummary)
 
 ```
 
-```{r bmiSample, fig.cap="BMI data from a sample of adults from the NHANES dataset, split by whether they reported engaging in regular physical activity."}
+```{r bmiSample, fig.cap="BMI data from a sample of adults from the NHANES dataset, split by whether they reported engaging in regular physical activity.",fig.width=4,fig.height=4,out.height='50%'}
 # take a sample from the NHANES dataset
 ggplot(NHANES_sample,aes(PhysActive,BMI)) +
   geom_boxplot() + 
@@ -148,7 +146,7 @@ $$
 
 where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  The t-statistic is distributed according to a probability distribution known as a *t* distribution.  The *t* distribution looks quite similar to a normal distribution, but it differs depending on the number of degrees of freedom, which for this example is the number of observations minus 2, since we have computed two means and thus given up two degrees of freedom.  When the degrees of freedom are large (say 1000), then the *t* distribution looks essentialy like the normal distribution, but when they are small then the *t* distribution has longer tails than the normal (see Figure \@ref(fig:tVersusNormal)).
 
-```{r tVersusNormal,echo=FALSE,fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 10 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal."}
+```{r tVersusNormal,echo=FALSE,fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 10 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal.",fig.width=4,fig.height=4,out.height='50%'}
 distDf <- data.frame(x=seq(-4,4,0.01))
 
 p1 <- ggplot(distDf,aes(x)) + 
@@ -217,7 +215,7 @@ sprintf('empirical probability of 70 or more heads given P(heads)=0.5: %0.6f',p_
 
 ```
 
-```{r coinFlips,echo=FALSE,fig.cap="Distribution of numbers of heads (out of 100 flips) across 100,000 simulated runs."}
+```{r coinFlips,echo=FALSE,fig.cap="Distribution of numbers of heads (out of 100 flips) across 100,000 simulated runs.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(data.frame(coinFlips),aes(coinFlips))  +
   geom_histogram(binwidth = 1) + 
   geom_vline(xintercept = 70,color='red',size=1)
@@ -289,7 +287,7 @@ pander(squatDf)
 
 ```
 
-```{r squatPlot,echo=FALSE,fig.cap="Box plots of simulated squatting ability for football players and cross-country runners."}
+```{r squatPlot,echo=FALSE,fig.cap="Box plots of simulated squatting ability for football players and cross-country runners.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(squatDf,aes(x=group,y=squat)) +
   geom_boxplot() +
@@ -323,7 +321,7 @@ pander(dfScram)
 
 ```
 
-```{r scramPlot,echo=FALSE,fig.cap="Box plots for subjects assigned to each group after scrambling group labels."}
+```{r scramPlot,echo=FALSE,fig.cap="Box plots for subjects assigned to each group after scrambling group labels.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(dfScram,aes(x=scrambledGroup,y=squat)) +
   geom_boxplot() +
@@ -355,7 +353,7 @@ sprintf('mean t value across shuffles = %0.3f',mean(shuffleDiff))
 
 We can now look at the distribution of mean differences across the shuffled datasets. Figure \@ref(fig:shuffleHist) shows the histogram of the group differences across all of the random shuffles.  As expected under the null hypothesis, this distribution is centered at zero.  
 
-```{r shuffleHist, echo=FALSE,fig.cap="Histogram of differences between the football and cross-country groups after randomly shuffling group membership.  The red line denotes the actual difference observed between the two groups, and the blue line shows the theoretical t distribution for this analysis."}
+```{r shuffleHist, echo=FALSE,fig.cap="Histogram of differences between the football and cross-country groups after randomly shuffling group membership.  The red line denotes the actual difference observed between the two groups, and the blue line shows the theoretical t distribution for this analysis.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(data.frame(shuffleDiff),aes(shuffleDiff)) +
   geom_histogram(aes(y=..density..),bins=50) + 
   geom_vline(xintercept = tt$statistic,color='red') +
@@ -440,7 +438,7 @@ sprintf('p(mean > %0.2f, df = 248) using parametric t-test = %0.5f',bmtTTest$sta
 
 ```
 
-```{r simDiff,echo=FALSE,fig.cap="Histogram of t statistics after shuffling of group labels, with the observed value of the t statistic shown in the blue line, and values more extreme than the observed value shown in orange."}
+```{r simDiff,echo=FALSE,fig.cap="Histogram of t statistics after shuffling of group labels, with the observed value of the t statistic shown in the blue line, and values more extreme than the observed value shown in orange.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(meanDiffSimDf,aes(meanDiffSim)) +
   geom_histogram(bins=200) +
   geom_vline(aes(xintercept=meanDiff[1,1]),color='blue') +
@@ -555,7 +553,7 @@ simResultsDf <-
 
 Figure \@ref(fig:sigResults) shows how the proportion of significant results increases as the sample size increases, such that with a very large sample size (about 262,000 total subjects), we will find a significant result in more than 90% of studies when there is a 1 ounce weight loss.  While these are statistically significant, most physicians would not consider a weight loss of one ounce to be practically or clinically significant. We will explore this relationship in more detail when we return to the concept of *statistical power*, but it should already be clear from this example that statistical significance is not necessarily indicative of practical significance.
 
-```{r sigResults, echo=FALSE,fig.cap="The proportion of signifcant results for a very small change (10 ounces, which is about .01 standard deviations) as a function of sample size."}
+```{r sigResults, echo=FALSE,fig.cap="The proportion of signifcant results for a very small change (10 ounces, which is about .01 standard deviations) as a function of sample size.",fig.width=8,fig.height=4,out.height='50%'}
 
 ggplot(simResultsDf,aes(sampleSize,pSigResult)) +
   geom_line() +
@@ -594,7 +592,7 @@ sprintf('familywise error rate: %0.3f',mean(uncOutcome>0))
 
 ```
 
-```{r nullSim,echo=FALSE,fig.cap="A histogram of the number of significant results in each set of 1 million statistical tests, when there is in fact no true effect."}
+```{r nullSim,echo=FALSE,fig.cap="A histogram of the number of significant results in each set of 1 million statistical tests, when there is in fact no true effect.",fig.width=4,fig.height=4,out.height='50%'}
 
 data.frame(nsig=uncOutcome) %>%
   ggplot(aes(nsig)) +
@@ -612,11 +610,11 @@ A simple way to control for the familywise error is to divide the alpha level by
 corAlpha <- 0.05/nTests
 
 corOutcome <- replicate(nRuns,sum(rnorm(nTests)<(qnorm(corAlpha))))
-print(sprintf('corrected familywise error rate: %0.3f',mean(corOutcome>0)))
+sprintf('corrected familywise error rate: %0.3f',mean(corOutcome>0))
 
 ```
 
-```{r bonferroniSim,echo=FALSE,fig.cap="A histogram of the number of significant results across all simulation runs after applying the Bonferroni correction for multiple tests."}
+```{r bonferroniSim,echo=FALSE,fig.cap="A histogram of the number of significant results across all simulation runs after applying the Bonferroni correction for multiple tests.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(data.frame(nsig=corOutcome),aes(nsig)) +
   geom_histogram(bins=50) +
