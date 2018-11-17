@@ -11,6 +11,7 @@ library(reshape2)
 library(tidyr)
 library(ggplot2)
 library(pander)
+library(readr)
 
 panderOptions('round',3)
 panderOptions('digits',7)
@@ -77,7 +78,7 @@ According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays)` rai
 
 How do we know that empirical probability gives us the right number? The answer to this question comes from the *law of large numbers*, which shows that the empirical probability will approach the true probability as the sample size increases.  We can see this by simulating a large number of coin flips, and looking at our estimate of the probability of heads after each flip.  We will spend much more time discussing simulation in a later chapter; for now, just assume that we have a computational way to generate a random outcome for each coin flip.
 
-```{r FlipSim,echo=FALSE,fig.cap='A demonstration of the law of large numbers.  A coin was flipped 30,000 times, and after each flip the probability of heads was computed based on the number of heads and tail collected up to that point.  It takes about 15,000 flips for the probability to settle at the true probability of 0.5.'}
+```{r FlipSim,echo=FALSE,fig.cap='A demonstration of the law of large numbers.  A coin was flipped 30,000 times, and after each flip the probability of heads was computed based on the number of heads and tail collected up to that point.  It takes about 15,000 flips for the probability to settle at the true probability of 0.5.',fig.width=8,fig.height=4,out.height='50%'}
 
 set.seed(12345) # set the seed so that the outcome is consistent
 nsamples <- 30000 # how many flips do we want to make?
@@ -104,7 +105,7 @@ sampDf %>%
 
 Figure \@ref(fig:FlipSim) shows that as the number of samples (i.e., coin flip trials) increases, the estimated probability of heads converges onto the true value of 0.5. However, note that the estimates can be very far off from the true value when the sample sizes are small.  A real-world example of this was seen in the 2017 special election for the US Senate in Georgia, which pitted the Republican Roy Moore against Democrat Doug Jones.  Figure \@ref(fig:ElectionResults) shows the relative amount of the vote reported for each of the candidates over the course of the evening, as an increasing number of ballots were counted. Early in the evening the vote counts were especially volatile, swinging from a large initial lead for Jones to a long period where Moore had the lead, until finally Jones took the lead to win the race.  
 
-```{r ElectionResults, echo=FALSE,messages=FALSE,fig.cap='Relative proportion of the vote in the Dec 12, 2017 special election for the US Senate seat in Georgia, as a function of the percentage of precincts reporting. These data were transcribed from https://www.ajc.com/news/national/alabama-senate-race-live-updates-roy-moore-doug-jones/KPRfkdaweoiXICW3FHjXqI/'}
+```{r ElectionResults, echo=FALSE,messages=FALSE,fig.cap='Relative proportion of the vote in the Dec 12, 2017 special election for the US Senate seat in Georgia, as a function of the percentage of precincts reporting. These data were transcribed from https://www.ajc.com/news/national/alabama-senate-race-live-updates-roy-moore-doug-jones/KPRfkdaweoiXICW3FHjXqI/',fig.width=4,fig.height=4,out.height='50%'}
 
 electionReturns <- 
   read_csv(
@@ -174,7 +175,7 @@ P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) - 
 $$
 
 
-```{r ThrowMatrix, echo=FALSEmfig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second throw. Cells shown in light blue represent the cells with a one in either the first or second throw; the rest are shown in dark blue.'}
+```{r ThrowMatrix, echo=FALSE,fig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second throw. Cells shown in light blue represent the cells with a one in either the first or second throw; the rest are shown in dark blue.',fig.width=4,fig.height=4,out.height='50%'}
 imgmtx <-
   matrix(0, nrow = 6, ncol = 6) 
 
@@ -315,7 +316,7 @@ $$
 
 That is, we want to know the probability that both things are true, given that the one being conditioned upon is true.  
 
-```{r conditionalProbability,echo=FALSE,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data."}
+```{r conditionalProbability,echo=FALSE,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data.",fig.width=8,fig.height=6,out.height='50%'}
 knitr::include_graphics("images/conditional_probability.png")
 
 ```
