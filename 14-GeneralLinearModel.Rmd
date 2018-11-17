@@ -12,6 +12,7 @@ library(fivethirtyeight)
 library(BayesMed)
 library(caret)
 library(MASS)
+library(cowplot)
 
 library(pander)
 panderOptions('round',2)
@@ -72,7 +73,7 @@ lmResult <- lm(grade~studyTime,data=df)
 
 ```
 
-```{r StudytimeGrades, echo=FALSE,fig.cap='Relation between study time and grades'}
+```{r StudytimeGrades, echo=FALSE,fig.cap='Relation between study time and grades',fig.width=4,fig.height=4,out.height='50%'}
 p <- ggplot(df,aes(studyTime,grade)) +
   geom_point(size=3) +
   xlab('Study time (hours)') +
@@ -119,7 +120,7 @@ $$
 $$
 Figure  \@ref(fig:LinearRegression) shows an example of this model applied to the study time example.
 
-```{r LinearRegression,echo=FALSE,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much it changes in y for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time."}
+```{r LinearRegression,echo=FALSE,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much it changes in y for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time.",fig.width=6,fig.height=6,out.height='50%'}
 
 p2 <- p+geom_abline(slope=lmResult$coefficients[2],
                   intercept=lmResult$coefficients[1],
@@ -191,7 +192,7 @@ This looks very much like the earlier equation that we used, except that the let
 
 We know that the grade data go into the Y matrix, but what goes into the $X$ matrix?  Remember from our initial discussion of linear regression that we need to add a constant in addition to our independent variable of interest, so our $X$ matrix (which we call the *design matrix*) needs to include two columns:  one representing the study time variable, and one column with the same value for each individual (which we generally fill with all ones). We can view the resulting design matrix graphically (see Figure \@ref(fig:GLMmatrix)).
 
-```{r GLMmatrix, echo=FALSE,fig.width=4, fig.height=4,fig.cap="A depiction of the study time data in terms of matrix algebra."}
+```{r GLMmatrix, echo=FALSE,fig.width=4, fig.height=4,fig.cap="A depiction of the study time data in terms of matrix algebra.",out.height='50%'}
 knitr::include_graphics("images/glm_matrix.png")
 ```
 
@@ -329,7 +330,7 @@ A small value of $R^2$ tells us that even if the model fit is statistically sign
 
 Often we would like to understand the effects of multiple variables on some particular outcome, and how they relate to one another.  In the context of our study time example, let's say that we discovered that some of the students had previously taken a course on the topic.  If we plot their grades (see Figure  \@ref(fig:StudytimeGradesPrior)), we can see that those who had a prior course perform much better than those who had not, given the same amount of study time.
 
-```{r StudytimeGradesPrior, echo=FALSE,fig.cap='The relationship between study time and grades, with color identifying whether each student had taken a previous course on the topic'}
+```{r StudytimeGradesPrior, echo=FALSE,fig.cap='The relationship between study time and grades, with color identifying whether each student had taken a previous course on the topic',fig.width=6,fig.height=4,out.height='50%'}
 
 p <- ggplot(df,aes(studyTime,grade,color=as.factor(priorClass))) +
   geom_point(size=3) + xlim(0,5) + ylim(70,100)
@@ -355,7 +356,7 @@ summary(lmResultTwoVars)
 
 ```
 
-```{r LinearRegressionByPriorClass,echo=FALSE, fig.cap='The relation between study time and grade including prior experience as an additional component in the model.  The blue line shows the slope relating grades to study time, and the black dotted line corresponds to the difference in means between the two groups.'}
+```{r LinearRegressionByPriorClass,echo=FALSE, fig.cap='The relation between study time and grade including prior experience as an additional component in the model.  The blue line shows the slope relating grades to study time, and the black dotted line corresponds to the difference in means between the two groups.',fig.width=6,fig.height=4,out.height='50%'}
 
 
 p <- ggplot(df,aes(studyTime,grade,color=priorClass)) +
@@ -403,7 +404,7 @@ print(p)
 In the previous model, we assumed that the effect of study time was the same for both groups. However, in some cases we might imagine that the effect of one variable might differ depending on the value of another variable, which we refer to as an *interaction* between variables.
 
 
-```{r CaffeineSpeaking, echo=FALSE,fig.cap='The relationship between caffeine and public speaking'}
+```{r CaffeineSpeaking, echo=FALSE,fig.cap='The relationship between caffeine and public speaking',fig.width=4,fig.height=4,out.height='50%'}
 set.seed(1234567)
 
 df <- 
@@ -433,7 +434,7 @@ summary(lmResultCaffeine)
 
 But now let's say that we find research suggesting that anxious and non-anxious people react differently to caffeine.  First let's plot the data separately for anxious and non-anxious people.
 
-```{r CaffeineSpeakingAnxiety,echo=FALSE,fig.cap='The relationship between caffeine and public speaking, with anxiety represented by the color of the data points'}
+```{r CaffeineSpeakingAnxiety,echo=FALSE,fig.cap='The relationship between caffeine and public speaking, with anxiety represented by the color of the data points',fig.width=6,fig.height=4,out.height='50%'}
 df <- 
   df %>% 
   mutate(anxiety=ifelse(group==1,'anxious','notAnxious'))
@@ -462,7 +463,7 @@ summary(lmResultInteraction)
 From these results we see that there are significant effects of both caffeine and anxiety (which we call *main effects*) and an interaction between caffeine and anxiety.  Figure \@ref(fig:CaffeineAnxietyInteraction) shows the separate regression lines for each group.
 
 
-```{r CaffeineAnxietyInteraction, echo=FALSE,fig.cap='The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group.'}
+```{r CaffeineAnxietyInteraction, echo=FALSE,fig.cap='The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group.',fig.width=4,fig.height=4,out.height='50%'}
 
 df_anx <- 
   df %>%
