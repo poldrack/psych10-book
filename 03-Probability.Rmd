@@ -120,7 +120,8 @@ electionReturns %>%
   labs(
     x = "Percentage of precincts reporting",
     y = "Percentage of votes"
-  )
+  ) +
+  theme(legend.position = c(.7,0.8)) 
 ```
 
 These two examples show that while large samples will ultimately converge on the true probability, the results with small samples can be far off.  Unfortunately, many people forget this and overinterpret results from small samples.  This was referred to as the *law of small numbers* by the psychologists Danny Kahneman and Amos Tversky, who showed that people (even trained researchers) often behave as if the law of large numbers applies even to small samples, giving too much credence to results from small datasets.  We will see examples throughout the course of just how unstable statistical results can be when they are generated on the basis of small samples.
@@ -316,7 +317,7 @@ $$
 
 That is, we want to know the probability that both things are true, given that the one being conditioned upon is true.  
 
-```{r conditionalProbability,echo=FALSE,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data.",fig.width=8,fig.height=6,out.height='50%'}
+```{r conditionalProbability,echo=FALSE,fig.cap="A graphical depiction of conditional probability, showing how the conditional probability limits our analysis to a subset of the data.",fig.width=8,out.height='50%'}
 knitr::include_graphics("images/conditional_probability.png")
 
 ```

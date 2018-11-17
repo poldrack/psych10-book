@@ -42,16 +42,16 @@ There are several different types of numbers that we work with in statistics.  I
 ```{r}
 # create variable containing responses to migraine question
 
-everHadMigraine = c('Yes','No','Yes','No','No','No','Yes','No','No','No')
+everHadMigraine <- c('Yes','No','Yes','No','No','No','Yes','No','No','No')
 everHadMigraine
 ```
 
-we could instead recode these into truth values:
+we could instead recode these into truth values, using the == symbol which is a test for equality, returning the logical value TRUE if the two things are equal and FALSE if they are not:
 
 ```{r}
 # create truth values from everHadMigraine variable
 
-everHadMigraineTF = everHadMigraine == 'Yes'
+everHadMigraineTF <- everHadMigraine == 'Yes'
 everHadMigraineTF
 ```
 

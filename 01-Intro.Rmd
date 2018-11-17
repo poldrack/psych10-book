@@ -56,7 +56,7 @@ df  %>%
   geom_line(size = 1) +
   geom_point(size=2) + 
   geom_hline(yintercept = 1,linetype='dashed') +
-  theme(legend.position = c(0,0.9)) +
+  theme(legend.position = c(0.2,0.9)) +
   theme(aspect.ratio = 1) +
   labs(
     y = "Relative risk of dying from any cause",
@@ -74,7 +74,7 @@ Based on the data we would also like to make predictions about future outcomes. 
 
 ## Fundamental concepts of statistics
 
-There are a number of very basic ideas that cut through nearly all aspects of statistical thinking.  Several of these are outlined by @stig: in his outstanding book "The Seven Pillars of Statistical Wisdom", which I have augmented here.
+There are a number of very basic ideas that cut through nearly all aspects of statistical thinking.  Several of these are outlined by @stig in his outstanding book "The Seven Pillars of Statistical Wisdom", which I have augmented here.
 
 ### Learning from data
 
