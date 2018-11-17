@@ -13,6 +13,8 @@ library(cowplot)
 library(boot)
 library(MASS)
 library(BayesFactor)
+library(pander)
+
 set.seed(123456) # set random seed to exactly replicate results
 
 # load the NHANES data library
@@ -97,7 +99,7 @@ uniformDf <-
 
 ```
 
-```{r uniformDist,echo=FALSE,fig.cap="Density of a uniform distribution is constant for all values. The blue line denotes the hypothesis of p(heads)=0.5."}
+```{r uniformDist,echo=FALSE,fig.cap="Density of a uniform distribution is constant for all values. The blue line denotes the hypothesis of p(heads)=0.5.",fig.width=4,fig.height=4,out.height='50%'}
 
 p <- ggplot(uniformDf,aes(steps,prior)) +
   geom_line() + 
@@ -126,7 +128,7 @@ sprintf('P(n = 7 | p(heads)=0.5) = %0.3f',likelihood)
 
 Let's plot the observed data against the entire distribution under the hypothesis of $p_{heads}=0.5$ (see Figure \@ref(fig:like1)):
 
-```{r like1,echo=FALSE,fig.cap='Likelihood of each possible values of n under hypothesis of p(heads)=0.5.  Observed value shown blue.'}
+```{r like1,echo=FALSE,fig.cap='Likelihood of each possible values of n under hypothesis of p(heads)=0.5.  Observed value shown blue.',fig.width=4,fig.height=4,out.height='50%'}
 
 likeDf <- 
   tibble(
@@ -142,7 +144,7 @@ ggplot(likeDf,aes(heads,likelihood5)) +
 
 We can also look at the likelihoods for other possible hypotheses (see Figure \@ref(fig:like2)) in relation to our data.  Looking at this, it seems that our observed data are relatively more likely under the hypothesis of $p_{heads}=0.7$, somewhat less likely under the hypothesis of $p_{heads}=0.5$, and quite unlikely under the hypothesis of $p_{heads}=0.3$.  One of the fundamental ideas of Bayesian inference is that we will try to find the value of $p_{heads}$ that makes the data most likely, while also taking into account our prior knowledge.
 
-```{r like2,echo=FALSE,fig.cap='Likelihood of each possible values of n under several different hypotheses (p(heads)=0.5 (red), 0.7 (green), 0.3 (black).  Observed value shown blue.'}
+```{r like2,echo=FALSE,fig.cap='Likelihood of each possible values of n under several different hypotheses (p(heads)=0.5 (red), 0.7 (green), 0.3 (black).  Observed value shown blue.',fig.width=4,fig.height=4,out.height='50%'}
 
 likeDf <- 
   likeDf %>%
@@ -204,7 +206,7 @@ bayesDf <-
 
 ```
 
-```{r posteriorDist,echo=FALSE,fig.cap="Posterior distribution plotted in blue against uniform prior distribution (dotted black line)."}
+```{r posteriorDist,echo=FALSE,fig.cap="Posterior distribution plotted in blue against uniform prior distribution (dotted black line).",fig.width=4,fig.height=4,out.height='50%'}
 
 # compute likelihoods for the observed data under all values of p(heads).  here we use the quantized values from .01 to .99 in steps of 0.01
 
@@ -256,7 +258,7 @@ pander(credible_interval)
 
 ```
 
-```{r rejectionSampling,echo=FALSE,fig.cap="Rejection sampling example.The black line shows the density of all possible values of p(heads); the blue lines show the 2.5th and 97.5th percentiles of the distribution, which represent the 95% credible interval for the estimate of p(heads)."}
+```{r rejectionSampling,echo=FALSE,fig.cap="Rejection sampling example.The black line shows the density of all possible values of p(heads); the blue lines show the 2.5th and 97.5th percentiles of the distribution, which represent the 95% credible interval for the estimate of p(heads).",fig.width=4,fig.height=4,out.height='50%'}
 
 # plot histogram
 
@@ -293,7 +295,7 @@ df <-
 
 ```
 
-```{r posteriorDistPrior,echo=FALSE,fig.cap="Effects of priors on the posterior distribution.  The original posterior distribution based on a flat prior is plotted in blue. The prior based on the observation of 5 heads out of 10 flips is plotted in the dotted black line, and the posterior using this prior is plotted in red."}
+```{r posteriorDistPrior,echo=FALSE,fig.cap="Effects of priors on the posterior distribution.  The original posterior distribution based on a flat prior is plotted in blue. The prior based on the observation of 5 heads out of 10 flips is plotted in the dotted black line, and the posterior using this prior is plotted in red.",fig.width=4,fig.height=4,out.height='50%'}
 
 
 ggplot(df,aes(steps,posteriors_flat)) + 
@@ -321,7 +323,7 @@ df <-
 ```
 
 
-```{r strongPrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 5 heads out of 10 flips.  The dotted black line shows the prior based on 50 heasd out of 100 flips, and the red line shows the posterior based on that prior."}
+```{r strongPrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 5 heads out of 10 flips.  The dotted black line shows the prior based on 50 heasd out of 100 flips, and the red line shows the posterior based on that prior.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(df,aes(steps,posteriors_fair)) + 
   geom_line(color='blue') + 
@@ -352,7 +354,7 @@ df <-
 
 ```
 
-```{r absolutePrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 5 heads out of 10 flips.  The dotted black line shows the prior based on 50 heasd out of 100 flips, and the red line shows the posterior based on that prior."}
+```{r absolutePrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 5 heads out of 10 flips.  The dotted black line shows the prior based on 50 heasd out of 100 flips, and the red line shows the posterior based on that prior.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(df,aes(steps,posteriors_absolute)) + 
   geom_line(color='blue') + 
@@ -419,7 +421,7 @@ drugDf <-
 
 ```
 
-```{r bayesTesting,echo=FALSE,fig.cap="Box plots showing data for drug and placebo groups."}
+```{r bayesTesting,echo=FALSE,fig.cap="Box plots showing data for drug and placebo groups.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(drugDf,aes(factor(group),hbchange)) +
   geom_boxplot() + 
