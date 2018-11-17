@@ -56,7 +56,7 @@ df  %>%
   geom_line(size = 1) +
   geom_point(size=2) + 
   geom_hline(yintercept = 1,linetype='dashed') +
-  theme(legend.position = "top") + 
+  theme(legend.position = c(0,0.9)) +
   theme(aspect.ratio = 1) +
   labs(
     y = "Relative risk of dying from any cause",
