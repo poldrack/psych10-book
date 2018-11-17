@@ -18,7 +18,7 @@ One of the most important things that we can do with a dataset is to look at it,
 
 On January 28, 1986, the Space Shuttle Challenger exploded 73 seconds after takeoff, killing all 7 of the astronauts on board.  As when any such disaster occurs, there was an official investigation into the cause of the accident, which found that an O-ring connecting two sections of the solid rocket booster had leaked, resulting in failure of the joint and explosion of the large liquid fuel tank (see figure \@ref(fig:srbLeak)).
 
-```{r srbLeak, echo=FALSE,fig.cap="An image of the solid rocket booster leaking fuel, seconds before the explostion. By NASA (Great Images in NASA Description) [Public domain], via Wikimedia Commons"}
+```{r srbLeak, echo=FALSE,fig.cap="An image of the solid rocket booster leaking fuel, seconds before the explostion. By NASA (Great Images in NASA Description) [Public domain], via Wikimedia Commons",fig.width=6,fig.height=6,out.height='50%'}
 knitr::include_graphics("images/Booster_Rocket_Breach_-_GPN-2000-001425.jpg")
 ```
 
@@ -34,7 +34,7 @@ knitr::include_graphics("images/thiokol_blowby_chart.png")
 
 The visualization expert Edward Tufte has argued that with a proper presentation of all of the data, the engineers could have been much more persuasive.  In particular, they could have show a figure like that shown in Figure \@ref(fig:challengerTemps), which highlights two important facts. First, it shows that the amount of O-ring damage (defined by the amount of erosion and soot found outside the rings after the solid rocket boosters were retrieved from the ocean in previous flights) was closely related to the temperature at takeoff.  Second, it shows that the range of forecasted temperatures for the morning of January 28 (shown in the shaded red area) was well outside of the range of all previous launches.  While we can't know for sure, it seems at least plausible that this could have been more persuasive. 
 
-```{r challengerTemps, echo=FALSE,fig.cap="A replotting of Tufte's damage index data. The blue line shows the trend in the data, and the red patch shows the projected temperatures for the morning of the launch."}
+```{r challengerTemps, echo=FALSE,fig.cap="A replotting of Tufte's damage index data. The blue line shows the trend in the data, and the red patch shows the projected temperatures for the morning of the launch.",fig.width=8,fig.height=4,out.height='50%'}
 oringDf=read.table('data/orings.csv',sep=',',header=TRUE)
 
 ggplot(oringDf,aes(x=Temperature,y=DamageIndex)) +
@@ -159,7 +159,7 @@ data/ink\ ratio = \frac{amount\, of\, ink\, used\, on\, data}{total\, amount\, o
 $$
 The point of this is to minimize visual clutter and let the data show through.  For example, take the two presentations of the dental health data in \@ref(fig:dataInkExample). Both panels show the same data, but panel A is much easier to apprehend, because of its relatively higher data/ink ratio.
 
-```{r dataInkExample,echo=FALSE,fig.cap="An example of the same data plotted with two different data/ink ratios."}
+```{r dataInkExample,echo=FALSE,fig.cap="An example of the same data plotted with two different data/ink ratios.",fig.width=8,fig.height=4,out.height='50%'}
 p1 = ggplot(df,aes(x,yDirty)) + 
   geom_point(size=2) +
   geom_smooth(method='lm',se=FALSE)+ ylim(-5,20) +
@@ -195,7 +195,7 @@ knitr::include_graphics('images/excel_chartjunk.png')
 It's often possible to use visualization to distort the message of a dataset.  A very common one is use of different axis scaling to either exaggerate or hide a pattern of data.  For example, let's say that we are interested in seeing whether rates of violent crime have changed in the US.  In Figure \@ref(fig:crimePlotAxes), we can see these data plotted in ways that either make it look like crime has remained constant, or that it has plummeted.  The same data can tell two very different stories!
 
 
-```{r crimePlotAxes,echo=FALSE,fig.cap="Crime data from 1990 to 2014 plotted over time.  Panels A and B show the same data, but with different axis ranges. Data obtained from https://www.ucrdatatool.gov/Search/Crime/State/RunCrimeStatebyState.cfm"}
+```{r crimePlotAxes,echo=FALSE,fig.cap="Crime data from 1990 to 2014 plotted over time.  Panels A and B show the same data, but with different axis ranges. Data obtained from https://www.ucrdatatool.gov/Search/Crime/State/RunCrimeStatebyState.cfm",fig.width=8,fig.height=4,out.height='50%'}
 
 
 crimeData=read.table('data/CrimeStatebyState.csv',sep=',',header=TRUE) %>%
@@ -218,7 +218,7 @@ One of the major controversies in statistical data visualization is how to choos
 
 There are certainly cases where using the zero point makes no sense at all. Let's say that we are interested in plotting body temperate for an individual over time.  In Figure \@ref(fig:bodyTempAxis) we plot the same (simulated) data with or without zero in the Y axis. It should be obvious that by plotting these data with zero in the Y axis (Panel A) we are wasting a lot of space in the figure, given that body temperature of a living person could never go to zero! By including zero, we are also making the apparent jump in temperature during days 21-30 much less evident. In general, my inclination for line plots and scatterplots is to use all of the space in the graph, unless the zero point is truly important to highlight.
 
-```{r bodyTempAxis,echo=FALSE,fig.cap="Body temperature over time, plotted with or without the zero point in the Y axis."}
+```{r bodyTempAxis,echo=FALSE,fig.cap="Body temperature over time, plotted with or without the zero point in the Y axis.",fig.width=8,fig.height=4,out.height='50%'}
 bodyTempDf=data.frame(days=c(1:40),temp=rnorm(40)*0.3 + 98.6)
 bodyTempDf$temp[21:30]=bodyTempDf$temp[21:30]+3
 
@@ -238,7 +238,7 @@ Edward Tufte introduced the concept of the "lie factor" to describe the degree t
 
 The lie factor supports the argument that one should always include the zero point in a bar chart.  In Figure \@ref(fig:barCharLieFactor) we plot the same data with and without zero in the Y axis.  In panel A, the proportional difference in area between the two bars is exactly the same as the proportional difference between the values (i.e. lie factor = 1), whereas in Panel B (where zero is not included) the proportional difference in area between the two bars is roughly 2.8 times bigger than the proportional difference in the values, and thus it visually exaggerates the size of the difference.  
 
-```{r barCharLieFactor, echo=FALSE,fig.cap="Two bar charts with associated lie factors."}
+```{r barCharLieFactor, echo=FALSE,fig.cap="Two bar charts with associated lie factors.",fig.width=8,fig.height=4,out.height='50%'}
 p1 = ggplot(data.frame(y=c(100,95),x=c('condition 1','condition 2')),aes(x=x,y=y)) + 
   geom_col() +
   ggtitle('lie factor = 1')
@@ -261,7 +261,7 @@ Humans have both perceptual and cognitive limitations that can make some visuali
 
 One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" pallettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R
 
-```{r badColors,echo=FALSE,fig.cap="Example of a bad figure that relies solely on color contrast."}
+```{r badColors,echo=FALSE,fig.cap="Example of a bad figure that relies solely on color contrast.",fig.width=8,fig.height=4,out.height='50%'}
 exampleDf = data.frame(value=c(3,5,4,6,2,5,8,8),
                        v1=as.factor(c(1,1,2,2,3,3,4,4)),
                        v2=as.factor(c(1,2,1,2,1,2,1,2)))
@@ -281,7 +281,7 @@ This plot is terrible for several reasons.  First, it requires distingishing a l
 
 Plotting the data using a more reasonable plot (Figure \@ref(fig:religionBars)), we can see the pattern much more clearly. This plot may not look as flashy as the pie chart generated using Excel, but it's a much more effective and accurate representation of the data.
 
-```{r religionBars,echo=FALSE,fig.cap="A clearer presentation of the religious affiliation data (obtained from http://www.pewforum.org/religious-landscape-study/)."}
+```{r religionBars,echo=FALSE,fig.cap="A clearer presentation of the religious affiliation data (obtained from http://www.pewforum.org/religious-landscape-study/).",fig.width=8,fig.height=4,out.height='50%'}
 religionData=read.table('data/religion_data.txt',sep='\t')
 
 names(religionData)=c('Religion','Percentage')
@@ -298,7 +298,7 @@ ggplot(religionData,aes(Religion,Percentage,label=Percentage)) +
 Often we are interested in plotting data where the variable of interest is affected by other factors than the one we are interested in.  For example, let's say that we want to understand how the price of gasoline has changed over time.  Figure \@ref(fig:gasPrices) shows historical gas price data, plotted either with or without adjustment for inflation. Whereas the unadjusted data show a huge increase, the adjusted data show that this is mostly just reflective of inflation.  Other examples where one needs to adjust data for other factors include population size (as we saw in the crime rate examples in an earlier chapter) and data collected across different seasons.
 
 
-```{r gasPrices,echo=FALSE,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation  Inflation correction based on Consumer Price Index data obtained from https://inflationdata.com/Inflation/Consumer_Price_Index/HistoricalCPI.aspx?reloaded=true#Table."}
+```{r gasPrices,echo=FALSE,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation  Inflation correction based on Consumer Price Index data obtained from https://inflationdata.com/Inflation/Consumer_Price_Index/HistoricalCPI.aspx?reloaded=true#Table.",fig.width=4,fig.height=4,out.height='50%'}
 
 # load CPI data 
 cpiData=read.table('data/cpi_data.txt')
@@ -320,7 +320,8 @@ for (i in 1:dim(gasPriceData)[1]){
 ggplot(gasPriceData,aes(year,gasPrice)) +
   geom_line(aes(color='Unadjusted'),size=1) +
   geom_line(aes(year,gasPrice1950Dollars,color='Adjusted'),size=1) +
-  ylab('Gasoline prices') + xlab('year') 
+  ylab('Gasoline prices') + xlab('year') + 
+  theme(legend.position = c(0,0.6)) 
 ```
 
 ## Suggested readings
