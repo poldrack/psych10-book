@@ -115,7 +115,7 @@ Remember that this doesn't tell us anything about the probability of the true po
 Given that the standard error decreases with sample size, that means that the confidence interval should also get narrower as the sample size increases, providing tighter bounds on our estimate.  Figure \@ref(fig:CISampSize) shows an example of how the confidence interval would change as a function of sample size for the weight example. From the figure it's evident that the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, consistent with the fact that the denominator of the confidence interval term is proportional to the square root of the sample size.
 
 
-```{r CISampSize,echo=FALSE,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean."}
+```{r CISampSize,echo=FALSE,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean.",fig.width=4,fig.height=4,out.height='50%'}
 ssDf <- 
   tibble(sampSize=2**seq(4,9)) %>%
   mutate(
@@ -226,7 +226,7 @@ sprintf('Cohens d for male vs. female height = %0.2f',d_height_gender)
 
 The effect size for gender differences in height (d = `r I(d_height_gender)`) is huge by reference to our table above.  We can also see this by looking at the distributions of male and female heights in our sample.  Figure \@ref(fig:genderHist) shows that the two distributions are quite well separated, though still overlapping, highlighting the fact that even when there is a very large effect size for the difference between two groups, there will be individuals from each group that are more like the other group.
 
-```{r genderHist,echo=FALSE,fig.cap="Smoothed histogram plots for male and female heights in the NHANES dataset, showing clearly distinct distributions."}
+```{r genderHist,echo=FALSE,fig.cap="Smoothed histogram plots for male and female heights in the NHANES dataset, showing clearly distinct distributions.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(NHANES_sample,aes(x=Height,color=Gender)) + 
   geom_density()
 ```
@@ -239,7 +239,7 @@ Pearson's *r*, also known as the *correlation coefficient*, is a measure of the 
 
 *r* is a measure that varies from -1 to 1, where a value of 1 represents a perfect positive relationship between the variables, 0 represents no relationship, and -1 represents a perfect negative relationship.  Figure \@ref(fig:corrFig) shows examples of various levels of correlation using randomly generated data.
 
-```{r corrFig,echo=FALSE,fig.cap="Examples of various levels of Pearson's r."}
+```{r corrFig,echo=FALSE,fig.cap="Examples of various levels of Pearson's r.",fig.width=8,fig.height=8,out.height='50%'}
 set.seed(123456789)
 p <- list()
 corrvals <- c(1,0.5,0,-0.5,-1)
@@ -352,7 +352,7 @@ powerSimResults <- powerDf %>%
 ```
 
 
-```{r plotPowerSim,echo=FALSE,fig.cap="Results from power simulation, showing power as a function of sample size, with effect sizes shown as different colors, and alpha shown as line type. The standard criterion of 80% power is shown by the dotted black line."}
+```{r plotPowerSim,echo=FALSE,fig.cap="Results from power simulation, showing power as a function of sample size, with effect sizes shown as different colors, and alpha shown as line type. The standard criterion of 80% power is shown by the dotted black line.",fig.width=6,fig.height=4,out.height='50%'}
 ggplot(powerSimResults,
        aes(sampSizePerGroup,power,color=as.factor(effectSize),linetype=as.factor(alpha))) +
   geom_line(size=1) +
