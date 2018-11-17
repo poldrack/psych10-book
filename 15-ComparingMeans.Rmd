@@ -13,6 +13,7 @@ library(BayesMed)
 library(BayesFactor)
 library(lme4)
 library(lmerTest)
+library(cowplot)
 
 library(pander)
 panderOptions('round',2)
@@ -53,7 +54,7 @@ NHANES_sample <-
 
 ```
 
-```{r PotTVViolin,echo=FALSE,fig.cap='Violin plot showing distributions of TV watching separated by regular marijuana use.'}
+```{r PotTVViolin,echo=FALSE,fig.cap='Violin plot showing distributions of TV watching separated by regular marijuana use.',fig.width=4,fig.height=4,out.height='50%'}
 ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
   geom_violin(draw_quantiles=.50)
 ```
@@ -92,7 +93,7 @@ s
 
 We can also view this graphically (see Figure :
 
-```{r ttestFig,echo=FALSE,fig.cap="Violin plots showing data for each group, with a blue line connecting the predicted values for each group, computed on the basis of the results of the linear model."}
+```{r ttestFig,echo=FALSE,fig.cap="Violin plots showing data for each group, with a blue line connecting the predicted values for each group, computed on the basis of the results of the linear model.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
   geom_violin() +
   annotate('segment',x=1,y=s$coefficients[1,1],xend=2,yend=s$coefficients[1,1]+s$coefficients[2,1],color='blue')
@@ -130,7 +131,7 @@ This shows us that although the difference between groups is highly significant,
 
 In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)).
 
-```{r BPfig, echo=FALSE,fig.cap='Violin plot of systolic blood pressure on first and second recording, from NHANES.'}
+```{r BPfig, echo=FALSE,fig.cap='Violin plot of systolic blood pressure on first and second recording, from NHANES.',fig.width=4,fig.height=4,out.height='50%'}
 
 set.seed(12345678)
 
@@ -167,7 +168,7 @@ t.test(BPsys~timepoint,data=NHANES_sample_tidy,
 
 This analysis shows no significant difference. However, this analysis is inappropriate since it assumes that the two samples are independent, when in fact they are not, since the data come from the same individuals.  We can plot the data with a line for each individual to show this (see Figure \@ref(fig:BPLinePlot)).
 
-```{r BPLinePlot,echo=FALSE,fig.cap='Violin plot of systolic BP on each recording, with lines connecting the two data points for each individual.'}
+```{r BPLinePlot,echo=FALSE,fig.cap='Violin plot of systolic BP on each recording, with lines connecting the two data points for each individual.',fig.width=4,fig.height=4,out.height='50%'}
 
 p <- p+geom_line(aes(group=ID))
 print(p)
@@ -176,7 +177,7 @@ print(p)
 
 In this analysis, what we really care about is whether the blood pressure for each person changed in a systematic way between the two measurements, so another way to represent the data is to compute the difference between the two timepoints for each individual, and then analyze these difference scores rather than analyzing the individual measurements. In Figure \@ref(fig:BPDiffHist), we show a histogram of these difference scores, with a blue line denoting the mean difference.
 
-```{r BPDiffHist,echo=FALSE,fig.cap="Histogram of difference scores between first and second BP measurement."}
+```{r BPDiffHist,echo=FALSE,fig.cap="Histogram of difference scores between first and second BP measurement.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(NHANES_sample,aes(diff)) + 
   geom_histogram(bins=20) +
@@ -233,7 +234,7 @@ You can see that this shows us the same p-value as the paired t-test computed us
 
 Often we want to compare more than two means to determine whether any of them differ from one another.  Let's say that we are analyzing data from a clinical trial for the treatment of high blood pressure.  In the study, volunteers are randomized to one of three conditions: Drug 1, Drug 2 or placebo.  Let's generate some data and plot them (see Figure \@ref(fig:DrugTrial))
 
-```{r DrugTrial, echo=FALSE,fig.cap='Box plots showing blood pressure for three different groups in our clinical trial.'}
+```{r DrugTrial, echo=FALSE,fig.cap='Box plots showing blood pressure for three different groups in our clinical trial.',fig.width=6,fig.height=4,out.height='50%'}
 
 set.seed(123456)
 
@@ -270,7 +271,7 @@ $$
 
 With ANOVA, we want to test whether the variance accounted for by the model is greater than what we would expect by chance, under the null hypothesis of no differences between means.  Whereas for the t distribution the expected value is zero under the null hypothesis, that's not the case here, since sums of squares are always positive numbers.  Fortunately, there is another standard distribution that describes how ratios of sums of squares are distributed under the null hypothesis: The *F* disribution (see figure \@ref(fig:FDist)). This distribution has two degrees of freedom, which correspond to the degrees of freedom for the numerator (which in this case is the model), and the denominator (which in this case is the error).
 
-```{r FDist, echo=FALSE,fig.cap='F distributions under the null hypothesis, for different values of degrees of freedom.'}
+```{r FDist, echo=FALSE,fig.cap='F distributions under the null hypothesis, for different values of degrees of freedom.',fig.width=6,fig.height=4,out.height='50%'}
 fdata <- 
   data.frame(x=seq(0.1,10,.1)) %>%
   mutate(
