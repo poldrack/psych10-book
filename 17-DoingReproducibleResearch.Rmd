@@ -87,7 +87,7 @@ This means that in a field where most of the hypotheses are likely to be wrong (
 
 We can simulate this to show how PPV relates to statistical power, as a function of the prior probability of the hypothesis being true (see Figure \@ref(fig:PPVsim))
 
-```{r PPVsim, echo=FALSE,fig.cap='A simulation of posterior predictive value as a function of statistical power (plotted on the x axis) and prior probability of the hypothesis being true (plotted as separate lines).'}
+```{r PPVsim, echo=FALSE,fig.cap='A simulation of posterior predictive value as a function of statistical power (plotted on the x axis) and prior probability of the hypothesis being true (plotted as separate lines).',fig.width=6,fig.height=4,out.height='50%'}
 
 alpha=0.05  # false positive rate
 beta = seq(1.,0.05,-0.05)  # false negative rate
@@ -124,7 +124,7 @@ Another kind of error can also occur when statistical power is low: Our estimate
 
 We can simulate this in order to see how the estimated effect size for significant results is related to the actual underlying effect size. Let's generate data for which there is a true effect size of 0.2, and estimate the effect size for those results where there is a significant effect detected. Figure \@ref(fig:CurseSim) shows that when power is low, the estimated effect size for significant results can be highly inflated compared to the actual effect size.
 
-```{r CurseSim, echo=FALSE,message=FALSE,fig.cap="A simulation of the winner's curse as a function of statistical power (x axis). The black line shows the estimated effect size, and the red dashed line shows the actual effect size. "}
+```{r CurseSim, echo=FALSE,message=FALSE,fig.cap="A simulation of the winner's curse as a function of statistical power (x axis). The black line shows the estimated effect size, and the red dashed line shows the actual effect size. ",fig.width=4,fig.height=4,out.height='50%'}
 
 trueEffectSize=0.2
 dfCurse=data.frame(sampSize=seq(20,300,20)) %>%
@@ -156,7 +156,7 @@ ggplot(dfCurse,aes(power,effectSizeEstimate)) +
 ```
 
 
-```{r curseSimSingle, echo=FALSE,fig.cap="A histogram showing sample sizes for a number of samples from a dataset, with significant results shown in blue and non-significant results in red."}
+```{r curseSimSingle, echo=FALSE,fig.cap="A histogram showing sample sizes for a number of samples from a dataset, with significant results shown in blue and non-significant results in red.",fig.width=4,fig.height=4,out.height='50%'}
 sampSize=60
 effectSize=0.2
 nruns=1000
