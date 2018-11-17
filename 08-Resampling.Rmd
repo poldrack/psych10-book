@@ -58,7 +58,7 @@ In R, there is a function to generate random numbers for each of the major proba
 
 Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function, which maps cumulative probabilities into values.  Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of interest via its quantile function.
 
-```{r rngExamples, echo=FALSE,fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution."}
+```{r rngExamples, echo=FALSE,fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution.",fig.width=8,fig.height=4,out.height='50%'}
 p1 <- ggplot(data.frame(x=runif(10000)),aes(x)) +
   geom_histogram(bins=100)  + ggtitle('Uniform')
 
@@ -73,14 +73,14 @@ By default, R will generate a different set of random numbers every time you run
 
 ```{r}
 # if we run the rnorm() command twice, it will give us different sets of pseudorandom numbers each time
-add.blank.lines(pander(rnorm(5)))
-add.blank.lines(pander(rnorm(5)))
+print(rnorm(5))
+print(rnorm(5))
 
 # if we set the random seed to the same value each time, then it will give us the same series of pseudorandom numbers each time.
 set.seed(12345)
-add.blank.lines(pander(rnorm(5)))
+print(rnorm(5))
 set.seed(12345)
-add.blank.lines(pander(rnorm(5)))
+print(rnorm(5))
 
 ```
 
@@ -88,7 +88,7 @@ add.blank.lines(pander(rnorm(5)))
 
 Let's go back to our example of exam finishing times. Let's say that I administer three exams and record the finishing times, which might look like the distributions presented in Figure \@ref(fig:finishingTimes).
 
-```{r finishingTimes, echo=FALSE,fig.cap="Simulated finishing time distributions."}
+```{r finishingTimes, echo=FALSE,fig.cap="Simulated finishing time distributions.",fig.width=8,fig.height=4,out.height='50%'}
 finishTimeDf <- tibble(finishTime=rnorm(3*150,mean=5,sd=1),
                         quiz=kronecker(c(1:3),rep(1,150)))
 
@@ -115,11 +115,11 @@ sampleMax <- function(sampSize=150){
 maxTime <- replicate(nRuns,sampleMax())
 
 cutoff <- quantile(maxTime,0.99)
-pander(sprintf('99th percentile of maxTime distribution: %.2f\n',cutoff))
+sprintf('99th percentile of maxTime distribution: %.2f',cutoff)
 
 ```
 
-```{r finishTimeSim,echo=FALSE,fig.cap="Distribution of maximum finishing times across simulations."}
+```{r finishTimeSim,echo=FALSE,fig.cap="Distribution of maximum finishing times across simulations.",fig.width=4,fig.height=4,out.height='50%'}
 tibble(maxTime) %>% 
   ggplot(aes(maxTime)) +
   geom_histogram(bins=100)
@@ -167,13 +167,13 @@ bootMeanHeight <- function(df){
 bootMeans <- replicate(nRuns,bootMeanHeight(heightSample))
 
 SEM_standard <- sd(heightSample$Height)/sqrt(sampleSize)
-print(sprintf('SEM computed using sample SD: %f',SEM_standard))
+sprintf('SEM computed using sample SD: %f',SEM_standard)
 SEM_bootstrap <- sd(bootMeans)
-print(sprintf('SEM computed using SD of bootstrap estimates: %f',SEM_bootstrap))
+sprintf('SEM computed using SD of bootstrap estimates: %f',SEM_bootstrap)
 
 ```
 
-```{r bootstrapSEM,echo=FALSE,fig.cap="An example of bootstrapping to compute the standard error of the mean. The histogram shows the distribution of means across bootstrap samples, while the red line shows the normal distribution based on the sample mean and standard deviation."}
+```{r bootstrapSEM,echo=FALSE,fig.cap="An example of bootstrapping to compute the standard error of the mean. The histogram shows the distribution of means across bootstrap samples, while the red line shows the normal distribution based on the sample mean and standard deviation.",fig.width=4,fig.height=4,out.height='50%'}
 
 tibble(bootMeans=bootMeans) %>%
   ggplot(aes(bootMeans)) + 
