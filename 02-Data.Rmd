@@ -149,7 +149,7 @@ Reliability is important if we want to compare one measurement to another.  The 
 
 Reliability is important, but on its own it's not enough: After all, I could create a highly reliable measurement on a personality test by coding every answer using a single number, regardless of how the person answers.  We want our measurements to also be *valid* --- that is, we want to make sure that we are actually measuring the construct that we think we are measuring (Figure \@ref(fig:ReliabilityValidity)). There are many different types of validity that are commonly discussed; we will focus on three of them.
 
-```{r ReliabilityValidity, echo=FALSE,fig.width=6, fig.height=6,fig.cap="A figure demonstrating the distinction between reliability and valdity.  Copyright Nevit Dilmen/CC-BY-SA-3.0"}
+```{r ReliabilityValidity, echo=FALSE,fig.width=6, fig.height=6,fig.cap="A figure demonstrating the distinction between reliability and valdity.  Copyright Nevit Dilmen/CC-BY-SA-3.0",fig.width=8,fig.height=8,out.height='50%'}
 knitr::include_graphics("images/Reliability_and_validity.png")
 ```
 
