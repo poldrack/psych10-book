@@ -66,7 +66,7 @@ chisqVal <- sum(((candyDf$count - nullExpectation)**2)/nullExpectation)
 
 The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together.  Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
 
-```{r chisqDist,echo=FALSE,fig.cap="Examples of the chi-squared distribution for various degrees of freedom."}
+```{r chisqDist,echo=FALSE,fig.cap="Examples of the chi-squared distribution for various degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
 xvals <- seq(0.01,20,0.01)
 dfvals <- c(1,2,4,8)
 chisqDf <- 
@@ -79,12 +79,13 @@ chisqDf <-
   mutate(chisqNorm = chisq/max(chisq))
   
 ggplot(chisqDf,aes(xvals,chisqNorm,group=as.factor(dfvals),color=as.factor(dfvals))) +
-  geom_line()
+  geom_line() +
+  theme(legend.position = c(0.8,0.7)) 
 ```
 
 Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables.  Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of the simulation.
 
-```{r chisqSim,echo=FALSE,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the blue line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom."}
+```{r chisqSim,echo=FALSE,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the blue line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
 
 d <- replicate(50000,rnorm(8)**2)
 dMean <- apply(d,2,sum)
