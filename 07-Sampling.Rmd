@@ -41,9 +41,9 @@ NHANES_adult <- NHANES %>%
   drop_na(Height) %>%
   subset(Age>=18)
 
-sprintf('Population height: mean = %.2f\n',
+sprintf('Population height: mean = %.2f',
                mean(NHANES_adult$Height))
-sprintf('Population height: std deviation = %.2f\n',
+sprintf('Population height: std deviation = %.2f',
                sd(NHANES_adult$Height))
 
 ```
@@ -55,9 +55,9 @@ In this case we know the population mean and standard deviation. Now let's take 
 
 exampleSample <- NHANES_adult %>% 
   sample_n(50)
-sprintf('Sample height: mean = %.2f\n',
+sprintf('Sample height: mean = %.2f',
                mean(exampleSample$Height))
-sprintf('Sample height: std deviation = %.2f\n',
+sprintf('Sample height: std deviation = %.2f',
                sd(exampleSample$Height))
 
 ```
@@ -82,14 +82,14 @@ for (i in 1:nsamps){
 
 sampdataDf <- tibble(mean=sampMeans)
 
-sprintf('Average sample mean = %.2f\n',
+sprintf('Average sample mean = %.2f',
                mean(sampMeans))
 
 sampMeans_df <- tibble(sampMeans=sampMeans)
 
 ```
 
-```{r samplePlot,echo=FALSE,fig.cap="The blue histogram shows the sampling distribution of the mean over 5000 random samples from the NHANES dataset.  The histogram for the full dataset is shown in gray for reference."}
+```{r samplePlot,echo=FALSE,fig.cap="The blue histogram shows the sampling distribution of the mean over 5000 random samples from the NHANES dataset.  The histogram for the full dataset is shown in gray for reference.",fig.width=8,fig.height=4,out.height='50%'}
 
 ggplot(sampMeans_df,aes(sampMeans)) +
   geom_histogram(data=NHANES_adult,aes(Height,..density..),
@@ -118,9 +118,9 @@ In general we have to be careful about doing this with smaller samples (less tha
 ```{r}
 # compare standard error based on population to standard deviation 
 # of sample means
-sprintf('Estimated standard error based on population SD: %.2f\n',
+sprintf('Estimated standard error based on population SD: %.2f',
                sd(NHANES_adult$Height)/sqrt(sampSize))
-sprintf('Standard deviation of sample means = %.2f\n',
+sprintf('Standard deviation of sample means = %.2f',
                sd(sampMeans))
 
 ```
@@ -133,7 +133,7 @@ The Central Limit Theorem tells us that as sample sizes get larger, the sampling
 
 We can also see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in Figure  \@ref(fig:alcoholYearDist). 
 
-```{r alcoholYearDist, echo=FALSE,fig.cap="Distribution of the variable AlcoholYear in the NHANES dataset, which reflects the number of days that the individual drank in a year."}
+```{r alcoholYearDist, echo=FALSE,fig.cap="Distribution of the variable AlcoholYear in the NHANES dataset, which reflects the number of days that the individual drank in a year.",fig.width=8,fig.height=4,out.height='50%'}
 NHANES_cleanAlc <- NHANES %>% 
   drop_na(AlcoholYear)
 ggplot(NHANES_cleanAlc,aes(AlcoholYear)) + 
@@ -170,7 +170,7 @@ get_sampling_dist <- function(sampSize,nsamps=2500) {
 
 ```
 
-```{r alcDist50,fig.cap="The sampling distribution of the mean for AlcoholYear in the NHANES dataset, with a sample size of 50, in blue.  The normal distribution with the same mean and standard deviation is shown in red."}
+```{r alcDist50,fig.cap="The sampling distribution of the mean for AlcoholYear in the NHANES dataset, with a sample size of 50, in blue.  The normal distribution with the same mean and standard deviation is shown in red.", fig.width=4,fig.height=4,out.height='50%'}
 
 get_sampling_dist(50)
 ```
@@ -182,6 +182,11 @@ Most people are familiar with the idea of a "margin of error" for political poll
 We saw in the previous section that with sufficient sample size, the sampling distribution of the mean is normally distributed, and that the standard error describes the standard deviation of this sampling distribution.  Using this knowledge, we can ask: What is the range that we would expect to capture 95% of all estimates?  To answer this, we can use the normal distribution, for which we know the values between which we expect 95% of all samples to fall. Specifically, we use the *quantile* function for the normal distribution (`qnorm()` in R) to determine the values of the normal distribution that that fall at the 2.5% and 97.5% points in the distribution.  We choose these points because we want to find the 95% of values in the center of the distribution, so we need to cut off 2.5% on each end in order to end up with 95% in the middle.  Figure \@ref(fig:normalCutoffs) shows that this occurs for $Z \pm 1.96$.
 
 ```{r echo=FALSE}
+
+```
+
+```{r normalCutoffs,echo=FALSE,fig.cap="Normal distribution, with the orange section in the center denoting the range in which we expect 95% of all values to fall.  The green sections show the portions of the distribution that are more extreme, which we would expect to occur less than 5% of the time.",fig.width=4,fig.height=4,out.height='50%'}
+
 # create utility functions
 
 dnormfun <- function(x){
@@ -223,9 +228,6 @@ plot_CI_cutoffs <- function(pct,zmin=-4,zmax=4,zmean=0,zsd=1) {
     return(zcut)
 }
 
-```
-
-```{r normalCutoffs,echo=FALSE,fig.cap="Normal distribution, with the orange section in the center denoting the range in which we expect 95% of all values to fall.  The green sections show the portions of the distribution that are more extreme, which we would expect to occur less than 5% of the time."}
 zcut <- plot_CI_cutoffs(0.95)
 
 ```
