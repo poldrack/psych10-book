@@ -12,7 +12,7 @@ library(tidyverse)
 library(ggplot2)
 library(fivethirtyeight)
 library(BayesMed)
-
+library(cowplot)
 library(pander)
 panderOptions('round',2)
 panderOptions('digits',7)
@@ -65,57 +65,59 @@ lorenzCurve = function(df){
   }
   S <- sum(lc)
   giniCoef <- 1 + (1-2*S)/nrow(df)
+  return(list(p=p,lc=lc,gc=giniCoef))
+}
 
-  p <- ggplot(data.frame(p,lc),aes(p,lc)) + 
+
+```
+
+
+```{r gini0,fig.cap="Lorenz curve for Gini index of zero (i.e. perfect equality).",fig.width=8,fig.height=8,out.height='50%'}
+# Create Lorenz curve for Gini index of zero (i.e. perfect equality)
+
+incomeDf <- data.frame(income=rep(40000,10))
+lc <- lorenzCurve(incomeDf)
+
+incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
+lc2 <- lorenzCurve(incomeDf)
+
+incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
+incomeDf$income[1] <- 40000000
+lc3 <- lorenzCurve(incomeDf)
+
+p1 <- ggplot(data.frame(p=lc$p,lc=lc$lc),aes(p,lc)) + 
     geom_line(color='blue') + 
     geom_point() + 
     xlim(0,1) + ylim(0,1) + 
     xlab('proportion of population') + ylab('proportion of income') +
     geom_abline(slope=1,intercept = 0,color='black',linetype='dotted') +
-    ggtitle(sprintf('Gini coefficient = %f',giniCoef))
-  print(p)
-  return(giniCoef)
-}
+    ggtitle(sprintf('A: Gini coefficient = %f',lc$gc))
 
+p2 <- ggplot(data.frame(p=lc2$p,lc=lc2$lc),aes(p,lc)) + 
+    geom_line(color='blue') + 
+    geom_point() + 
+    xlim(0,1) + ylim(0,1) + 
+    xlab('proportion of population') + ylab('proportion of income') +
+    geom_abline(slope=1,intercept = 0,color='black',linetype='dotted') +
+    ggtitle(sprintf('B: Gini coefficient = %f',lc2$gc))
+
+p3 <- ggplot(data.frame(p=lc3$p,lc=lc3$lc),aes(p,lc)) + 
+    geom_line(color='blue') + 
+    geom_point() + 
+    xlim(0,1) + ylim(0,1) + 
+    xlab('proportion of population') + ylab('proportion of income') +
+    geom_abline(slope=1,intercept = 0,color='black',linetype='dotted') +
+    ggtitle(sprintf('C: Gini coefficient = %f',lc3$gc))
+
+plot_grid(p1,p2,p3,ncol=2)
 ```
-
-First, let's create an example with 10 people where everyone has exactly the same income (Figure \@ref(fig:gini0)).
-
-```{r gini0,fig.cap="Lorenz curve for Gini index of zero (i.e. perfect equality)."}
-# Create Lorenz curve for Gini index of zero (i.e. perfect equality)
-
-incomeDf <- data.frame(income=rep(40000,10))
-lc=lorenzCurve(incomeDf)
-sprintf('Gini index = %0.2f',lc)
-```
-Now let's look at an example where income is normally distributed (Figure \@ref(fig:giniNormal)).
-
-```{r giniNormal,fig.cap="Gini index for a population with normally distributed income."}
-# Create Lorenz curve for a population with normally distributed income.
-incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
-
-print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
-
-```
-
-Now let's look at an example with high inequality; everyone has equal income (\$40,000) except for one person, who has income of \$40,000,000 (Figure \@ref(fig:giniInequal)).
-
-```{r giniInequal,fig.cap="Lorenz curve for a maximally inequal population."}
-# Create Lorenz curve for a maximally inequal population
-
-incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
-incomeDf$income[1] <- 40000000
-print(sprintf('Gini index = %0.2f',lorenzCurve(incomeDf)))
-
-```
-
-According to the US Census, the United States had a Gini index of 0.469 in 2010, falling roughly half way between our normally distributed and maximally inequal examples.
+Figure \@ref(fig:gini0) shows the Lorenz curves for several different income distributions.  The top left panel (A) shows an example with 10 people where everyone has exactly the same income. The top right panel (B) shows an example where income is normally distributed. The bottom left panel shows an example with high inequality; everyone has equal income (\$40,000) except for one person, who has income of \$40,000,000. According to the US Census, the United States had a Gini index of 0.469 in 2010, falling roughly half way between our normally distributed and maximally inequal examples.
 
 ## Is income inequality related to hate crimes?
 
 Now that we understand the Gini index, we can look at the relationship between income inequality and rates of hate crimes (see Figure \@ref(fig:hateCrimeGini)).
 
-```{r hateCrimeGini, fig.cap="Plot of rates of hate crimes vs. Gini index."}
+```{r hateCrimeGini, fig.cap="Plot of rates of hate crimes vs. Gini index.",fig.width=4,fig.height=4,out.height='50%'}
 
 hateCrimes <- 
   hate_crimes %>%
@@ -216,7 +218,7 @@ This test shows that the likelihood of an r value this extreme or more is quite 
 
 We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis.
 
-```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line."}
+```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line.",fig.width=4,fig.height=4,out.height='50%'}
 shuffleCorr <- function(x,y){
   xShuffled=sample(x)
   return(cor(xShuffled,y))
@@ -238,7 +240,7 @@ The p-value computed using randomization is reasonably similar to the answer giv
 
 You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
 
-```{r outlierCorr, echo=FALSE,fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive."}
+```{r outlierCorr, echo=FALSE,fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive.",fig.width=4,fig.height=4,out.height='50%'}
 n <- 10
 set.seed(1234)
 
@@ -299,7 +301,7 @@ Let's say that we did such an analysis, and we found that abused children had po
 
 One useful way to describe causal relations between variables is through a *causal graph*, which shows variables as circles and causal relations between them as arrows.  For example, Figure \@ref(fig:simpleCausalGraph) shows the causal relationships between study time and two variables that we think should be affected by it: exam grades and exam finishing times.  
 
-```{r simpleCausalGraph, echo=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam)."}
+```{r simpleCausalGraph, echo=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam).",fig.width=6,fig.height=6,out.height='50%'}
 
 library(DiagrammeR)
 grViz("
@@ -325,7 +327,7 @@ digraph boxes_and_circles {
 
 However, in reality the effects on finishing time and grades are not due directly to the amount of time spent studying, but rather to the amount of knowledge that the student gains by studying.  We would usually say that knowledge is a *latent* variable -- that is, we can't measure it directly but we can see it reflected in variables that we can measure (like grades and finishing times).  Figure \@ref(fig:latentCausalGraph) shows this.
 
-```{r latentCausalGraph, echo=FALSE,fig.cap="A graph showing the same causal relationships as above, but now also showing the latent variable (knowledge) using a square box."}
+```{r latentCausalGraph, echo=FALSE,fig.cap="A graph showing the same causal relationships as above, but now also showing the latent variable (knowledge) using a square box.",fig.width=6,fig.height=6,out.height='50%'}
 
 library(DiagrammeR)
 grViz("
