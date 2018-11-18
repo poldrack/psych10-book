@@ -15,7 +15,7 @@ documentclass: book
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=8, fig.height=6, #echo=FALSE, 
+knitr::opts_chunk$set(fig.width=6, fig.height=6, #echo=FALSE, 
                       warning=FALSE, message=FALSE)
 ```
 
@@ -23,53 +23,26 @@ knitr::opts_chunk$set(fig.width=8, fig.height=6, #echo=FALSE,
 
 ## Why does this book exist?
 
-In 2018 I began teaching an undergraduate statistics course at Stanford (Psych 10/Stats 60).  
-I had never taught statistics before, and this was a chance to shake things up.  
-I have been increasingly unhappy with undergraduate statistics education in psychology, and I wanted to bring a number of new ideas and approaches to the class.  
-In particular, I wanted to bring to bear the approaches that are increasingly used in real statistical practice in the 21st century.  
-As Brad Efron and Trevor Hastie laid out so nicely in their book "Computer Age Statistical Inference: Algorithms, Evidence, and Data Science", these methods take advantage of today's increased computing power to solve statistical problems in ways that go far beyond the more standard methods that are usually taught in the undergraduate statistics course for psychology students.
+In 2018 I began teaching an undergraduate statistics course at Stanford (Psych 10/Stats 60).  I had never taught statistics before, and this was a chance to shake things up.  I have been increasingly unhappy with undergraduate statistics education in psychology, and I wanted to bring a number of new ideas and approaches to the class.  In particular, I wanted to bring to bear the approaches that are increasingly used in real statistical practice in the 21st century.  As Brad Efron and Trevor Hastie laid out so nicely in their book "Computer Age Statistical Inference: Algorithms, Evidence, and Data Science", these methods take advantage of today's increased computing power to solve statistical problems in ways that go far beyond the more standard methods that are usually taught in the undergraduate statistics course for psychology students.
 
-The first year that I taught the class, I used Andy Field's amazing graphic novel statistics book, "An Adventure in Statstics", as the textbook.  
-There are many things that I really like about this book -- in particular, I like the way that it frames statistical practice around the building of models, and treats null hypothesis testing with sufficient caution (though insufficient disdain, in my opinion). 
-Unfortunately, most of my students hated the book, primarily because it involved wading through a lot of story to get to the statistical knowledge.  
-I also found it wanting because there are a number of topics (particular those from the field of artificial intelligence known as *machine learning*) that I wanted to include but were not discussed in his book.  
-I ultimately came to feel that the students would be best served by a book that follows very closely to my lectures, so I started writing down my lectures into a set of computational notebooks that would ultimately become this book.  
-The outline of this book follows roughly that of Field's book, since the lectures were originally based in large part on the flow of that book, but the content is substantially different (and also much less fun and clever).
+The first year that I taught the class, I used Andy Field's amazing graphic novel statistics book, "An Adventure in Statstics", as the textbook.  There are many things that I really like about this book -- in particular, I like the way that it frames statistical practice around the building of models, and treats null hypothesis testing with sufficient caution (though insufficient disdain, in my opinion). Unfortunately, most of my students hated the book, primarily because it involved wading through a lot of story to get to the statistical knowledge.  I also found it wanting because there are a number of topics (particular those from the field of artificial intelligence known as *machine learning*) that I wanted to include but were not discussed in his book.  I ultimately came to feel that the students would be best served by a book that follows very closely to my lectures, so I started writing down my lectures into a set of computational notebooks that would ultimately become this book.  The outline of this book follows roughly that of Field's book, since the lectures were originally based in large part on the flow of that book, but the content is substantially different (and also much less fun and clever).
 
 ## You're not a statistician - why should we listen to you?
 
-I am trained as a psychologist and neuroscientist, not a statistician.  
-However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics.  
-Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches.  
-There are almost certainly some things in this book that would annoy a real statistician (for example, I'm sure that there are places where I should have put a $\hat{hat}$ on a varible but did not).  
+I am trained as a psychologist and neuroscientist, not a statistician.  However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics.  Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches.  There are almost certainly some things in this book that would annoy a real statistician (for example, I'm sure that there are places where I should have put a $\hat{hat}$ on a varible but did not).  
 
 *if I have a statistician read it, then discuss that here*
 
 ## Why R?
 
-In my course, students learn to analyze data hands-on using the R language.  
-The question "Why R?" could be interpreted to mean "Why R instead of a graphical software package like (insert name here)?".  
-After all, most of the students who enroll in my class have never programmed before, so teaching them to program is going to take away from instruction in statistical concepts.  
-My answer is that I think that the best way to learn statistical tools is to work directly with data, and that working with graphical packages insulates one from the data and methods in way that impedes true understanding.  
-In addition, for many of the students in my class this may be the only course in which they are exposed to programming; given that programming is an essential ability in a growing number of academic fields, I think that providing these students with basic programming literacy is critical to their future success, and will hopefully inspire at least a few of them to learn more.
+In my course, students learn to analyze data hands-on using the R language.  The question "Why R?" could be interpreted to mean "Why R instead of a graphical software package like (insert name here)?".  After all, most of the students who enroll in my class have never programmed before, so teaching them to program is going to take away from instruction in statistical concepts.  My answer is that I think that the best way to learn statistical tools is to work directly with data, and that working with graphical packages insulates one from the data and methods in way that impedes true understanding.  In addition, for many of the students in my class this may be the only course in which they are exposed to programming; given that programming is an essential ability in a growing number of academic fields, I think that providing these students with basic programming literacy is critical to their future success, and will hopefully inspire at least a few of them to learn more.
 
-The question could also be interpreted to mean "Why R instead of (insert language here)?".  
-On this question I am much more conflicted, because I deeply dislike R as a programming language (I greatly prefer Python).  
-Why then do I use it?
-The first answer to the question is practical -- nearly all of the potential teaching assistants (mostly graduate students in our department) have experience with R, since our graduate statistics course uses R.  
-In fact, most of them have much greater skill with R than I do!  
-On the other hand, relatively few of them have expertise in Python.  
-Thus, if I want an army of skilled teaching assistants, it makes sense to use R.
+The question could also be interpreted to mean "Why R instead of (insert language here)?".  On this question I am much more conflicted, because I deeply dislike R as a programming language (I greatly prefer Python).  Why then do I use it? The first answer to the question is practical -- nearly all of the potential teaching assistants (mostly graduate students in our department) have experience with R, since our graduate statistics course uses R.  In fact, most of them have much greater skill with R than I do!  On the other hand, relatively few of them have expertise in Python.  Thus, if I want an army of skilled teaching assistants, it makes sense to use R.
 
-The other reason is that the free Rstudio software makes using R relatively easy for new users.  
-In particular, I like the RMarkdown Notebook feature that allows the mixing of narrative and executable code with integrated output.  
-It's similar in spirit to the Jupyter notebooks that many of us use for Python programming, but I find it easier to deal with because it's just a plain text file.  
-In my class, I give students a skeleton RMarkdown file for problem sets, and they submit the file with their solution added, which I then score using a set of automated grading scripts. 
+The other reason is that the free Rstudio software makes using R relatively easy for new users.  In particular, I like the RMarkdown Notebook feature that allows the mixing of narrative and executable code with integrated output.  It's similar in spirit to the Jupyter notebooks that many of us use for Python programming, but I find it easier to deal with because it's just a plain text file.  In my class, I give students a skeleton RMarkdown file for problem sets, and they submit the file with their solution added, which I then score using a set of automated grading scripts. 
 
 ## An open source book
 
-This book is meant to be a living document, which is why its source is available online at [https://github.com/poldrack/psych10-book](https://github.com/poldrack/psych10-book).  
-If you find any errors in the book or want to make a suggestion for how to improve it, please open an issue on the Github site. 
-Even better, submit a pull request with your suggested change.  
+This book is meant to be a living document, which is why its source is available online at [https://github.com/poldrack/psych10-book](https://github.com/poldrack/psych10-book).  If you find any errors in the book or want to make a suggestion for how to improve it, please open an issue on the Github site. Even better, submit a pull request with your suggested change.  
 
 
