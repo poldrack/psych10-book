@@ -215,13 +215,13 @@ $$
 height_i =  \beta * age_i + error_i
 $$
 
-where $\beta$ is a *parameter* that we multiply by age to get the smallest error.  You might have noticed that this is simply a line with a slope of $\beta$ - to see this, let's plot the best fitting line in blue on top of the data (Panel B in Figure \@ref(fig:childHeightLine)).Something is clearly wrong with this model, as the line doesn't seem to follow the data very well.  In fact, the RMSE for this model (`r I(rmse_heightOnly)`) is actually higher than the model that only includes the mean! The problem comes from the fact that our model only includes age, which means that the predicted value of height from the model must take on a value of zero when age is zero.  Even though the data do not include any children with an age of zero, the line is mathematically constrained to have a y-value of zero when x is zero, which explains why the line is pulled down below the younger datapoints.  We can fix this by including a constant value in our model, which basically represents the estimated value of height when age is equal to zero; even though an age of zero is not plausible in this dataset, this is a mathematical trick that will allow the model to account for the overall magnitude of the data.  The model is:
+where $\beta$ is a *parameter* that we multiply by age to get the smallest error.  You might have noticed that this is simply a line with a slope of $\beta$ - to see this, let's plot the best fitting line in blue on top of the data (Panel B in Figure \@ref(fig:childHeightLine)). Something is clearly wrong with this model, as the line doesn't seem to follow the data very well.  In fact, the RMSE for this model (`r I(rmse_heightOnly)`) is actually higher than the model that only includes the mean! The problem comes from the fact that our model only includes age, which means that the predicted value of height from the model must take on a value of zero when age is zero.  Even though the data do not include any children with an age of zero, the line is mathematically constrained to have a y-value of zero when x is zero, which explains why the line is pulled down below the younger datapoints.  We can fix this by including a constant value in our model, which basically represents the estimated value of height when age is equal to zero; even though an age of zero is not plausible in this dataset, this is a mathematical trick that will allow the model to account for the overall magnitude of the data.  The model is:
 
 $$
 height_i = constant + \beta * age_i + error_i
 $$
 
-where *constant* is a constant value added to the prediction for all individuals (which we also call the *intercept*, since it maps onto the intercept in the equation for a line).  We will also learn later how it is that we actually compute these values; for now, we will use the `geom_smooth()` function in R to compute the values of the constant and $\beta$ that give us the smallest error. Panel C in Figure \@ref(fig:childHeightLine) shows this model fitted to the NHANES data, where we see that the line matches the data much better than the one without a constant. 
+where *constant* is a constant value added to the prediction for all individuals (which we also call the *intercept*, since it maps onto the intercept in the equation for a line).  We will also learn later how it is that we actually compute these values; for now, we will use the `lm()` function in R to compute the values of the constant and $\beta$ that give us the smallest error. Panel C in Figure \@ref(fig:childHeightLine) shows this model fitted to the NHANES data, where we see that the line matches the data much better than the one without a constant. 
 
 ```{r ageHeightError,echo=FALSE,fig.cap="Distribution of errors from model including constant and age.",fig.width=4,fig.height=4,out.height='50%'}
 # find the best fitting model to predict height given age
@@ -252,7 +252,7 @@ sprintf("root mean squared error: %0.2f", rmse_age)
 
 ```
 
-Our error is much smaller using this model -- only `r I(rmse_age)` centimeters on average.  Can you think of other variables that might also be related to height? What about gender?  In Panel D of Figure \@ref(fig:heightAgeGender) we plot the data with lines fitted separately for males and females. From the plot, it seems that there is a difference between males and females, but it is relatively small and only emerges after the age of puberty.  Let's estimate this model and see how the errors look:
+Our error is much smaller using this model -- only `r I(rmse_age)` centimeters on average.  Can you think of other variables that might also be related to height? What about gender?  In Panel D of Figure \@ref(fig:childHeightLine) we plot the data with lines fitted separately for males and females. From the plot, it seems that there is a difference between males and females, but it is relatively small and only emerges after the age of puberty.  Let's estimate this model and see how the errors look:
 
 ```{r}
 # compute model fit for modeling with age and gender
@@ -281,7 +281,7 @@ print(sprintf("root mean squared error: %0.2f", rmse_age_gender))
 In Figure \@ref(fig:msePlot) we plot the root mean squared error values across the different models. From this we see that the model got a little bit better going from mode to mean, much better going from mean to mean+age, and only very slighly better by including gender as well.
 
 
-```{r msePlot,echo=FALSE, fig.cap="Mean squared error plotted for each of the models tested above."}
+```{r msePlot,echo=FALSE, fig.cap="Mean squared error plotted for each of the models tested above.",fig.width=4,fig.height=4,out.height='50%'}
 error_df <- #build a dataframe using the function tribble()
   tribble(
     ~model, ~error,
@@ -300,7 +300,8 @@ error_df %>%
   scale_x_discrete(limits = c("mode", "mean", "mean + age", "mean + age + gender")) +
   labs(
     y = "root mean squared error"
-  )
+  ) + 
+  coord_flip()
   
 ```
 
@@ -363,7 +364,7 @@ We could also imagine data that show the same linear relationship, but have much
 
 These were both examples where the *linear model* seems appropriate, and the error reflects noise in our measurement. The linear model specifies that the relationship between two variables follows a straight line. For example, in a linear model, change in BAC is always associated with a specific change in ReactionTime, regardless of the level of BAC.
 
-On the other hand, there are other situations where the linear model is incorrect, and error will be increased because the model is not properly specified.  Let's say that we are interested in the relationship between caffeine intake and performance on a test.  The relation between stimulants like caffeine and test performance is often *nonlinear* - that is, it doesn't follow a straight line.  This is because performance goes up with smaller amounts of caffeine (as the person becomes more alert), but then starts to decline with larger amounts (as the person becomes nervous and jittery). Let's simulate data of this form, and then fit a linear model to the data (see Panel C of Figure \@ref(fig:BACrt)). The blue line shows the straight line that bests fits these data; clearly, there is a high degree of error.  Although there is a very lawful relation between test performance and caffeine intake, it follows a curve rather than a straight line.  The linear model has high error because it's the wrong model for these data.
+On the other hand, there are other situations where the linear model is incorrect, and error will be increased because the model is not properly specified.  Let's say that we are interested in the relationship between caffeine intake and performance on a test.  The relation between stimulants like caffeine and test performance is often *nonlinear* - that is, it doesn't follow a straight line.  This is because performance goes up with smaller amounts of caffeine (as the person becomes more alert), but then starts to decline with larger amounts (as the person becomes nervous and jittery). We can simulate data of this form, and then fit a linear model to the data (see Panel C of Figure \@ref(fig:BACrt)). The blue line shows the straight line that bests fits these data; clearly, there is a high degree of error.  Although there is a very lawful relation between test performance and caffeine intake, it follows a curve rather than a straight line.  The linear model has high error because it's the wrong model for these data.
 
 ## Can a model be too good?
 
@@ -835,7 +836,7 @@ sprintf("std of rate: %.2f", sd(crimeData$Violent.Crime.rate))
 
 ```
 
-From the right panel of Figure \@ref(fig:popVsCrime) we see that California is not so dangerous after all -- its crime rate of `r I(caCrimeData$Violent.Crime.rate)` per 100,000 people is a bit above the mean of `r I(mean(crimeData$Violent.Crime.rate))`, and well within the range of many other states. But what if we want to get a clearer view of how far it is from the rest of the distribution? 
+From the right panel of Figure \@ref(fig:popVsCrime) we see that California is not so dangerous after all -- its crime rate of `r I(caCrimeData$Violent.Crime.rate)` per 100,000 people is a bit above the mean of `r I(mean(crimeData$Violent.Crime.rate))`, but well within the range of many other states. But what if we want to get a clearer view of how far it is from the rest of the distribution? 
 
 The *Z-score* allows us to express data in a way that provides more insight into each data point's relationship to the overall distribution.  The formula to compute a Z-score for a data point given that we know the value of the population mean $\mu$ and standard deviation $\sigma$ is:
 
@@ -1048,7 +1049,7 @@ Figure \@ref(fig:zDensity2SD) shows the same plot for two standard deviations. H
 
 ### Standardized scores
 
-Let's say that instead of Z-scores, we wanted to generate standardized crime scores with a mean of 100 and standard deviation of 10.  We can do that by simply multiplying the Z-scores by 10 and then adding 100.
+Let's say that instead of Z-scores, we wanted to generate standardized crime scores with a mean of 100 and standard deviation of 10.  This is similar to the standardization that is done with scores from intelligence tests to generate the intelligence quotient (IQ).  We can do this by simply multiplying the Z-scores by 10 and then adding 100.
 
 ```{r stdScores,echo=FALSE,fig.cap="Crime data presented as standardized scores with mean of  100 and standard deviation of 10.",fig.width=4,fig.height=4,out.height='50%'}
 crimeData <-
@@ -1090,7 +1091,7 @@ One useful application of Z-scores is to compare distributions of different vari
 
 p1 <- crimeData %>% 
   ggplot(aes(Violent.Crime.rate, Property.crime.rate)) +
-  geom_point(size = 5) +
+  geom_point(size = 2) +
   annotate(
     "point",
     x = caCrimeData$Violent.Crime.rate, 
@@ -1128,7 +1129,7 @@ caCrimeData <-
 
 p2 <- crimeData %>% 
   ggplot(aes(ViolentCrimeRateZscore, PropertyCrimeRateZscore)) +
-  geom_point(size = 5) +
+  geom_point(size = 2) +
   scale_y_continuous(breaks = seq.int(-2, 2, .5)) +
   scale_x_continuous(breaks = seq.int(-2, 2, .5)) +
   annotate(
@@ -1158,7 +1159,7 @@ plot_grid(p1,p2)
 
 Let's add one more factor to the plot: Population.  In the left panel of Figure \@ref(fig:crimeTypePopPlot) we show this using the size of the plotting symbol, which is often a useful way to add information to a plot.
 
-```{r crimeTypePopPlot,echo=FALSE,fig.cap="Left: Plot of violent vs. property crime rates, with population size presented through the size of the plotting symbol; California is presented in blue.",fig.width=8,fig.height=4,out.height='50%'}
+```{r crimeTypePopPlot,echo=FALSE,fig.cap="Left: Plot of violent vs. property crime rates, with population size presented through the size of the plotting symbol; California is presented in blue. Right: Difference scores for violent vs. property crime, plotted against population. ",fig.width=8,fig.height=4,out.height='50%'}
 
 p1 <- crimeData %>% 
   ggplot(aes(ViolentCrimeRateZscore, PropertyCrimeRateZscore)) +

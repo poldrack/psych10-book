@@ -15,8 +15,21 @@ library(pander)
 panderOptions('round',3)
 panderOptions('digits',7)
 
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES <- NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult <- NHANES %>%
+  drop_na(Height) %>%
+  subset(Age>=18)
+
+
 ```
-One of the most important books in practical computer science, called *Numerical Recipes*, said the following:
+
+The use of computer simulations has become an essential aspect of modern statistics. For example, one of the most important books in practical computer science, called *Numerical Recipes*, says the following:
 
 > "Offered the choice between mastery of a five-foot shelf of analytical statistics books and middling ability at performing statistical Monte Carlo simulations, we would surely choose to have the latter skill."
 
@@ -40,13 +53,13 @@ To do this, we need to generate random samples from a normal distribution.
 
 ## Randomness in statistics
 
-The term "random" is often used colloquiually to refer to things that are bizarre or unexpected, but in statistics the term has a very specific meaning: A process is *random* if it is unpredictable.  For example, if I flip a fair coin 10 times, the value of the outcome on one flip does not provide me with any information that lets us predict the outcome on the next flip. It's important to note that the fact that something is unpredictable doesn't necessarily mean that it is not deterministic.  For example, when we flip a coin, the outcome of the flip is determined by the laws of physics; if we knew all of the conditions in enough detail, we should be able to predict the outcome of the flip.  However, many factors combine to make the outcome of the coin flip unpredictable in practice.
+The term "random" is often used colloquiually to refer to things that are bizarre or unexpected, but in statistics the term has a very specific meaning: A process is *random* if it is unpredictable.  For example, if I flip a fair coin 10 times, the value of the outcome on one flip does not provide me with any information that lets me predict the outcome on the next flip. It's important to note that the fact that something is unpredictable doesn't necessarily mean that it is not deterministic.  For example, when we flip a coin, the outcome of the flip is determined by the laws of physics; if we knew all of the conditions in enough detail, we should be able to predict the outcome of the flip.  However, many factors combine to make the outcome of the coin flip unpredictable in practice.
 
 Psychologists have shown that humans actually have a fairly bad sense of randomness. First, we tend to see patterns when they don't exist. In the extreme, this leads to the phenomenon of *pareidolia*, in which people will perceive familiar objects within random patterns (such as perceiving a cloud as a human face or seeing the Virgin Mary in a piece of toast).  Second, humans tend to think of random processes as self-correcting, which leads us to expect that we are "due for a win" after losing many rounds in a game, a phenonenon known as the "gambler's fallacy". 
 
 ## Generating random numbers
 
-Running a Monte Carlo simulation requires that we generate random numbers.  Generating truly random numbers (i.e. numbers that are completely unpredictable) is only possible through physical processes, such as the decay of atoms or the rolling of dice, which are difficult to obtain and/or too slow to be useful for computer simulation (though they can be obtained from the [NIST Randomness Beacon](https://www.nist.gov/programs-projects/nist-randomness-beacon]).
+Running a Monte Carlo simulation requires that we generate random numbers.  Generating truly random numbers (i.e. numbers that are completely unpredictable) is only possible through physical processes, such as the decay of atoms or the rolling of dice, which are difficult to obtain and/or too slow to be useful for computer simulation (though they can be obtained from the [NIST Randomness Beacon](https://www.nist.gov/programs-projects/nist-randomness-beacon])).
 
 In general, instead of truly random numbers we use *pseudo-random* numbers generated using a computer algorithm; these numbers will seem random in the sense that they are difficult to predict, but the series of numbers will actually repeat at some point.  For example, the random number generator used in R will repeate after $2^{19937} - 1$ numbers.  That's far more than the number of seconds in the history of the universe, and we generally think that this is fine for most purposes in statistical analysis.
 
@@ -128,7 +141,7 @@ tibble(maxTime) %>%
 ```
 
 This shows that the 99th percentile of the finishing time distribution falls at `r I(cutoff)`, meaning that if we were to give that much time, then everyone should finish 99% of the time.
-It's always important to remember that our assumptions matter -- if they are wrong, then the results of the simulation are useless. In this case, we assumed that the finishing time distribution was normally distributed with a particular mean and standard deviation; if this is incorrect, then the answer could be very different.
+It's always important to remember that our assumptions matter -- if they are wrong, then the results of the simulation are useless. In this case, we assumed that the finishing time distribution was normally distributed with a particular mean and standard deviation; if this is incorrect (and it almost certainly is), then the answer could be very different.
 
 ## Using simulation for statistics: The bootstrap
 
@@ -136,26 +149,17 @@ So far we have used simulation to demonstrate statistical principles, but we can
 
 ### Computing the bootstrap
 
-In the section above, we used our knowledge of the sampling distribution of the mean to compute the standard error of the mean and conidence intervals.  But what if we can't assume that the estimates are normally distributed, or we don't know their distribution?  The idea of the bootstrap is to use the data themselves to estimate an answer.  The name comes from the idea of pulling one's self up by their own boostraps, expressing the idea that we don't have any external source of leverage so we have to rely upon the data themselves.  The bootstrap method was conceived by Bradley Efron of the Stanford Department of Statistics, who is one of the world's most influential statisticians.
+In the section above, we used our knowledge of the sampling distribution of the mean to compute the standard error of the mean and confidence intervals.  But what if we can't assume that the estimates are normally distributed, or we don't know their distribution?  The idea of the bootstrap is to use the data themselves to estimate an answer.  The name comes from the idea of pulling one's self up by their own boostraps, expressing the idea that we don't have any external source of leverage so we have to rely upon the data themselves.  The bootstrap method was conceived by Bradley Efron of the Stanford Department of Statistics, who is one of the world's most influential statisticians.
 
 The idea behind the boostrap is that we repeatedly sample from the actual dataset; importantly, we sample *with replacement*, such that the same data point will often end up being represented multiple times within one of the samples.  We then compute our statistic of interest on each of the bootstrap samples, and use the distribution of those estimates 
 
 Let's start by using the bootstrap to estimate the sampling distribution of the mean, so that we can compare the result to the SEM that we discussed earlier.
 
 ```{r}
+# perform the boostrap to compute SEM and compare to parametric method
+
 nRuns <- 2500
 sampleSize <- 32
-# load the NHANES data library
-library(NHANES)
-
-# drop duplicated IDs within the NHANES dataset
-NHANES <- NHANES %>% 
-  dplyr::distinct(ID,.keep_all=TRUE)
-
-NHANES_adult <- NHANES %>%
-  drop_na(Height) %>%
-  subset(Age>=18)
-
 
 heightSample <- NHANES_adult %>%
   sample_n(sampleSize)
@@ -201,11 +205,11 @@ sampleMean=mean(heightSample$Height)
 normalCI <- tibble("2.5%" = sampleMean - 1.96*SEM_standard,
           "97.5%"=sampleMean + 1.96*SEM_standard) 
 
-pander("confidence limits based on sample SD and normal distribution:")
+print("confidence limits based on sample SD and normal distribution:")
 pander(normalCI)
 ```
 
-We would usually never employ the bootstrap to compute confidence intervals for the mean (since we can generally assume that the normal distribution is appropriate for the sampling distribution of the mean), but this example shows how the method gives us roughly the same result as the standard method based on the normal distribution.  The bootstrap would more often be used to generate standard errors for estimates of other statistics where we know or suspect that the normal distribution is not appropriate.
+We would not usually employ the bootstrap to compute confidence intervals for the mean (since we can generally assume that the normal distribution is appropriate for the sampling distribution of the mean, as long as our sample is large enough), but this example shows how the method gives us roughly the same result as the standard method based on the normal distribution.  The bootstrap would more often be used to generate standard errors for estimates of other statistics where we know or suspect that the normal distribution is not appropriate.
 
 ## Suggested readings
 
