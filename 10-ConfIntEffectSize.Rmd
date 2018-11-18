@@ -3,11 +3,11 @@ output:
   html_document: default
   pdf_document: default
 ---
-# Confidence intervals, effect sizes, and statistical power
+# Confidence intervals, effect sizes, and statistical power {#ci-effect-size-power}
 
 In the previous chapter we discussed how we can use data to test hypotheses.  Those methods provided a binary answer: we either reject or fail to reject the null hypothesis. However, this kind of decision overlooks a couple of important questions.  First, we would like to know how much uncertainty we have about the answer (regardless of which way it goes).  In addition, sometimes we don't have a clear null hypothesis, so we would like to see what range of estimates are consistent with the data.  Second, we would like to know how large the effect actually is, since as we saw in the weight loss example in the previous chapter, a statisticially significant effect is not necessarily a practically important effect.
 
-In this chapter we will discuss methods to address these two questions: confidence intervals to provide a measure of our uncertainty about our estimates, and effect sizes to provide a standardized way to understand how large the effects are.
+In this chapter we will discuss methods to address these two questions: confidence intervals to provide a measure of our uncertainty about our estimates, and effect sizes to provide a standardized way to understand how large the effects are. We will also discuss the concept of *statistical power* which tells us how well we can expect to find any true effects that might exist.
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -84,9 +84,9 @@ Using the estimated mean from our sample (`r I(sample_summary$meanWeight)`) and 
 
 ### Confidence intervals using the t distribution
 
-As stated above, if we knew the population standard deviation, then we could use the normal distribution to compute our confidence intervals. However, in general we don't -- in which case the t distribution is more appropriate as a sampling distribution. Remember that the t distribution is slightly broader than the normal distribution, especially for smaller samples, which means that the confidence intervals will be slightly wider than they would if we were using the normal distribution. This incorporates the extra uncertainty that arises when we make conclusions based on small samples.
+As stated above, if we knew the population standard deviation, then we could use the normal distribution to compute our confidence intervals. However, in general we don't -- in which case the *t* distribution is more appropriate as a sampling distribution. Remember that the t distribution is slightly broader than the normal distribution, especially for smaller samples, which means that the confidence intervals will be slightly wider than they would if we were using the normal distribution. This incorporates the extra uncertainty that arises when we make conclusions based on small samples.
 
-We can compute the 95% confidence interval in a way similar to the normal distribution example above, but critical value is determnined by the 2.5th percentile and the 97.5th percentile of the t distribution, which we can compute using the `qt()` function in R.  Thus, the confidence interval for the mean ($\bar{X}$) is:
+We can compute the 95% confidence interval in a way similar to the normal distribution example above, but the critical value is determnined by the 2.5th percentile and the 97.5th percentile of the *t* distribution, which we can compute using the `qt()` function in R.  Thus, the confidence interval for the mean ($\bar{X}$) is:
 
 $$
 CI = \bar{X} \pm t_{crit}*SE
@@ -117,7 +117,7 @@ Given that the standard error decreases with sample size, that means that the co
 
 ```{r CISampSize,echo=FALSE,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean.",fig.width=4,fig.height=4,out.height='50%'}
 ssDf <- 
-  tibble(sampSize=2**seq(4,9)) %>%
+  tibble(sampSize=c(10,20,30,40,50,75,100,200,300,400,500)) %>%
   mutate(
     meanHeight=mean(NHANES_sample$Height),
     ci.lower = meanHeight + qt(0.025,sampSize)*sd(NHANES_adult$Weight)/sqrt(sampSize),
@@ -131,7 +131,7 @@ ggplot(ssDf, aes(sampSize, meanHeight)) +
 
 ### Computing confidence intervals using the bootstrap
 
-In some cases we can't assume normality, or we don't know the sampling distribution of the statistic.  In these cases, we can use the bootstrap (which we introduced in the earlier chapter on resampling).  As a reminder, the bootstrap involves repeatedly resampling the data *with replacement*, and then using the distribution of the statistic computed on those samples as a surrogate for the sampling distribution of the statistic. 
+In some cases we can't assume normality, or we don't know the sampling distribution of the statistic.  In these cases, we can use the bootstrap (which we introduced in Chapter \@ref(resampling-and-simulation)).  As a reminder, the bootstrap involves repeatedly resampling the data *with replacement*, and then using the distribution of the statistic computed on those samples as a surrogate for the sampling distribution of the statistic. 
 
 Earlier we ran the bootstrap using hand-crafted code, but R includes a package called `boot` that we can use to run the bootstrap and compute confidence intervals.  Let's use it to compute the confidence interval for weight in our NHANES sample.
 
@@ -166,15 +166,6 @@ TBD - ADD DETAILS ABOUT COMPARING CIs ACROSS CONDITIONS
 In the last chapter we discussed the idea that statistical significance may not necessarily reflect practical significance.  In order to discuss practical significance, we need a standard way to describe the size of an effect in terms of the actual data, which we refer to as an *effect size*.  In this section we will introduce the concept and discuss various ways that effect sizes can be calculated.
 
 An effect size is a standarized measurement that compares the size of some statistical effect to a reference quantity, such as the variability of the statistic. In some fields of science and engineering this idea is referred to as a "signal to noise ratio".  There are many different ways that this can be quantified, which depend on the nature of the data.
-
-```{r,echo=FALSE}
-### An example: Should you drink less?
-
-#We already saw one example of an effect size in the weight loss example in the previous chapter -- here we present another, this time based on a published research study that examined the effects of alcohol consumption on longevity (REF).  TBD - MORE HERE
-
-```
-
-
 
 ### Cohen's D
 
@@ -226,16 +217,18 @@ sprintf('Cohens d for male vs. female height = %0.2f',d_height_gender)
 
 The effect size for gender differences in height (d = `r I(d_height_gender)`) is huge by reference to our table above.  We can also see this by looking at the distributions of male and female heights in our sample.  Figure \@ref(fig:genderHist) shows that the two distributions are quite well separated, though still overlapping, highlighting the fact that even when there is a very large effect size for the difference between two groups, there will be individuals from each group that are more like the other group.
 
-```{r genderHist,echo=FALSE,fig.cap="Smoothed histogram plots for male and female heights in the NHANES dataset, showing clearly distinct distributions.",fig.width=4,fig.height=4,out.height='50%'}
+```{r genderHist,echo=FALSE,fig.cap="Smoothed histogram plots for male and female heights in the NHANES dataset, showing clearly distinct but also clearly overlapping distributions.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(NHANES_sample,aes(x=Height,color=Gender)) + 
-  geom_density()
+  geom_density(size=1) + 
+  theme(legend.position = c(0,0.8))
+  
 ```
 
-It is also worth nothing that we rarely encounter effects of this magnitude in science, in part because they are such obvious effects that we don't need scientific research to find them.  As we will see in the later chapter on reproducibility, very large reported effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. 
+It is also worth nothing that we rarely encounter effects of this magnitude in science, in part because they are such obvious effects that we don't need scientific research to find them.  As we will see in Chapter \@ref(doing-reproducible-research) on reproducibility, very large reported effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. It is also worth noting that even for such a huge effect, the two distributions still overlap - there will be some females who are taller than the average male, and vice versa. For most interesting scientific effects the degree of overlap will be much great, so we shouldn't immediately jump to strong conclusions about different populations based on even a large effect size.
 
 ### Pearson's r
 
-Pearson's *r*, also known as the *correlation coefficient*, is a measure of the size of the relationship between two continuous variables.  We will discuss correlation in much more detail in an upcoming chapter, so we will save the details for that chapter; here we simply introduce *r* as a way to quantify the relation between two variables.
+Pearson's *r*, also known as the *correlation coefficient*, is a measure of the strength of the linear relationship between two continuous variables.  We will discuss correlation in much more detail in Chapter \@ref(modeling-continuous-relationships), so we will save the details for that chapter; here we simply introduce *r* as a way to quantify the relation between two variables.
 
 *r* is a measure that varies from -1 to 1, where a value of 1 represents a perfect positive relationship between the variables, 0 represents no relationship, and -1 represents a perfect negative relationship.  Figure \@ref(fig:corrFig) shows examples of various levels of correlation using randomly generated data.
 
@@ -264,7 +257,7 @@ $$
 odds\ of\ A = \frac{P(A)}{P(\neg A)}
 $$
 
-The odds ratio is simply the ratio of two odds. For example, let's take the case of smoking and lung cancer.  A study published in the International Journal of Cancer in 2012 [@pesc:kend:gust:2012]. (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3296911/) combined data regarding the occurrence of lung cancer in smokers and individuals who have never smoked across a number of different studies.  Note that these data come from case-control studies, which means that participants in the studies were recruited because they either did or did not have cancer; their smoking status was then examined. These numbers thus do not represent the prevalence of cancer amongst smokers in the general population -- but they can tell us about the relationship between cancer and smoking.
+The odds ratio is simply the ratio of two odds. For example, let's take the case of smoking and lung cancer.  A study published in the International Journal of Cancer in 2012 [@pesc:kend:gust:2012] combined data regarding the occurrence of lung cancer in smokers and individuals who have never smoked across a number of different studies.  Note that these data come from case-control studies, which means that participants in the studies were recruited because they either did or did not have cancer; their smoking status was then examined. These numbers thus do not represent the prevalence of cancer amongst smokers in the general population -- but they can tell us about the relationship between cancer and smoking.
 
 ```{r}
 # create table for cancer occurrence depending on smoking status
@@ -297,11 +290,11 @@ oddsRatio <- oddsCancerCurrentSmoker/oddsCancerNeverSmoked
 sprintf('odds ratio of cancer for smokers vs. nonsmokers: %0.3f',oddsRatio)
 ```
 
-The odds ratio of `r I(oddsRatio)` tells us that the odds of cancer in smokers is roughly 23 times higher than never-smokers. 
+The odds ratio of `r I(oddsRatio)` tells us that the odds of cancer in smokers are roughly 23 times higher than never-smokers. 
 
 ## Statistical power
 
-Remember from the previous chapter that under the Neyman-Pearson hypothesis testing approach, we have to specify our level of tolerance for two kinds of errors: False positives (which they called *Type I error*) and false negatives (which they called *Type II error*). People often focus heavily on Type I error, because making a false positive claim is generally viewed as a very bad thing; for example, the now discredited claims by Wakefield and his colleagues that autism was associated with vaccination have resulted in substantial increases in childhood diseases such as measles.  Similarly, we don't want to claim that a drug cures a disease if it really doesn't.  That's why the tolerance for Type I errors is generally set fairly low, usually at $\alpha = 0.05$.  But what about Type II errors?  
+Remember from the previous chapter that under the Neyman-Pearson hypothesis testing approach, we have to specify our level of tolerance for two kinds of errors: False positives (which they called *Type I error*) and false negatives (which they called *Type II error*). People often focus heavily on Type I error, because making a false positive claim is generally viewed as a very bad thing; for example, the now discredited claims by wake:1999 that autism was associated with vaccination led to anti-vaccine sentiment that has resulted in substantial increases in childhood diseases such as measles.  Similarly, we don't want to claim that a drug cures a disease if it really doesn't.  That's why the tolerance for Type I errors is generally set fairly low, usually at $\alpha = 0.05$.  But what about Type II errors?  
 
 The concept of *statistical power* is the complement of Type II error -- that is, it is the likelihood of finding a positive result given that it exists:
 
@@ -315,7 +308,7 @@ There are three factors that can affect power:
 
 - sample size: Larger samples provide greater statistical power
 - effect size: A given design will always have greater power to find a large effect than a small effect (because finding large effects is easier)
-- Type I error rate: There is a tradeoff between Type I error and power, such that (all else being equal) decreasing Type I error will also decrease power.
+- Type I error rate: There is a relationship between Type I error and power such that (all else being equal) decreasing Type I error will also decrease power.
 
 We can see this through simulation.  First let's simulate a single experiment, in which we compare the means of two groups using a standard t-test.  We will vary the size of the effect (specified in terms of Cohen's d), the Type I error rate, and the sample size, and for each of these we will examine how the proportion of significant results (i.e. power) is affected. Figure \@ref(fig:plotPowerSim) shows an example of how power changes as a function of these factors.  
 
@@ -363,13 +356,13 @@ ggplot(powerSimResults,
 
 This simulation shows us that even with a sample size of 96, we will have relatively little power to find a small effect ($d = 0.2$) with $\alpha = 0.005$.  This means that a study designed to do this would be *futile* -- that is, it is almost guaranteed to find nothing even if a true effect of that size exists.
 
-There are at least two important reasons to care about statistical power, one of which we discuss here and the other of which we will return to in the final chapter.  If you are a researcher, you probably don't want to spend your time doing futile experiments.  However, running an underpowered study is essentially futile, because it means that there is a very low likelihood that one will find an effect, even if it exists.  
+There are at least two important reasons to care about statistical power, one of which we discuss here and the other of which we will return to in Chapter \@ref(doing-reproducible-science).  If you are a researcher, you probably don't want to spend your time doing futile experiments.  However, running an underpowered study is essentially futile, because it means that there is a very low likelihood that one will find an effect, even if it exists.  
 
 ### Power analysis
 
-Fortunately, there are tools available that allow us to determine the statistical power of an experiment. The most common use of these tools is in planning an experiment, when we would like to determine how large our sample needs to be in order to be adqequately powered to find our effect of interest.
+Fortunately, there are tools available that allow us to determine the statistical power of an experiment. The most common use of these tools is in planning an experiment, when we would like to determine how large our sample needs to be in order to have sufficient power to find our effect of interest.
 
-Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the ```pwr.t.test()``` function from the pwr library.  
+Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the `pwr.t.test()` function from the `pwr` library.  
 
 ```{r}
 # power analysis for Cohen's d = 0.5, for 80% power with alpha = 0.05
@@ -378,13 +371,15 @@ pwr.t.test(d=0.5,power=0.8,sig.level=0.05)
 
 This tells us that we would need at least 64 subjects in each group in order to have sufficient power to find a medium-sized effect.  It's always important to run a power analysis before one starts a new study, to make sure that the study won't be futile due to a sample that is too small.
 
+It might have occurred to you that if the effect size is large enough, then the necessary sample will be very small.  For example, if we run the same power analysis with an effect size of d=3, then we will see that we only need about 3 subjects in each group to have sufficient power to find the difference.  
+
 ```{r echo=FALSE}
 # power analysis for a huge effect of Cohen's d = 3.0
 pwr.t.test(d=3,power=0.8,sig.level=0.05)
 
 ```
 
-It might have occurred to you that if the effect size is large enough, then the necessary sample will be very small.  For example, if we run the same power analysis with an effect size of d=3, then we will see that we only need about 3 subjects in each group to have sufficient power to find the difference.  However, it's rare in science to be doing an experiment where we expect to find such a large effect -- just as we don't need statistics to tell us that 16-year-olds are taller than than 6-year-olds.  When we run a power analysis, we need to specify an effect size that is plausible for our study, which would usually come from previous research.  However, in the final chapter we will discuss a phenomenon known as the "winner's curse" that likely results in published effect sizes being larger than the true effect size, so this should also be kept in mind.  
+However, it's rare in science to be doing an experiment where we expect to find such a large effect -- just as we don't need statistics to tell us that 16-year-olds are taller than than 6-year-olds.  When we run a power analysis, we need to specify an effect size that is plausible for our study, which would usually come from previous research.  However, in Chapter \@ref(doing-reproducible-science) we will discuss a phenomenon known as the "winner's curse" that likely results in published effect sizes being larger than the true effect size, so this should also be kept in mind.  
 
 ## Suggested readings
 

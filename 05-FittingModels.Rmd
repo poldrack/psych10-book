@@ -366,7 +366,7 @@ These were both examples where the *linear model* seems appropriate, and the err
 
 On the other hand, there are other situations where the linear model is incorrect, and error will be increased because the model is not properly specified.  Let's say that we are interested in the relationship between caffeine intake and performance on a test.  The relation between stimulants like caffeine and test performance is often *nonlinear* - that is, it doesn't follow a straight line.  This is because performance goes up with smaller amounts of caffeine (as the person becomes more alert), but then starts to decline with larger amounts (as the person becomes nervous and jittery). We can simulate data of this form, and then fit a linear model to the data (see Panel C of Figure \@ref(fig:BACrt)). The blue line shows the straight line that bests fits these data; clearly, there is a high degree of error.  Although there is a very lawful relation between test performance and caffeine intake, it follows a curve rather than a straight line.  The linear model has high error because it's the wrong model for these data.
 
-## Can a model be too good?
+## Can a model be too good? {#overfitting}
 
 Error sounds like a bad thing, and usually we will prefer a model that has lower error over one that has higher error. However, we mentioned above that there is a tension between the ability of a model to accurately fit the current dataset and its ability to generalize to new datasets, and it turns out that the model with the lowest error often is much worse at generalizing to new datasets!  
 

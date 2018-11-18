@@ -42,7 +42,7 @@ In this chapter we will introduce the ideas behind the use of statistics to make
 
 The specific type of hypothesis testing that we will discuss is known (for reasons that will become clear) as *null hypothesis staistical testing* (NHST).  If you pick up almost any scientific or biomedical research publication, you will see NHST being used to test hypotheses, and in their introductory psycholology textbook, Gerrig & Zimbardo (2002) referred to NHST as the “backbone of psychological research”.  Thus, learning how to use and interpret the results from hypothesis testing is essential to understand the results from this research.
 
-It is also important for you to know, however, that NHST is deeply flawed, and that many statisticians and researchers (including myself) think that it has been the cause of serious problems in science, which we will discuss in a later chapter.  For more than 50 years, there have been calls to abandon NHST in favor of other approaches (like those that we will discuss in the following chapters):
+It is also important for you to know, however, that NHST is deeply flawed, and that many statisticians and researchers (including myself) think that it has been the cause of serious problems in science, which we will discuss in Chapter \@ref(doing-reproducible-research).  For more than 50 years, there have been calls to abandon NHST in favor of other approaches (like those that we will discuss in the following chapters):
 
 - “The test of statistical significance in psychological research may be taken as an instance of a kind of essential mindlessness in the conduct of research” (Bakan, 1966)
 - Hypothesis testing is “a wrongheaded view about what constitutes scientific progress” (Luce, 1988)
@@ -57,7 +57,7 @@ Before we get to the results, let's ask how you would think the statistical anal
 
 It turns out that this is *not* how null hypothesis testing works.  Instead, we first take our hypothesis of interest (i.e. whether body-worn cameras reduce use of force), and flip it on its head, creating a *null hypothesis* -- in this case, the null hypothesis would be that cameras do not reduce use of force.  Importantly, we then assume that the null hypothesis is true. We then look at the data, and determine whether the data are sufficiently unlikely under the null hypothesis that we can reject the null in favor of the *alternative hypothesis* which is our hypothesis of interest.  If there is not sufficient evidence to reject the null, then we say that we "failed to reject" the null.  
 
-Understanding some of the concepts of NHST, particularly the notorious "p-value", is invariably challenging the first time one encounters them, because they are so counter-intuitive. As we will see later, there are other approaches that provide a much more intuitive way to address hypothesis testing. However, before we get to those, it's important for you to have a deep understanding of how hypothesis testing works, because it's clearly not going to go away any time soon.
+Understanding some of the concepts of NHST, particularly the notorious "p-value", is invariably challenging the first time one encounters them, because they are so counter-intuitive. As we will see later, there are other approaches that provide a much more intuitive way to address hypothesis testing (but have their own complexities). However, before we get to those, it's important for you to have a deep understanding of how hypothesis testing works, because it's clearly not going to go away any time soon.
 
 ## The process of null hypothesis testing
 
@@ -88,7 +88,8 @@ For step 2, we collect some data.  In this case, we will sample 250 individuals 
 # and inactive individuals
 
 sampSize <- 250
-NHANES_sample <- sample_n(NHANES_adult,sampSize)
+NHANES_sample <- NHANES_adult %>%
+  sample_n(sampSize)
 
 sampleSummary <-
   NHANES_sample %>%
@@ -105,8 +106,8 @@ pander(sampleSummary)
 
 ```
 
-```{r bmiSample, fig.cap="BMI data from a sample of adults from the NHANES dataset, split by whether they reported engaging in regular physical activity.",fig.width=4,fig.height=4,out.height='50%'}
-# take a sample from the NHANES dataset
+```{r bmiSample, echo=FALSE,fig.cap="Box plot of BMI data from a sample of adults from the NHANES dataset, split by whether they reported engaging in regular physical activity.",fig.width=4,fig.height=4,out.height='50%'}
+
 ggplot(NHANES_sample,aes(PhysActive,BMI)) +
   geom_boxplot() + 
   xlab('Physically active?') + 
@@ -119,24 +120,23 @@ For step 3, we need to specify our null hypothesis (which we call $H_0$) and our
 
 We also have to decide whether to use *directional* or *non-directional* hypotheses.  A non-directional hypothesis simply predicts that there will be a difference, without predicting which direction it will go.  For the BMI/activity example, a non-directional null hypothesis would be:
 
-> $H0: BMI_{active} = BMI_{inactive}$
+$H0: BMI_{active} = BMI_{inactive}$
 
 and the corresponding non-directional alternative hypothesis would be:
 
-> $HA: BMI_{active} \neq BMI_{inactive}$
+$HA: BMI_{active} \neq BMI_{inactive}$
 
 A directional hypothesis, on the other hand, predicts which direction the difference would go.  For example, we have strong prior knowledge to predict that people who engage in physical activity should weigh less than those who do not, so we would propose the following directional null hypothesis:
 
-> $H0: BMI_{active} \ge BMI_{inactive}$
+$H0: BMI_{active} \ge BMI_{inactive}$
 
 and directional alternative:
 
-> $H0: BMI_{active} < BMI_{inactive}$
-
+$H0: BMI_{active} < BMI_{inactive}$
 
 ### Step 4: Fit a model to the data and compute a test statistic
 
-For step 4, we want to use the data to compute a statistic that will ultimately let us decide whether the null hypothesis is rejected or not.  To do this, the model needs to quantify the amount of evidence in favor of the alternative hypothesis, relative to the variability in the data. Thus we can think of the test statistic as providing a measure of the size of the effect compared to the variability in the data.  In general, this test statistic will have a probability distribution associated with it, because we will want to determine how likely our observed value of the statistic is under the null hypothesis.  
+For step 4, we want to use the data to compute a statistic that will ultimately let us decide whether the null hypothesis is rejected or not.  To do this, the model needs to quantify the amount of evidence in favor of the alternative hypothesis, relative to the variability in the data. Thus we can think of the test statistic as providing a measure of the size of the effect compared to the variability in the data.  In general, this test statistic will have a probability distribution associated with it, because that allows us to determine how likely our observed value of the statistic is under the null hypothesis.  
 
 For the BMI example, we need a test statistic that allows us to test for a difference between two means, since the hypotheses are stated in terms of mean BMI for each group.  One statistic that is often used to compare two means is the *t-statistic*, first developed by the statistician William Sealy Gossett, who worked for the Guiness Brewery in Dublin and wrote under the pen name "Student" - hence, it is often called "Student's t-statistic".  The t-statistic is appropriate for comparing the means of two groups when the sample sizes are relatively small and the population standard deviation is unknown.  The t-statistic for comparison of two independent groups is computed as:
 
@@ -144,17 +144,17 @@ $$
 t = \frac{\bar{X_1} - \bar{X_2}}{\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}}
 $$
 
-where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  The t-statistic is distributed according to a probability distribution known as a *t* distribution.  The *t* distribution looks quite similar to a normal distribution, but it differs depending on the number of degrees of freedom, which for this example is the number of observations minus 2, since we have computed two means and thus given up two degrees of freedom.  When the degrees of freedom are large (say 1000), then the *t* distribution looks essentialy like the normal distribution, but when they are small then the *t* distribution has longer tails than the normal (see Figure \@ref(fig:tVersusNormal)).
+where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the estimated variances of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  The t-statistic is distributed according to a probability distribution known as a *t* distribution.  The *t* distribution looks quite similar to a normal distribution, but it differs depending on the number of degrees of freedom, which for this example is the number of observations minus 2, since we have computed two means and thus given up two degrees of freedom.  When the degrees of freedom are large (say 1000), then the *t* distribution looks essentialy like the normal distribution, but when they are small then the *t* distribution has longer tails than the normal (see Figure \@ref(fig:tVersusNormal)).
 
-```{r tVersusNormal,echo=FALSE,fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 10 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal.",fig.width=4,fig.height=4,out.height='50%'}
+```{r tVersusNormal,echo=FALSE,fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 4 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal.",fig.width=4,fig.height=4,out.height='50%'}
 distDf <- data.frame(x=seq(-4,4,0.01))
 
 p1 <- ggplot(distDf,aes(x)) + 
   stat_function(fun = dnorm, n = 100,size=1.5,color='red') +
-  stat_function(fun = dt, args = list(df = 10),
+  stat_function(fun = dt, args = list(df = 4),
                 n = 100,size=1.5,color='blue',
                 linetype='dashed') + 
-  ggtitle('df = 10')
+  ggtitle('df = 4')
 
 p2 <- ggplot(distDf,aes(x)) + 
   stat_function(fun = dnorm, n = 100,size=1.5,color='red') +
@@ -168,7 +168,7 @@ plot_grid(p1,p2)
 
 ### Step 5: Determine the probability of the data under the null hypothesis
 
-This is the step where NHST starts to violate our intuition -- rather than determining the likelihood the the null hypothesis is true given the data, we instead determine the likelihood of the data under the null hypothesis - because we started out by assuming that the null hypothesis is true!  To do this, we need to know the probability distribution for the statistic under the null hypothesis, so that we can ask how likely the data are under that distribution. Before we move to our BMI data, let's start with some simpler examples. 
+This is the step where NHST starts to violate our intuition -- rather than determining the likelihood that the null hypothesis is true given the data, we instead determine the likelihood of the data under the null hypothesis - because we started out by assuming that the null hypothesis is true!  To do this, we need to know the probability distribution for the statistic under the null hypothesis, so that we can ask how likely the data are under that distribution. Before we move to our BMI data, let's start with some simpler examples. 
 
 ##### Randomization: A very simple example
 Let's say that we wish to determine whether a coin is fair.  To collect data, we flip the coin 100 times, and we count 70 heads.  In this example, $H_0: P(heads)=0.5$ and $H_A: P(heads) \neq 0.5$, and our test statistic is simply the number of heads that we counted.  The question that we then want to as is: How likely is it that we would observe 70 heads if the true probability of heads is 0.5.  We can imagine that it might happen very occasionally just by chance, but doesn't seem very likely. To quantify this, we can use the *binomial distribution*:
@@ -176,7 +176,7 @@ Let's say that we wish to determine whether a coin is fair.  To collect data, we
 $$
 P(X < k) = \sum_{i=0}^k \binom{N}{k} p^i (1-p)^{(n-i)}
 $$
-This tells us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the likelihood of a certain number or more extreme, which we can obtain by subtracting from one:
+This tells us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the probability of a certain number or more, which we can obtain by subtracting from one:
 
 $$
 P(X \ge k) = 1 - P(X < k)
@@ -233,7 +233,7 @@ sprintf('t statistic = %0.3f',tStat)
 
 
 The question that we then want to ask is: What is the likelihood that we would find a t statistic of this size, if the true difference between groups is zero or less (i.e. the directional null hypothesis)?  
-We can use the t distribution to determine this probability. Our sample size is 250, so the appropriate t distribution has 248 degrees of freedom.  We can use the `pt()` function in R to determine the probability of finding a value of the t-statistic greater than or equal to our observed value.  Note that we want to know the probability of a value greater than our observed value, but by default `pt()` gives us the probability of a value less than the one that we provide it, so we have to tell it explicitly to provide us with the "upper tail" probability.
+We can use the t distribution to determine this probability. Our sample size is 250, so the appropriate t distribution has 248 degrees of freedom.  We can use the `pt()` function in R to determine the probability of finding a value of the t-statistic greater than or equal to our observed value.  Note that we want to know the probability of a value greater than our observed value, but by default `pt()` gives us the probability of a value less than the one that we provide it, so we have to tell it explicitly to provide us with the "upper tail" probability (by setting `lower.tail = FALSE`).
 
 ```{r}
 pvalue_tdist <- pt(tStat$mean,df=248, lower.tail = FALSE)
@@ -256,7 +256,7 @@ sprintf('p(t > %0.2f or t< %0.2f, df = 248) = %0.3f',tStat$mean,-1*tStat$mean,pv
 
 Here we see that the p value for the two-tailed test is twice as large as that for the one-tailed test, which reflects the fact that an extreme value is less surprising since it could have occurred in either direction.
 
-How do you choose whether to use a one-tailed versus a two-tailed test?  The two-tailed test is always going to be more conservative, so it's always a good bet to use that one, unless you had a very strong prior reason for using a one-tailed test. In that case, you should have written down the hypothesis before you ever looked at the data. In a later chapter we will discuss the idea of pre-registration of hypotheses, which formalizes the idea of writing down your hypotheses before you ever see the actual data.  You should *never* make a decision about how to perform a hypothesis test once you have looked at the data, as this can introduce serious bias into the results.
+How do you choose whether to use a one-tailed versus a two-tailed test?  The two-tailed test is always going to be more conservative, so it's always a good bet to use that one, unless you had a very strong prior reason for using a one-tailed test. In that case, you should have written down the hypothesis before you ever looked at the data. In Chapter \label(doing-reproducible-research) we will discuss the idea of pre-registration of hypotheses, which formalizes the idea of writing down your hypotheses before you ever see the actual data.  You should *never* make a decision about how to perform a hypothesis test once you have looked at the data, as this can introduce serious bias into the results.
 
 #### Computing p-values using randomization
 
@@ -382,7 +382,7 @@ sprintf('Number of runs on which shuffled t == observed t*-1: %d',equalSumMinus)
 
 ```
 
-There are `r I(equalSum)` shuffle runs on which the t statistic for the shuffled data was exactly the same as the observed data -- which means that shuffling resulted in the same labeling as the actual data!  This is unlikely, but not *that* unlikely, and we can actually compute its likelihood using a bit of probability theory.  The number of possible permutations of 10 items is $10!$ which comes out to 3628800.  The number of possible rearrangements of each set of 5 is $5!$ which comes out to 120, so the number of possible rearrangements of two sets of five is $5! * 5!$ or 14400.  Thus, we expect that 0.0039 of the random labelings should come out exactly the same as the original, which is fairly close to the 0.0033 that we see in our simulation.
+There are `r I(equalSum)` shuffle runs on which the t statistic for the shuffled data was exactly the same as the observed data -- which means that shuffling resulted in the same labeling as the actual data!  This is unlikely, but not *that* unlikely, and we can actually compute its likelihood using a bit of probability theory.  The number of possible permutations of 10 items is $10!$ which comes out to 3628800.  The number of possible rearrangements of each set of 5 is $5!$ which comes out to 120, so the number of possible rearrangements of two sets of five is $5! * 5!$ or 14400.  Thus, we expect that 0.0039 of the random labelings should come out exactly the same as the original, which is fairly close to the 0.0033 that we see in our simulation. We have a similar expectation for the number of times that the labeling will be exactly opposite of the true labeling, giving us the negative of the observed t value.
 
 We can compute the p-value from the randomized data by measuring how many of the shuffled values are at least as extreme as the observed value:
 
@@ -397,7 +397,7 @@ This p-value is very similar to the p-value that we obtained using the t distrib
 
 ##### Randomization: BMI/activity example
 
-Now let's use randomization to compute the p-value for the BMI/activity example. In this case, we will randomly shuffle the PhysActive labels and compute the difference between groups after each shuffle, and then compare our observed t statistic to the distribution of t statistics from the shuffled datasets.
+Now let's use randomization to compute the p-value for the BMI/activity example. In this case, we will randomly shuffle the `PhysActive` variable and compute the difference between groups after each shuffle, and then compare our observed t statistic to the distribution of t statistics from the shuffled datasets.
 
 ```{r}
 # create function to shuffle BMI data
@@ -456,23 +456,23 @@ We do have to make one main assumption when we use the randomization test, which
 
 The next step is to determine whether the p-value that results from the previous step is small enough that we are willing to reject the null hypothesis and conclude instead that the alternative is true.  How much evidence do we require?  This is one of the most controversial questions in statistics, in part because it requires a subjective judgment -- there is no "correct" answer.
 
-Historically, the most common answer to this question has been that we should reject the null hypothesis if the p-value is less than 0.05.  This comes from the writings of Ronald Fisher, who has been referred to as "the single most important figure in 20th century statistics"(Efron):
+Historically, the most common answer to this question has been that we should reject the null hypothesis if the p-value is less than 0.05.  This comes from the writings of Ronald Fisher, who has been referred to as "the single most important figure in 20th century statistics"[@efron1998]:
 
-> “If P is between .1 and .9 there is certainly no reason to suspect the hypothesis tested. If it is below .02 it is strongly indicated that the hypothesis fails to account for the whole of the facts. We shall not often be astray if we draw a conventional line at .05 ... it is convenient to draw the line at about the level at which we can say: Either there is something in the treatment, or a coincidence has occurred such as does not occur more than once in twenty trials” (REF)
+> “If P is between .1 and .9 there is certainly no reason to suspect the hypothesis tested. If it is below .02 it is strongly indicated that the hypothesis fails to account for the whole of the facts. We shall not often be astray if we draw a conventional line at .05 ... it is convenient to draw the line at about the level at which we can say: Either there is something in the treatment, or a coincidence has occurred such as does not occur more than once in twenty trials” [@fisher1925statistical]
 
 However, Fisher never intended $p < 0.05$ to be a fixed rule:
 
-> "no scientific worker has a fixed level of significance at which from year to year, and in all circumstances, he rejects hypotheses; he rather gives his mind to each particular case in the light of his evidence and his ideas" (REF)
+> "no scientific worker has a fixed level of significance at which from year to year, and in all circumstances, he rejects hypotheses; he rather gives his mind to each particular case in the light of his evidence and his ideas" [fish:1956]
 
 Instead, it is likely that it became a ritual due to the reliance upon tables of p-values that were used before computing made it easy to compute p values for arbitrary values of a statistic.  All of the tables had an entry for 0.05, making it easy to determine whether one's statistic exceeded the value needed to reach that level of significance.
 
-The choice of statistical thresholds remains deeply controversial, and recently (Benjamin et al., 2018) it has been proposed that the standard threshold be changed from .05 to .005, making it substantially more stringent and thus more difficult to reject the null hypothesis. In large part this move is due to growing concerns that the evidence obtained from a significant result at $p < .05$ is relatively weak; we will discuss this in much more detail in our later chapter on reproducibility.
+The choice of statistical thresholds remains deeply controversial, and recently (Benjamin et al., 2018) it has been proposed that the standard threshold be changed from .05 to .005, making it substantially more stringent and thus more difficult to reject the null hypothesis. In large part this move is due to growing concerns that the evidence obtained from a significant result at $p < .05$ is relatively weak; we will discuss this in much more detail in our later discussion of reproducibility in Chapter \label(doing-reproducible-research).
 
 #### Hypothesis testing as decision-making: The Neyman-Pearson approach
 
 Whereas Fisher thought that the p-value could provide evidence regarding a specific hypothesis, the statisticians Jerzy Neyman and Egon Pearson disagreed vehemently. Instead, they proposed that we think of hypothesis testing in terms of its error rate in the long run:
 
-> "no test based upon a theory of probability can by itself provide any valuable evidence of the truth or falsehood of a hypothesis. But we may look at the purpose of tests from another viewpoint. Without hoping to know whether each separate hypothesis is true or false, we may search for rules to govern our behaviour with regard to them, in following which we insure that, in the long run of experience, we shall not often be wrong"
+> "no test based upon a theory of probability can by itself provide any valuable evidence of the truth or falsehood of a hypothesis. But we may look at the purpose of tests from another viewpoint. Without hoping to know whether each separate hypothesis is true or false, we may search for rules to govern our behaviour with regard to them, in following which we insure that, in the long run of experience, we shall not often be wrong" [@Neyman289]
 
 That is: We can’t know which specific decisions are right or wrong, but if we follow the rules, we can at least how often our decisions will be wrong.
 
@@ -491,7 +491,7 @@ Neyman and Pearson coined two terms to describe the probability of these two typ
 - P(Type I error) = $\alpha$
 - P(Type II error) = $\beta$
 
-That is, if we set $\alpha$ to .05, then in the long run we should make a Type I error 5% of the time.  Whereas it's common to set $\alpha$ as .05, the standard value for $\beta$ is .2 - that is, we are willing to accept that 20% of the time we will fail to detect a true effect.  We will return to this below when we discuss statistical power, which is the complement of Type II error.
+That is, if we set $\alpha$ to .05, then in the long run we should make a Type I error 5% of the time.  Whereas it's common to set $\alpha$ as .05, the standard value for $\beta$ is .2 - that is, we are willing to accept that 20% of the time we will fail to detect a true effect.  We will return to this below when we discuss statistical power in Section \@ref(statistical-power), which is the complement of Type II error.
 
 ### What does a significant result mean?
 
@@ -511,7 +511,7 @@ No. The p-value is a statement about the likelihood of a particular dataset unde
 
 #### Does it mean that you have found a meaningful effect?
 
-No.  There is an important distinction between *statistical significance* and *practical significance*.  As an example, let's say that we performed a randomized controlled trial to examine the effect of a particular diet on body weight, and we find a statistically significant effect at p<.05.  What this doesn't tell us is how much weight was actually lost, which we refer to as the *effect size*.  If we think about a study of weight loss, then we probably don't think that the loss of ten ounces (i.e. the weight of a bag of potato chips) is practically significant.  Let's look at our ability to detect a significant difference of 1 ounce as the sample size increases.
+No.  There is an important distinction between *statistical significance* and *practical significance*.  As an example, let's say that we performed a randomized controlled trial to examine the effect of a particular diet on body weight, and we find a statistically significant effect at p<.05.  What this doesn't tell us is how much weight was actually lost, which we refer to as the *effect size* (to be discussed in more detail in Chapter \@ref(ci-effect-size-power)).  If we think about a study of weight loss, then we probably don't think that the loss of ten ounces (i.e. the weight of a bag of potato chips) is practically significant.  Let's look at our ability to detect a significant difference of 1 ounce as the sample size increases.
 
 ```{r}
 # create simulated data for weight loss trial
@@ -551,9 +551,9 @@ simResultsDf <-
   mutate(pSigResult=nSigResults/nRuns)
 ```
 
-Figure \@ref(fig:sigResults) shows how the proportion of significant results increases as the sample size increases, such that with a very large sample size (about 262,000 total subjects), we will find a significant result in more than 90% of studies when there is a 1 ounce weight loss.  While these are statistically significant, most physicians would not consider a weight loss of one ounce to be practically or clinically significant. We will explore this relationship in more detail when we return to the concept of *statistical power*, but it should already be clear from this example that statistical significance is not necessarily indicative of practical significance.
+Figure \@ref(fig:sigResults) shows how the proportion of significant results increases as the sample size increases, such that with a very large sample size (about 262,000 total subjects), we will find a significant result in more than 90% of studies when there is a 1 ounce weight loss.  While these are statistically significant, most physicians would not consider a weight loss of one ounce to be practically or clinically significant. We will explore this relationship in more detail when we return to the concept of *statistical power* in Section \@ref(statistical-power), but it should already be clear from this example that statistical significance is not necessarily indicative of practical significance.
 
-```{r sigResults, echo=FALSE,fig.cap="The proportion of signifcant results for a very small change (10 ounces, which is about .01 standard deviations) as a function of sample size.",fig.width=8,fig.height=4,out.height='50%'}
+```{r sigResults, echo=FALSE,fig.cap="The proportion of signifcant results for a very small change (1 ounce, which is about .001 standard deviations) as a function of sample size.",fig.width=8,fig.height=4,out.height='50%'}
 
 ggplot(simResultsDf,aes(sampleSize,pSigResult)) +
   geom_line() +
@@ -601,9 +601,9 @@ data.frame(nsig=uncOutcome) %>%
 
 ```
 
-This shows that about 5% of all of the tests were significant in each run, meaning that if we were to use p < .05 as our threshold for statistical significance, then even if there were no truly significant relationships present, we would still "find" about 500 genes that were seemingly significant (the expected number of significant results is simply $n * \alpha$).  That is because while we controlled for the error per test, we didn't control the *familywise error*, or the error across all of the tests, which is what we really want to control if we are going to be looking at the results from a large number of tests. Using p<.05, our familywise error rate in the above example is 1 -- that is, we are pretty much guaranteed to make at least one error in any particular study.  
+This shows that about 5% of all of the tests were significant in each run, meaning that if we were to use p < .05 as our threshold for statistical significance, then even if there were no truly significant relationships present, we would still "find" about 500 genes that were seemingly significant (the expected number of significant results is simply $n * \alpha$).  That is because while we controlled for the error per test, we didn't control the *familywise error*, or the error across all of the tests, which is what we really want to control if we are going to be looking at the results from a large number of tests. Using p<.05, our familywise error rate in the above example is one -- that is, we are pretty much guaranteed to make at least one error in any particular study.  
 
-A simple way to control for the familywise error is to divide the alpha level by the number of tests; this is known as the *Bonferroni* correction, named after the Italian statistician Carlo Bonferroni.  Using the data from our example above, we see in Figure \@ref(fig:bonferroniSim) that nearly every study shows zero significant results using the corrected alpha level of 0.000005 instead of the nominal level of .05;  We have effectively controlled the familywise error, such that the probability of making *any* errors in our study is controlled at right around .05.
+A simple way to control for the familywise error is to divide the alpha level by the number of tests; this is known as the *Bonferroni* correction, named after the Italian statistician Carlo Bonferroni.  Using the data from our example above, we see in Figure \@ref(fig:bonferroniSim) that only about 5 percent of studies show any significant results using the corrected alpha level of 0.000005 instead of the nominal level of .05.  We have effectively controlled the familywise error, such that the probability of making *any* errors in our study is controlled at right around .05.
 
 ```{r}
 # compute Bonferroni-corrected alpha

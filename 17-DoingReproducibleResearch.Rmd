@@ -14,7 +14,7 @@ set.seed(123456) # set random seed to exactly replicate results
 ```
 
 
-Most people think that science is a reliable way to answer questions about the world.  When our physician prescribes a treatment we trust that it has been shown to be effective through research, and we have similar faith that the airplanes that we fly in aren't going to fall from the sky.  However, since 2005 there has been an increasing concern that science may not work as well as we have always thought that it does.  In this chapter we will discuss the concerns about reproducibility of scientific research, and outline the steps that one can take to make sure that our statistical results are as reproducible as possible.
+Most people think that science is a reliable way to answer questions about the world.  When our physician prescribes a treatment we trust that it has been shown to be effective through research, and we have similar faith that the airplanes that we fly in aren't going to fall from the sky.  However, since 2005 there has been an increasing concern that science may not always work as well as we have long thought that it does.  In this chapter we will discuss these concerns about reproducibility of scientific research, and outline the steps that one can take to make sure that our statistical results are as reproducible as possible.
 
 ## How we think science should work
 
@@ -26,6 +26,8 @@ Let's say that we are interested in a research project on how children choose wh
   * Offer children the choice between a cookie and an apple with either an Elmo-branded sticker or a control sticker, and record what they choose
 - You do statistics to test the null hypothesis
   * "The preplanned comparison shows Elmo-branded apples were associated with an increase in a child’s selection of an apple over a cookie, from 20.7% to 33.8% ($\chi^2$=5.158; P=.02)" [@wans:just:payn:2012]
+- You make a conclusion based on the data
+  *"this study suggests that the use of branding or appealing branded characters may benefit healthier foods more than they benefit indulgent, more highly processed foods. Just as attractive names have been shown to increase the selection of healthier foods in school lunchrooms, brands and cartoon characters could do the same with young children."[@wans:just:payn:2012]
   
 ## How science (sometimes) actually works
 
@@ -37,14 +39,13 @@ Wansink also acknowledged the paper was weak as he was preparing to submit it to
 “It seems to me it should be lower,” he wrote, attaching a draft. “Do you want to take a look at it and see what you think. If you can get the data, and it needs some tweeking, it would be good to get that one value below .05.” ...
 Later in 2012, the study appeared in the prestigious JAMA Pediatrics, the 0.06 p-value intact. But in September 2017, it was retracted and replaced with a version that listed a p-value of 0.02. And a month later, it was retracted yet again for an entirely different reason: Wansink admitted that the experiment had not been done on 8- to 11-year-olds, as he’d originally claimed, but on preschoolers.
 
-This kind of behavior finally caught up with Wansink; [fifteen of his research study have been retracted](https://www.vox.com/science-and-health/2018/9/19/17879102/brian-wansink-cornell-food-brand-lab-retractions-jama) and in 2018 he resigned from his faculty position at Cornell University.
+This kind of behavior finally caught up with Wansink; [fifteen of his research studies have been retracted](https://www.vox.com/science-and-health/2018/9/19/17879102/brian-wansink-cornell-food-brand-lab-retractions-jama) and in 2018 he resigned from his faculty position at Cornell University.
 
 ## The reproducibility crisis in science
 
-One might hope that Brian Wansink was a rare outlier, but it has become increasingly clear that problems with reproducibility are much more widespread in science than previously thought.  This became clear in 2015, when a large group of researchers published a study in the journal *Science* titled "Estimating the reproducibility of psychological science"[@open:2015]. In this study, the researchers took 100 published studies in psychology and attempted to reproduce the results originally reported in the papers.  Their findings were shocking: Whereas 97% of the original papers had reported statistically significant findings, only 37% of these effects were statistically significant in the replication study.  
-Although the problems in psychology have received a great deal of attention, they seem to be present in nearly every area of science, from cancer biology [@erri:iorn:gunn:2014] and chemistry [@bake:2017] to economics [@NBERw22989] and the social sciences [@Camerer2018EvaluatingTR].
+One might hope that Brian Wansink was a rare outlier, but it has become increasingly clear that problems with reproducibility are much more widespread in science than previously thought.  This became clear in 2015, when a large group of researchers published a study in the journal *Science* titled "Estimating the reproducibility of psychological science"[@open:2015]. In this study, the researchers took 100 published studies in psychology and attempted to reproduce the results originally reported in the papers.  Their findings were shocking: Whereas 97% of the original papers had reported statistically significant findings, only 37% of these effects were statistically significant in the replication study.  Although these problems in psychology have received a great deal of attention, they seem to be present in nearly every area of science, from cancer biology [@erri:iorn:gunn:2014] and chemistry [@bake:2017] to economics [@NBERw22989] and the social sciences [@Camerer2018EvaluatingTR].
 
-The reproducibility crisis that emerged after 2010 was actually predicted by John Ioannidis, a physician from Stanford who wrote a paper in 2005 titled "Why most published research findings are false."[@ioan:2005]  In this article, Ioannidis argued that the use of null hypothesis statistical testing in the context of modern science will necessarily lead to high levels of false results.  
+The reproducibility crisis that emerged after 2010 was actually predicted by John Ioannidis, a physician from Stanford who wrote a paper in 2005 titled "Why most published research findings are false"[@ioan:2005].  In this article, Ioannidis argued that the use of null hypothesis statistical testing in the context of modern science will necessarily lead to high levels of false results.  
 
 ### Positive predictive value and statistical significance
 
@@ -70,12 +71,12 @@ $$
 PPV = \frac{p(hIsTrue) * (1 - \beta)}{p(hIsTrue) * (1 - \beta) + (1 - p(hIsTrue)) * \alpha}
 $$
 
-Let's first take an example where the probability of our hypothesis being true is high, say 0.8 - though note that we cannot actually know this probability.  Let's say that we perform a study with the standard values of $\alpha=0.05$ and $\beta=0.2$.  We can compute the PPV as:
+Let's first take an example where the probability of our hypothesis being true is high, say 0.8 - though note that in general we cannot actually know this probability.  Let's say that we perform a study with the standard values of $\alpha=0.05$ and $\beta=0.2$.  We can compute the PPV as:
 
 $$
 PPV = \frac{0.8 * (1 - 0.2)}{0.8 * (1 - 0.2) + (1 - 0.8) * 0.05} = 0.98
 $$
-This means that if we find a positive result in a study where the hypothesis is likely to be true, then its likelihood of being true is high.  Note, however, that a research field where the hypotheses have such a high likelihood of being true is probably not a very interesting field of research; research is most important when it tells us something new!  
+This means that if we find a positive result in a study where the hypothesis is likely to be true and power is high, then its likelihood of being true is high.  Note, however, that a research field where the hypotheses have such a high likelihood of being true is probably not a very interesting field of research; research is most important when it tells us something new!  
 
 Let's do the same analysis for a field where $p(hIsTrue)=0.1$ -- that is, most of the hypotheses being tested are false.  In this case, PPV is:
 
@@ -196,7 +197,7 @@ A popular book entitled "The Compleat Academic: A Career Guide", published by th
 
 What Bem suggests here is known as *HARKing* (Hypothesizing After the Results are Known)[@kerr:1998].  This might seem innocuous, but is problematic because it allows the research to re-frame a post-hoc conclusion (which we should take with a grain of salt) as an a priori prediction (in which we would have stronger faith).  In essence, it allows the researcher to rewrite their theory based on the facts, rather that using the theory to make predictions and then test them -- akin to moving the goalpost so that it ends up whereever the ball goes.  It thus becomes very difficult to disconfirm incorrect ideas, since the goalpost can always be moved to match the data.
 
-> **Analyzing data** Examine them from every angle. Analyze the sexes separately. Make up new composite indices. If a datum suggests a new hypothesis, try to find further evidence for itelsewhere in the data. If you see dim traces of interesting patterns, try to reorganize the data to bring them into bolder relief. If there are participants you don’t like, or trials, observers, or interviewers who gave you anomalous results,drop them (temporarily). Go on a fishing expedition for something — anything — interesting. No, this is not immoral. 
+> **Analyzing data** Examine them from every angle. Analyze the sexes separately. Make up new composite indices. If a datum suggests a new hypothesis, try to find further evidence for it elsewhere in the data. If you see dim traces of interesting patterns, try to reorganize the data to bring them into bolder relief. If there are participants you don’t like, or trials, observers, or interviewers who gave you anomalous results,drop them (temporarily). Go on a fishing expedition for something — anything — interesting. No, this is not immoral. 
 
 What Bem suggests here is known as *p-hacking*, which refers to trying many different analyses until one finds a significant result.  Bem is correct that if one were to report every analysis done on the data then this approach would not be "immoral". However, it is rare to see a paper discuss all of the analyses that were performed on a dataset; rather, papers often only present the analyses that *worked* - which usually means that they found a statistically significant result.  There are many different ways that one might p-hack:
 
@@ -229,9 +230,9 @@ In the years since the reproducibility crisis arose, there has been a robust mov
 
 ### Pre-registration
 
-One of the ideas that has gained the greatest traction is *pre-registration*, in which one submits a detailed description of a study (including all data analyses) to a trusted repository (such as the (Open Science Framework)[http://osf.io] or (AsPredicted.org)[http://aspredicted.org]).  By specifying one's plans in detail prior to analyzing the data, pre-registration provides greater faith that the analyses do not suffer from p-hacking or other questionable research practices.  
+One of the ideas that has gained the greatest traction is *pre-registration*, in which one submits a detailed description of a study (including all data analyses) to a trusted repository (such as the [Open Science Framework](http://osf.io) or [AsPredicted.org](http://aspredicted.org).  By specifying one's plans in detail prior to analyzing the data, pre-registration provides greater faith that the analyses do not suffer from p-hacking or other questionable research practices.  
 
-The effects of pre-registration have been seen in clinical trials in medicine.  In 2000, the National Heart, Lung, and Blood Institute (NHLBI) began requiring all clinical trials to be pre-registered using the [ClinicalTrials.gov](http://clinicaltrials.gov).  This provides a natural experiment to observe the effects of study pre-registration.  When @kapl:irvi:2015 examined clinical trial outcomes over time, they found that the number of positive outcomes in clnical trials was reduced after 2000 compared to before. While there are many possible causes, it seems likely that prior to study registration researchers were able to change their methods in order to find a positive result, which became more difficult after registration was required.
+The effects of pre-registration have been seen in clinical trials in medicine.  In 2000, the National Heart, Lung, and Blood Institute (NHLBI) began requiring all clinical trials to be pre-registered using the system at  [ClinicalTrials.gov](http://clinicaltrials.gov).  This provides a natural experiment to observe the effects of study pre-registration.  When @kapl:irvi:2015 examined clinical trial outcomes over time, they found that the number of positive outcomes in clnical trials was reduced after 2000 compared to before. While there are many possible causes, it seems likely that prior to study registration researchers were able to change their methods in order to find a positive result, which became more difficult after registration was required.
  
 ### Reproducible practices
 
@@ -254,19 +255,18 @@ Second, remember that the p-value doesn't provide us with a measure of the likel
 
 ## Doing reproducible data analysis
 
-So far we have focused on the ability to replicate other researchers' findings in new experiments, but another important aspect of reproducibility is to be able to reproduce someone's analyses on their own data, which we refer to a *computational reproducibility.*  This requires that researchers share both their data and their analysis code, so that other researchers can both try to reproduce the result as well as potentially test different analysis methods on the same data.  
-There is an increasing move in psychology towards open sharing of code and data; for example, the journal *Psychological Science* now provides "badges" to papers that share research materials, data, and code, as well as for pre-registration.
+So far we have focused on the ability to replicate other researchers' findings in new experiments, but another important aspect of reproducibility is to be able to reproduce someone's analyses on their own data, which we refer to a *computational reproducibility.*  This requires that researchers share both their data and their analysis code, so that other researchers can both try to reproduce the result as well as potentially test different analysis methods on the same data.  There is an increasing move in psychology towards open sharing of code and data; for example, the journal *Psychological Science* now provides "badges" to papers that share research materials, data, and code, as well as for pre-registration.
 
 The ability to reproduce analyses is one reason that we strongly advocate for the use of scripted analyses (such as those using R) rather than using a "point-and-click" software package.  It's also a reason that we advocate the use of free and open-source software (like R) as opposed to commercial software packages, which will require others to buy the software in order to reproduce any analyses.
 
-There are many ways to share both code and data.  A common way to share code is via web sites that support *version control* for software, such as [Github](http://github.com).  Small datasets can also be shared via these same sites; larger datasets can be shared through data sharing portals such as [Zenodo](https://zenodo.org/), or through specialized portals for specific types of data (such as [OpenNeuro](http://openneuro.org) for neuroimaging data).#
+There are many ways to share both code and data.  A common way to share code is via web sites that support *version control* for software, such as [Github](http://github.com).  Small datasets can also be shared via these same sites; larger datasets can be shared through data sharing portals such as [Zenodo](https://zenodo.org/), or through specialized portals for specific types of data (such as [OpenNeuro](http://openneuro.org) for neuroimaging data).
 
 ## Conclusion: Doing better science
-
 
 It is every scientist's responsibility to improve their research practices in order to increase the reproducibility of their research.  It is essential to remember that the goal of research is not to find a significant result; rather, it is to ask and answer questions about nature in the most truthful way possible.  Most of our hypotheses will be wrong, and we should be comfortable with that, so that when we find one that's right, we will be even more confident in its truth.
 
 ## Suggested Readings
 
 - [Rigor Mortis: How Sloppy Science Creates Worthless Cures, Crushes Hope, and Wastes Billions, by Richard Harris](https://www.amazon.com/dp/B01K3WN72C)
+- [Improving your statistical inferences](https://www.coursera.org/learn/statistical-inferences) - an online course on how to do better statistical analysis, including many of the points raised in this chapter.
 

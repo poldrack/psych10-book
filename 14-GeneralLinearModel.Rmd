@@ -143,7 +143,7 @@ print(p3)
 
 ### Regression to the mean
 
-The concept of *regression to the mean* was one of Galton's essential contributions to science, and it remains a critical point to understand when we interpret the results of experimental data analyses.  Let's say that we want to study the effects of a reading intervention on the performance of poor readers.  To test our hypothesis, we might go into a school and recruit those individuals in the bottom 25% of the distribution on some reading test, administer the intervention, and then examine their performance.  Let's say that the intervention actually has no effect, and that reading scores for each individual are simply samples from a normal distribution.  We can simulate this:
+The concept of *regression to the mean* was one of Galton's essential contributions to science, and it remains a critical point to understand when we interpret the results of experimental data analyses.  Let's say that we want to study the effects of a reading intervention on the performance of poor readers.  To test our hypothesis, we might go into a school and recruit those individuals in the bottom 25% of the distribution on some reading test, administer the intervention, and then examine their performance.  Let's say that the intervention actually has no effect, and that reading scores for each individual are simply independent samples from a normal distribution.  We can simulate this:
 
 ```{r}
 # create simulated data for regression to the mean example
@@ -175,7 +175,7 @@ If we look at the difference between the mean test performance at the first and 
 
 We generally estimate the parameters of a linear model from data using *linear algebra*, which is the form of algebra that is applied to vectors and matrices.  If you aren't familiar with linear algebra, don't worry -- you won't actually need to use it here, as R will do all the work for us.  However, a brief excursion in linear algebra can provide some insight into how the model parameters are estimated in practice.
 
-First, let's introduce the idea of vectors and matrices; you've already encountered them in the context of R, but we will review them here.  A matrix is a set of numbers that are arranged in a squared or rectangle, such that there are one or more *dimensions* across which the matrix varies.  Let's take our study time data from above.  We could arrange these numbers in a matrix, which would have eight rows (one for each child) and two columns (one for study time, and one for grade).  If you are thinking "that sounds like a data frame in R" you are exactly right!  In fact, a data frame is a specialized version of a matrix, and we can convert them to a matrix using the `as.matrix()` function.
+First, let's introduce the idea of vectors and matrices; you've already encountered them in the context of R, but we will review them here.  A matrix is a set of numbers that are arranged in a square or rectangle, such that there are one or more *dimensions* across which the matrix varies.  It is customary to place different observation units (such as people) in the rows, and different variables in the columns. Let's take our study time data from above. We could arrange these numbers in a matrix, which would have eight rows (one for each student) and two columns (one for study time, and one for grade).  If you are thinking "that sounds like a data frame in R" you are exactly right!  In fact, a data frame is a specialized version of a matrix, and we can convert a data frame to a matrix using the `as.matrix()` function.
 
 ```{r}
 df_matrix <- df %>% 
@@ -192,11 +192,11 @@ This looks very much like the earlier equation that we used, except that the let
 
 We know that the grade data go into the Y matrix, but what goes into the $X$ matrix?  Remember from our initial discussion of linear regression that we need to add a constant in addition to our independent variable of interest, so our $X$ matrix (which we call the *design matrix*) needs to include two columns:  one representing the study time variable, and one column with the same value for each individual (which we generally fill with all ones). We can view the resulting design matrix graphically (see Figure \@ref(fig:GLMmatrix)).
 
-```{r GLMmatrix, echo=FALSE,fig.width=4, fig.height=4,fig.cap="A depiction of the study time data in terms of matrix algebra.",out.height='50%'}
+```{r GLMmatrix, echo=FALSE,fig.height=4,fig.cap="A depiction of the linear model for the study time data in terms of matrix algebra.",out.height='50%'}
 knitr::include_graphics("images/glm_matrix.png")
 ```
 
-The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1, so the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view these as individual equations for each individual:
+The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1, so the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view the linear model as a set of individual equations for each individual:
 
 $\hat{y}_1 = studyTime_1*\beta_1 + 1*\beta_2$
 
@@ -495,11 +495,11 @@ anova(lmResultCafAnx,lmResultInteraction)
 This tells us that there is good evidence to prefer the model with the interaction over the one without an interaction.  Model comparison is relatively simple in this case because the two models are *nested* -- one of the models is a simplified version of the other model.  Model comparison with non-nested models can get much more complicated.
 
 
-### What does "predict" really mean?
+## What does "predict" really mean?
 
-When we talk about "prediction" in daily life, we are generally referring to the ability to estimate the value of some variable in advance of seeing the data.  However, the term is often used in the context of linear regression to refer to the fitting of a model to the data; the estimated values ($\hat{y}$) are sometimes referred to as "predictions" and the independent variables are referred to as "predictors".  This has an unfortunate connotation, as it implies that our model should also be able to predict the values of new data points in the future. In reality, the fit of a model to a dataset will nearly always be better than the fit of the model to a new dataset [@copa:1983].  
+When we talk about "prediction" in daily life, we are generally referring to the ability to estimate the value of some variable in advance of seeing the data.  However, the term is often used in the context of linear regression to refer to the fitting of a model to the data; the estimated values ($\hat{y}$) are sometimes referred to as "predictions" and the independent variables are referred to as "predictors".  This has an unfortunate connotation, as it implies that our model should also be able to predict the values of new data points in the future. In reality, the fit of a model to the dataset used to obtain the parameters will nearly always be better than the fit of the model to a new dataset [@copa:1983].
 
-As an example, let's take a sample of 48 children from NHANES and fit a regression model for weight that includes several regressors (age, height, hours spent watching TV and using the computer, and household income).  
+As an example, let's take a sample of 48 children from NHANES and fit a regression model for weight that includes several regressors (age, height, hours spent watching TV and using the computer, and household income) along with their interactions.  
 
 ```{r}
 # get children with good values of all variables
@@ -529,7 +529,7 @@ get_sample_predictions <- function(sample_size,shuffle=FALSE) {
     sample_n(sample_size)
   
   pred_new <- predict(heightRegressOrig,new_sample)
-  
+  # return r-squared and rmse for original and new data
   return(c(cor(pred_orig,orig_sample$Weight)**2,
            cor(pred_new,new_sample$Weight)**2,
            sqrt(mean((pred_orig - orig_sample$Weight)**2)),
@@ -548,10 +548,9 @@ pander(mean_rsquared)
 
 ```
 
-Here we see that whereas the model fit on the original data showed a very good fit (only off by a few pounds per individual), the same model does a much worse job of predicting the weight values for new children sampled from the same population (off by more than 20 pounds per individual).  This happens because the model that we specified is quite complex, since it includes not just each of the individual variables, but also all possible combinations of them (which we refer to as *interactions* as we will see in a later chapter), resulting in a model with 32 parameters.  Since this is almost as many coefficients as there are data points, the model *overfits* the data, just like the complex polynomial curve in our initial example of overfitting.
+Here we see that whereas the model fit on the original data showed a very good fit (only off by a few pounds per individual), the same model does a much worse job of predicting the weight values for new children sampled from the same population (off by more than 25 pounds per individual).  This happens because the model that we specified is quite complex, since it includes not just each of the individual variables, but also all possible combinations of them (i.e. their *interactions*), resulting in a model with 32 parameters.  Since this is almost as many coefficients as there are data points, the model *overfits* the data, just like the complex polynomial curve in our initial example of overfitting in Section \@ref(overfitting).
 
 Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable, such that it should be impossible in principle to predict weight from the other variables, since they should have no systematic relationship.
-
 
 ```{r}
 print('using shuffled y variable to simulate null effect')
@@ -566,11 +565,19 @@ pander(mean_rsquared)
 
 ```
 
-This shows us that even when there is no true relationship to be modeled (because shuffling obliterated the relationship), the complex model still shows a very low error in its predictions, because it fits the noise in the specific dataset.  However, when that model is applied to a new dataset, we see that the error is much larger, as it should be.
+This shows us that even when there is no true relationship to be modeled (because shuffling should have obliterated the relationship), the complex model still shows a very low error in its predictions, because it fits the noise in the specific dataset.  However, when that model is applied to a new dataset, we see that the error is much larger, as it should be.
 
-#### Cross-validation
+### Cross-validation
 
-One method that has been developed to help address the problem of overfitting is known as *cross-validation*.  This technique is commonly used within the field of machine learning, which is focused on building models that can generalize well to new data, even when we don't have a new dataset to test the model. The idea behind cross-validation is that we fit our model repeatedly, each time leaving out a subset of the data, and then test the ability of the model to predict the values in each held-out subset.  Let's see how that would work for our weight prediction example.  In this case we will perform 12-fold cross-validation, which means that we will break the data into 12 subsets, and then fit the model 12 times, in each case leaving out one of the subsets and then testing the model's ability to accurately predict the value of the dependent variable for those held-out data points.  The `caret` package in R provides us with the ability to easily run cross-validation across our dataset:
+One method that has been developed to help address the problem of overfitting is known as *cross-validation*.  This technique is commonly used within the field of machine learning, which is focused on building models that will generalize well to new data, even when we don't have a new dataset to test the model. The idea behind cross-validation is that we fit our model repeatedly, each time leaving out a subset of the data, and then test the ability of the model to predict the values in each held-out subset.  
+
+
+```{r crossvalidation,echo=FALSE,fig.cap="A schematic of the  crossvalidation procedure.",fig.height=4,out.height='30%'}
+knitr::include_graphics("images/crossvalidation.png")
+
+```
+
+Let's see how that would work for our weight prediction example.  In this case we will perform 12-fold cross-validation, which means that we will break the data into 12 subsets, and then fit the model 12 times, in each case leaving out one of the subsets and then testing the model's ability to accurately predict the value of the dependent variable for those held-out data points.  The `caret` package in R provides us with the ability to easily run cross-validation across our dataset:
 
 ```{r}
 # create a function to run cross-validation

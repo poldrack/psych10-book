@@ -72,8 +72,7 @@ lorenzCurve = function(df){
 ```
 
 
-```{r gini0,fig.cap="Lorenz curve for Gini index of zero (i.e. perfect equality).",fig.width=8,fig.height=8,out.height='50%'}
-# Create Lorenz curve for Gini index of zero (i.e. perfect equality)
+```{r gini0,echo=FALSE,fig.cap="Lorenz curves for A) perfect equality, B) normally distributed income, and C) high inequality (equal income except for one very wealthy individual).",fig.width=8,fig.height=8,out.height='50%'}
 
 incomeDf <- data.frame(income=rep(40000,10))
 lc <- lorenzCurve(incomeDf)
@@ -81,7 +80,7 @@ lc <- lorenzCurve(incomeDf)
 incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
 lc2 <- lorenzCurve(incomeDf)
 
-incomeDf <- data.frame(income=rnorm(10,mean=40000,sd=5000))
+incomeDf <- data.frame(income=rep(40000,10))
 incomeDf$income[1] <- 40000000
 lc3 <- lorenzCurve(incomeDf)
 
@@ -127,10 +126,12 @@ hateCrimes <-
 hateCrimes$state_abb[hateCrimes$state=="District of Columbia"]='DC'
 
 ggplot(hateCrimes,aes(gini_index,avg_hatecrimes_per_100k_fbi,label=state_abb)) +
-  geom_point() + geom_text(aes(label=state_abb),hjust=0, vjust=0) +
+  geom_point() + 
+  geom_text(aes(label=state_abb),hjust=0, vjust=0) +
   theme(plot.title = element_text(size = 20, face = "bold")) +
   xlab('Gini index') + 
-  ylab('Avg hate crimes per 100K population (FBI)')
+  ylab('Avg hate crimes per 100K population (FBI)') +
+  theme(plot.margin = unit(c(0,1,0,0), "cm"))
   
 ```
 
@@ -150,7 +151,7 @@ $$
 covariance = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{N - 1}
 $$
 
-This value will be high when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.
+This value will be far from zero when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.
 
 ```{r }
 # create data for toy example of covariance
@@ -176,18 +177,30 @@ sprintf('covariance: %.2f',covXY)
 
 ```
 
-We don't usually use the covariance to describe relationships between variables, because it varies with the overall lever of variance in the data.  Instead, we would usually use the *correlation coefficient* (often referred to as *Pearson's correlation* after the statistician Karl Pearson). The correlation is computed by scaling the covariance by the standard deviations of the two variables:
+We don't usually use the covariance to describe relationships between variables, because it varies with the overall level of variance in the data.  Instead, we would usually use the *correlation coefficient* (often referred to as *Pearson's correlation* after the statistician Karl Pearson). The correlation is computed by scaling the covariance by the standard deviations of the two variables:
 
 $$
 r = \frac{covariance}{s_xs_y} = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{(N - 1)s_x s_y}
 $$
 
 ```{r}
+# compute the correlation coefficient
+
 corXY <- sum(df$crossproduct)/((nrow(df)-1)*sd(df$x)*sd(df$y))
-pander(sprintf('correlation coefficient = %.2f\n',corXY))
-# compare to cor(df$x,df$y)
+sprintf('correlation coefficient = %.2f',corXY)
+
 ```
- 
+
+We can also compute the correlation value easily using the `cor()` function in R:
+
+```{r}
+# compute r using built-in function
+
+c <- cor(df$x,df$y)
+sprintf('correlation coefficient = %.2f',c)
+
+```
+
 The correlation coefficient is useful because it varies between -1 and 1 regardless of the nature of the data - in fact, we already discussed the correlation coefficient earlier in the discussion of effect sizes.  As we saw in the previous chapter on effect sizes, a correlation of 1 indicates a perfect linear relationship, a correlation of -1 indicates a perfect negative relationship, and a correlation of zero indicates no linear relationship.
 
 We can compute the correlation coefficient for the hate crime data:
@@ -216,9 +229,11 @@ cor.test(hateCrimes$avg_hatecrimes_per_100k_fbi,
 
 This test shows that the likelihood of an r value this extreme or more is quite low, so we would reject the null hypothesis of $r=0$.  Note that this test assumes that both variables are normally distributed.
 
-We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis.
+We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis. The results are shown in Figure \@ref(fig:shuffleCorr).  The p-value computed using randomization is reasonably similar to the answer give by the t-test.
 
-```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line.",fig.width=4,fig.height=4,out.height='50%'}
+```{r}
+# compute null distribution by shuffling order of variables
+
 shuffleCorr <- function(x,y){
   xShuffled=sample(x)
   return(cor(xShuffled,y))
@@ -226,19 +241,22 @@ shuffleCorr <- function(x,y){
 
 shuffleDist <- replicate(2500,shuffleCorr(hateCrimes$avg_hatecrimes_per_100k_fbi,hateCrimes$gini_index))
 
+```
+
+```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line.",fig.width=4,fig.height=4,out.height='50%'}
+
 ggplot(data.frame(shuffleDist),aes(shuffleDist)) + 
   geom_histogram(bins=100) +
   geom_vline(xintercept = corGiniHC,color='blue') +
   ggtitle(sprintf('p(shuffled r >= observed) = %0.3f',mean(shuffleDist>=corGiniHC))) +
-  theme(plot.title = element_text(size = 20, face = "bold"))
+  theme(plot.title = element_text(size = 20, face = "bold")) +
+  theme(plot.margin = unit(c(0,1,0,0), "cm"))
 
 ```
 
-The p-value computed using randomization is reasonably similar to the answer give by the t-test.
-
 ### Robust correlations
 
-You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
+You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints (the one for the District of Columbia) seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
 
 ```{r outlierCorr, echo=FALSE,fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive.",fig.width=4,fig.height=4,out.height='50%'}
 n <- 10
@@ -256,13 +274,14 @@ ccSpearman <- cor(dfOutlier$x,dfOutlier$y,method='spearman')
 p <- ggplot(dfOutlier,aes(x,y))+
    geom_point() +
    ggtitle(sprintf('r = %0.2f (without outlier: r = %.2f)',cc,cor(dfOutlier$x[2:n],dfOutlier$y[2:n]))) +
-   theme(plot.title = element_text(size = 20, face = "bold"))
+   theme(plot.title = element_text(size = 20, face = "bold")) +
+  theme(plot.margin = unit(c(0,1,0,0), "cm"))
  print(p)
 
 
 ```
 
-One way to address outliers is to compute the correlation on the ranks of the data after ordering them, rather than on the data themselves; this is known as *Spearman's correlation*.  Whereas the Pearson correlation for the example in Figure \@ref(fig:outlierCorr) was r `I(cc)`, the Spearman correlation is `r I(ccSpearman)`, showing that the rank correlation reduces the effect of the outlier.
+One way to address outliers is to compute the correlation on the ranks of the data after ordering them, rather than on the data themselves; this is known as *Spearman's correlation*.  Whereas the Pearson correlation for the example in Figure \@ref(fig:outlierCorr) was `r I(cc)`, the Spearman correlation is `r I(ccSpearman)`, showing that the rank correlation reduces the effect of the outlier.
 
 We can compute the rank correlation on the hate crime data using the `cor.test` function:
 
@@ -308,14 +327,14 @@ grViz("
 digraph boxes_and_circles {
 
   # a 'graph' statement
-  graph [overlap = true, fontsize = 10]
+  graph [overlap = true, fontsize = 6]
 
   # several 'node' statements
  
   node [shape = circle,
         fixedsize = true,
         width = 0.9,
-        fontsize=10] // sets as circles
+        fontsize=6] // sets as circles
   StudyTime; ExamGrade; FinishTime
 
   # several 'edge' statements
@@ -334,13 +353,14 @@ grViz("
 digraph boxes_and_circles {
 
   # a 'graph' statement
-  graph [overlap = true, fontsize = 10]
+  graph [overlap = true, fontsize = 6]
 
   # several 'node' statements
  
   node [shape = circle,
         fixedsize = true,
-        width = 0.9] // sets as circles
+        width = 0.9,
+        fontsize=6] // sets as circles
   StudyTime; ExamGrade; FinishTime; Knowledge
 
   # several 'edge' statements
@@ -359,5 +379,5 @@ Within statistics and machine learning, there is a very active research communit
 
 ## Suggested readings
 
-- [The Book of Why](http://bayes.cs.ucla.edu/WHY/) - an excellent introduction to the ideas behind causal inference.
+- [The Book of Why](http://bayes.cs.ucla.edu/WHY/) by Judea Pearl - an excellent introduction to the ideas behind causal inference.
 

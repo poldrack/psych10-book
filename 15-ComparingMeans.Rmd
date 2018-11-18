@@ -106,7 +106,7 @@ To compute the standard errors for this analysis, we can use exactly the same eq
 
 ### Effect sizes for comparing two means
 
-The most commonly used effect size for a comparison between two means is Cohen's d, which (as you may remember from the earlier chapter on effect sizes) is an expression of the effect in terms of standard error units.  For the t-test estimated using the general linear model outlined above, this is expressed as:
+The most commonly used effect size for a comparison between two means is Cohen's d, which (as you may remember from Chapter \@ref(ci-effect-size-power)) is an expression of the effect in terms of standard error units.  For the t-test estimated using the general linear model outlined above, this is expressed as:
 
 $$
 d = \frac{\hat{beta_1}}{SE_{residual}}
@@ -218,7 +218,7 @@ This shows us that although the effect was significant in a paired t-test, it ac
 
 ### The paired t-test as a linear model
 
-We can also define the paired t-test in terms of a general linear model.  To do this, we include all of the measurements for each subject as data points (within a tidy data frame).  We then include in the model a variable that codes for the identity of each individual (in this case, the ID variable that contains a subject ID for each person). This is known as a *mixed model*, since it includes effects of independent variables as well as effects of individuals.  The standard model fitting procedure ```lm()``` can't do this, but we can do it using the ```lmer()``` function from a popular R package called *lme4*, which is specialized for estimating mixed models.  The ```(1|ID)``` in the lmer formula tells the function to estimate a separate intercept (which is what the ```1``` refers to) for each value of the ```ID``` variable, and then estimate a common slope relating timepoint to BP.
+We can also define the paired t-test in terms of a general linear model.  To do this, we include all of the measurements for each subject as data points (within a tidy data frame).  We then include in the model a variable that codes for the identity of each individual (in this case, the ID variable that contains a subject ID for each person). This is known as a *mixed model*, since it includes effects of independent variables as well as effects of individuals.  The standard model fitting procedure ```lm()``` can't do this, but we can do it using the ```lmer()``` function from a popular R package called *lme4*, which is specialized for estimating mixed models.  The ```(1|ID)``` in the formula tells `lmer()` to estimate a separate intercept (which is what the ```1``` refers to) for each value of the ```ID``` variable (i.e. for each individual in the dataset), and then estimate a common slope relating timepoint to BP.
 
 ```{r,messages=FALSE}
 # compute mixed model for paired test
@@ -228,7 +228,7 @@ lmrResult <- lmer(BPsys~timepoint + (1|ID),data=NHANES_sample_tidy)
 summary(lmrResult)
 ```
 
-You can see that this shows us the same p-value as the paired t-test computed using the ```t.test()``` function.
+You can see that this shows us a p-value that is very close to the result from the paired t-test computed using the ```t.test()``` function.
 
 ## Comparing more than two means
 
@@ -289,7 +289,7 @@ ggplot(fdata,aes(x,f_1_1)) +
 ```
 
 
-To create an ANOVA model, we extend the idea of *dummy coding* that you encountered in the last chapter. Remember that for the t-test comparing two means, we created a single dummy variable that took the value of 1 for one of the conditions and zero for the others.  Here we extend that idea by creating two dummy variables, one that codes for the Drug 1 condition and the other that codes for the Drug 2 condition.  Just as in the t-test, we will have one condition (in this case, placebo) that doesn't have a dummy variable, and thus represents the baseline against which the others are compared. Let's create the dummy coding for drugs 1 and 2.
+To create an ANOVA model, we extend the idea of *dummy coding* that you encountered in the last chapter. Remember that for the t-test comparing two means, we created a single dummy variable that took the value of 1 for one of the conditions and zero for the others.  Here we extend that idea by creating two dummy variables, one that codes for the Drug 1 condition and the other that codes for the Drug 2 condition.  Just as in the t-test, we will have one condition (in this case, placebo) that doesn't have a dummy variable, and thus represents the baseline against which the others are compared; its mean defines the intercept of the model. Let's create the dummy coding for drugs 1 and 2.
 
 ```{r}
 # create dummy variables for drug1 and drug2
@@ -309,6 +309,6 @@ Now we can fit a model using the same approach that we used in the previous chap
 lmResultANOVA <- lm(sysBP ~ d1 + d2, data=df)
 summary(lmResultANOVA)
 ```
-The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, keep in mind that if we wanted to compare interpret these tests, we would need to correct the p-values to account for the fact that we have done multiple hypothesis tests; we will see an example of how to do this in the next chapter.
+The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, keep in mind that if we wanted to interpret these tests, we would need to correct the p-values to account for the fact that we have done multiple hypothesis tests; we will see an example of how to do this in the next chapter.
 
 Remember that the hypothesis that we started out wanting to test was whether there was any difference between any of the conditions; we refer to this as an *omnibus* hypothesis test, and it is the test that is provided by the F statistic, which basically tells us whether our model is better than a simple model that just includes an intercept.  In this case we see that the F test is highly significant, consistent with our impression that there did seem to be a difference between the groups (which in fact we know there was, because we created the data).
