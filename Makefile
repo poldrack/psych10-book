@@ -1,3 +1,5 @@
+all: render-pdf render-gitbook
+
 clean:
 	rm -rf _bookdown_files bookdown-demo.*
 
