@@ -9,6 +9,8 @@ link-citations: false
 output:
   bookdown::gitbook:
     lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
   bookdown::pdf_book:
     keep_tex: yes
 documentclass: book
