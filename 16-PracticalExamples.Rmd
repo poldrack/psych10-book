@@ -1,9 +1,13 @@
 ---
 output:
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
   pdf_document: default
   html_document: default
 ---
-# The process of statistical modeling: A practical example
+# The process of statistical modeling: A practical example {#practical-example}
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -11,6 +15,7 @@ library(ggplot2)
 library(BayesFactor)
 library(emmeans)
 library(brms)
+library(cowplot)
 
 library(pander)
 panderOptions('round',2)
