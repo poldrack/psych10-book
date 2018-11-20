@@ -5,7 +5,7 @@ output:
 ---
 # Modeling categorical relationships
 
-So far we have discussed the general concept of statistical modeling and hypothesis testing, and applied them to some simple analyses. In this chapter we will focus on the modeling of *categorical* relationships, by which we mean relationships variables that are measured on a nominal (and sometimes ordinal) scale.  These data are usually expressed in terms of counts; that is, for each value of the variable (or combination of values of multiple variables), how many observations take that value?  For example, when we count how many people from each major are in our class, we are fitting a categorical model to the data.
+So far we have discussed the general concept of statistical modeling and hypothesis testing, and applied them to some simple analyses. In this chapter we will focus on the modeling of *categorical* relationships, by which we mean relationships between variables that are measured on a nominal (and sometimes ordinal) scale.  These data are usually expressed in terms of counts; that is, for each value of the variable (or combination of values of multiple variables), how many observations take that value?  For example, when we count how many people from each major are in our class, we are fitting a categorical model to the data.
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -35,24 +35,18 @@ NHANES_adult <-
 
 ```
 
-## Example: Does traffic to a web site vary across days of the week?
+## Example: Candy colors
 
-Let's say that we want to know whether the traffic to a specific web site differs across different days of the week.  As an example, we can use data collected using Google Analytics for the Openfmri.org web site (which is run by my lab). 
+Let's say that I have purchased a bag of 100 candies, which are labeled as having 1/3 chocolates, 1/3 licorices, and 1/3 gumballs.  When I count the candies in the bag, we get the following numbers:
 
-```{r openfmriTraffic,fig.cap='Traffic to openfmri.org during the month of June, 2018, separated by days of the week.'}
-openfmriData <- 
-  read.table('data/openfmri_analytics.csv',sep=',',header=1) %>%
-  group_by(DayOfWeek) %>%
-  summarize(sumUsers=sum(Users))
-
-ggplot(openfmriData,aes(DayOfWeek,sumUsers,group=1)) + 
-  geom_line() + 
-  geom_point() + 
-  scale_x_discrete(limits=c('Mon','Tue','Wed','Thu','Fri','Sat','Sun')) +
-  geom_hline(yintercept = mean(openfmriData$sumUsers),linetype='dashed')
+```{r}
+candyDf <- 
+  tibble(candyType=c('chocolate','licorice','gumball'),
+         count=c(30,33,37))
+pander(candyDf)
 ```
 
-Looking at the data shown in Figure \@ref(fig:openfmriTraffic), it certainly seems like traffic is higher early in the week and declines over the course of the week, hitting its lowest point on the weekend.  However, how can we tell whether this apparent pattern is simply due to random fluctuations?  
+Because I like chocolate much more than licorice or gumballs, I feel slightly ripped off.  What I would like to know is: What is the likelihood that the count would come out this way if the true probability of each candy type is the averaged proportion of 1/3 each?
 
 ## Pearson's chi-squared test
 
@@ -62,15 +56,17 @@ $$
 \chi^2 = \sum_i\frac{(observed_i - expected_i)^2}{expected_i}
 $$
 
-In the case of our web site traffic example, the null hypothesis is that the number of visits is the same every day -- which means that we would expect under the null hypothesis that the number of visits each day is simply equivalent to the mean across all days (denoted by the dashed line in Figure \@ref(fig:openfmriTraffic)). 
+In the case of our candy example, the null hypothesis is that the proportion of each type of candies is equal.  We can compute the chi-squared statistic for our observed counts of candy as follows:
 
 ```{r}
-chisqVal <- sum(((openfmriData$sumUsers - mean(openfmriData$sumUsers))**2)/mean(openfmriData$sumUsers))
+# compute chi-squared statistic
+nullExpectation <- c(1/3,1/3,1/3)*sum(candyDf$count)
+chisqVal <- sum(((candyDf$count - nullExpectation)**2)/nullExpectation)
 ```
 
 The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together.  Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
 
-```{r chisqDist,fig.cap="Examples of the chi-squared distribution for various degrees of freedom."}
+```{r chisqDist,echo=FALSE,fig.cap="Examples of the chi-squared distribution for various degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
 xvals <- seq(0.01,20,0.01)
 dfvals <- c(1,2,4,8)
 chisqDf <- 
@@ -83,12 +79,15 @@ chisqDf <-
   mutate(chisqNorm = chisq/max(chisq))
   
 ggplot(chisqDf,aes(xvals,chisqNorm,group=as.factor(dfvals),color=as.factor(dfvals))) +
-  geom_line()
+  geom_line() +
+  theme(legend.position = c(0.8,0.7)) 
 ```
 
-Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables.  Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of the simulation.
+Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables, using simulation.
 
-```{r chisqSim,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the blue line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom."}
+```{r}
+# simulate 50,000 sums of 8 standard normal random variables and compare
+# to theoretical chi-squared distribution
 
 d <- replicate(50000,rnorm(8)**2)
 dMean <- apply(d,2,sum)
@@ -97,6 +96,12 @@ csDf <-
   data.frame(x=seq(0.01,30,0.01)) %>%
   mutate(chisq=dchisq(x,8))
 
+```
+
+Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of a simulation that repeatedly added 
+
+```{r chisqSim,echo=FALSE,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the blue line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
+
 ggplot(data.frame(dMean),aes(dMean)) + 
   geom_histogram(aes(y=..density..),bins=100) +
   geom_line(data=csDf,aes(x,chisq),color='blue',size=1.5)+
@@ -104,20 +109,22 @@ ggplot(data.frame(dMean),aes(dMean)) +
 
 ```
 
-For the web traffic example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all days. We use a chi-squared distribution with degrees of freedom equal to n - 1, since we lost one degree of freedom when we computed the mean in order to generate the expected values.
+For the candy example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all candies. We use a chi-squared distribution with degrees of freedom equal to n - 1, since we lost one degree of freedom when we computed the mean in order to generate the expected values.
 
 ```{r}
-pval <- pchisq(chisqVal,6,lower.tail=FALSE)
-pval
+pval <- pchisq(chisqVal,2,lower.tail=FALSE)
+sprintf("p-value = %0.3f",pval)
 ```
 
-This shows that our observed data are exceedingly unlikely under the null hypothesis. 
+This shows that the observed counts of candies are not particularly surprising based on the proportions printed on the bag of candy, and we would not reject the null hypothesis of equal proportions.
 
 ## Contingency tables and the two-way test
 
-Another way that we often use the chi-squared test is to ask whether two categorical variables are related to one another.  As an example, let's take the question of whether a black driver is more likely to be searched when they are pulled over by a police officer, compared to a white driver  The Stanford Open Policing Project (https://openpolicing.stanford.edu/) has studied this, and provides data that we can use to analyze the question.  We will use the data from the State of Connecticut since they are fairly small.  These data were first cleaned up to remove all unnecessary data (see code/process_CT_data.py).
+Another way that we often use the chi-squared test is to ask whether two categorical variables are related to one another.  As a more realistic example, let's take the question of whether a black driver is more likely to be searched when they are pulled over by a police officer, compared to a white driver  The Stanford Open Policing Project (https://openpolicing.stanford.edu/) has studied this, and provides data that we can use to analyze the question.  We will use the data from the State of Connecticut since they are fairly small.  These data were first cleaned up to remove all unnecessary data (see code/process_CT_data.py).
 
 ```{r}
+# load police stop data
+
 stopData <- 
   read.table('data/CT_data_cleaned.csv',header=TRUE,sep=',') %>%
   mutate(searched=recode(search_conducted,'False'=FALSE,'True'=TRUE)) %>%
@@ -130,6 +137,7 @@ The standard way to represent data from a categorical analysis is through a *con
 Let's compute the contingency table for the police search data:
 
 ```{r}
+# compute and print two-way contingency table
 
 summaryDf2way <- 
   stopData %>% 
@@ -148,6 +156,8 @@ pander(summaryContingencyTable)
 It can also be useful to look at the contingency table using proportions rather than raw numbers, since they are easier to compare visually.
 
 ```{r}
+# Compute and print contingency table using proportions 
+# rather than raw frequencies
 summaryContingencyTableProportion <- 
   summaryContingencyTable %>%
   mutate(
@@ -157,7 +167,7 @@ summaryContingencyTableProportion <-
 pander(summaryContingencyTableProportion,round=4)
 ```
 
-The Pearson chi-squared test allows us to test whether observed frequencies are different from expected frequencies, so we need to determine what frequencies we would expect in each cell if searches and race were unrelated -- which we can defined as being *independent.*  Remember from the chapter on probability that if X and Y are independent, then:
+The Pearson chi-squared test allows us to test whether observed frequencies are different from expected frequencies, so we need to determine what frequencies we would expect in each cell if searches and race were unrelated -- which we can define as being *independent.*  Remember from the chapter on probability that if X and Y are independent, then:
 
 $$
 P(X \cap Y) = P(X) * P(Y)
@@ -193,7 +203,6 @@ summaryDfStop <-
 
 # multiply outer product by n to compute expected frequencies
 expected <- outer(summaryDfRace$prop, summaryDfStop$prop)*nrow(stopData)
-
 expectedDf <- data.frame(expected,driverRace = c('Black','White'))
 names(expectedDf) <- c('NotStopped','Stopped','driverRace')
 expectedDfTidy <- 
@@ -213,19 +222,23 @@ summaryDf2way <-
 
 pander(summaryDf2way)
 
+```
+
+```{r}
 # compute chi-squared statistic by summing standarized squared differences
 chisq <- sum(summaryDf2way$stdSqDiff)
-pander(chisq)
+sprintf('Chi-squared value = %0.2f',chisq)
+
 ```
 
 Having computed the chi-squared statistic, we now need to compare it to the chi-squared distribution in order to determine how extreme it is compared to our expectation under the null hypothesis.  The degrees of freedom for this distribution are $df = (nRows - 1) * (nColumns - 1)$ - thus, for a 2X2 table like the one here, $df = (2-1)*(2-1)=1$.  The intuition here is that computing the expected frequencies requires us to use three values: the total number of observations and the marginal probability for each of the two variables.  Thus, once those values are computed, there is only one number that is free to vary, and thus there is one degree of freedom.  Given this, we can compute the p-value for the chi-squared statistic:
 
 ```{r}
 pval <- pchisq(chisq,1,lower.tail=FALSE)
-pval
+sprintf('p-value = %e',pval)
 ```
 
-The p value of $3.79e^{-182}$ is exceedingly small, showing that the observed data would be highly unlikely if there was truly no relationship between race and police searches.
+The p value of $3.79e^{-182}$ is exceedingly small, showing that the observed data would be highly unlikely if there was truly no relationship between race and police searches, and thus we should reject the null hypothesis of independence.
 
 We can also perform this test easily using the `chisq.test()` function in R:
 
@@ -244,7 +257,7 @@ chisqTestResult
 
 ## Standardized residuals
 
-When we find a significant effect with the chi-squared test, this tells us that the data are unlikely under the null hypothesis, but it doesn't tell us how the data differ.  To get a deeper insight into how the data differ from the null model, we can examine the residuals from a model, which reflects the deviation of the data from the model in each cell. Rather than looking at the raw residuals (which will vary simply depending on the number of observations in the data), it's more common to look at ther *standardized residuals*, which are computed as:
+When we find a significant effect with the chi-squared test, this tells us that the data are unlikely under the null hypothesis, but it doesn't tell us how the data differ.  To get a deeper insight into how the data differ from what we would expect under the null hypothesis, we can examine the residuals from a model, which reflects the deviation of the data from the model in each cell. Rather than looking at the raw residuals (which will vary simply depending on the number of observations in the data), it's more common to look at ther *standardized residuals*, which are computed as:
 
 $$
 standardized\ residual_{ij} = \frac{observed_{ij} - expected_{ij}}{\sqrt{expected_{ij}}}
@@ -253,6 +266,8 @@ where $i$ and $j$ are the indices for the rows and columns respectively.  We can
 
 
 ```{r}
+# compute standardized residuals
+
 summaryDf2way <- 
   summaryDf2way %>% 
   mutate(stdRes = (n - expected)/sqrt(expected))
@@ -260,7 +275,7 @@ summaryDf2way <-
 pander(summaryDf2way)
 ```
 
-These standardized residuals can be interpreted as Z scores -- in this case, we see that the number of searches for black individuals are substantially higher than expected based on independence, and the number of searches for white individuals are substantially lower than expected. This provides us with context to interpret the signficant chi-squared result.
+These standardized residuals can be interpreted as Z scores -- in this case, we see that the number of searches for black individuals are substantially higher than expected based on independence, and the number of searches for white individuals are substantially lower than expected. This provides us with the context that we need to interpret the signficant chi-squared result.
 
 ## Odds ratios
 
@@ -277,15 +292,15 @@ $$
 odds\ ratio = \frac{odds_{searched|black}}{odds_{searched|white}} = 2.59
 $$
 
-The odds ratio shows that the odds of being searched are 2.59 times higher for blacks than whites, based on this dataset.
+The odds ratio shows that the odds of being searched are 2.59 times higher for black versus white drivers, based on this dataset.
 
 ## Bayes factor
 
-We discussed Bayes factors in the earlier chapter on Bayesian statistics -- you may remember that it represents the ratio of the likelihood of the data under eac of the two hypotheses:
+We discussed Bayes factors in the earlier chapter on Bayesian statistics -- you may remember that it represents the ratio of the likelihood of the data under each of the two hypotheses:
 $$ 
 K = \frac{P(data|H_A)}{P(data|H_0)} = \frac{P(H_A|data)*P(H_A)}{P(H_0|data)*P(H_0)}
 $$
-Bayes factors are similar to p-values and effect sizes in one way, which is that their interpretation is somewhat subjective.  There are various guidelines for their interpretation -- here is one from Kass & Rafferty (1995):
+Bayes factors are similar to p-values and effect sizes in one way, which is that their interpretation is somewhat subjective.  There are various guidelines for their interpretation -- here is one from @kass:raff:1995 :
 
 | BF             | Interpretation       |
 |---------------|----------------------|
@@ -297,9 +312,15 @@ Bayes factors are similar to p-values and effect sizes in one way, which is that
 We can compute the Bayes factor for the police search data using the `contingencyTableBF()` function from the BayesFactor package:
 
 ```{r}
+# compute Bayes factor 
+# using independent multinomial sampling plan in which row totals (driver race)
+# are fixed
+
 bf <- contingencyTableBF(as.matrix(summaryDf2wayTable), 
-                         sampleType = "jointMulti")
+                         sampleType = "indepMulti",
+                         fixedMargin='cols')
 bf
+
 ```
 
 This shows that the evidence in favor of a relationship between driver race and police searches in this dataset is exceedingly strong.
@@ -311,6 +332,8 @@ Categorical analysis can also be applied to contingency tables where there are m
 For example, let's look at the NHANES data and compare the variable *Depressed* which denotes the "self-reported number of days where participant felt down, depressed or hopeless".  This variable is coded as ``None``, ``Several``, or  ``Most``.  Let's test whether this variable is related to the *SleepTrouble* variable which reports whether the individual has reported sleeping problems to a doctor.  
 
 ```{r}
+# summarize depression as a function of sleep trouble
+
 depressedSleepTrouble <- 
   NHANES_adult %>%
   drop_na(SleepTrouble,Depressed) %>%
@@ -325,7 +348,7 @@ depressedSleepTroubleTable <-
 pander(depressedSleepTroubleTable)
 ```
 
-Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the number of people with sleep trouble is overall less than those without, for people who reporting being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test:
+Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the total number of people with sleep trouble is muh less than those without, for people who report being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test:
 
 ```{r}
 # need to remove the column with the label names
@@ -337,9 +360,11 @@ depressedSleepChisq <- chisq.test(depressedSleepTroubleTable)
 depressedSleepChisq
 ```
 
-We can also compute the Bayes factor to quantify the strength of the evidence in favor the alternative hypothesis:
+This test shows that there is a strong relationship between depression and sleep trouble.  We can also compute the Bayes factor to quantify the strength of the evidence in favor the alternative hypothesis:
 
 ```{r}
+# compute bayes factor, using a joint multinomial sampling plan
+
 bf <- contingencyTableBF(as.matrix(depressedSleepTroubleTable), 
                          sampleType = "jointMulti")
 bf
@@ -349,7 +374,7 @@ Here see that the Bayes factor is exceedingly large, showing that the evidence i
 
 ## Beware of Simpson's paradox
 
-The contingency tables presented above represent summaries large numbers of observations, but summaries can sometimes be misleading.  Let's take an example from baseball.  The table below shows the batting data (hits/at bats and batting average) for Derek Jeter and David Justice over the years 1995-1997:
+The contingency tables presented above represent summaries of large numbers of observations, but summaries can sometimes be misleading.  Let's take an example from baseball.  The table below shows the batting data (hits/at bats and batting average) for Derek Jeter and David Justice over the years 1995-1997:
 
 | Player  | 1995    |      | 1996    |      | 1997    |      | Combined |      |
 |---------|---------|------|---------|------|---------|------|----------|------|

@@ -1,3 +1,11 @@
 
-[![CircleCI](https://circleci.com/gh/poldrack/psych10-book.svg?style=svg&circle-token=f656d97c4fee9e56ca8af3f80bcad9ffbd0c3a3c)](https://circleci.com/gh/poldrack/psych10-book)
+## Statistical Thinking for the 21st Century
+
+Copyright 2018 Russell A. Poldrack
+
+A live Gitbook version of the book is available at http://web.stanford.edu/group/poldracklab/statsthinking21/
+
+A paper version of the book is currently under discussion.
+
+Comments/suggestions?  Please post an issue [here](https://github.com/poldrack/psych10-book/issues)
 

@@ -13,6 +13,8 @@ library(cowplot)
 library(boot)
 library(MASS)
 library(BayesFactor)
+library(pander)
+
 set.seed(123456) # set random seed to exactly replicate results
 
 # load the NHANES data library
@@ -30,7 +32,7 @@ NHANES_adult <-
 
 ```
 
-In this chapter we will take up the approach to statistical modeleing and inference that stands in contrast to the null hypothesis testing framework that you encountered in the previous chapter.  This is known as "Bayesian statistics" after the Reverend Thomas Bayes, whose theorem you have already encountered.  In this chapter you will learn how Bayes' theorem provides a way of understanding data that solves many of the problems that we discussed regarding null hypothesis testing.
+In this chapter we will take up the approach to statistical modeling and inference that stands in contrast to the null hypothesis testing framework that you encountered Chapter \@ref(hypothesis-testing).  This is known as "Bayesian statistics" after the Reverend Thomas Bayes, whose theorem you have already encountered in Chapter \@ref(probability).  In this chapter you will learn how Bayes' theorem provides a way of understanding data that solves many of the conceptual problems that we discussed regarding null hypothesis testing.
 
 ## Generative models
 
@@ -42,15 +44,15 @@ If we know the value of the latent variable, then it's easy to reconstruct what 
 
 ## Bayes' theorem and inverse inference
 
-The reason that Bayesian statistics has its name is because it takes advantage of Bayes' theorem to make inferences from data back to some features of the (latent) model that generated the data.  
-*CHANGE EXAMPLE*
-Let's say that we want to know whether a coin is fair.  To test this, we flip the coin 10 times and come up with 7 heads.  Before this we were pretty sure that the coin was fair (i.e., that $p_{heads}=0.5$), but these data would certainly give us pause.  We already know how to compute the conditional probability that we would flip 95 or more heads if the coin is really fair ($P(n\ge95|p_{heads}=0.5)$), using the binomial distribution:
+The reason that Bayesian statistics has its name is because it takes advantage of Bayes' theorem to make inferences from data back to some features of the (latent) model that generated the data.  Let's say that want to know whether a coin is fair.  To test this, we flip the coin 10 times and come up with 7 heads.  Before this we were pretty sure that the coin was fair (i.e., that $p_{heads}=0.5$), but these data would certainly give us pause.  We already know how to compute the conditional probability that we would flip 7 or more heads out of 10 if the coin is really fair ($P(n\ge7|p_{heads}=0.5)$), using the binomial distribution:
 
 ```{r}
-pbinom(95,100,.5,lower.tail=FALSE)
+# compute the conditional probability of 7 or more heads when p(heads)=0.5
+sprintf('p(7 or more heads | p(heads) = 0.5) = %.3f',
+        pbinom(7,10,.5,lower.tail=FALSE))
 ```
 
-That is an exceedingly small number.  However, this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of the data given some parameter, whereas what we really want to know is the parameter value. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
+That is an fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of the data given some parameter, whereas what we really want to know is the parameter value. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
 
 Remember that Bayes' theorem provides us with the tool that we need to invert a conditional probability:
 
@@ -62,164 +64,186 @@ We can think of this theorem as having four parts:
 
 - prior ($P(H)$): Our degree of belief about hypothesis H before seeing the data D
 - likelihood ($P(D|H)$): How likely are the observed data D under hypothesis H?
-- marginal likelihood ($P(D)$): How likely are the observed data, collapsing over all possible hypotheses?
+- marginal likelihood ($P(D)$): How likely are the observed data, combining over all possible hypotheses?
 - posterior ($P(H|D)$): Our updated belief about hypothesis H, given the data D
 
-Here we see one of the primary differences between frequentist and Bayesian statsistics.  Frequentists do not beleive in the idea of a probability of a hypothesis -- for them, a hypothesis is either true or it isn't.  Another way to say this is that for the frequentist, the hypothesis is fixed and the data are random, which is why frequentist inference focused on describing the probability of data given a hypothesis (i.e. the p-value).  Bayesians, on the other hand, are comfortable making probability statements about both data and hypotheses.
+Here we see one of the primary differences between frequentist and Bayesian statsistics.  Frequentists do not believe in the idea of a probability of a hypothesis -- for them, a hypothesis is either true or it isn't.  Another way to say this is that for the frequentist, the hypothesis is fixed and the data are random, which is why frequentist inference focused on describing the probability of data given a hypothesis (i.e. the p-value).  Bayesians, on the other hand, are comfortable making probability statements about both data and hypotheses.
 
 ## Doing Bayesian estimation
 
-We ultimately want to use Bayesian statistics to test hypotheses, but before we do that we need to estimate the parameters that are necessary to test the hypothesis. Here we will walk through the process of Bayesian estimation.  Let's say that we want to test whether a coin is fair (i.e. $p_{heads}=0.5$).  To begin with, we have no prior knowledge about the coin, so we have no reason to believe that it is fair or not; in probability terms, we have no reason to think that any particular value of $p_{heads}$ is more likely than any other.  Let's walk through how to do this using Bayes' theorem.
+We ultimately want to use Bayesian statistics to test hypotheses, but before we do that we need to estimate the parameters that are necessary to test the hypothesis. Here we will walk through the process of Bayesian estimation.  Let's use another screening example: Airport security screening.  If you fly a lot like I do, it's just a matter of time until one of the random explosive screenings comes back positive; I had the particularly unfortunate experience of this happening soon after September 11, 2001, when airport security staff were particularly on edge.  
 
-#### from MH: Careful: You are saying several potentially different things and I think you're going to then say this corresponds to the uniform prior. If we conceive of the prior as saying we are uncertain whether or not the coin is fair, this could look like a bernoulli (flip) which then leads to a fork: either it is fair (p = 0.5) or it is biased (p ~ uniform(0,1) )
+What the security staff want to know is what is the likelihood that a person is carrying an explosive, given that the machine has given a positive test.  Let's walk through how to do this using Bayesian analysis.
 
 ### Specifying the prior
 
-To use Bayes' theorem, we first need to specify the prior probability for the hypothesis.  In this case, we didn't have any reason to think that one value was more likely than another, so we can use the *uniform distribution* as our prior, since all values are equally likely under a uniform distribution (see Figure \@ref(fig:uniformDist)).  For this example, we will just enumerate a set of possible values of $p_{heads}$, from 0.01 to 0.99 in steps of 0.01.
-
-```{r uniformDist,fig.cap="Density of a uniform distribution is constant for all values. The blue line denotes the hypothesis of p(heads)=0.5."}
-
-# we need to scale the uniform by the number of possible values. let's use 
-# steps of 0.01
-uniformDf <- 
-  tibble(
-    steps = seq(.01,.99,.01)
-  ) %>%
-  mutate(
-    # create a prior that reflects a uniform distribution across all steps
-    prior = dunif(steps)/length(steps)
-  )
-
-p <- ggplot(uniformDf,aes(steps,prior)) +
-  geom_line() + 
-  xlab('value') + ylab('density') +
-  ylim(0,0.02) + 
-  geom_vline(xintercept = 0.5,color='blue')
-
-print(p)
-```
-
-## Collect some data
-
-We need some data in order to estimate how likely the coin is to come up heads, so that we can test our hypothesis that it is fair. Let's say that we flip the coin 10 times, and it comes up heads 7 times.  
-
-#### from MH: I think this whole example can be made into an interesting story. of course, I am biased by the way I teach this stuff, but for two examples, see the aside on Spinning Coins here: http://probmods.org/chapters/bayesian-data-analysis.html and the early part of this chapter: https://mhtess.github.io/bdappl/chapters/03-simpleModels.html
-
-## Computing the likelihood
-
-We want to compute the likelihood of the data under the hypothesis that the coin is fair (i.e. $P(n=7|p_{heads}=0.5)$), which we can do using the ```dbinom``` function in R:
+To use Bayes' theorem, we first need to specify the prior probability for the hypothesis.  In this case, we don't know the real number but we can assume that it's quite small -- for this example, let's say that one out of every 5 million travelers is expected to have an explosive device.  
 
 ```{r}
-likelihood <- dbinom(7,10,.5)
+prior <- 1/5000000
+```
+
+### Collect some data
+
+The data are composed of the results of the explosive screening test.  Let's say that the security staff runs the bag through their testing apparatus 10 times, and it gives a positive reading on 6 of the 10 tests.
+
+```{r}
+nTests <- 10
+nPositives <- 9
+```
+
+
+### Computing the likelihood
+
+We want to compute the likelihood of the data under the hypothesis that there is an explosive in the bag.  Let's say that we know that the sensitivity of the test is 0.99 -- that is, when a device is present, it will detect it 99% of the time. To determine the likelihood of our data under the hypothesis that a device is present, we can treat each test as a Bernoulli trial with a probability of success of 0.99, which we can model using a binomial distribution.
+
+```{r}
+likelihood <- dbinom(nPositives,nTests,0.99)
 likelihood
-
 ```
 
-Let's plot the observed data against the entire distribution under the hypothesis of $p_{heads}=0.5$ (see Figure \@ref(fig:like1)):
+### Computing the marginal likelihood
 
-```{r like1,fig.cap='Likelihood of each possible values of n under hypothesis of p(heads)=0.5.  Observed value shown blue.'}
+We also need to know the overall likelihood of the data -- that is, finding `r I(nPositives)` positives out of 10 tests. Computing the marginal likelihood is in general often one of the most difficult aspects of Bayesian analysis, but for our example it's simple because we can take advantage of the specific form of Bayes' theorem that we introduced in Section \@ref(bayestheorem):
 
-likeDf <- 
-  tibble(
-    heads = seq(1,10,1),
-    likelihood5 = dbinom(seq(1,10,1),10,.5)
-  )
+$$
+P(B|A) = \frac{P(A|B)*P(B)}{P(A|B)*P(B) + P(A|\neg B)*P(\neg B)}
+$$
 
-ggplot(likeDf,aes(heads,likelihood5)) + 
-  geom_line(color='red') +
-  xlab('number of heads') + ylab('probability') +
-  geom_vline(xintercept = 7,color='blue')
-```
+The marginal likelihood in this case is a weighted average of the likelihood of the data under either presence or absence of the explosive, multiplied by the probability of the explosive being present (i.e. the prior).  In this case, let's say that we know that the specifity of the test is 0.9, such that the likelihood of a positive result when there is no explosive is 0.1.  
 
-We can also look at the likelihoods for other possible hypotheses (see Figure \@ref(fig:like2)) in relation to our data.  Looking at this, it seems that our observed data are relatively more likely under the hypothesis of $p_{heads}=0.7$, somewhat less likely under the hypothesis of $p_{heads}=0.5$, and quite unlikely under the hypothesis of $p_{heads}=0.3$.  One of the fundamental ideas of Bayesian inference is that we will try to find the value of $p_{heads}$ that makes the data most likely, while also taking into account our prior knowledge.
-
-```{r like2,fig.cap='Likelihood of each possible values of n under several different hypotheses (p(heads)=0.5 (red), 0.7 (green), 0.3 (black).  Observed value shown blue.'}
-
-likeDf <- 
-  likeDf %>%
-  mutate(likelihood7 = dbinom(seq(1,10,1),10,.7),
-         likelihood3 = dbinom(seq(1,10,1),10,.3)
-  )
-
-ggplot(likeDf,aes(heads,likelihood5)) + 
-  geom_line(color='red') +
-  xlab('number of heads') + ylab('probability') +
-  geom_vline(xintercept = 7,color='blue') +
-  geom_line(aes(heads,likelihood7),color='green') +
-  geom_line(aes(heads,likelihood3),color='black')
-
-
-```
-
-## Computing the marginal likelihood
-
-We also need to know the overall likelihood of flipping 7 coins on 10 tries; this *marginal likelihood* is primarily important because it normalizes the other values, ensures that the result is a true probability. Using R we can compute this as follows, by dividing the number of ways in which one could choose 7 out of 10 by the total number of possible outcomes across 10 flips (which is $2^{10}$):
-
-#### from MH: This has got me thinking that it may best pedagogically to have a simple example with two or three discrete hypotheses (rather than a continuum of coin weights) and do the math in a table or tree form. At some point, you would need to do a marginal likelihood calculation, and so at this point, you could refer back to that step in the procedure.
+We can compute this in R as follows:
 
 ```{r}
-marginal_likelihood <- choose(10,7)/2**10
-marginal_likelihood
+marginal_likelihood <- dbinom(nPositives,nTests,0.99)*prior + dbinom(nPositives,nTests,.1)*(1-prior)
+sprintf('marginal likelihood = %.3e',marginal_likelihood)
 ```
-
-Note that this is actually exactly the same as $P(n=7|p_{heads}=0.5)$.
 
 ### Computing the posterior
 
-We now have all of the parts that we need to compute the posterior probability of of 7 out of 10 heads, given the uniform prior:
+We now have all of the parts that we need to compute the posterior probability of of an explosive being present, given the observed 6 positive outcomes out of 10 tests.  
 
 ```{r}
-likelihood <- dbinom(7,10,.5)
-prior <- 1/10
 posterior <- (likelihood*prior)/marginal_likelihood
 posterior
+```
+This result shows us that the probability of an explosive in the bag is much higher than the prior, but nowhere near certainty, again highlighting the fact that testing for rare events is almost always liable to high numbers of false positives.
+
+## Estimating posterior distributions
+
+In the previous example there were only two possible outcomes - the explosive is either there or it's not.  However, in other cases we want to use Bayesian estimation to estimate the value of a parameter.  Let's say that we want to know about the effectiveness of a new drug for pain; to test this, we can administer the drug to a group of patients and then ask them whether their pain improved or not after taking the drug.  We can use Bayesian analysis to estimate the proportion of people for whom the drug will be effective using these data.
+
+### Specifying the prior
+
+In this case, we don't have any prior information about the effectiveness of the drug, so we will use a *uniform distribution* as our prior, since all values are equally likely under a uniform distribution.  In order to simplify the example, we will only look at a subset of 99 possible values of effectiveness (from .01 to .99, in steps of .01), so in this case each possible value has a prior probability of 1/99.  
+
+### Collect some data
+
+We need some data in order to estimate the effect of the drug.  Let's say that we administer the drug to 100 individuals, with the results show in the table:
+
+```{r}
+# create a table with results
+nResponders=64
+nTested=100
+drugDf <- tibble(
+  outcome=c('improved','not improved'),
+  number=c(nResponders,nTested-nResponders)
+)
+pander(drugDf)
+```
+
+### Computing the likelihood
+
+We can compute the likelihood of the data under the any particular value of the effectiveness parameter using the `dbinom()` function in R. In Figure \@ref(fig:like2) you can see the likelihood curves over numbers of responders for several different values of $p_{respond}$. Looking at this, it seems that our observed data are relatively more likely under the hypothesis of $p_{respond}=0.7$, somewhat less likely under the hypothesis of $p_{respond}=0.5$, and quite unlikely under the hypothesis of $p_{respond}=0.3$.  One of the fundamental ideas of Bayesian inference is that we will try to find the value of our parameter of interest that makes the data most likely, while also taking into account our prior knowledge.
+
+```{r like2,echo=FALSE,fig.cap='Likelihood of each possible number of responders under several different hypotheses (p(respond)=0.5 (red), 0.7 (green), 0.3 (black).  Observed value shown blue.',fig.width=4,fig.height=4,out.height='50%'}
+
+likeDf <-
+  tibble(resp = seq(1,99,1)) %>%
+  mutate(
+    presp=resp/100,
+    likelihood5 = dbinom(resp,100,.5),
+    likelihood7 = dbinom(resp,100,.7),
+    likelihood3 = dbinom(resp,100,.3)
+)
+
+ggplot(likeDf,aes(resp,likelihood5)) + 
+  geom_line(color='red') +
+  xlab('number of responders') + ylab('likelihood') +
+  geom_vline(xintercept = drugDf$number[1],color='blue') +
+  geom_line(aes(resp,likelihood7),color='green') +
+  geom_line(aes(resp,likelihood3),color='black')
+
 
 ```
 
-This tells us that the hypothesis of a fair coin is fairly unlikely given our observed data; in fact, it's slightly lower than it was before we saw the data (i.e. the prior).
+### Computing the marginal likelihood
 
-We can also look at the entire distribution of posterior values, which tells us how likely each possible value of $p_{heads}$ is given the data (see Figure \@ref(fig:posteriorDist)).
+We also need to know the overall likelihood of the data, which is used as a normalizing constant to ensure that the posterior values are true probabilities. In this case, our use of a set of discrete possible parameter values makes it easy to compute the marginal likelihood, because we can just compute each one and add them up.
 
-```{r posteriorDist,fig.cap="Posterior distribution plotted in blue against uniform prior distribution (dotted black line)."}
+```{r}
+# compute marginal likelihood
+likeDf <- likeDf %>%
+  mutate(uniform_prior = array(1/n()))
 
-# compute likelihoods for the observed data under all values of p(heads).  here we use the quantized values from .01 to .99 in steps of 0.01
+# multiply each likelihood by prior and add them up
+marginal_likelihood=sum(dbinom(nResponders,100,likeDf$presp)*likeDf$uniform_prior)
+sprintf('marginal likelihood = %0.4f',marginal_likelihood)
+```
+
+### Computing the posterior
+
+We now have all of the parts that we need to compute the posterior probability distribution across all possible values of $p_{respond}$, as shown in Figure \@ref(fig:posteriorDist).
+
+```{r}
+# Create data for use in figure
 
 bayesDf <-
   tibble(
     steps = seq(0.01,0.99,0.01)
   ) %>%
   mutate(
-    likelihoods = dbinom(7,10,steps),
+    likelihoods = dbinom(drugDf$number[1],100,steps),
     priors = dunif(steps)/length(steps),
     posteriors = (likelihoods*priors)/marginal_likelihood
  )
 
+```
+
+```{r posteriorDist,echo=FALSE,fig.cap="Posterior probability distribution plotted in blue against uniform prior distribution (dotted black line).",fig.width=4,fig.height=4,out.height='50%'}
+
+# compute likelihoods for the observed data under all values of p(heads).  here we use the quantized values from .01 to .99 in steps of 0.01
+
+
 ggplot(bayesDf,aes(steps,posteriors)) +
   geom_line(color='blue') +
   geom_line(aes(steps,priors),color='black',linetype='dotted') +
-  xlab('p(heads)') + ylab('Probability')
+  xlab('p(respond)') + ylab('posterior probability')
 
 ```
 
 ### Maximum a posteriori (MAP) estimation
 
-Given our data we might also like to obtain an estimate of p(heads) for our coin.  One way to do this is to find the value of p(heads) for which the posterior probability is the highest, which we refer to as the *maximum a posteriori* (MAP) estimate.  We can find this from the data in \@ref(fig:posteriorDist):
+Given our data we would like to obtain an estimate of $p_{respond}$ for our sample.  One way to do this is to find the value of $p_{respond}$ for which the posterior probability is the highest, which we refer to as the *maximum a posteriori* (MAP) estimate.  We can find this from the data in \@ref(fig:posteriorDist):
 
 ```{r}
+# compute MAP estimate
 
 MAP_estimate <- bayesDf$steps[which.max(bayesDf$posteriors)]
-MAP_estimate
+sprintf('MAP estimate = %0.4f',MAP_estimate)
 ```
+Note that this is simply the proportion of responders from our sample -- this occurs because the prior was uniform and thus didn't bias our response.
 
 ### Credible intervals
 
 Often we would like to know not just a single estimate for the posterior, but an interval in which we are confident that the posterior falls.  We previously discussed the concept of confidence intervals in the context of frequentist inference, and you may remember that the interpretation of confidence intervals was particularly convoluted.  What we really want is an interval in which we are confident that the true parameter falls, and Bayesian statistics can give us such an interval, which we call a *credible interval*.
 
-In some cases the credible interval can be computed *numerically* based on a known distribution, but it's more common to generate a credible interval by sampling from the posterior distribution and then compute quantiles of the samples. This is particularly useful when we don't have an easy way to express the posterior distribution numerically, which is often the case in real Bayesian data analysis (as we will see later).  
+In some cases the credible interval can be computed *numerically* based on a known distribution, but it's more common to generate a credible interval by sampling from the posterior distribution and then compute quantiles of the samples. This is particularly useful when we don't have an easy way to express the posterior distribution numerically, which is often the case in real Bayesian data analysis.  
 
-We will generate samples from our posterior distribution using a simple algorithm known as [*rejection sampling*](https://am207.github.io/2017/wiki/rejectionsampling.html).  The idea is that we choose a random value of x (in this case $p_{heads}$) and a random value of y (in this case, the posterior probability of $p_{heads}$) each from a uniform distribution, and we accept the sample only if $y < f(x)$ - in this case, if the randomly selected value of y is less than the actual posterior probability of y.  Figure \@ref(fig:rejectionSampling) shows an example of a histogram of samples using rejection sampling, along with the 95% credible intervals obtained using this method.  
+We will generate samples from our posterior distribution using a simple algorithm known as [*rejection sampling*](https://am207.github.io/2017/wiki/rejectionsampling.html).  The idea is that we choose a random value of x (in this case $p_{respond}$) and a random value of y (in this case, the posterior probability of $p_{respond}$) each from a uniform distribution, and we accept the sample only if $y < f(x)$ - in this case, if the randomly selected value of y is less than the actual posterior probability of y.  Figure \@ref(fig:rejectionSampling) shows an example of a histogram of samples using rejection sampling, along with the 95% credible intervals obtained using this method.  
 
-```{r rejectionSampling,fig.cap="Rejection sampling example.The black line shows the density of all possible values of p(heads); the blue lines show the 2.5th and 97.5th percentiles of the distribution, which represent the 95% credible interval for the estimate of p(heads)."}
+```{r}
+# Compute credible intervals for example
 
 nsamples <- 100000
 
@@ -228,14 +252,18 @@ x <- runif(nsamples)
 y <- runif(nsamples)
 
 # create f(x)
-fx <- dbinom(7,10,x)
+fx <- dbinom(drugDf$number[1],100,x)
 
 # accept samples where y < f(x)
 accept <- which(y<fx)
 accepted_samples <- x[accept]
 
 credible_interval <- quantile(accepted_samples,c(0.025,0.975))
-credible_interval
+pander(credible_interval)
+
+```
+
+```{r rejectionSampling,echo=FALSE,fig.cap="Rejection sampling example.The black line shows the density of all possible values of p(respond); the blue lines show the 2.5th and 97.5th percentiles of the distribution, which represent the 95% credible interval for the estimate of p(heads).",fig.width=4,fig.height=4,out.height='50%'}
 
 # plot histogram
 
@@ -249,97 +277,123 @@ for (i in 1:2) {
 print(p)
 ```
 
-The interpretation of this credible interval is much closer to what we had hoped we could get from a confidence interval (but could not): It tells us that there is a 95% probability that the value of $p_{heads}$ falls between these two values.
+The interpretation of this credible interval is much closer to what we had hoped we could get from a confidence interval (but could not): It tells us that there is a 95% probability that the value of $p_{respond}$ falls between these two values.  Importantly, it shows that we have high confidence that $p_{respond} > 0.0$, meaning that the drug seems to have a positive effect.
 
 ### Effects of different priors
 
-In the previous example we used a *flat prior*, meaning that we didn't have any reason to believe that any particular value of $p_{heads}$ was more or less likely.  However, let's say that we had instead started with some previous data: We had flipped 10 coins, and 5 of them came up heads.  This would have lead us to start with a prior belief that the coin was fair.  We can do the same computation as above, but using the information about our previous coin flips as the prior (see Figure \@ref(fig:posteriorDistPrior)).  
+In the previous example we used a *flat prior*, meaning that we didn't have any reason to believe that any particular value of $p_{respond}$ was more or less likely.  However, let's say that we had instead started with some previous data: In a previous study, researchers had tested 20 people and found that 10 of them had responded positively.  This would have lead us to start with a prior belief that the treatment has an effect in 50% of people.  We can do the same computation as above, but using the information about our previous study as the prior (see Figure \@ref(fig:posteriorDistPrior)).  
 
+```{r}
+# compute likelihoods for data under all values of p(heads) using a flat or empirical prior.  here we use the quantized values from .01 to .99 in steps of 0.01
 
-```{r posteriorDistPrior,fig.cap="Effects of priors on the posterior distribution.  The original posterior distribution based on a flat prior is plotted in blue. The prior based on the observation of 5 heads out of 10 flips is plotted in the dotted black line, and the posterior using this prior is plotted in red."}
-
-# compute likelihoods for data under all values of p(heads).  here we use the quantized values from .01 to .99 in steps of 0.01
 
 df <- 
   tibble(
     steps=seq(0.01,0.99,0.01)
   ) %>% 
   mutate(
-    likelihoods = dbinom(7,10,steps),
+    likelihoods = dbinom(drugDf$number[1],100,steps),
     priors_flat = dunif(steps)/sum(dunif(steps)),
-    priors_fair = dbinom(5,10,steps)/sum(dbinom(5,10,steps)),
-    posteriors_flat = (likelihoods*priors_flat)/marginal_likelihood,
-    posteriors_fair=(likelihoods*priors_fair)/marginal_likelihood
+    priors_empirical = dbinom(10,20,steps)/sum(dbinom(10,20,steps)),
 )
+marginal_likelihood_flat=sum(dbinom(nResponders,100,df$steps)*df$priors_flat)
+marginal_likelihood_empirical=sum(dbinom(nResponders,100,df$steps)*df$priors_empirical)
+df <- df %>%
+  mutate(
+    posteriors_flat = (likelihoods*priors_flat)/marginal_likelihood_flat,
+    posteriors_empirical=(likelihoods*priors_empirical)/marginal_likelihood_empirical
+  )
+
+
+```
+
+```{r posteriorDistPrior,echo=FALSE,fig.cap="Effects of priors on the posterior distribution.  The original posterior distribution based on a flat prior is plotted in blue. The prior based on the observation of 10 responders out of 20 people is plotted in the dotted black line, and the posterior using this prior is plotted in red.",fig.width=4,fig.height=4,out.height='50%'}
+
 
 ggplot(df,aes(steps,posteriors_flat)) + 
   geom_line(color='blue') + 
   xlab('p(heads)') + ylab('Posterior probability') +
-  geom_line(aes(steps,posteriors_fair),color='red') +
-  geom_line(aes(steps,priors_fair),linetype='dotted')
+  geom_line(aes(steps,posteriors_empirical),color='red') +
+  geom_line(aes(steps,priors_empirical),linetype='dotted')
 
 ```
 
 Note that the likelihood and marginal likelihood did not change - only the prior changed.  The effect of the change in prior to was to pull the posterior closer to the mass of the new prior, which is centered at 0.5.  
 
-Now let's see what happens if we come to the analysis with an even stronger prior belief.  Let's say that instead of having previously observed 5 heads on 10 flips, we had flipped a coin 100 times and observed 50 flips.  This should in principle give us a much stronger prior, and as we see in Figure \@ref(fig:strongPrior), that's what happens: The prior is much more concentrated around 0.5, and the posterior is also much closer to the prior.  The general idea is that Bayesian inference combines the information from the prior and the likelihood, weighting the relative strength of each.
+Now let's see what happens if we come to the analysis with an even stronger prior belief.  Let's say that instead of having previously observed 10 responders out of 20 people, the prior study had instead tested 500 people and found 250 responders.  This should in principle give us a much stronger prior, and as we see in Figure \@ref(fig:strongPrior), that's what happens: The prior is much more concentrated around 0.5, and the posterior is also much closer to the prior.  The general idea is that Bayesian inference combines the information from the prior and the likelihood, weighting the relative strength of each.
 
-
-```{r strongPrior,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 5 heads out of 10 flips.  The dotted black line shows the prior based on 50 heasd out of 100 flips, and the red line shows the posterior based on that prior."}
-
-# compute likelihoods for data under all values of p(heads).  here we use the quantized values from .01 to .99 in steps of 0.01
+```{r}
+# compute likelihoods for data under all values of p(heads) using strong prior.
 
 df <-
   df %>%
   mutate(
-    priors_flips_strong = dbinom(50,100,steps)/sum(dbinom(50,100,steps)),
-    posteriors_strongprior = (likelihoods*priors_flips_strong)/marginal_likelihood
+    priors_strong = dbinom(250,500,steps)/sum(dbinom(250,500,steps)),
   )
 
+marginal_likelihood_strong=sum(dbinom(nResponders,100,df$steps)*df$priors_strong)
+
+df <-
+  df %>%
+  mutate(
+    posteriors_strongprior = (likelihoods*priors_strong)/marginal_likelihood_strong
+  )
+
+```
 
 
-ggplot(df,aes(steps,posteriors_fair)) + 
+```{r strongPrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 50 heads out of 100 people.  The dotted black line shows the prior based on 550 heasd out of 500 flips, and the red line shows the posterior based on that prior.",fig.width=4,fig.height=4,out.height='50%'}
+
+ggplot(df,aes(steps,posteriors_empirical)) + 
   geom_line(color='blue') + 
   xlab('p(heads)') + ylab('Posterior probability') +
   geom_line(aes(steps,posteriors_strongprior),color='red') +
-  geom_line(aes(steps,priors_flips_strong),linetype='dotted')
+  geom_line(aes(steps,priors_strong),linetype='dotted')
 
 ```
 
 This example also highlights the sequential nature of Bayesian analysis -- the posterior from one analysis can become the prior for the next analysis.
 
-Finally, it is important to realize that if the priors are strong enough, they can completely overwhelm the data.  Let's say that you have an absolute prior that $p_{heads}$ is between 0.2 and 0.3, such that you set the prior likelihood of all other values to zero.  What happens if we then compute the posterior?
+Finally, it is important to realize that if the priors are strong enough, they can completely overwhelm the data.  Let's say that you have an absolute prior that $p_{respond}$ is 0.8 or greater, such that you set the prior likelihood of all other values to zero.  What happens if we then compute the posterior?
 
-```{r absolutePrior,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 5 heads out of 10 flips.  The dotted black line shows the prior based on 50 heasd out of 100 flips, and the red line shows the posterior based on that prior."}
-
-# compute likelihoods for data under all values of p(heads).  here we use the quantized values from .01 to .99 in steps of 0.01
-
+```{r}
+# compute likelihoods for data under all values of p(respond) using absolute prior. 
 df <-
   df %>%
   mutate(
     priors_absolute = array(data=0,dim=length(steps))
   )
-df$priors_absolute[which(df$steps<=0.3 & df$steps>=0.2)] <- 1
+df$priors_absolute[which(df$steps>=0.8)] <- 1
 df$priors_absolute <- df$priors_absolute/sum(df$priors_absolute)
+marginal_likelihood_absolute=sum(dbinom(nResponders,100,df$steps)*df$priors_absolute)
+
 df <-
   df %>% 
   mutate(
-    posteriors_absolute=(likelihoods*priors_absolute)/marginal_likelihood
+    posteriors_absolute=(likelihoods*priors_absolute)/marginal_likelihood_absolute
   )
+
+```
+
+```{r absolutePrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 50 responders out of 100 people, using an absolute prior which states that p(respond) is 0.8 or greater.  The prior is shown in the dotted red line. ",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(df,aes(steps,posteriors_absolute)) + 
   geom_line(color='blue') + 
-  xlab('p(heads)') + ylab('Posterior probability') +
-  ylim(0,max(df$priors_absolute/10)*1.1) + 
-  geom_line(aes(steps,priors_absolute/10),linetype='dotted')
+  xlab('p(heads)') + 
+  ylab('Posterior probability') +
+  ylim(0,max(df$posteriors_absolute)*1.1) + 
+  geom_line(aes(steps,
+            priors_absolute*max(df$posteriors_absolute)*20),
+            linetype='dotted',
+            size=1)
 
 ```
 
 In Figure \@ref(fig:absolutePrior) we see that there is zero density in the posterior for any of the values where the prior was set to zero - the data are overwhelmed by the absolute prior.
 
-### Choosing a prior
+## Choosing a prior
 
-The impact of priors on the resulting inferences are the most controversial aspect of Bayesian statistics.  There are various ways to choose one's priors, which (as we saw above) can impact the resulting inferences.  *Uninformative priors* attempt to bias the resulting posterior as little as possible, as we saw in the example of the uniform prior above.  It's also common to use *weakly informative priors*, which bias the result only very slightly. For example, if we had used a binomial distribution based on a one heads out of two coin flips, this would have been centered around 0.5 but fairly flat, biasing the posterior only slightly.  
+The impact of priors on the resulting inferences are the most controversial aspect of Bayesian statistics.  There are various ways to choose one's priors, which (as we saw above) can impact the resulting inferences.  *Uninformative priors* attempt to bias the resulting posterior as little as possible, as we saw in the example of the uniform prior above.  It's also common to use *weakly informative priors* (or *default priors*), which bias the result only very slightly. For example, if we had used a binomial distribution based on a one heads out of two coin flips, this would have been centered around 0.5 but fairly flat, biasing the posterior only slightly.  
 
 It is also possible to use priors based on the scientific literature or pre-existing data, which we would call *empirical priors*.  In general, however, we will stick to the use of uninformative/weakly informative priors, since they raise the least concern about biasing our results.  In general it is a good idea to try any Bayesian analysis using multiple reasonable priors, and make sure that the results don't change in an important way based on the prior.
 
@@ -358,24 +412,29 @@ $$
 for two hypotheses $H_1$ and $H_2$.  In the case of our two senators, we know how to compute the likelihood of the data under each hypothesis using the binomial distribution.  We will put Senator Smith in the numerator and Senator Jones in the denominator, so that a value greater than one will reflect greater evidence for Senator Smith, and a value less than one will reflect greater evidence for Senator Jones.
 
 ```{r}
+# compute Bayes factor for Smith vs. Jones
+
 bf <- dbinom(490,1000,0.4)/dbinom(490,1000,0.6)
-bf
+sprintf('Bayes factor = %0.2f',bf)
 ```
 
 This number provides a measure of the evidence that the data provides regarding the two hypotheses - in this case, it tells us the data support Senator Smith more than 3000 times more strongly than the support Senator Jones.
 
 ### Bayes factors for statistical hypotheses
 
-In the previous example we had specific predictions from each senator, whose likelihood we could quantify using the binomial distribution. However, in real data analysis we generally must deal with uncertainty about our parameters, which complicates the Bayes factor.  However, in exchange the gain the ability to quantify the relative amount of evidence in favor of the null versus alternative hypotheses.  
+In the previous example we had specific predictions from each senator, whose likelihood we could quantify using the binomial distribution. However, in real data analysis we generally must deal with uncertainty about our parameters, which complicates the Bayes factor.  However, in exchange we gain the ability to quantify the relative amount of evidence in favor of the null versus alternative hypotheses.  
 
 Let's say that we are a medical researcher performing a clinical trial for the treatment of diabetes, and we wish to know whether a particular drug reduces blood glucose compared to placebo. We recruit a set of volunteers and randomly assign them to either drug or placebo group, and we measure the change in hemoglobin A1C (a marker for blood glucose levels) in each group over the period in which the drug or placebo was administered.  What we want to know is: Is there a difference between the drug and placebo?
 
 First, let's generate some data and anlayze them using null hypothesis testing (see Figure \@ref(fig:bayesTesting)).
 
-```{r bayesTesting,fig.cap="Box plots showing data for drug and placebo groups."}
+```{r}
+# create simulated data for drug trial example
+
 set.seed(123456)
 nsubs <- 40
 effect_size <- 0.1
+
 # randomize indiviuals to drug (1) or placebo (0)
 drugDf <- 
   tibble(
@@ -385,6 +444,10 @@ drugDf <-
     hbchange=rnorm(nsubs) - group*effect_size
   )
 
+```
+
+```{r bayesTesting,echo=FALSE,fig.cap="Box plots showing data for drug and placebo groups.",fig.width=4,fig.height=4,out.height='50%'}
+
 ggplot(drugDf,aes(factor(group),hbchange)) +
   geom_boxplot() + 
   annotate('segment',x=0.5,xend=2.5,y=0,yend=0,linetype='dotted')
@@ -393,13 +456,15 @@ ggplot(drugDf,aes(factor(group),hbchange)) +
 Let's perform an independent-samples t-test, which shows that there is a significant difference between the groups:
 
 ```{r}
+# compute t-test for drug example
 drugTT <- t.test(hbchange~group,data=drugDf,alternative='greater')
-drugTT
+print(drugTT)
 ```
 
 This test tells us that there is a significant difference between the groups, but it doesn't quantify how strongly the evidence supports the null versus alternative hypotheses.  To measure that, we can compute a Bayes factor using the BayesFactor package in R:
 
 ```{r}
+# compute Bayes factor for drug data
 bf_drug <- ttestBF(formula=hbchange~group,data=drugDf,
                   nullInterval = c(0,Inf))
 bf_drug
@@ -416,7 +481,7 @@ The Bayes factor here tells us that the alternative hypothesis (i.e. that the di
 
 Based on this, even though the statisical result is significant, the amount of evidence in favor of the alternative vs. the null hypothesis is weak enough that it's not worth even mentioning.  
 
-Because the Bayes factor is comparing evidence for two hypotheses, it also allows us to assess whether there is evidence in favor of the null hypothesis, which we couldn't do with standard null hypothesis testing (because it already assumes that the null is true!).  This can be very useful to determine whether a non-significant result really provides strong evidence that there is no effect, or instead just reflects weak evidence overall.
+Because the Bayes factor is comparing evidence for two hypotheses, it also allows us to assess whether there is evidence in favor of the null hypothesis, which we couldn't do with standard null hypothesis testing (because it starts with the assumption that the null is true).  This can be very useful to determine whether a non-significant result really provides strong evidence that there is no effect, or instead just reflects weak evidence overall.
 
 ## Suggested readings
 
