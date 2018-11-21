@@ -355,6 +355,7 @@ ggplot(gasPriceData,aes(year,gasPrice)) +
 
 ## Suggested readings
 
+- [Fundamentals of data visualization](https://serialmentor.com/dataviz/)
 - *Visual Explanations*, by Edward Tufte
 - *Visualizing Data*, by William S. Cleveland
 - *Graph Design for the Eye and Mind*, by Stephen M. Kosslyn
