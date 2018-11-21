@@ -4,7 +4,9 @@ clean:
 	rm -rf _bookdown_files bookdown-demo.*
 
 render-gitbook:
+	cp _gitbook_99-References.Rmd 99-References.Rmd
 	echo "bookdown::render_book('index.Rmd', 'bookdown::gitbook')" | R --no-save
+	rm 99-References.Rmd
 
 render-pdf:
 	echo "rendering pdf - TBD"
