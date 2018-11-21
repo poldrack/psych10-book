@@ -8,7 +8,9 @@ render-gitbook:
 
 render-pdf:
 	echo "rendering pdf - TBD"
+	cp _latex_99-References.Rmd 99-References.Rmd
 	echo "bookdown::render_book('index.Rmd', 'bookdown::pdf_book')" | R --no-save
+	rm 99-References.Rmd
 
 pkgsetup:
 	cd setup && python get_packages.py 

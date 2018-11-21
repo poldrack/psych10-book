@@ -1,0 +1,9 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# References
+
+`r if (knitr::is_html_output()) '# References {-}'`
