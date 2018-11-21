@@ -3,7 +3,7 @@
 
 Copyright 2018 Russell A. Poldrack
 
-A live Gitbook version of the book is available at http://web.stanford.edu/group/poldracklab/statsthinking21/
+A live Gitbook version of the book is available at http://thinkstats.org/
 
 A paper version of the book is currently under discussion.
 
