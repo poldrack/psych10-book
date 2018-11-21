@@ -31,7 +31,7 @@ The first year that I taught the class, I used Andy Field's amazing graphic nove
 
 ## You're not a statistician - why should we listen to you?
 
-I am trained as a psychologist and neuroscientist, not a statistician.  However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics.  Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches.  There are almost certainly some things in this book that would annoy a real statistician (for example, I'm sure that there are places where I should have put a $\hat{hat}$ on a varible but did not).  
+I am trained as a psychologist and neuroscientist, not a statistician.  However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics.  Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches.  There are almost certainly some things in this book that would annoy a real statistician (for example, I'm sure that there are places where I should have put a $\hat{hat}$ on a variable but did not).  
 
 Having said that, I welcome input from readers with greater statistical expertise than mine.  
 
