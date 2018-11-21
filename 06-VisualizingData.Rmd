@@ -42,20 +42,38 @@ The investigation found that many aspects of the NASA decision making process we
 The visualization expert Edward Tufte has argued that with a proper presentation of all of the data, the engineers could have been much more persuasive.  In particular, they could have show a figure like that shown in Figure \@ref(fig:challengerTemps), which highlights two important facts. First, it shows that the amount of O-ring damage (defined by the amount of erosion and soot found outside the rings after the solid rocket boosters were retrieved from the ocean in previous flights) was closely related to the temperature at takeoff.  Second, it shows that the range of forecasted temperatures for the morning of January 28 (shown in the shaded red area) was well outside of the range of all previous launches.  While we can't know for sure, it seems at least plausible that this could have been more persuasive. 
 
 ```{r challengerTemps, echo=FALSE,fig.cap="A replotting of Tufte's damage index data. The blue line shows the trend in the data, and the red patch shows the projected temperatures for the morning of the launch.",fig.width=8,fig.height=4,out.height='50%'}
-oringDf=read.table('data/orings.csv',sep=',',header=TRUE)
+oringDf <- read.table("data/orings.csv", sep = ",", header = TRUE)
 
-ggplot(oringDf,aes(x=Temperature,y=DamageIndex)) +
-  geom_point() + xlim(25,85) + ylab('Damage Index') +
-  xlab('Temperature at time of launch') +
-  geom_smooth(method='loess',se=FALSE,span=1) + ylim(0,12) +
-  geom_vline(xintercept=27.5,size=7,alpha=0.3,color='red')
+oringDf %>%
+  ggplot(aes(x = Temperature, y = DamageIndex)) +
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE, span = 1) + ylim(0, 12) +
+  geom_vline(xintercept = 27.5, size = 7, alpha = 0.3, color = "red") +
+  labs(
+    y = "Damage Index",
+    x = "Temperature at time of launch"
+  ) +
+  scale_x_continuous(breaks = seq.int(25, 85, 5)) +
+  annotate(
+    "text",
+    x = 32,
+    y = 11,
+    label = "Forcasted temperature",
+    size = 5
+  )
 ```
 
 ## Anatomy of a plot
 
-The goal of plotting data is to present a summary of a dataset in a two-dimensional (or occasionally three-dimensional) presentation.  We refer to the dimensions as *axes* -- the horizontal axis is called the *X-axis* and the vertical axis is called the *Y-axis*.  We can arrange the data long those axes in a way that highlights their values (either continuous or categorical).
+The goal of plotting data is to present a summary of a dataset in a two-dimensional (or occasionally three-dimensional) presentation.  We refer to the dimensions as *axes* -- the horizontal axis is called the *X-axis* and the vertical axis is called the *Y-axis*.  We can arrange the data along the axes in a way that highlights the data values. These values may be either continuous or categorical.
 
-There are many different types of plots that we can use, which have different advantages and disadvantages.  Let's say that we are interested in characterizing the difference in height between men and women in the NHANES dataset. Figure \@ref(fig:plotHeight) shows four different ways to plot these data. The bar graph in panel A shows the difference in means, but does't show us how much spread there is in the data around these means -- and as we will see later, knowing this is essential to determine whether we think the difference between the groups is large enough to be important.  The second plot shows the bars with all of the data points overlaid - this  makes it a bit clearer that the distributions of height for men and women are overlapping, but it's still hard to see due to the large number of data points.  In general we prefer using a plotting technique that provides a clearely view of the distribution of the data points.  In panel C we see one example, known as a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  Another option is the *box plot* shown in panel D, which shows the median (central line), a measure of variability (the width of the box, which is based on a measure called the interquartile range), and any outliers (noted by the points at the ends of the lines). These are both effective ways to show data that provide a good feel for the distribution of the data.
+There are many different types of plots that we can use, which have different advantages and disadvantages.  Let's say that we are interested in characterizing the difference in height between men and women in the NHANES dataset. Figure \@ref(fig:plotHeight) shows four different ways to plot these data. 
+A) The bar graph in panel A shows the difference in means, but doesn't show us how much spread there is in the data around these means -- and as we will see later, knowing this is essential to determine whether we think the difference between the groups is large enough to be important.  
+B) The second plot shows the bars with all of the data points overlaid - this  makes it a bit clearer that the distributions of height for men and women are overlapping, but it's still hard to see due to the large number of data points.  
+
+In general we prefer using a plotting technique that provides a clearly view of the distribution of the data points.  
+C) In panel C, we see one example of clearly showing the data points, known as a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  
+D) Another option is the *box plot* shown in panel D, which shows the median (central line), a measure of variability (the width of the box, which is based on a measure called the interquartile range), and any outliers (noted by the points at the ends of the lines). These are both effective ways to show data that provide a good feel for the distribution of the data.
 
 ```{r plotHeight,echo=FALSE,fig.cap="Four different ways of plotting the difference in height between men and women in the NHANES dataset.  Panel A plots the means of the two groups, which gives no way to assess the relative overlap of the two distributions.  Panel B shows the same bars, but also overlays the data points, jittering them so that we can see their overall distribution.  Panel C shows a violin plot, which shows the distribution of the datasets for each group.  PAnel D shows a box plot, which highlights the spread of the distribution along with any outliers (which are shown as individual points)."}
 
@@ -98,46 +116,52 @@ There are many different tools for plotting data in R, but we will focus on the 
 Let's say that we want to create a *scatterplot* that plots height against weight for each adult in a sample of 150 people from the NHANES dataset, with different markers used to denote men and women.  First we create our sample:
 
 ```{r}
-NHANES_sample <- NHANES_adult %>%
-  drop_na(Weight,Gender) %>%
-  sample_n(150)
-
+NHANES_sample <- 
+  NHANES_adult %>%
+  drop_na(Weight, Gender) %>% #remove rows (individuals) with missing values for Weight and Gender
+  sample_n(150) #take a random sample of n = 150 rows (individuals)
 ```
 
 Now let's set up the `ggplot()` command. This requires us to specify two things.  First, we need to tell it which data frame to obtain the data from (in this case, `NHANES_sample`).  Second, we need to tell it which variables from the data frame to use, which we do via the *aesthetics* function `aes()`.  In this case, we want to plot height on the X axis and weight on the Y axis. The result is shown in Figure \@ref(fig:emptyPlot): The command generates a set of plot axes but doesn't actually show any data.
 
 ```{r emptyPlot,fig.cap='Empty plot frame generated by ggplot()',fig.width=4,fig.height=4,out.height='50%'}
-
-ggplot(NHANES_sample,aes(x=Height,y=Weight))
+NHANES_sample %>%
+  ggplot(aes(x = Height, y = Weight))
 ```
 
-We next need to add a presentation of the data. The way that we tell `ggplot` what to show is by adding various commands to the main `ggplot()` command.  In particular, we generally need to add a *geometry*, which specifies how the data will be arranged in the plot.  For example, to show each data point we can use the `geom_point()` geometry, as shown in Figure \@ref(fig:simpleGeom).
+We next need to add a presentation of the data. The way that we tell `ggplot` what to show is by adding various commands to the main `ggplot()` command.  In particular, we generally need to add a *geometry* or "geom", which specifies how the data will be arranged in the plot.  For example, to show each data point we can use the `geom_point()` geometry, as shown in Figure \@ref(fig:simpleGeom). Each data point represents an individual row in our `NHANES_sample` dataset with each row corresponding to an individual person in this dataset. 
 
 ```{r simpleGeom,fig.cap='Simple scatter plot using geom_point()',fig.width=4,fig.height=4,out.height='50%'}
-ggplot(NHANES_sample,aes(x=Height,y=Weight)) +
+NHANES_sample %>% 
+  ggplot(aes(x = Height, y = Weight)) +
   geom_point()
-
 ```
 
-Finally, we want to plot the points in separate colors depending on whether their gender.  We do this by simply adding a *color* keyword to the aesthetics, which tells the `geom_point()` function to separately color points by Gender.  This is shown in Figure \@ref(fig:colorPoints).  This figure also shows an example of how we can include multiple geometry layers in a single figure -- in this case, we use `geom_smooth()` to plot the lines that best describe relation between height and weight, separately by gender.  The shading around the lines reflects our confidence in the estimate at that point.
+Finally, we want to plot the points in separate colors depending on their gender. We do this by simply adding a *color* keyword to the aesthetics, which tells the `geom_point()` function to separately color points by Gender.  This is shown in Figure \@ref(fig:colorPoints).  This figure also shows an example of how we can include multiple geometry layers in a single figure -- in this case, we use `geom_smooth()` to plot the lines that best describe the relation between height and weight, separately by gender.  The shading around the lines reflects our confidence in the estimate at that point.
 
 ```{r colorPoints,fig.cap='Scatterplot with points separately colored by Gender.',fig.width=4,fig.height=4,out.height='50%'}
-ggplot(NHANES_sample,aes(x=Height,y=Weight,color=Gender)) +
-  geom_point() + 
-  geom_smooth(method='lm')
-
+NHANES_sample %>% 
+  ggplot(aes(x = Height, y = Weight, color = Gender)) +
+  geom_point() +
+  geom_smooth(method = "lm")
 ```
 
 
 ## Principles of good visualization
 
-Many books have been written on effective visualization of data.  There are some principles that most of these authors agree on, while others are more contentious.  Here we summarize some of the major principles; if you want to learn more, then some good resources are listed in the *Suggested Readings* section at the end of this chapter.
+Many books have been written on effective visualization of data.  There are some principles that most of these authors agree on, while others are more contentious. Here we summarize some of the major principles; if you want to learn more, then some good resources are listed in the *Suggested Readings* section at the end of this chapter.
 
 Here is our distillation of some important principles for data visualization.
 
 ### Show the data and make them stand out
 
-Let's say that I had performed a study that examined the relationship between dental health and time spent flossing, and I would like to visualize my data. Figure \@ref(fig:dentalFigs) shows four possible presentations of these data.  In panel A, we don't actually show the data, just a line expressing the relationship between the data.  This is clearly not optimal, because we can't actually see what the underlying data look like.  Panels B-D show three possible outcomes from plotting the actual data, where each plot shows a different way that the data could have been generated. If we saw the plot in Panel B, we would probably be suspicious -- rarely would real data follow such a precise pattern.  The data in Panel C, on the other hand, look like real data -- they show a general trend, but they are messy, as data in the world usually are.  The data in Panel D show us that the apparent relationship between the two variables is solely caused by one individual, which we would refer to as an *outlier* because they fall so far outside of the pattern in the rest of the group.  It should be clear that we probably don't want to conclude very much from an effect that is driven by one data point.  This figure highlights why it is *always* important to look at the raw data before putting too much faith in any summary of the data.
+Let's say that I had performed a study that examined the relationship between dental health and time spent flossing, and I would like to visualize my data. Figure \@ref(fig:dentalFigs) shows four possible presentations of these data.  
+A) In panel A, we don't actually show the data, just a line expressing the relationship between the data.  This is clearly not optimal, because we can't actually see what the underlying data look like.  
+
+Panels B-D show three possible outcomes from plotting the actual data, where each plot shows a different way that the data could have been generated. 
+B) If we saw the plot in Panel B, we would probably be suspicious -- rarely would real data follow such a precise pattern.  
+C) The data in Panel C, on the other hand, look like real data -- they show a general trend, but they are messy, as data in the world usually are.  
+D) The data in Panel D show us that the apparent relationship between the two variables is solely caused by one individual, who we would refer to as an *outlier* because they fall so far outside of the pattern of the rest of the group. It should be clear that we probably don't want to conclude very much from an effect that is driven by one data point.  This figure highlights why it is *always* important to look at the raw data before putting too much faith in any summary of the data.
 
 ```{r dentalFigs,echo=FALSE,fig.cap="Four different possible presentations of data for the dental health example. Each point in the scatter plot represents one data point in the dataset, and the line in each plot represents the linear trend in the data."}
 
@@ -181,7 +205,7 @@ plot_grid(p1,p2,p3,p4,nrow=2,labels='AUTO')
 
 ## Maximize the data/ink ratio
 
-Tufte has proposed an idea called the data/ink ratio:
+Edward Tufte has proposed an idea called the data/ink ratio:
 
 $$
 data/ink\ ratio = \frac{amount\, of\, ink\, used\, on\, data}{total\, amount\, of\, ink}
@@ -241,11 +265,11 @@ p2 = ggplot(crimeData,aes(Year,ViolentCrimePerCapita)) +
 plot_grid(p1,p2,labels='AUTO')
 ```
 
-One of the major controversies in statistical data visualization is how to choose the Y axis, and in particular whether it should always include zero.  In his famous book "How to lie with statsitics", Darrell Huff argued strongly that one should always include the zero point in the Y axis.  On the other hand, Edward Tufte has argued against this:
+One of the major controversies in statistical data visualization is how to choose the Y axis, and in particular whether it should always include zero.  In his famous book "How to lie with statistics", Darrell Huff argued strongly that one should always include the zero point in the Y axis.  On the other hand, Edward Tufte has argued against this:
 
 > “In general, in a time-series, use a baseline that shows the data not the zero point; don’t spend a lot of empty vertical space trying to reach down to the zero point at the cost of hiding what is going on in the data line itself.” (from https://qz.com/418083/its-ok-not-to-start-your-y-axis-at-zero/)
 
-There are certainly cases where using the zero point makes no sense at all. Let's say that we are interested in plotting body temperate for an individual over time.  In Figure \@ref(fig:bodyTempAxis) we plot the same (simulated) data with or without zero in the Y axis. It should be obvious that by plotting these data with zero in the Y axis (Panel A) we are wasting a lot of space in the figure, given that body temperature of a living person could never go to zero! By including zero, we are also making the apparent jump in temperature during days 21-30 much less evident. In general, my inclination for line plots and scatterplots is to use all of the space in the graph, unless the zero point is truly important to highlight.
+There are certainly cases where using the zero point makes no sense at all. Let's say that we are interested in plotting body temperature for an individual over time.  In Figure \@ref(fig:bodyTempAxis) we plot the same (simulated) data with or without zero in the Y axis. It should be obvious that by plotting these data with zero in the Y axis (Panel A) we are wasting a lot of space in the figure, given that body temperature of a living person could never go to zero! By including zero, we are also making the apparent jump in temperature during days 21-30 much less evident. In general, my inclination for line plots and scatterplots is to use all of the space in the graph, unless the zero point is truly important to highlight.
 
 ```{r bodyTempAxis,echo=FALSE,fig.cap="Body temperature over time, plotted with or without the zero point in the Y axis.",fig.width=8,fig.height=4,out.height='50%'}
 bodyTempDf=data.frame(days=c(1:40),temp=rnorm(40)*0.3 + 98.6)
@@ -253,10 +277,19 @@ bodyTempDf$temp[21:30]=bodyTempDf$temp[21:30]+3
 
 p1 = ggplot(bodyTempDf,aes(days,temp)) +
   geom_line() + 
-  ylim(0,105)
+  ylim(0,105) +
+  labs(
+    y = "Body temperature",
+    x = "Measurement day"
+    )
 p2 = ggplot(bodyTempDf,aes(days,temp)) +
   geom_line() + 
-  ylim(95,105)
+  ylim(95,105) +
+  labs(
+    y = "Body temperature",
+    x = "Measurement day"
+    )
+
 plot_grid(p1,p2)
 ```
 
@@ -265,7 +298,7 @@ plot_grid(p1,p2)
 
 Edward Tufte introduced the concept of the "lie factor" to describe the degree to which physical differences in a visualization correspond to the magnitude of the differences in the data. If a graphic has a lie factor near 1, then it is appropriately representing the data, whereas lie factors far from one reflect a distortion of the underlying data.
 
-The lie factor supports the argument that one should always include the zero point in a bar chart.  In Figure \@ref(fig:barCharLieFactor) we plot the same data with and without zero in the Y axis.  In panel A, the proportional difference in area between the two bars is exactly the same as the proportional difference between the values (i.e. lie factor = 1), whereas in Panel B (where zero is not included) the proportional difference in area between the two bars is roughly 2.8 times bigger than the proportional difference in the values, and thus it visually exaggerates the size of the difference.  
+The lie factor supports the argument that one should always include the zero point in a bar chart in many cases.  In Figure \@ref(fig:barCharLieFactor) we plot the same data with and without zero in the Y axis.  In panel A, the proportional difference in area between the two bars is exactly the same as the proportional difference between the values (i.e. lie factor = 1), whereas in Panel B (where zero is not included) the proportional difference in area between the two bars is roughly 2.8 times bigger than the proportional difference in the values, and thus it visually exaggerates the size of the difference.  
 
 ```{r barCharLieFactor, echo=FALSE,fig.cap="Two bar charts with associated lie factors.",fig.width=8,fig.height=4,out.height='50%'}
 p1 = ggplot(data.frame(y=c(100,95),x=c('condition 1','condition 2')),aes(x=x,y=y)) + 
@@ -306,7 +339,7 @@ Even for people with perfect color vision, there are perceptual limitations that
 knitr::include_graphics("images/religion_piechart.png")
 ```
 
-This plot is terrible for several reasons.  First, it requires distingishing a large number of colors from very small patches at the bottom of the figure.  Second, the visual perspective distorts the relative numbers, such that the pie wedge for Catholic appears much larger than the pie wedge for None, when in fact the number for None is slightly larger (22.8 vs 20.8 percent), as was evident in Figure \@ref(fig:chartJunk).  Third, by separating the legend from the graphic, it requires the viewer to hold information in their working memory in order to map between the graphic and legend.  And finally, it uses text that is far too small, making it impossible to read without zooming in.
+This plot is terrible for several reasons.  First, it requires distinguishing a large number of colors from very small patches at the bottom of the figure.  Second, the visual perspective distorts the relative numbers, such that the pie wedge for Catholic appears much larger than the pie wedge for None, when in fact the number for None is slightly larger (22.8 vs 20.8 percent), as was evident in Figure \@ref(fig:chartJunk).  Third, by separating the legend from the graphic, it requires the viewer to hold information in their working memory in order to map between the graphic and legend and to conduct many "table look-ups" in order to continuously match the legend labels to the visualization.  And finally, it uses text that is far too small, making it impossible to read without zooming in.
 
 Plotting the data using a more reasonable approach (Figure \@ref(fig:religionBars)), we can see the pattern much more clearly. This plot may not look as flashy as the pie chart generated using Excel, but it's a much more effective and accurate representation of the data.
 
@@ -318,9 +351,12 @@ religionData = arrange(religionData,desc(Percentage))
 religionData$Religion=factor(religionData$Religion,levels=religionData$Religion)
 ggplot(religionData,aes(Religion,Percentage,label=Percentage)) +
   geom_bar(stat='identity') + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+
+This plot allows the viewer to make comparisons based on the the **length** of the bars **along a common scale** (the y-axis). Humans tend to be more accurate when decoding differences based on these perceptual elements than based on area or color. 
+
 
 ## Correcting for other factors
 
@@ -349,13 +385,14 @@ for (i in 1:dim(gasPriceData)[1]){
 ggplot(gasPriceData,aes(year,gasPrice)) +
   geom_line(aes(color='Unadjusted'),size=1) +
   geom_line(aes(year,gasPrice1950Dollars,color='Adjusted'),size=1) +
-  ylab('Gasoline prices') + xlab('year') + 
+  ylab('Gasoline prices') + xlab('Year') + 
   theme(legend.position = c(0,0.6)) 
 ```
 
-## Suggested readings
+## Suggested readings and videos
 
 - [Fundamentals of data visualization](https://serialmentor.com/dataviz/)
 - *Visual Explanations*, by Edward Tufte
 - *Visualizing Data*, by William S. Cleveland
 - *Graph Design for the Eye and Mind*, by Stephen M. Kosslyn
+- *How Humans See Data*, by John Rauser https://www.youtube.com/watch?v=fSgEeI2Xpdc&feature=youtu.be
