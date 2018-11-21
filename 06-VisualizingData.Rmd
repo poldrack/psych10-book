@@ -1,5 +1,9 @@
 ---
 output:
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
   pdf_document: default
   html_document: default
 ---
@@ -387,6 +391,7 @@ ggplot(gasPriceData,aes(year,gasPrice)) +
 
 ## Suggested readings and videos
 
+- [Fundamentals of data visualization](https://serialmentor.com/dataviz/)
 - *Visual Explanations*, by Edward Tufte
 - *Visualizing Data*, by William S. Cleveland
 - *Graph Design for the Eye and Mind*, by Stephen M. Kosslyn
