@@ -601,7 +601,8 @@ sprintf('familywise error rate: %0.3f',mean(uncOutcome>0))
 data.frame(nsig=uncOutcome) %>%
   ggplot(aes(nsig)) +
   geom_histogram(bins=50) +
-  xlab(sprintf('Number of significant results (out of %d)',nTests))
+  xlab(sprintf('Number of significant results (out of %d)',nTests)) +
+  theme(plot.margin = unit(c(0,1.5,0,0), "cm"))
 
 ```
 
@@ -622,7 +623,8 @@ sprintf('corrected familywise error rate: %0.3f',mean(corOutcome>0))
 
 ggplot(data.frame(nsig=corOutcome),aes(nsig)) +
   geom_histogram(bins=50) +
-  xlab(sprintf('Number of significant results (out of %d)',nTests))
+  xlab(sprintf('Number of significant results (out of %d)',nTests)) +
+  theme(plot.margin = unit(c(0,1,0,0), "cm"))
 
 ```
 
