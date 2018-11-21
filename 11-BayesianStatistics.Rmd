@@ -89,7 +89,7 @@ prior <- 1/5000000
 
 ### Collect some data
 
-The data are composed of the results of the explosive screening test.  Let's say that the security staff runs the bag through their testing apparatus 10 times, and it gives a positive reading on 6 of the 10 tests.
+The data are composed of the results of the explosive screening test.  Let's say that the security staff runs the bag through their testing apparatus 10 times, and it gives a positive reading on 9 of the 10 tests.
 
 ```{r}
 nTests <- 10
@@ -125,7 +125,7 @@ sprintf('marginal likelihood = %.3e',marginal_likelihood)
 
 ### Computing the posterior
 
-We now have all of the parts that we need to compute the posterior probability of of an explosive being present, given the observed 6 positive outcomes out of 10 tests.  
+We now have all of the parts that we need to compute the posterior probability of of an explosive being present, given the observed 9 positive outcomes out of 10 tests.  
 
 ```{r}
 posterior <- (likelihood*prior)/marginal_likelihood
