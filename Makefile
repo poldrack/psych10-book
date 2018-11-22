@@ -1,5 +1,8 @@
 all: render-pdf render-gitbook
 
+deploy:
+	bash deploy.sh
+
 clean:
 	rm -rf _bookdown_files bookdown-demo.*
 
