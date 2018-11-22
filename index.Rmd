@@ -6,9 +6,12 @@ site: bookdown::bookdown_site
 bibliography: ["psych10-book.bib"]
 biblio-style: "apalike"
 link-citations: false
+github-repo: poldrack/psych10-book
 output:
   bookdown::gitbook:
     lib_dir: "book_assets"
+    config:
+      edit: https://github.com/poldrack/psych10-book/edit/master/%s
     includes:
       in_header: google_analytics.html
   bookdown::pdf_book:
