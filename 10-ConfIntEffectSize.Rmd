@@ -159,9 +159,13 @@ These values are fairly close to the values obtained using the t distribution ab
 
 ### Relation of confidence intervals to hypothesis tests
 
-There is a close relationship between confidence intervals and hypothesis tests.  In particular, if the confidence interval does not include the null hypothesis, then the associated statistical test would be statistically significant.  
+There is a close relationship between confidence intervals and hypothesis tests.  In particular, if the confidence interval does not include the null hypothesis, then the associated statistical test would be statistically significant.  For example, if you are testing whether the mean of a sample is greater than zero with $\alpha = 0.05$, you could simply check to see whether zero is contained within the 95% confidence interval for the mean.
 
-TBD - ADD DETAILS ABOUT COMPARING CIs ACROSS CONDITIONS
+Things get trickier if we want to compare the means of two conditions [@sche:gent:2001]. There are a couple of situations that are clear.  First, each mean is contained within the confidence interval for the other mean, then there is certainly no significant difference at the chosen confidence level.  Second, if there is no overlap between the confidence intervals, then there is certainly a significant difference at the chosen level; in fact, this test is substantially *conservative*, such that the actual error rate will be lower than the chosen level.  But what about the case where the confidence intervals overlap one another but don't contain the means for the other group?  In this case the answer depends on the relative variability of the two variables, and there is no general answer.  In general we should avoid using the "visual test" for overlapping confidence intervals, because it will generally result in a higher rate of false negative (Type II) errors.
+
+```{r, echo=FALSE}
+# example of CI overlap here?
+```
 
 ## Effect sizes
 
