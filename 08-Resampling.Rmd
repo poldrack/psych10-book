@@ -37,8 +37,8 @@ In this chapter we will introduce the concept of a Monte Carlo simulation and di
 
 ## Monte Carlo simulation
 
-The concept of Monte Carlo simulation was devised by the mathematicians Stan Ulam and Nicholas Metropolis, who were working to develop an atomic weapon as part of the Manhattan Project. They needed to compute the average distance that a neutron would travel in a substance before it collided with an atomic nucleus, but they could not compute this using standard mathematics.
-Ulam realized that these computations could be simulated using random numbers, just like a casino game.  His uncle had gambled at Monte Carlo, which is apparently where the name came from for their new technique.  
+The concept of Monte Carlo simulation was devised by the mathematicians Stan Ulam and Nicholas Metropolis, who were working to develop an atomic weapon as part of the Manhattan Project (https://en.wikipedia.org/wiki/Manhattan_Project). They needed to compute the average distance that a neutron would travel in a substance before it collided with an atomic nucleus, but they could not compute this using standard mathematics.
+Ulam realized that these computations could be simulated using random numbers, just like a casino game. In in a casino game, numbers are drawn at random; to estimate the probability of a specific outcome, you could play the game hundreds of times. Ulamn's uncle had gambled at the Monte Carlo casino in Monaco, which is apparently where the name came from for this new technique.  
 
 There are four steps to performing a Monte Carlo simulation:
 
@@ -69,37 +69,47 @@ In R, there is a function to generate random numbers for each of the major proba
 * `rnorm()` - normal distribution
 * `rbinom()` - binomial distribution (e.g. rolling the dice, coin flips)
 
-Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function, which maps cumulative probabilities into values.  Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of interest via its quantile function.
+You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function; instead of identifying the cumulative probabilities for a set of values, the quantile function identifies the values for a set of cumulative probabilities. Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of interest via its quantile function. Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  
 
 ```{r rngExamples, echo=FALSE,fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution.",fig.width=8,fig.height=4,out.height='50%'}
-p1 <- ggplot(data.frame(x=runif(10000)),aes(x)) +
-  geom_histogram(bins=100)  + ggtitle('Uniform')
 
-p2 <- ggplot(data.frame(x=rnorm(10000)),aes(x)) +
-  geom_histogram(bins=100) + ggtitle('Normal')
+p1 <-
+  tibble(
+    x = runif(10000)
+  ) %>% 
+  ggplot((aes(x))) +
+  geom_histogram(bins = 100) + 
+  labs(title = "Uniform")
 
+p2 <-
+  tibble(
+    x = runif(10000)
+  ) %>% 
+  ggplot(aes(x)) +
+  geom_histogram(bins = 100) +
+  labs(title = "Normal")
 
-plot_grid(p1,p2,ncol=3)
+plot_grid(p1, p2, ncol = 3)
 ```
 
 By default, R will generate a different set of random numbers every time you run it. However, it is also possible to generate exactly the same set of random numbers, by setting what is called the *random seed* to a specific value.  We will do this in many of the examples in this book, in order to make sure that the examples are reproducible.
 
 ```{r}
 # if we run the rnorm() command twice, it will give us different sets of pseudorandom numbers each time
-print(rnorm(5))
-print(rnorm(5))
+print(rnorm(n = 5))
+print(rnorm(n = 5))
 
 # if we set the random seed to the same value each time, then it will give us the same series of pseudorandom numbers each time.
 set.seed(12345)
-print(rnorm(5))
+print(rnorm(n = 5))
 set.seed(12345)
-print(rnorm(5))
+print(rnorm(n = 5))
 
 ```
 
 ## Using Monte Carlo simulation
 
-Let's go back to our example of exam finishing times. Let's say that I administer three exams and record the finishing times, which might look like the distributions presented in Figure \@ref(fig:finishingTimes).
+Let's go back to our example of exam finishing times. Let's say that I administer three quizzes and record the finishing times for each student for each exame, which might look like the distributions presented in Figure \@ref(fig:finishingTimes).
 
 ```{r finishingTimes, echo=FALSE,fig.cap="Simulated finishing time distributions.",fig.width=8,fig.height=4,out.height='50%'}
 finishTimeDf <- tibble(finishTime=rnorm(3*150,mean=5,sd=1),
@@ -112,48 +122,46 @@ ggplot(finishTimeDf,aes(finishTime)) +
 
 ```
 
-However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate a large number of quizzes (using the assumption that the finishing times are distributed normally, as stated above), and each time we can record the longest finishing time.  To do this, we create a new function in R called `sampleMax()` which takes a sample of the appropriate size (i.e. the number of students in the class) from the appropriate distribution, and returns the maximum value in the sample.  We then repeat this a large number of times (5000 should be enough) using the `replicate()` function, which will store all of the outputs into a single variable.  The distribution of finishing times is shown in Figure \@ref(fig:finishTimeSim).
+However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate a large number of quizzes (using the assumption that the finishing times are distributed normally, as stated above); for each of these simulated quizzes, we can record the longest finishing time.  To do this, we create a new function in R called `sampleMax()` which simulates a sample of the appropriate size (i.e. the number of students in the class) from the appropriate distribution (i.e., normal), and returns the maximum value in the sample.  We then repeat this simulation a large number of times (5000 should be enough) using the `replicate()` function, which will store all of the outputs into a single variable.  The distribution of finishing times is shown in Figure \@ref(fig:finishTimeSim).
 
 ```{r}
 # sample maximum value 5000 times and compute 99th percentile
-
 nRuns <- 5000
 sampSize <- 150
 
-sampleMax <- function(sampSize=150){
-  samp <- rnorm(sampSize,mean=5,sd=1)
+sampleMax <- function(sampSize = 150) {
+  samp <- rnorm(sampSize, mean = 5, sd = 1)
   return(max(samp))
 }
 
-maxTime <- replicate(nRuns,sampleMax())
+maxTime <- replicate(nRuns, sampleMax())
 
-cutoff <- quantile(maxTime,0.99)
-sprintf('99th percentile of maxTime distribution: %.2f',cutoff)
-
+cutoff <- quantile(maxTime, 0.99)
+sprintf("99th percentile of maxTime distribution: %.2f", cutoff)
 ```
 
 ```{r finishTimeSim,echo=FALSE,fig.cap="Distribution of maximum finishing times across simulations.",fig.width=4,fig.height=4,out.height='50%'}
-tibble(maxTime) %>% 
+tibble(maxTime) %>%
   ggplot(aes(maxTime)) +
-  geom_histogram(bins=100)
-
+  geom_histogram(bins = 100) +
+  geom_vline(xintercept = cutoff, color = "red")
 
 ```
 
-This shows that the 99th percentile of the finishing time distribution falls at `r I(cutoff)`, meaning that if we were to give that much time, then everyone should finish 99% of the time.
-It's always important to remember that our assumptions matter -- if they are wrong, then the results of the simulation are useless. In this case, we assumed that the finishing time distribution was normally distributed with a particular mean and standard deviation; if this is incorrect (and it almost certainly is), then the answer could be very different.
+This shows that the 99th percentile of the finishing time distribution falls at `r I(cutoff)`, meaning that if we were to give that much time for the quiz, then everyone should finish 99% of the time.
+It's always important to remember that our assumptions matter -- if they are wrong, then the results of the simulation are useless. In this case, we assumed that the finishing time distribution was normally distributed with a particular mean and standard deviation; if these assumptions are incorrect (and they almost certainly are), then the true answer could be very different.
 
 ## Using simulation for statistics: The bootstrap
 
-So far we have used simulation to demonstrate statistical principles, but we can also use simulation to answer real statistical questions.  In this section we will introduce a concept known as the *bootstrap* that lets us use simulation to quantify our uncertainty about statistical estimates. Later in the course we will see other examples of how simulation can often be used to answer statistical questions, especially when theoretical statistical methods are not available or when their assumptions are too stifling.
+So far we have used simulation to demonstrate statistical principles, but we can also use simulation to answer real statistical questions.  In this section we will introduce a concept known as the *bootstrap* that lets us use simulation to quantify our uncertainty about statistical estimates. Later in the course, we will see other examples of how simulation can often be used to answer statistical questions, especially when theoretical statistical methods are not available or when their assumptions are too stifling.
 
 ### Computing the bootstrap
 
-In the section above, we used our knowledge of the sampling distribution of the mean to compute the standard error of the mean and confidence intervals.  But what if we can't assume that the estimates are normally distributed, or we don't know their distribution?  The idea of the bootstrap is to use the data themselves to estimate an answer.  The name comes from the idea of pulling one's self up by their own boostraps, expressing the idea that we don't have any external source of leverage so we have to rely upon the data themselves.  The bootstrap method was conceived by Bradley Efron of the Stanford Department of Statistics, who is one of the world's most influential statisticians.
+In the section above, we used our knowledge of the sampling distribution of the mean to compute the standard error of the mean and confidence intervals.  But what if we can't assume that the estimates are normally distributed, or we don't know their distribution?  The idea of the bootstrap is to use the data themselves to estimate an answer.  The name comes from the idea of pulling one's self up by one's own boostraps, expressing the idea that we don't have any external source of leverage so we have to rely upon the data themselves.  The bootstrap method was conceived by Bradley Efron of the Stanford Department of Statistics, who is one of the world's most influential statisticians.
 
 The idea behind the boostrap is that we repeatedly sample from the actual dataset; importantly, we sample *with replacement*, such that the same data point will often end up being represented multiple times within one of the samples.  We then compute our statistic of interest on each of the bootstrap samples, and use the distribution of those estimates 
 
-Let's start by using the bootstrap to estimate the sampling distribution of the mean, so that we can compare the result to the SEM that we discussed earlier.
+Let's start by using the bootstrap to estimate the sampling distribution of the mean, so that we can compare the result to the standard error of the mean (SEM) that we discussed earlier.
 
 ```{r}
 # perform the boostrap to compute SEM and compare to parametric method
@@ -161,19 +169,22 @@ Let's start by using the bootstrap to estimate the sampling distribution of the 
 nRuns <- 2500
 sampleSize <- 32
 
-heightSample <- NHANES_adult %>%
+heightSample <- 
+  NHANES_adult %>%
   sample_n(sampleSize)
 
-bootMeanHeight <- function(df){
-  bootSample <- sample_n(df,dim(df)[1],replace = TRUE)
+bootMeanHeight <- function(df) {
+  bootSample <- sample_n(df, dim(df)[1], replace = TRUE)
   return(mean(bootSample$Height))
 }
-bootMeans <- replicate(nRuns,bootMeanHeight(heightSample))
 
-SEM_standard <- sd(heightSample$Height)/sqrt(sampleSize)
-sprintf('SEM computed using sample SD: %f',SEM_standard)
+bootMeans <- replicate(nRuns, bootMeanHeight(heightSample))
+
+SEM_standard <- sd(heightSample$Height) / sqrt(sampleSize)
+sprintf("SEM computed using sample SD: %f", SEM_standard)
+
 SEM_bootstrap <- sd(bootMeans)
-sprintf('SEM computed using SD of bootstrap estimates: %f',SEM_bootstrap)
+sprintf("SEM computed using SD of bootstrap estimates: %f", SEM_bootstrap)
 
 ```
 
@@ -195,15 +206,18 @@ Figure \@ref(fig:bootstrapSEM) shows that the distribution of means across boots
 ```{r}
 # compute bootstrap confidence interval
 
-bootCI <- quantile(bootMeans,c(0.025,0.975))
+bootCI <- quantile(bootMeans, c(0.025, 0.975))
 pander("boostrap confidence limits:")
 pander(bootCI)
 
-#now let's compute the confidence intervals using the sample mean and SD
-sampleMean=mean(heightSample$Height)
+# now let's compute the confidence intervals using the sample mean and SD
+sampleMean <- mean(heightSample$Height)
 
-normalCI <- tibble("2.5%" = sampleMean - 1.96*SEM_standard,
-          "97.5%"=sampleMean + 1.96*SEM_standard) 
+normalCI <- 
+  tibble(
+  "2.5%" = sampleMean - 1.96 * SEM_standard,
+  "97.5%" = sampleMean + 1.96 * SEM_standard
+)
 
 print("confidence limits based on sample SD and normal distribution:")
 pander(normalCI)
@@ -213,4 +227,4 @@ We would not usually employ the bootstrap to compute confidence intervals for th
 
 ## Suggested readings
 
-- *Computer Age Statistical Inference:Algorithms, Evidence and Data Science*, by Bradley Efron and Trevor Hastie
+- *Computer Age Statistical Inference: Algorithms, Evidence and Data Science*, by Bradley Efron and Trevor Hastie
