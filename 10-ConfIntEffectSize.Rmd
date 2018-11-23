@@ -1,5 +1,9 @@
 ---
 output:
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
   html_document: default
   pdf_document: default
 ---
