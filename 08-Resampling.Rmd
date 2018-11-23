@@ -108,7 +108,6 @@ set.seed(12345)
 print(rnorm(n = 5))
 set.seed(12345)
 print(rnorm(n = 5))
-
 ```
 
 ## Using Monte Carlo simulation
