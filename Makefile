@@ -1,4 +1,4 @@
-all: render-pdf render-gitbook
+all: render-pdf render-gitbook 
 
 deploy:
 	bash deploy.sh
@@ -9,6 +9,11 @@ clean:
 render-gitbook:
 	cp _gitbook_99-References.Rmd 99-References.Rmd
 	echo "bookdown::render_book('index.Rmd', 'bookdown::gitbook')" | R --no-save
+	rm 99-References.Rmd
+
+render-epub:
+	cp _gitbook_99-References.Rmd 99-References.Rmd
+	echo "bookdown::render_book('index.Rmd', 'bookdown::epub_book')" | R --no-save
 	rm 99-References.Rmd
 
 render-pdf:
