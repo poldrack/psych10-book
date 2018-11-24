@@ -52,6 +52,10 @@ The question could also be interpreted to mean "Why R instead of (insert languag
 
 The other reason is that the free Rstudio software makes using R relatively easy for new users.  In particular, I like the RMarkdown Notebook feature that allows the mixing of narrative and executable code with integrated output.  It's similar in spirit to the Jupyter notebooks that many of us use for Python programming, but I find it easier to deal with because it's just a plain text file.  In my class, I give students a skeleton RMarkdown file for problem sets, and they submit the file with their solution added, which I then score using a set of automated grading scripts. 
 
+## The golden age of data
+
+Throughout this book I have tried when possible to use examples from real data.  This is now very easy because we are swimming in open datasets, as governments, scientists, and companies are increasingly making data freely available.  I think that using real datasets is important because it prepares students to work with real data rather than toy datasets, which I think should be one of the major goals of statistical training. It also helps us realize (as we will see at various points throughout the book) that data don't always come to us ready to analyze, and often need *wrangling* to help get them into shape.  Using real data also shows that the idealized statistical distributions often assumed in statistical methods don't always hold in the real world -- for example, as we will see in Chapter \@ref(summarizing-data), distributions of some real-world quantities (like the number of friends on Facebook) can have very long tails that can break many standard assumptions.
+
 ## An open source book
 
 This book is meant to be a living document, which is why its source is available online at [https://github.com/poldrack/psych10-book](https://github.com/poldrack/psych10-book).  If you find any errors in the book or want to make a suggestion for how to improve it, please open an issue on the Github site. Even better, submit a pull request with your suggested change.  
