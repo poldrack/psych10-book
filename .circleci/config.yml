@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: rocker/tidyverse
+    steps:
+      - run: apt-get install make
+      - run: apt-get install jags
+      - run: apt-get install -y gsl-bin libgsl-dev
+      - run: apt-get install libudunits2-0 
+      - checkout
+      - run:
+           name: installing packages
+           command: |
+               Rscript setup/package_installs.R
+      - run:
+           name: rendering gitbook
+           command: |
+             make render-gitbook
