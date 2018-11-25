@@ -62,8 +62,10 @@ This book is meant to be a living document, which is why its source is available
 
 ## Acknowledgements
 
-I'd first like to thank Susan Holmes, who first inspired me to consider writing my own statistics book.  Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse.  Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. I'd also like to thank others who provided helpful comments and suggestions: Wesley Tansey, Jack Van Horn.
+I'd first like to thank Susan Holmes, who first inspired me to consider writing my own statistics book.  Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse.  Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. Particular thanks also go to Yihui Xie, creator of the Bookdown package, for improving the book's use of Bookdown features (including the ability for users to directly generate edits via the Edit button).  
+
+I'd also like to thank others who provided helpful comments and suggestions: Wesley Tansey, Jack Van Horn.
 
 Thanks to the following Twitter users for helpful suggestions: \@enoriverbend
 
-Thanks to the following individuals for submitting edits via Github: Mehdi Rahim, Shanaathanan Modchalingam
+Thanks to the following individuals/usernames for submitting edits or issues via Github: Mehdi Rahim, Shanaathanan Modchalingam, Alan He, basicv8vc, jiamingkong
