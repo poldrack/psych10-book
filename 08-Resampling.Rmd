@@ -73,9 +73,9 @@ In R, there is a function to generate random numbers for each of the major proba
 * `rnorm()` - normal distribution
 * `rbinom()` - binomial distribution (e.g. rolling the dice, coin flips)
 
-You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function; instead of identifying the cumulative probabilities for a set of values, the quantile function identifies the values for a set of cumulative probabilities. Using this function, we can generate random numbers from a uniform distribution, and then map those into the distribution of interest via its quantile function. Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions.  
+Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions, generated using the following code:
 
-```{r rngExamples, echo=FALSE,fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution.",fig.width=8,fig.height=4,out.height='50%'}
+```{r rngExamples,fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution.",fig.width=8,fig.height=4,out.height='50%'}
 
 p1 <-
   tibble(
@@ -96,7 +96,9 @@ p2 <-
 plot_grid(p1, p2, ncol = 3)
 ```
 
-By default, R will generate a different set of random numbers every time you run it. However, it is also possible to generate exactly the same set of random numbers, by setting what is called the *random seed* to a specific value.  We will do this in many of the examples in this book, in order to make sure that the examples are reproducible.
+You can also generate random numbers for any distribution if you have a *quantile* function for the distribution. This is the inverse of the cumulative distribution function; instead of identifying the cumulative probabilities for a set of values, the quantile function identifies the values for a set of cumulative probabilities. Using the quantile function, we can generate random numbers from a uniform distribution, and then map those into the distribution of interest via its quantile function.   
+
+By default, R will generate a different set of random numbers every time you run one of the random number generator functions described above. However, it is also possible to generate exactly the same set of random numbers, by setting what is called the *random seed* to a specific value.  We will do this in many of the examples in this book, in order to make sure that the examples are reproducible.
 
 ```{r}
 # if we run the rnorm() command twice, it will give us different sets of pseudorandom numbers each time
