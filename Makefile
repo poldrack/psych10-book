@@ -1,5 +1,9 @@
-all: render-pdf render-gitbook 
+all: render-pdf render-epub render-gitbook 
 
+docker-build:
+	docker build -t thinkstats .
+shell:
+        docker run -it --entrypoint=bash thinkstats
 deploy:
 	bash deploy.sh
 
