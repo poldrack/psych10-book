@@ -1,5 +1,5 @@
 if (!require("BayesFactor")) install.packages("BayesFactor",repos="https://cran.rstudio.com",dependencies=TRUE)
-if (!require("fiftystater")) install.packages("fiftystater",repos="https://cran.rstudio.com",dependencies=TRUE)
+if (!require("fiftystater")) install.packages("https://cran.r-project.org/src/contrib/Archive/fiftystater/fiftystater_1.0.1.tar.gz",repos=NULL,dependencies=TRUE)
 if (!require("mapproj")) install.packages("mapproj",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("dplyr")) install.packages("dplyr",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("fivethirtyeight")) install.packages("fivethirtyeight",repos="https://cran.rstudio.com",dependencies=TRUE)
