@@ -1,3 +1,5 @@
+if (!require("tidyverse")) install.packages("tidyverse",repos="https://cran.rstudio.com",dependencies=TRUE)
+if (!require("caret")) install.packages("caret",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("BayesFactor")) install.packages("BayesFactor",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("sfsmisc")) install.packages("sfsmisc",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("pwr")) install.packages("pwr",repos="https://cran.rstudio.com",dependencies=TRUE)
@@ -9,7 +11,6 @@ if (!require("BayesMed")) install.packages("BayesMed",repos="https://cran.rstudi
 if (!require("DiagrammeR")) install.packages("DiagrammeR",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("ggplot2")) install.packages("ggplot2",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("kableExtra")) install.packages("kableExtra",repos="https://cran.rstudio.com",dependencies=TRUE)
-if (!require("tidyverse")) install.packages("tidyverse",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("reshape2")) install.packages("reshape2",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("NHANES")) install.packages("NHANES",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("tidyr")) install.packages("tidyr",repos="https://cran.rstudio.com",dependencies=TRUE)
