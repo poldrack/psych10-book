@@ -260,7 +260,7 @@ ggplot(data.frame(coinFlips),aes(coinFlips))  +
 
 ```
 
-Here we can see that the probability computed via simulation (`r I(p_ge_70_sim)`) is very close to the theoretical probability (.00004).  
+Here we can see that the probability computed via simulation (`r I(sprintf('%0.6f',p_ge_70_sim))`) is very close to the theoretical probability (.00004).  
 
 Let's do the analogous computation for our BMI example. First we compute the t statistic using the values from our sample that we calculated above:
 
