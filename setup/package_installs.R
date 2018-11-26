@@ -1,5 +1,6 @@
 if (!require("tidyverse")) install.packages("tidyverse",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("caret")) install.packages("caret",repos="https://cran.rstudio.com",dependencies=TRUE)
+if (!require("lmerTest")) install.packages("lmerTest",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("BayesFactor")) install.packages("BayesFactor",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("sfsmisc")) install.packages("sfsmisc",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("pwr")) install.packages("pwr",repos="https://cran.rstudio.com",dependencies=TRUE)
