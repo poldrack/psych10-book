@@ -15,3 +15,4 @@ if (!require("cowplot")) install.packages("cowplot",repos="https://cran.rstudio.
 if (!require("MASS")) install.packages("MASS",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("boot")) install.packages("boot",repos="https://cran.rstudio.com",dependencies=TRUE)
 if (!require("bookdown")) install.packages("bookdown",repos="https://cran.rstudio.com",dependencies=TRUE)
+if (!require("pander")) install.packages("pander",repos="https://cran.rstudio.com",dependencies=TRUE)
