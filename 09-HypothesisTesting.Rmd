@@ -283,7 +283,7 @@ pvalue_tdist <-
 sprintf("p(t > %0.2f, df = 248) = %0.3f", tStat, pvalue_tdist)
 ```
 
-This tells us that our observed t-statistic value of `r I(tStat$mean)` is relatively unlikely if the null hypothesis really is true.
+This tells us that our observed t-statistic value of `r I(tStat)` is relatively unlikely if the null hypothesis really is true.
 
 In this case, we used a directional hypothesis, so we only had to look at one end of the null distribution. If we want to test a non-directional hypothesis, then we are interested in differences in either direction, so we have to add the probability that the observed value is as extreme in the other direction -- which we get by simply multiplying the observed *t* value by -1, since the *t* distribution is centered around zero.  Using this, we can get a *two-tailed* value:
 
