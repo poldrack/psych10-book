@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Statistical Thinking for the 21st Century</title>
+  <meta name="description" content="Statistical Thinking for the 21st Century">
+  <meta name="generator" content="bookdown 0.7 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Statistical Thinking for the 21st Century" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  <meta name="github-repo" content="poldrack/psych10-book" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Statistical Thinking for the 21st Century" />
+  
+  
+  
+
+<meta name="author" content="Copyright 2018 Russell A. Poldrack">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+
+<link rel="next" href="introduction.html">
+<script src="book_assets/jquery-2.2.3/jquery.min.js"></script>
+<link href="book_assets/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="book_assets/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="book_assets/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="book_assets/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="book_assets/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+<script src="book_assets/htmlwidgets-1.2/htmlwidgets.js"></script>
+<script src="book_assets/viz-0.3/viz.js"></script>
+<link href="book_assets/DiagrammeR-styles-0.2/styles.css" rel="stylesheet" />
+<script src="book_assets/grViz-binding-1.0.0/grViz.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129414074-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-129414074-1');
+</script>
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="0.1" data-path="index.html"><a href="index.html#why-does-this-book-exist"><i class="fa fa-check"></i><b>0.1</b> Why does this book exist?</a></li>
+<li class="chapter" data-level="0.2" data-path="index.html"><a href="index.html#youre-not-a-statistician---why-should-we-listen-to-you"><i class="fa fa-check"></i><b>0.2</b> You’re not a statistician - why should we listen to you?</a></li>
+<li class="chapter" data-level="0.3" data-path="index.html"><a href="index.html#why-r"><i class="fa fa-check"></i><b>0.3</b> Why R?</a></li>
+<li class="chapter" data-level="0.4" data-path="index.html"><a href="index.html#the-golden-age-of-data"><i class="fa fa-check"></i><b>0.4</b> The golden age of data</a></li>
+<li class="chapter" data-level="0.5" data-path="index.html"><a href="index.html#an-open-source-book"><i class="fa fa-check"></i><b>0.5</b> An open source book</a></li>
+<li class="chapter" data-level="0.6" data-path="index.html"><a href="index.html#acknowledgements"><i class="fa fa-check"></i><b>0.6</b> Acknowledgements</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#what-is-statistical-thinking"><i class="fa fa-check"></i><b>1.1</b> What is statistical thinking?</a></li>
+<li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#what-can-statistics-do-for-us"><i class="fa fa-check"></i><b>1.2</b> What can statistics do for us?</a></li>
+<li class="chapter" data-level="1.3" data-path="introduction.html"><a href="introduction.html#fundamental-concepts-of-statistics"><i class="fa fa-check"></i><b>1.3</b> Fundamental concepts of statistics</a><ul>
+<li class="chapter" data-level="1.3.1" data-path="introduction.html"><a href="introduction.html#learning-from-data"><i class="fa fa-check"></i><b>1.3.1</b> Learning from data</a></li>
+<li class="chapter" data-level="1.3.2" data-path="introduction.html"><a href="introduction.html#aggregation"><i class="fa fa-check"></i><b>1.3.2</b> Aggregation</a></li>
+<li class="chapter" data-level="1.3.3" data-path="introduction.html"><a href="introduction.html#uncertainty"><i class="fa fa-check"></i><b>1.3.3</b> Uncertainty</a></li>
+<li class="chapter" data-level="1.3.4" data-path="introduction.html"><a href="introduction.html#sampling"><i class="fa fa-check"></i><b>1.3.4</b> Sampling</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="introduction.html"><a href="introduction.html#causality-and-statistics"><i class="fa fa-check"></i><b>1.4</b> Causality and statistics</a></li>
+<li class="chapter" data-level="1.5" data-path="introduction.html"><a href="introduction.html#suggested-readings"><i class="fa fa-check"></i><b>1.5</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="working-with-data.html"><a href="working-with-data.html"><i class="fa fa-check"></i><b>2</b> Working with data</a><ul>
+<li class="chapter" data-level="2.1" data-path="working-with-data.html"><a href="working-with-data.html#what-are-data"><i class="fa fa-check"></i><b>2.1</b> What are data?</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="working-with-data.html"><a href="working-with-data.html#qualitative-data"><i class="fa fa-check"></i><b>2.1.1</b> Qualitative data</a></li>
+<li class="chapter" data-level="2.1.2" data-path="working-with-data.html"><a href="working-with-data.html#quantitative-data"><i class="fa fa-check"></i><b>2.1.2</b> Quantitative data</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="working-with-data.html"><a href="working-with-data.html#scales-of-measurement"><i class="fa fa-check"></i><b>2.2</b> Scales of measurement</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="working-with-data.html"><a href="working-with-data.html#why-do-scales-of-measurement-matter"><i class="fa fa-check"></i><b>2.2.1</b> Why do scales of measurement matter?</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="working-with-data.html"><a href="working-with-data.html#what-makes-a-good-measurement"><i class="fa fa-check"></i><b>2.3</b> What makes a good measurement?</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="working-with-data.html"><a href="working-with-data.html#reliability"><i class="fa fa-check"></i><b>2.3.1</b> <em>Reliability</em></a></li>
+<li class="chapter" data-level="2.3.2" data-path="working-with-data.html"><a href="working-with-data.html#validity"><i class="fa fa-check"></i><b>2.3.2</b> <em>Validity</em></a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="working-with-data.html"><a href="working-with-data.html#suggested-readings-1"><i class="fa fa-check"></i><b>2.4</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="probability.html"><a href="probability.html"><i class="fa fa-check"></i><b>3</b> Probability</a><ul>
+<li class="chapter" data-level="3.1" data-path="probability.html"><a href="probability.html#what-is-probability"><i class="fa fa-check"></i><b>3.1</b> What is probability?</a></li>
+<li class="chapter" data-level="3.2" data-path="probability.html"><a href="probability.html#how-do-we-determine-probabilities"><i class="fa fa-check"></i><b>3.2</b> How do we determine probabilities?</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="probability.html"><a href="probability.html#personal-opinion"><i class="fa fa-check"></i><b>3.2.1</b> Personal opinion</a></li>
+<li class="chapter" data-level="3.2.2" data-path="probability.html"><a href="probability.html#empirical-frequency"><i class="fa fa-check"></i><b>3.2.2</b> Empirical frequency</a></li>
+<li class="chapter" data-level="3.2.3" data-path="probability.html"><a href="probability.html#classical-probability"><i class="fa fa-check"></i><b>3.2.3</b> Classical probability</a></li>
+<li class="chapter" data-level="3.2.4" data-path="probability.html"><a href="probability.html#solving-de-meres-problem"><i class="fa fa-check"></i><b>3.2.4</b> Solving de Méré’s problem</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="probability.html"><a href="probability.html#probability-distributions"><i class="fa fa-check"></i><b>3.3</b> Probability distributions</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="probability.html"><a href="probability.html#cumulative-probability-distributions"><i class="fa fa-check"></i><b>3.3.1</b> Cumulative probability distributions</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="probability.html"><a href="probability.html#conditional-probability"><i class="fa fa-check"></i><b>3.4</b> Conditional probability</a></li>
+<li class="chapter" data-level="3.5" data-path="probability.html"><a href="probability.html#computing-conditional-probabilities-from-data"><i class="fa fa-check"></i><b>3.5</b> Computing conditional probabilities from data</a></li>
+<li class="chapter" data-level="3.6" data-path="probability.html"><a href="probability.html#independence"><i class="fa fa-check"></i><b>3.6</b> Independence</a></li>
+<li class="chapter" data-level="3.7" data-path="probability.html"><a href="probability.html#bayestheorem"><i class="fa fa-check"></i><b>3.7</b> Reversing a conditional probability: Bayes’ rule</a></li>
+<li class="chapter" data-level="3.8" data-path="probability.html"><a href="probability.html#learning-from-data-1"><i class="fa fa-check"></i><b>3.8</b> Learning from data</a></li>
+<li class="chapter" data-level="3.9" data-path="probability.html"><a href="probability.html#odds-and-odds-ratios"><i class="fa fa-check"></i><b>3.9</b> Odds and odds ratios</a></li>
+<li class="chapter" data-level="3.10" data-path="probability.html"><a href="probability.html#what-do-probabilities-mean"><i class="fa fa-check"></i><b>3.10</b> What do probabilities mean?</a></li>
+<li class="chapter" data-level="3.11" data-path="probability.html"><a href="probability.html#suggested-readings-2"><i class="fa fa-check"></i><b>3.11</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="summarizing-data.html"><a href="summarizing-data.html"><i class="fa fa-check"></i><b>4</b> Summarizing data</a><ul>
+<li class="chapter" data-level="4.1" data-path="summarizing-data.html"><a href="summarizing-data.html#why-summarize-data"><i class="fa fa-check"></i><b>4.1</b> Why summarize data?</a></li>
+<li class="chapter" data-level="4.2" data-path="summarizing-data.html"><a href="summarizing-data.html#summarizing-data-using-tables"><i class="fa fa-check"></i><b>4.2</b> Summarizing data using tables</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="summarizing-data.html"><a href="summarizing-data.html#frequency-distributions"><i class="fa fa-check"></i><b>4.2.1</b> Frequency distributions</a></li>
+<li class="chapter" data-level="4.2.2" data-path="summarizing-data.html"><a href="summarizing-data.html#cumulative-distributions"><i class="fa fa-check"></i><b>4.2.2</b> Cumulative distributions</a></li>
+<li class="chapter" data-level="4.2.3" data-path="summarizing-data.html"><a href="summarizing-data.html#plotting-histograms"><i class="fa fa-check"></i><b>4.2.3</b> Plotting histograms</a></li>
+<li class="chapter" data-level="4.2.4" data-path="summarizing-data.html"><a href="summarizing-data.html#histogram-bins"><i class="fa fa-check"></i><b>4.2.4</b> Histogram bins</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="summarizing-data.html"><a href="summarizing-data.html#idealized-representations-of-distributions"><i class="fa fa-check"></i><b>4.3</b> Idealized representations of distributions</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="summarizing-data.html"><a href="summarizing-data.html#skewness"><i class="fa fa-check"></i><b>4.3.1</b> Skewness</a></li>
+<li class="chapter" data-level="4.3.2" data-path="summarizing-data.html"><a href="summarizing-data.html#long-tailed-distributions"><i class="fa fa-check"></i><b>4.3.2</b> Long-tailed distributions</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="summarizing-data.html"><a href="summarizing-data.html#suggested-readings-3"><i class="fa fa-check"></i><b>4.4</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html"><i class="fa fa-check"></i><b>5</b> Fitting models to data</a><ul>
+<li class="chapter" data-level="5.1" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#what-is-a-model"><i class="fa fa-check"></i><b>5.1</b> What is a model?</a></li>
+<li class="chapter" data-level="5.2" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#statistical-modeling-an-example"><i class="fa fa-check"></i><b>5.2</b> Statistical modeling: An example</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#improving-our-model"><i class="fa fa-check"></i><b>5.2.1</b> Improving our model</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#what-makes-a-model-good"><i class="fa fa-check"></i><b>5.3</b> What makes a model “good”?</a></li>
+<li class="chapter" data-level="5.4" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#overfitting"><i class="fa fa-check"></i><b>5.4</b> Can a model be too good?</a></li>
+<li class="chapter" data-level="5.5" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#the-simplest-model-the-mean"><i class="fa fa-check"></i><b>5.5</b> The simplest model: The mean</a><ul>
+<li class="chapter" data-level="5.5.1" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#the-median"><i class="fa fa-check"></i><b>5.5.1</b> The median</a></li>
+</ul></li>
+<li class="chapter" data-level="5.6" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#the-mode"><i class="fa fa-check"></i><b>5.6</b> The mode</a></li>
+<li class="chapter" data-level="5.7" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#variability-how-well-does-the-mean-fit-the-data"><i class="fa fa-check"></i><b>5.7</b> Variability: How well does the mean fit the data?</a></li>
+<li class="chapter" data-level="5.8" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#using-simulations-to-understand-statistics"><i class="fa fa-check"></i><b>5.8</b> Using simulations to understand statistics</a></li>
+<li class="chapter" data-level="5.9" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#z-scores"><i class="fa fa-check"></i><b>5.9</b> Z-scores</a><ul>
+<li class="chapter" data-level="5.9.1" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#interpreting-z-scores"><i class="fa fa-check"></i><b>5.9.1</b> Interpreting Z-scores</a></li>
+<li class="chapter" data-level="5.9.2" data-path="fitting-models-to-data.html"><a href="fitting-models-to-data.html#standardized-scores"><i class="fa fa-check"></i><b>5.9.2</b> Standardized scores</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="data-visualization.html"><a href="data-visualization.html"><i class="fa fa-check"></i><b>6</b> Data Visualization</a><ul>
+<li class="chapter" data-level="6.1" data-path="data-visualization.html"><a href="data-visualization.html#how-data-visualization-can-save-lives"><i class="fa fa-check"></i><b>6.1</b> How data visualization can save lives</a></li>
+<li class="chapter" data-level="6.2" data-path="data-visualization.html"><a href="data-visualization.html#anatomy-of-a-plot"><i class="fa fa-check"></i><b>6.2</b> Anatomy of a plot</a></li>
+<li class="chapter" data-level="6.3" data-path="data-visualization.html"><a href="data-visualization.html#plotting-in-r-using-ggplot"><i class="fa fa-check"></i><b>6.3</b> Plotting in R using ggplot</a></li>
+<li class="chapter" data-level="6.4" data-path="data-visualization.html"><a href="data-visualization.html#principles-of-good-visualization"><i class="fa fa-check"></i><b>6.4</b> Principles of good visualization</a><ul>
+<li class="chapter" data-level="6.4.1" data-path="data-visualization.html"><a href="data-visualization.html#show-the-data-and-make-them-stand-out"><i class="fa fa-check"></i><b>6.4.1</b> Show the data and make them stand out</a></li>
+</ul></li>
+<li class="chapter" data-level="6.5" data-path="data-visualization.html"><a href="data-visualization.html#maximize-the-dataink-ratio"><i class="fa fa-check"></i><b>6.5</b> Maximize the data/ink ratio</a></li>
+<li class="chapter" data-level="6.6" data-path="data-visualization.html"><a href="data-visualization.html#avoid-chartjunk"><i class="fa fa-check"></i><b>6.6</b> Avoid chartjunk</a></li>
+<li class="chapter" data-level="6.7" data-path="data-visualization.html"><a href="data-visualization.html#avoid-distorting-the-data"><i class="fa fa-check"></i><b>6.7</b> Avoid distorting the data</a></li>
+<li class="chapter" data-level="6.8" data-path="data-visualization.html"><a href="data-visualization.html#the-lie-factor"><i class="fa fa-check"></i><b>6.8</b> The lie factor</a></li>
+<li class="chapter" data-level="6.9" data-path="data-visualization.html"><a href="data-visualization.html#remember-human-limitations"><i class="fa fa-check"></i><b>6.9</b> Remember human limitations</a><ul>
+<li class="chapter" data-level="6.9.1" data-path="data-visualization.html"><a href="data-visualization.html#perceptual-limitations"><i class="fa fa-check"></i><b>6.9.1</b> Perceptual limitations</a></li>
+</ul></li>
+<li class="chapter" data-level="6.10" data-path="data-visualization.html"><a href="data-visualization.html#correcting-for-other-factors"><i class="fa fa-check"></i><b>6.10</b> Correcting for other factors</a></li>
+<li class="chapter" data-level="6.11" data-path="data-visualization.html"><a href="data-visualization.html#suggested-readings-and-videos"><i class="fa fa-check"></i><b>6.11</b> Suggested readings and videos</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="sampling-1.html"><a href="sampling-1.html"><i class="fa fa-check"></i><b>7</b> Sampling</a><ul>
+<li class="chapter" data-level="7.1" data-path="sampling-1.html"><a href="sampling-1.html#how-do-we-sample"><i class="fa fa-check"></i><b>7.1</b> How do we sample?</a></li>
+<li class="chapter" data-level="7.2" data-path="sampling-1.html"><a href="sampling-1.html#sampling-error"><i class="fa fa-check"></i><b>7.2</b> Sampling error</a></li>
+<li class="chapter" data-level="7.3" data-path="sampling-1.html"><a href="sampling-1.html#standard-error-of-the-mean"><i class="fa fa-check"></i><b>7.3</b> Standard error of the mean</a></li>
+<li class="chapter" data-level="7.4" data-path="sampling-1.html"><a href="sampling-1.html#the-central-limit-theorem"><i class="fa fa-check"></i><b>7.4</b> The Central Limit Theorem</a></li>
+<li class="chapter" data-level="7.5" data-path="sampling-1.html"><a href="sampling-1.html#confidence-intervals"><i class="fa fa-check"></i><b>7.5</b> Confidence intervals</a></li>
+<li class="chapter" data-level="7.6" data-path="sampling-1.html"><a href="sampling-1.html#suggested-readings-4"><i class="fa fa-check"></i><b>7.6</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html"><i class="fa fa-check"></i><b>8</b> Resampling and simulation</a><ul>
+<li class="chapter" data-level="8.1" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html#monte-carlo-simulation"><i class="fa fa-check"></i><b>8.1</b> Monte Carlo simulation</a></li>
+<li class="chapter" data-level="8.2" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html#randomness-in-statistics"><i class="fa fa-check"></i><b>8.2</b> Randomness in statistics</a></li>
+<li class="chapter" data-level="8.3" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html#generating-random-numbers"><i class="fa fa-check"></i><b>8.3</b> Generating random numbers</a></li>
+<li class="chapter" data-level="8.4" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html#using-monte-carlo-simulation"><i class="fa fa-check"></i><b>8.4</b> Using Monte Carlo simulation</a></li>
+<li class="chapter" data-level="8.5" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html#using-simulation-for-statistics-the-bootstrap"><i class="fa fa-check"></i><b>8.5</b> Using simulation for statistics: The bootstrap</a><ul>
+<li class="chapter" data-level="8.5.1" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html#computing-the-bootstrap"><i class="fa fa-check"></i><b>8.5.1</b> Computing the bootstrap</a></li>
+</ul></li>
+<li class="chapter" data-level="8.6" data-path="resampling-and-simulation.html"><a href="resampling-and-simulation.html#suggested-readings-5"><i class="fa fa-check"></i><b>8.6</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html"><i class="fa fa-check"></i><b>9</b> Hypothesis testing</a><ul>
+<li class="chapter" data-level="9.1" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#null-hypothesis-statistical-testing-nhst"><i class="fa fa-check"></i><b>9.1</b> Null Hypothesis Statistical Testing (NHST)</a></li>
+<li class="chapter" data-level="9.2" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#null-hypothesis-statistical-testing-an-example"><i class="fa fa-check"></i><b>9.2</b> Null hypothesis statistical testing: An example</a></li>
+<li class="chapter" data-level="9.3" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#the-process-of-null-hypothesis-testing"><i class="fa fa-check"></i><b>9.3</b> The process of null hypothesis testing</a><ul>
+<li class="chapter" data-level="9.3.1" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#step-1-formulate-a-prediction"><i class="fa fa-check"></i><b>9.3.1</b> Step 1: Formulate a prediction</a></li>
+<li class="chapter" data-level="9.3.2" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#step-2-collect-some-data"><i class="fa fa-check"></i><b>9.3.2</b> Step 2: Collect some data</a></li>
+<li class="chapter" data-level="9.3.3" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#step-3-specify-the-null-and-alternative-hypotheses"><i class="fa fa-check"></i><b>9.3.3</b> Step 3: Specify the null and alternative hypotheses</a></li>
+<li class="chapter" data-level="9.3.4" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#step-4-fit-a-model-to-the-data-and-compute-a-test-statistic"><i class="fa fa-check"></i><b>9.3.4</b> Step 4: Fit a model to the data and compute a test statistic</a></li>
+<li class="chapter" data-level="9.3.5" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#step-5-determine-the-probability-of-the-data-under-the-null-hypothesis"><i class="fa fa-check"></i><b>9.3.5</b> Step 5: Determine the probability of the data under the null hypothesis</a></li>
+<li class="chapter" data-level="9.3.6" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#step-6-assess-the-statistical-significance-of-the-result"><i class="fa fa-check"></i><b>9.3.6</b> Step 6: Assess the “statistical significance” of the result</a></li>
+<li class="chapter" data-level="9.3.7" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#what-does-a-significant-result-mean"><i class="fa fa-check"></i><b>9.3.7</b> What does a significant result mean?</a></li>
+</ul></li>
+<li class="chapter" data-level="9.4" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#nhst-in-a-modern-context-multiple-testing"><i class="fa fa-check"></i><b>9.4</b> NHST in a modern context: Multiple testing</a></li>
+<li class="chapter" data-level="9.5" data-path="hypothesis-testing.html"><a href="hypothesis-testing.html#suggested-readings-6"><i class="fa fa-check"></i><b>9.5</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html"><i class="fa fa-check"></i><b>10</b> Confidence intervals, effect sizes, and statistical power</a><ul>
+<li class="chapter" data-level="10.1" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#confidence-intervals-1"><i class="fa fa-check"></i><b>10.1</b> Confidence intervals</a><ul>
+<li class="chapter" data-level="10.1.1" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#confidence-intervals-using-the-normal-distribution"><i class="fa fa-check"></i><b>10.1.1</b> Confidence intervals using the normal distribution</a></li>
+<li class="chapter" data-level="10.1.2" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#confidence-intervals-using-the-t-distribution"><i class="fa fa-check"></i><b>10.1.2</b> Confidence intervals using the t distribution</a></li>
+<li class="chapter" data-level="10.1.3" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#confidence-intervals-and-sample-size"><i class="fa fa-check"></i><b>10.1.3</b> Confidence intervals and sample size</a></li>
+<li class="chapter" data-level="10.1.4" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#computing-confidence-intervals-using-the-bootstrap"><i class="fa fa-check"></i><b>10.1.4</b> Computing confidence intervals using the bootstrap</a></li>
+<li class="chapter" data-level="10.1.5" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#relation-of-confidence-intervals-to-hypothesis-tests"><i class="fa fa-check"></i><b>10.1.5</b> Relation of confidence intervals to hypothesis tests</a></li>
+</ul></li>
+<li class="chapter" data-level="10.2" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#effect-sizes"><i class="fa fa-check"></i><b>10.2</b> Effect sizes</a><ul>
+<li class="chapter" data-level="10.2.1" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#cohens-d"><i class="fa fa-check"></i><b>10.2.1</b> Cohen’s D</a></li>
+<li class="chapter" data-level="10.2.2" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#pearsons-r"><i class="fa fa-check"></i><b>10.2.2</b> Pearson’s r</a></li>
+<li class="chapter" data-level="10.2.3" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#odds-ratio"><i class="fa fa-check"></i><b>10.2.3</b> Odds ratio</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#statistical-power"><i class="fa fa-check"></i><b>10.3</b> Statistical power</a><ul>
+<li class="chapter" data-level="10.3.1" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#power-analysis"><i class="fa fa-check"></i><b>10.3.1</b> Power analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="10.4" data-path="ci-effect-size-power.html"><a href="ci-effect-size-power.html#suggested-readings-7"><i class="fa fa-check"></i><b>10.4</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html"><i class="fa fa-check"></i><b>11</b> Bayesian statistics</a><ul>
+<li class="chapter" data-level="11.1" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#generative-models"><i class="fa fa-check"></i><b>11.1</b> Generative models</a></li>
+<li class="chapter" data-level="11.2" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#bayes-theorem-and-inverse-inference"><i class="fa fa-check"></i><b>11.2</b> Bayes’ theorem and inverse inference</a></li>
+<li class="chapter" data-level="11.3" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#doing-bayesian-estimation"><i class="fa fa-check"></i><b>11.3</b> Doing Bayesian estimation</a><ul>
+<li class="chapter" data-level="11.3.1" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#specifying-the-prior"><i class="fa fa-check"></i><b>11.3.1</b> Specifying the prior</a></li>
+<li class="chapter" data-level="11.3.2" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#collect-some-data"><i class="fa fa-check"></i><b>11.3.2</b> Collect some data</a></li>
+<li class="chapter" data-level="11.3.3" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#computing-the-likelihood"><i class="fa fa-check"></i><b>11.3.3</b> Computing the likelihood</a></li>
+<li class="chapter" data-level="11.3.4" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#computing-the-marginal-likelihood"><i class="fa fa-check"></i><b>11.3.4</b> Computing the marginal likelihood</a></li>
+<li class="chapter" data-level="11.3.5" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#computing-the-posterior"><i class="fa fa-check"></i><b>11.3.5</b> Computing the posterior</a></li>
+</ul></li>
+<li class="chapter" data-level="11.4" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#estimating-posterior-distributions"><i class="fa fa-check"></i><b>11.4</b> Estimating posterior distributions</a><ul>
+<li class="chapter" data-level="11.4.1" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#specifying-the-prior-1"><i class="fa fa-check"></i><b>11.4.1</b> Specifying the prior</a></li>
+<li class="chapter" data-level="11.4.2" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#collect-some-data-1"><i class="fa fa-check"></i><b>11.4.2</b> Collect some data</a></li>
+<li class="chapter" data-level="11.4.3" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#computing-the-likelihood-1"><i class="fa fa-check"></i><b>11.4.3</b> Computing the likelihood</a></li>
+<li class="chapter" data-level="11.4.4" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#computing-the-marginal-likelihood-1"><i class="fa fa-check"></i><b>11.4.4</b> Computing the marginal likelihood</a></li>
+<li class="chapter" data-level="11.4.5" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#computing-the-posterior-1"><i class="fa fa-check"></i><b>11.4.5</b> Computing the posterior</a></li>
+<li class="chapter" data-level="11.4.6" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#maximum-a-posteriori-map-estimation"><i class="fa fa-check"></i><b>11.4.6</b> Maximum a posteriori (MAP) estimation</a></li>
+<li class="chapter" data-level="11.4.7" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#credible-intervals"><i class="fa fa-check"></i><b>11.4.7</b> Credible intervals</a></li>
+<li class="chapter" data-level="11.4.8" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#effects-of-different-priors"><i class="fa fa-check"></i><b>11.4.8</b> Effects of different priors</a></li>
+</ul></li>
+<li class="chapter" data-level="11.5" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#choosing-a-prior"><i class="fa fa-check"></i><b>11.5</b> Choosing a prior</a></li>
+<li class="chapter" data-level="11.6" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#bayesian-hypothesis-testing"><i class="fa fa-check"></i><b>11.6</b> Bayesian hypothesis testing</a><ul>
+<li class="chapter" data-level="11.6.1" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#bayes-factors"><i class="fa fa-check"></i><b>11.6.1</b> Bayes factors</a></li>
+<li class="chapter" data-level="11.6.2" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#bayes-factors-for-statistical-hypotheses"><i class="fa fa-check"></i><b>11.6.2</b> Bayes factors for statistical hypotheses</a></li>
+</ul></li>
+<li class="chapter" data-level="11.7" data-path="bayesian-statistics.html"><a href="bayesian-statistics.html#suggested-readings-8"><i class="fa fa-check"></i><b>11.7</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html"><i class="fa fa-check"></i><b>12</b> Modeling categorical relationships</a><ul>
+<li class="chapter" data-level="12.1" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#example-candy-colors"><i class="fa fa-check"></i><b>12.1</b> Example: Candy colors</a></li>
+<li class="chapter" data-level="12.2" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#pearsons-chi-squared-test"><i class="fa fa-check"></i><b>12.2</b> Pearson’s chi-squared test</a></li>
+<li class="chapter" data-level="12.3" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#contingency-tables-and-the-two-way-test"><i class="fa fa-check"></i><b>12.3</b> Contingency tables and the two-way test</a></li>
+<li class="chapter" data-level="12.4" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#standardized-residuals"><i class="fa fa-check"></i><b>12.4</b> Standardized residuals</a></li>
+<li class="chapter" data-level="12.5" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#odds-ratios"><i class="fa fa-check"></i><b>12.5</b> Odds ratios</a></li>
+<li class="chapter" data-level="12.6" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#bayes-factor"><i class="fa fa-check"></i><b>12.6</b> Bayes factor</a></li>
+<li class="chapter" data-level="12.7" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#categorical-analysis-beyond-the-2-x-2-table"><i class="fa fa-check"></i><b>12.7</b> Categorical analysis beyond the 2 X 2 table</a></li>
+<li class="chapter" data-level="12.8" data-path="modeling-categorical-relationships.html"><a href="modeling-categorical-relationships.html#beware-of-simpsons-paradox"><i class="fa fa-check"></i><b>12.8</b> Beware of Simpson’s paradox</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html"><i class="fa fa-check"></i><b>13</b> Modeling continuous relationships</a><ul>
+<li class="chapter" data-level="13.1" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#an-example-hate-crimes-and-income-inequality"><i class="fa fa-check"></i><b>13.1</b> An example: Hate crimes and income inequality</a><ul>
+<li class="chapter" data-level="13.1.1" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#quantifying-inequality-the-gini-index"><i class="fa fa-check"></i><b>13.1.1</b> Quantifying inequality: The Gini index</a></li>
+</ul></li>
+<li class="chapter" data-level="13.2" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#is-income-inequality-related-to-hate-crimes"><i class="fa fa-check"></i><b>13.2</b> Is income inequality related to hate crimes?</a></li>
+<li class="chapter" data-level="13.3" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#covariance-and-correlation"><i class="fa fa-check"></i><b>13.3</b> Covariance and correlation</a><ul>
+<li class="chapter" data-level="13.3.1" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#hypothesis-testing-for-correlations"><i class="fa fa-check"></i><b>13.3.1</b> Hypothesis testing for correlations</a></li>
+<li class="chapter" data-level="13.3.2" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#robust-correlations"><i class="fa fa-check"></i><b>13.3.2</b> Robust correlations</a></li>
+<li class="chapter" data-level="13.3.3" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#bayesian-correlation-analysis"><i class="fa fa-check"></i><b>13.3.3</b> Bayesian correlation analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="13.4" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#correlation-and-causation"><i class="fa fa-check"></i><b>13.4</b> Correlation and causation</a><ul>
+<li class="chapter" data-level="13.4.1" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#causal-graphs"><i class="fa fa-check"></i><b>13.4.1</b> Causal graphs</a></li>
+</ul></li>
+<li class="chapter" data-level="13.5" data-path="modeling-continuous-relationships.html"><a href="modeling-continuous-relationships.html#suggested-readings-9"><i class="fa fa-check"></i><b>13.5</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html"><i class="fa fa-check"></i><b>14</b> The General Linear Model</a><ul>
+<li class="chapter" data-level="14.1" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#linear-regression"><i class="fa fa-check"></i><b>14.1</b> Linear regression</a><ul>
+<li class="chapter" data-level="14.1.1" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#regression-to-the-mean"><i class="fa fa-check"></i><b>14.1.1</b> Regression to the mean</a></li>
+<li class="chapter" data-level="14.1.2" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#estimating-linear-regression-parameters"><i class="fa fa-check"></i><b>14.1.2</b> Estimating linear regression parameters</a></li>
+<li class="chapter" data-level="14.1.3" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#the-relation-between-correlation-and-regression"><i class="fa fa-check"></i><b>14.1.3</b> The relation between correlation and regression</a></li>
+<li class="chapter" data-level="14.1.4" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#standard-errors-for-regression-models"><i class="fa fa-check"></i><b>14.1.4</b> Standard errors for regression models</a></li>
+<li class="chapter" data-level="14.1.5" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#statistical-tests-for-regression-parameters"><i class="fa fa-check"></i><b>14.1.5</b> Statistical tests for regression parameters</a></li>
+<li class="chapter" data-level="14.1.6" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#quantifying-goodness-of-fit-of-the-model"><i class="fa fa-check"></i><b>14.1.6</b> Quantifying goodness of fit of the model</a></li>
+</ul></li>
+<li class="chapter" data-level="14.2" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#fitting-more-complex-models"><i class="fa fa-check"></i><b>14.2</b> Fitting more complex models</a></li>
+<li class="chapter" data-level="14.3" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#interactions-between-variables"><i class="fa fa-check"></i><b>14.3</b> Interactions between variables</a></li>
+<li class="chapter" data-level="14.4" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#what-does-predict-really-mean"><i class="fa fa-check"></i><b>14.4</b> What does “predict” really mean?</a><ul>
+<li class="chapter" data-level="14.4.1" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#cross-validation"><i class="fa fa-check"></i><b>14.4.1</b> Cross-validation</a></li>
+</ul></li>
+<li class="chapter" data-level="14.5" data-path="the-general-linear-model.html"><a href="the-general-linear-model.html#suggested-readings-10"><i class="fa fa-check"></i><b>14.5</b> Suggested readings</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="comparing-means.html"><a href="comparing-means.html"><i class="fa fa-check"></i><b>15</b> Comparing means</a><ul>
+<li class="chapter" data-level="15.1" data-path="comparing-means.html"><a href="comparing-means.html#students-t-test"><i class="fa fa-check"></i><b>15.1</b> Student’s T test</a></li>
+<li class="chapter" data-level="15.2" data-path="comparing-means.html"><a href="comparing-means.html#the-t-test-as-a-linear-model"><i class="fa fa-check"></i><b>15.2</b> The t-test as a linear model</a><ul>
+<li class="chapter" data-level="15.2.1" data-path="comparing-means.html"><a href="comparing-means.html#effect-sizes-for-comparing-two-means"><i class="fa fa-check"></i><b>15.2.1</b> Effect sizes for comparing two means</a></li>
+</ul></li>
+<li class="chapter" data-level="15.3" data-path="comparing-means.html"><a href="comparing-means.html#bayes-factor-for-mean-differences"><i class="fa fa-check"></i><b>15.3</b> Bayes factor for mean differences</a></li>
+<li class="chapter" data-level="15.4" data-path="comparing-means.html"><a href="comparing-means.html#paired-t-tests"><i class="fa fa-check"></i><b>15.4</b> Paired t-tests</a><ul>
+<li class="chapter" data-level="15.4.1" data-path="comparing-means.html"><a href="comparing-means.html#sign-test"><i class="fa fa-check"></i><b>15.4.1</b> Sign test</a></li>
+<li class="chapter" data-level="15.4.2" data-path="comparing-means.html"><a href="comparing-means.html#paired-t-test"><i class="fa fa-check"></i><b>15.4.2</b> Paired t-test</a></li>
+<li class="chapter" data-level="15.4.3" data-path="comparing-means.html"><a href="comparing-means.html#the-paired-t-test-as-a-linear-model"><i class="fa fa-check"></i><b>15.4.3</b> The paired t-test as a linear model</a></li>
+</ul></li>
+<li class="chapter" data-level="15.5" data-path="comparing-means.html"><a href="comparing-means.html#comparing-more-than-two-means"><i class="fa fa-check"></i><b>15.5</b> Comparing more than two means</a><ul>
+<li class="chapter" data-level="15.5.1" data-path="comparing-means.html"><a href="comparing-means.html#analysis-of-variance"><i class="fa fa-check"></i><b>15.5.1</b> Analysis of variance</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="practical-example.html"><a href="practical-example.html"><i class="fa fa-check"></i><b>16</b> The process of statistical modeling: A practical example</a><ul>
+<li class="chapter" data-level="16.1" data-path="practical-example.html"><a href="practical-example.html#the-process-of-statistical-modeling"><i class="fa fa-check"></i><b>16.1</b> The process of statistical modeling</a><ul>
+<li class="chapter" data-level="16.1.1" data-path="practical-example.html"><a href="practical-example.html#specify-your-question-of-interest"><i class="fa fa-check"></i><b>16.1.1</b> 1: Specify your question of interest</a></li>
+<li class="chapter" data-level="16.1.2" data-path="practical-example.html"><a href="practical-example.html#identify-or-collect-the-appropriate-data"><i class="fa fa-check"></i><b>16.1.2</b> 2: Identify or collect the appropriate data</a></li>
+<li class="chapter" data-level="16.1.3" data-path="practical-example.html"><a href="practical-example.html#prepare-the-data-for-analysis"><i class="fa fa-check"></i><b>16.1.3</b> 3: Prepare the data for analysis</a></li>
+<li class="chapter" data-level="16.1.4" data-path="practical-example.html"><a href="practical-example.html#determine-the-appropriate-model"><i class="fa fa-check"></i><b>16.1.4</b> 4. Determine the appropriate model</a></li>
+<li class="chapter" data-level="16.1.5" data-path="practical-example.html"><a href="practical-example.html#fit-the-model-to-the-data"><i class="fa fa-check"></i><b>16.1.5</b> 5. Fit the model to the data</a></li>
+<li class="chapter" data-level="16.1.6" data-path="practical-example.html"><a href="practical-example.html#criticize-the-model-to-make-sure-it-fits-properly"><i class="fa fa-check"></i><b>16.1.6</b> 6. Criticize the model to make sure it fits properly</a></li>
+<li class="chapter" data-level="16.1.7" data-path="practical-example.html"><a href="practical-example.html#test-hypothesis-and-quantify-effect-size"><i class="fa fa-check"></i><b>16.1.7</b> 7. Test hypothesis and quantify effect size</a></li>
+<li class="chapter" data-level="16.1.8" data-path="practical-example.html"><a href="practical-example.html#what-about-possible-confounds"><i class="fa fa-check"></i><b>16.1.8</b> What about possible confounds?</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html"><i class="fa fa-check"></i><b>17</b> Doing reproducible research</a><ul>
+<li class="chapter" data-level="17.1" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#how-we-think-science-should-work"><i class="fa fa-check"></i><b>17.1</b> How we think science should work</a></li>
+<li class="chapter" data-level="17.2" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#how-science-sometimes-actually-works"><i class="fa fa-check"></i><b>17.2</b> How science (sometimes) actually works</a></li>
+<li class="chapter" data-level="17.3" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#the-reproducibility-crisis-in-science"><i class="fa fa-check"></i><b>17.3</b> The reproducibility crisis in science</a><ul>
+<li class="chapter" data-level="17.3.1" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#positive-predictive-value-and-statistical-significance"><i class="fa fa-check"></i><b>17.3.1</b> Positive predictive value and statistical significance</a></li>
+<li class="chapter" data-level="17.3.2" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#the-winners-curse"><i class="fa fa-check"></i><b>17.3.2</b> The winner’s curse</a></li>
+</ul></li>
+<li class="chapter" data-level="17.4" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#questionable-research-practices"><i class="fa fa-check"></i><b>17.4</b> Questionable research practices</a><ul>
+<li class="chapter" data-level="17.4.1" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#esp-or-qrp"><i class="fa fa-check"></i><b>17.4.1</b> ESP or QRP?</a></li>
+</ul></li>
+<li class="chapter" data-level="17.5" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#doing-reproducible-research-1"><i class="fa fa-check"></i><b>17.5</b> Doing reproducible research</a><ul>
+<li class="chapter" data-level="17.5.1" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#pre-registration"><i class="fa fa-check"></i><b>17.5.1</b> Pre-registration</a></li>
+<li class="chapter" data-level="17.5.2" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#reproducible-practices"><i class="fa fa-check"></i><b>17.5.2</b> Reproducible practices</a></li>
+<li class="chapter" data-level="17.5.3" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#replication"><i class="fa fa-check"></i><b>17.5.3</b> Replication</a></li>
+</ul></li>
+<li class="chapter" data-level="17.6" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#doing-reproducible-data-analysis"><i class="fa fa-check"></i><b>17.6</b> Doing reproducible data analysis</a></li>
+<li class="chapter" data-level="17.7" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#conclusion-doing-better-science"><i class="fa fa-check"></i><b>17.7</b> Conclusion: Doing better science</a></li>
+<li class="chapter" data-level="17.8" data-path="doing-reproducible-research.html"><a href="doing-reproducible-research.html#suggested-readings-11"><i class="fa fa-check"></i><b>17.8</b> Suggested Readings</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Statistical Thinking for the 21st Century</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="header">
+<h1 class="title">Statistical Thinking for the 21st Century</h1>
+<h4 class="author"><em>Copyright 2018 Russell A. Poldrack</em></h4>
+<h4 class="date"><em>Draft: 2018-11-25</em></h4>
+</div>
+<div id="preface" class="section level1 unnumbered">
+<h1>Preface</h1>
+<div id="why-does-this-book-exist" class="section level2">
+<h2><span class="header-section-number">0.1</span> Why does this book exist?</h2>
+<p>In 2018 I began teaching an undergraduate statistics course at Stanford (Psych 10/Stats 60). I had never taught statistics before, and this was a chance to shake things up. I have been increasingly unhappy with undergraduate statistics education in psychology, and I wanted to bring a number of new ideas and approaches to the class. In particular, I wanted to bring to bear the approaches that are increasingly used in real statistical practice in the 21st century. As Brad Efron and Trevor Hastie laid out so nicely in their book “Computer Age Statistical Inference: Algorithms, Evidence, and Data Science”, these methods take advantage of today’s increased computing power to solve statistical problems in ways that go far beyond the more standard methods that are usually taught in the undergraduate statistics course for psychology students.</p>
+<p>The first year that I taught the class, I used Andy Field’s amazing graphic novel statistics book, “An Adventure in Statistics”, as the textbook. There are many things that I really like about this book – in particular, I like the way that it frames statistical practice around the building of models, and treats null hypothesis testing with sufficient caution (though insufficient disdain, in my opinion). Unfortunately, most of my students hated the book, primarily because it involved wading through a lot of story to get to the statistical knowledge. I also found it wanting because there are a number of topics (particular those from the field of artificial intelligence known as <em>machine learning</em>) that I wanted to include but were not discussed in his book. I ultimately came to feel that the students would be best served by a book that follows very closely to my lectures, so I started writing down my lectures into a set of computational notebooks that would ultimately become this book. The outline of this book follows roughly that of Field’s book, since the lectures were originally based in large part on the flow of that book, but the content is substantially different (and also much less fun and clever).</p>
+</div>
+<div id="youre-not-a-statistician---why-should-we-listen-to-you" class="section level2">
+<h2><span class="header-section-number">0.2</span> You’re not a statistician - why should we listen to you?</h2>
+<p>I am trained as a psychologist and neuroscientist, not a statistician. However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics. Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches. There are almost certainly some things in this book that would annoy a real statistician (for example, I’m sure that there are places where I should have put a <span class="math inline">\(\hat{hat}\)</span> on a variable but did not).</p>
+<p>Having said that, I welcome input from readers with greater statistical expertise than mine.</p>
+</div>
+<div id="why-r" class="section level2">
+<h2><span class="header-section-number">0.3</span> Why R?</h2>
+<p>In my course, students learn to analyze data hands-on using the R language. The question “Why R?” could be interpreted to mean “Why R instead of a graphical software package like (insert name here)?”. After all, most of the students who enroll in my class have never programmed before, so teaching them to program is going to take away from instruction in statistical concepts. My answer is that I think that the best way to learn statistical tools is to work directly with data, and that working with graphical packages insulates one from the data and methods in way that impedes true understanding. In addition, for many of the students in my class this may be the only course in which they are exposed to programming; given that programming is an essential ability in a growing number of academic fields, I think that providing these students with basic programming literacy is critical to their future success, and will hopefully inspire at least a few of them to learn more.</p>
+<p>The question could also be interpreted to mean “Why R instead of (insert language here)?”. On this question I am much more conflicted, because I deeply dislike R as a programming language (I greatly prefer Python). Why then do I use it? The first answer to the question is practical – nearly all of the potential teaching assistants (mostly graduate students in our department) have experience with R, since our graduate statistics course uses R. In fact, most of them have much greater skill with R than I do! On the other hand, relatively few of them have expertise in Python. Thus, if I want an army of skilled teaching assistants, it makes sense to use R.</p>
+<p>The other reason is that the free Rstudio software makes using R relatively easy for new users. In particular, I like the RMarkdown Notebook feature that allows the mixing of narrative and executable code with integrated output. It’s similar in spirit to the Jupyter notebooks that many of us use for Python programming, but I find it easier to deal with because it’s just a plain text file. In my class, I give students a skeleton RMarkdown file for problem sets, and they submit the file with their solution added, which I then score using a set of automated grading scripts.</p>
+</div>
+<div id="the-golden-age-of-data" class="section level2">
+<h2><span class="header-section-number">0.4</span> The golden age of data</h2>
+<p>Throughout this book I have tried when possible to use examples from real data. This is now very easy because we are swimming in open datasets, as governments, scientists, and companies are increasingly making data freely available. I think that using real datasets is important because it prepares students to work with real data rather than toy datasets, which I think should be one of the major goals of statistical training. It also helps us realize (as we will see at various points throughout the book) that data don’t always come to us ready to analyze, and often need <em>wrangling</em> to help get them into shape. Using real data also shows that the idealized statistical distributions often assumed in statistical methods don’t always hold in the real world – for example, as we will see in Chapter <a href="summarizing-data.html#summarizing-data">4</a>, distributions of some real-world quantities (like the number of friends on Facebook) can have very long tails that can break many standard assumptions.</p>
+</div>
+<div id="an-open-source-book" class="section level2">
+<h2><span class="header-section-number">0.5</span> An open source book</h2>
+<p>This book is meant to be a living document, which is why its source is available online at <a href="https://github.com/poldrack/psych10-book" class="uri">https://github.com/poldrack/psych10-book</a>. If you find any errors in the book or want to make a suggestion for how to improve it, please open an issue on the Github site. Even better, submit a pull request with your suggested change.</p>
+</div>
+<div id="acknowledgements" class="section level2">
+<h2><span class="header-section-number">0.6</span> Acknowledgements</h2>
+<p>I’d first like to thank Susan Holmes, who first inspired me to consider writing my own statistics book. Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse. Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. Particular thanks also go to Yihui Xie, creator of the Bookdown package, for improving the book’s use of Bookdown features (including the ability for users to directly generate edits via the Edit button).</p>
+<p>I’d also like to thank others who provided helpful comments and suggestions: Wesley Tansey, Jack Van Horn.</p>
+<p>Thanks to the following Twitter users for helpful suggestions: @enoriverbend</p>
+<p>Thanks to the following individuals/usernames for submitting edits or issues via Github: Mehdi Rahim, Shanaathanan Modchalingam, Alan He, basicv8vc, jiamingkong</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+<a href="introduction.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="book_assets/gitbook-2.6.7/js/app.min.js"></script>
+<script src="book_assets/gitbook-2.6.7/js/lunr.js"></script>
+<script src="book_assets/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="book_assets/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="book_assets/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="book_assets/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="book_assets/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"linkedin": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/poldrack/psych10-book/edit/master/index.Rmd",
+"text": "Edit"
+},
+"download": ["StatsThinking21.pdf", "StatsThinking21.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "";
+    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(src))
+      src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
