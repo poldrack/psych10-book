@@ -25,12 +25,12 @@ library(NHANES)
 # drop duplicated IDs within the NHANES dataset
 NHANES <- 
   NHANES %>% 
-  dplyr::distinct(ID,.keep_all=TRUE)
+  dplyr::distinct(ID,.keep_all = TRUE)
 
 NHANES_adult <- 
   NHANES %>%
   drop_na(PhysActive,BMI) %>%
-  subset(Age>=18)
+  subset(Age >= 18)
 
 ```
 
@@ -44,20 +44,20 @@ In this chapter we will introduce the ideas behind the use of statistics to make
 
 ## Null Hypothesis Statistical Testing (NHST)
 
-The specific type of hypothesis testing that we will discuss is known (for reasons that will become clear) as *null hypothesis staistical testing* (NHST).  If you pick up almost any scientific or biomedical research publication, you will see NHST being used to test hypotheses, and in their introductory psycholology textbook, Gerrig & Zimbardo (2002) referred to NHST as the “backbone of psychological research”.  Thus, learning how to use and interpret the results from hypothesis testing is essential to understand the results from this research.
+The specific type of hypothesis testing that we will discuss is known (for reasons that will become clear) as *null hypothesis statistical testing* (NHST).  If you pick up almost any scientific or biomedical research publication, you will see NHST being used to test hypotheses, and in their introductory psycholology textbook, Gerrig & Zimbardo (2002) referred to NHST as the “backbone of psychological research”.  Thus, learning how to use and interpret the results from hypothesis testing is essential to understand the results from this research.
 
 It is also important for you to know, however, that NHST is deeply flawed, and that many statisticians and researchers (including myself) think that it has been the cause of serious problems in science, which we will discuss in Chapter \@ref(doing-reproducible-research).  For more than 50 years, there have been calls to abandon NHST in favor of other approaches (like those that we will discuss in the following chapters):
 
 - “The test of statistical significance in psychological research may be taken as an instance of a kind of essential mindlessness in the conduct of research” (Bakan, 1966)
 - Hypothesis testing is “a wrongheaded view about what constitutes scientific progress” (Luce, 1988)
  
-NHST is also widely misunderstood, largely because it violates out intuitions about how statistical hypothesis testing should work.  Let's look at an example to see.
+NHST is also widely misunderstood, largely because it violates our intuitions about how statistical hypothesis testing should work.  Let's look at an example to see.
 
 ## Null hypothesis statistical testing: An example
 
-There is great interest in the use of body-worn cameras by police officers, which are thought to reduce the use of force and improve officer behavior.  However, in order to establish this we need experimental evidence, and it has become increasingly common for governments to use randomized controlled trials to test such ideas.  A randomized controlled trial of the effectiveness of body-worn cameras was performed by the Washington, DC government and DC Metropolitan Police Department in 2015/2016 in order to test this.  Officers were randomly assigned to wear a body-worn camera or not, and their behavior was then tracked over time to determine whether the cameras resulted in less usee of force and fewer civilian complaints about officer behavior.  
+There is great interest in the use of body-worn cameras by police officers, which are thought to reduce the use of force and improve officer behavior.  However, in order to establish this we need experimental evidence, and it has become increasingly common for governments to use randomized controlled trials to test such ideas.  A randomized controlled trial of the effectiveness of body-worn cameras was performed by the Washington, DC government and DC Metropolitan Police Department in 2015/2016 in order to test the hypothesis that body-worn cameras are effective.  Officers were randomly assigned to wear a body-worn camera or not, and their behavior was then tracked over time to determine whether the cameras resulted in less use of force and fewer civilian complaints about officer behavior.  
 
-Before we get to the results, let's ask how you would think the statistical analysis might work. Let's say we want to specifically test the hypothesis of whether the use of force is decreased by the wearing of cameras. The randomized controlled trial provides us with the data to test the hypothesis -- namely, the rates of use of force by officers assigned to either the camera or control groups.  The next obvious step is to look at the data and determine whether they provide convincing evidence for or against the hypothesis.  That is: What is the likelihood that body-worn cameras reduce the use of force, given the data and everything else we know?
+Before we get to the results, let's ask how you would think the statistical analysis might work. Let's say we want to specifically test the hypothesis of whether the use of force is decreased by the wearing of cameras. The randomized controlled trial provides us with the data to test the hypothesis -- namely, the rates of use of force by officers assigned to either the camera or control groups.  The next obvious step is to look at the data and determine whether they provide convincing evidence for or against this hypothesis.  That is: What is the likelihood that body-worn cameras reduce the use of force, given the data and everything else we know?
 
 It turns out that this is *not* how null hypothesis testing works.  Instead, we first take our hypothesis of interest (i.e. whether body-worn cameras reduce use of force), and flip it on its head, creating a *null hypothesis* -- in this case, the null hypothesis would be that cameras do not reduce use of force.  Importantly, we then assume that the null hypothesis is true. We then look at the data, and determine whether the data are sufficiently unlikely under the null hypothesis that we can reject the null in favor of the *alternative hypothesis* which is our hypothesis of interest.  If there is not sufficient evidence to reject the null, then we say that we "failed to reject" the null.  
 
@@ -88,26 +88,58 @@ For step 1, we formulate a prediction based on our hypothesis: BMI should be gre
 For step 2, we collect some data.  In this case, we will sample 250 individuals from the NHANES dataset.  Figure \@ref(fig:bmiSample) shows an example of such a sample, with BMI shown separately for active and inactive individuals.
 
 ```{r}
-# sample 250 adults from NHANES and compute BMI separately for active
+# sample 250 adults from NHANES and compute mean BMI separately for active
 # and inactive individuals
 
 sampSize <- 250
-NHANES_sample <- NHANES_adult %>%
+
+NHANES_sample <- 
+  NHANES_adult %>%
   sample_n(sampSize)
 
 sampleSummary <-
   NHANES_sample %>%
-  group_by(PhysActive) %>% 
+  group_by(PhysActive) %>%
   summarize(
-    N=length(BMI),
-    mean=mean(BMI),
-    sd=sd(BMI)
+    N = length(BMI),
+    mean = mean(BMI),
+    sd = sd(BMI)
   )
 
-meanDiff=sampleSummary[1,3] - sampleSummary[2,3]
+# calculate the mean difference in BMI between active 
+# and inactive individuals; we'll use this later to calculate the t-statistic
+meanDiff <- 
+  sampleSummary %>% 
+  select(
+    PhysActive,
+    mean
+  ) %>% 
+  spread(PhysActive, mean) %>% 
+  mutate(
+    meanDiff = No - Yes
+  ) %>% 
+  pull(meanDiff)
 
+# calculate the summed variances in BMI for active 
+# and inactive individuals; we'll use this later to calculate the t-statistic
+sumVariance <- 
+  sampleSummary %>% 
+  select(
+    PhysActive,
+    N,
+    sd
+  ) %>% 
+  gather(column, stat, N:sd) %>% 
+  unite(temp, PhysActive, column) %>% 
+  spread(temp, stat) %>% 
+  mutate(
+    sumVariance = No_sd**2 / No_N + Yes_sd**2 / Yes_N
+  ) %>% 
+  pull(sumVariance)
+
+
+# print sampleSummary table
 pander(sampleSummary)
-
 ```
 
 ```{r bmiSample, echo=FALSE,fig.cap="Box plot of BMI data from a sample of adults from the NHANES dataset, split by whether they reported engaging in regular physical activity.",fig.width=4,fig.height=4,out.height='50%'}
@@ -175,48 +207,50 @@ plot_grid(p1,p2)
 This is the step where NHST starts to violate our intuition -- rather than determining the likelihood that the null hypothesis is true given the data, we instead determine the likelihood of the data under the null hypothesis - because we started out by assuming that the null hypothesis is true!  To do this, we need to know the probability distribution for the statistic under the null hypothesis, so that we can ask how likely the data are under that distribution. Before we move to our BMI data, let's start with some simpler examples. 
 
 ##### Randomization: A very simple example
-Let's say that we wish to determine whether a coin is fair.  To collect data, we flip the coin 100 times, and we count 70 heads.  In this example, $H_0: P(heads)=0.5$ and $H_A: P(heads) \neq 0.5$, and our test statistic is simply the number of heads that we counted.  The question that we then want to as is: How likely is it that we would observe 70 heads if the true probability of heads is 0.5.  We can imagine that it might happen very occasionally just by chance, but doesn't seem very likely. To quantify this, we can use the *binomial distribution*:
+Let's say that we wish to determine whether a coin is fair.  To collect data, we flip the coin 100 times, and we count 70 heads.  In this example, $H_0: P(heads)=0.5$ and $H_A: P(heads) \neq 0.5$, and our test statistic is simply the number of heads that we counted.  The question that we then want to as is: How likely is it that we would observe 70 heads if the true probability of heads is 0.5.  We can imagine that this might happen very occasionally just by chance, but doesn't seem very likely. To quantify this probability, we can use the *binomial distribution*:
 
 $$
 P(X < k) = \sum_{i=0}^k \binom{N}{k} p^i (1-p)^{(n-i)}
 $$
-This tells us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the probability of a certain number or more, which we can obtain by subtracting from one:
+This equation will tell us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the probability of a certain number or more, which we can obtain by subtracting from one:
 
 $$
 P(X \ge k) = 1 - P(X < k)
 $$
 
-We can compute the probability for our example as follows:
+We can compute the probability for our example using the `pbinom()` function in R as follows:
 
 ```{r}
 # compute the probability of 69 or fewer heads, when P(heads)=0.5
-p_lt_70 <- pbinom(69,100,0.5)
-sprintf('probability of 69 or fewer heads given P(heads)=0.5: %0.6f',p_lt_70)
+p_lt_70 <- pbinom(69, 100, 0.5) 
+sprintf("probability of 69 or fewer heads given P(heads)=0.5: %0.6f", p_lt_70)
 
 # the probability of 70 or more heads is simply the complement of p_lt_70
 p_ge_70 <- 1 - p_lt_70
-sprintf('probability of 70 or more heads given P(heads)=0.5: %0.6f',p_ge_70)
+sprintf("probability of 70 or more heads given P(heads)=0.5: %0.6f", p_ge_70)
 ```
 
 
-This computation shows us that the likelihood of getting 70 heads if the coin is indeed fair is very small.  Now, what if we didn't have the `pbinom()` function to tell us the probability of that number of heads?  We could instead determine it by simulation -- we repeatly flip a coin 100 times using a true probability of 0.5, and then compute the distribution of number of heads across those simulation runs.  Figure \@ref(fig:coinFlips) shows the result from this simulation.
+This computation shows us that the likelihood of getting 70 heads if the coin is indeed fair is very small.  Now, what if we didn't have the `pbinom()` function to tell us the probability of that number of heads?  We could instead determine it by simulation -- we repeatly flip a coin 100 times using a true probability of 0.5, and then compute the distribution of the number of heads across those simulation runs.  Figure \@ref(fig:coinFlips) shows the result from this simulation.
 
 ```{r}
 # simulate tossing of 100,000 flips of 100 coins to identify empirical 
 # probability of 70 or more heads out of 100 flips
 
 # create function to toss coins
-tossCoins <- function(){
-  flips <- runif(100)>0.5
+tossCoins <- function() {
+  flips <- runif(100) > 0.5 
   return(sum(flips))
 }
 
 # use a large number of replications since this is fast
-coinFlips <- replicate(100000,tossCoins())
+coinFlips <- replicate(100000, tossCoins())
 
-p_ge_70_sim <- mean(coinFlips>=70)
-sprintf('empirical probability of 70 or more heads given P(heads)=0.5: %0.6f',p_ge_70_sim)
-
+p_ge_70_sim <- mean(coinFlips >= 70)
+sprintf(
+  "empirical probability of 70 or more heads given P(heads)=0.5: %0.6f", 
+  p_ge_70_sim
+)
 ```
 
 ```{r coinFlips,echo=FALSE,fig.cap="Distribution of numbers of heads (out of 100 flips) across 100,000 simulated runs.",fig.width=4,fig.height=4,out.height='50%'}
@@ -226,13 +260,16 @@ ggplot(data.frame(coinFlips),aes(coinFlips))  +
 
 ```
 
-Here we can see that the probability computed via simulation (.00002) is very close to the theoretical probability (.00004).  
+Here we can see that the probability computed via simulation (`r I(p_ge_70_sim)`) is very close to the theoretical probability (.00004).  
 
-Let's do the analogous computation for our BMI example. First we compute the t statistic using the values from our sample:
+Let's do the analogous computation for our BMI example. First we compute the t statistic using the values from our sample that we calculated above:
 
 ```{r}
-tStat <- (sampleSummary[1,3] - sampleSummary[2,3])/ sqrt(sampleSummary[1,4]**2/sampleSummary[1,2] + sampleSummary[2,4]**2/sampleSummary[2,2] )
-sprintf('t statistic = %0.3f',tStat)
+tStat <- 
+  meanDiff / sqrt(sumVariance)
+
+sprintf("t statistic = %0.3f", tStat)
+
 ```
 
 
@@ -240,9 +277,10 @@ The question that we then want to ask is: What is the likelihood that we would f
 We can use the t distribution to determine this probability. Our sample size is 250, so the appropriate t distribution has 248 degrees of freedom.  We can use the `pt()` function in R to determine the probability of finding a value of the t-statistic greater than or equal to our observed value.  Note that we want to know the probability of a value greater than our observed value, but by default `pt()` gives us the probability of a value less than the one that we provide it, so we have to tell it explicitly to provide us with the "upper tail" probability (by setting `lower.tail = FALSE`).
 
 ```{r}
-pvalue_tdist <- pt(tStat$mean,df=248, lower.tail = FALSE)
-sprintf('p(t > %0.2f, df = 248) = %0.3f',tStat$mean,pvalue_tdist)
+pvalue_tdist <- 
+  pt(tStat, df = 248, lower.tail = FALSE)
 
+sprintf("p(t > %0.2f, df = 248) = %0.3f", tStat, pvalue_tdist)
 ```
 
 This tells us that our observed t-statistic value of `r I(tStat$mean)` is relatively unlikely if the null hypothesis really is true.
@@ -252,10 +290,15 @@ In this case, we used a directional hypothesis, so we only had to look at one en
 
 
 ```{r}
-pvalue_tdist_twotailed <- pt(tStat$mean,df=248, lower.tail = FALSE) + 
-  pt(-1*tStat$mean,df=248, lower.tail = TRUE)
-sprintf('p(t > %0.2f or t< %0.2f, df = 248) = %0.3f',tStat$mean,-1*tStat$mean,pvalue_tdist_twotailed)
+pvalue_tdist_twotailed <- 
+  pt(tStat, df = 248, lower.tail = FALSE) +
+  pt(-1 * tStat, df = 248, lower.tail = TRUE)
 
+sprintf(
+  "p(t > %0.2f or t< %0.2f, df = 248) = %0.3f", 
+  tStat, 
+  -1 * tStat, pvalue_tdist_twotailed
+)
 ```
 
 Here we see that the p value for the two-tailed test is twice as large as that for the one-tailed test, which reflects the fact that an extreme value is less surprising since it could have occurred in either direction.
@@ -278,17 +321,19 @@ Let's start with a simple example. Let's say that we want to compare the mean sq
 # reset random seed for this example
 set.seed(12345678)
 
-# create a function to round values to nearest product of 5, 
+# create a function to round values to nearest product of 5,
 # to keep example simple
-roundToNearest5 <- function(x,base=5){ 
-        return(base*round(x/base))
-} 
+roundToNearest5 <- function(x, base = 5) {
+  return(base * round(x / base))
+}
 
 # create and show data frame containing simulated data
-squatDf <- tibble(group=as.factor(c(rep('FB',5),rep('XC',5))),
-              squat=roundToNearest5(c(rnorm(5)*30 + 300,rnorm(5)*30 + 140)))
-pander(squatDf)
+squatDf <- tibble(
+  group = as.factor(c(rep("FB", 5), rep("XC", 5))),
+  squat = roundToNearest5(c(rnorm(5) * 30 + 300, rnorm(5) * 30 + 140))
+)
 
+pander(squatDf)
 ```
 
 ```{r squatPlot,echo=FALSE,fig.cap="Box plots of simulated squatting ability for football players and cross-country runners.",fig.width=4,fig.height=4,out.height='50%'}
@@ -304,10 +349,15 @@ From the plot in Figure \@ref(fig:squatPlot) it's clear that there is a large di
 ```{r}
 # compute and print t statistic comparing two groups
 
-tt <- t.test(squat~group,data=squatDf,alternative='greater',var.equal=TRUE)
+tt <- 
+  t.test(
+    squat ~ group, 
+    data = squatDf, 
+    alternative = "greater", 
+    var.equal = TRUE
+  )
 
-sprintf('p(t > %0.2f, df = 8) = %0.5f',tt$statistic,tt$p.value)
-
+sprintf("p(t > %0.2f, df = 8) = %0.5f", tt$statistic, tt$p.value)
 ```
 
 This shows that the likelihood of such a difference under the null hypothesis is very small, using the *t* distribution to define the null.   Now let's see how we could answer the same question using randomization.  The basic idea is that if the null hypothesis of no difference between groups is true, then it shouldn't matter which group one comes from (football players versus cross-country runners) -- thus, to create data that are like our actual data but also conform to the null hypothesis, we can randomly reorder the group labels for the individuals in the dataset, and then recompute the difference between the groups. The results of such a shuffle are shown in Figure \@ref(fig:scramPlot).
@@ -315,12 +365,13 @@ This shows that the likelihood of such a difference under the null hypothesis is
 ```{r}
 # create a scrambled version of the group membership variable
 
-dfScram <- 
-  squatDf %>% 
+dfScram <-
+  squatDf %>%
   mutate(
-    scrambledGroup=sample(group)
+    scrambledGroup = sample(group)
   ) %>%
-  dplyr::select(-group)
+  select(-group)
+
 pander(dfScram)
 
 ```
@@ -340,19 +391,24 @@ After scrambling the labels, we see that the two groups are now much more simila
 
 nRuns <- 10000
 
-shuffleAndMeasure <- function(df){
-  dfScram <- df %>% 
+shuffleAndMeasure <- function(df) {
+  dfScram <- 
+    df %>%
     mutate(
-      scrambledGroup=sample(group)
-    ) 
-  tt <- t.test(squat~scrambledGroup,data=dfScram,
-               alternative='greater',var.equal=TRUE)
+      scrambledGroup = sample(group)
+    )
+  tt <- t.test(
+    squat ~ scrambledGroup,
+    data = dfScram,
+    alternative = "greater", 
+    var.equal = TRUE
+  )
   return(tt$statistic)
 }
 
-shuffleDiff <- replicate(nRuns,shuffleAndMeasure(squatDf))
+shuffleDiff <- replicate(nRuns, shuffleAndMeasure(squatDf))
 
-sprintf('mean t value across shuffles = %0.3f',mean(shuffleDiff))
+sprintf("mean t value across shuffles = %0.3f", mean(shuffleDiff))
 ```
 
 We can now look at the distribution of mean differences across the shuffled datasets. Figure \@ref(fig:shuffleHist) shows the histogram of the group differences across all of the random shuffles.  As expected under the null hypothesis, this distribution is centered at zero.  
@@ -375,15 +431,14 @@ We can see that the distribution of t values after shuffling roughly follows the
 # compute number of runs on which t statistic for shuffle data was 
 # equal to observed t statistic
 
-equalSum <- sum(shuffleDiff==tt$statistic)
-sprintf('Number of runs on which shuffled t == observed t: %d',equalSum)
+equalSum <- sum(shuffleDiff == tt$statistic)
+sprintf("Number of runs on which shuffled t == observed t: %d", equalSum)
 
-# compute number of runs on which t statistic for shuffle data was 
+# compute number of runs on which t statistic for shuffle data was
 # equal to observed t statistic times -1
 
-equalSumMinus <- sum(shuffleDiff==tt$statistic*-1)
-sprintf('Number of runs on which shuffled t == observed t*-1: %d',equalSumMinus)
-
+equalSumMinus <- sum(shuffleDiff == tt$statistic * -1)
+sprintf("Number of runs on which shuffled t == observed t*-1: %d", equalSumMinus)
 ```
 
 There are `r I(equalSum)` shuffle runs on which the t statistic for the shuffled data was exactly the same as the observed data -- which means that shuffling resulted in the same labeling as the actual data!  This is unlikely, but not *that* unlikely, and we can actually compute its likelihood using a bit of probability theory.  The number of possible permutations of 10 items is $10!$ which comes out to 3628800.  The number of possible rearrangements of each set of 5 is $5!$ which comes out to 120, so the number of possible rearrangements of two sets of five is $5! * 5!$ or 14400.  Thus, we expect that 0.0039 of the random labelings should come out exactly the same as the original, which is fairly close to the 0.0033 that we see in our simulation. We have a similar expectation for the number of times that the labeling will be exactly opposite of the true labeling, giving us the negative of the observed t value.
@@ -393,8 +448,12 @@ We can compute the p-value from the randomized data by measuring how many of the
 ```{r}
 # compute p value using randomization
 pvalRandomization <- mean(shuffleDiff >= tt$statistic)
-sprintf('p(t > %0.2f, df = 8) using randomization = %0.5f',tt$statistic,pvalRandomization)
 
+sprintf(
+  'p(t > %0.2f, df = 8) using randomization = %0.5f',
+  tt$statistic,
+  pvalRandomization
+)
 ```
 
 This p-value is very similar to the p-value that we obtained using the t distribution, and both are quite extreme, suggesting that the observed data are very unlikely to have arisen if the null hypothesis is true - and in this case we *know* that it's not true, because we generated the data.
@@ -406,25 +465,29 @@ Now let's use randomization to compute the p-value for the BMI/activity example.
 ```{r}
 # create function to shuffle BMI data
 
-shuffleBMIstat <- function(){
-  bmiDataShuffled <- NHANES_sample %>%
-    subset(
-      select=c(BMI,PhysActive)
-    ) %>%
+shuffleBMIstat <- function() {
+  bmiDataShuffled <- 
+    NHANES_sample %>%
+    select(BMI, PhysActive) %>%
     mutate(
-      PhysActive=sample(PhysActive)
+      PhysActive = sample(PhysActive)
     )
   # compute the difference
-  simResult <- t.test(BMI~PhysActive,data=bmiDataShuffled,
-                      var.equal=TRUE)
+  simResult <- t.test(
+    BMI ~ PhysActive,
+    data = bmiDataShuffled,
+    var.equal = TRUE
+  )
   return(simResult$statistic)
 }
 
 # run function 5000 times and save output
 
 nRuns <- 5000
-meanDiffSimDf <- data.frame(meanDiffSim=replicate(nRuns,shuffleBMIstat()))
-
+meanDiffSimDf <- 
+  data.frame(
+    meanDiffSim = replicate(nRuns, shuffleBMIstat())
+  )
 ```
 
 Let's look at the results.  Figure \@ref(fig:simDiff) shows the distribution of t values from the shuffled samples, and we can also compute the probability of finding a value as large or larger than the observed value:
@@ -432,23 +495,44 @@ Let's look at the results.  Figure \@ref(fig:simDiff) shows the distribution of 
 ```{r}
 # compute the empirical probability of t values larger than observed
 # value under the randomization null
-bmtTTest <- t.test(BMI~PhysActive,data=NHANES_sample,
-                   var.equal=TRUE,alternative='greater')
+bmtTTest <- 
+  t.test(
+  BMI ~ PhysActive,
+  data = NHANES_sample,
+  var.equal = TRUE, 
+  alternative = "greater"
+)
 
-bmiPvalRand <- mean(meanDiffSimDf$meanDiffSim>=bmtTTest$statistic)
-sprintf('p(mean > %0.2f, df = 248) using randomization = %0.5f',bmtTTest$statistic,bmiPvalRand)
-sprintf('p(mean > %0.2f, df = 248) using parametric t-test = %0.5f',bmtTTest$statistic,bmtTTest$p.value)
+bmiPvalRand <- 
+  mean(meanDiffSimDf$meanDiffSim >= bmtTTest$statistic)
 
+sprintf(
+  "p(mean > %0.2f, df = 248) using randomization = %0.5f", 
+  bmtTTest$statistic, 
+  bmiPvalRand
+)
 
+sprintf(
+  "p(mean > %0.2f, df = 248) using parametric t-test = %0.5f", 
+  bmtTTest$statistic, 
+  bmtTTest$p.value
+  )
 ```
 
 ```{r simDiff,echo=FALSE,fig.cap="Histogram of t statistics after shuffling of group labels, with the observed value of the t statistic shown in the blue line, and values more extreme than the observed value shown in orange.",fig.width=4,fig.height=4,out.height='50%'}
-ggplot(meanDiffSimDf,aes(meanDiffSim)) +
-  geom_histogram(bins=200) +
-  geom_vline(aes(xintercept=meanDiff[1,1]),color='blue') +
-  xlab('T stat: BMI difference between groups') +
-  geom_histogram(data=subset(meanDiffSimDf,subset=meanDiffSim>=meanDiff[1,1]),aes(meanDiffSim),bins=200,fill='orange') 
 
+meanDiffSimDf %>% 
+  ggplot(aes(meanDiffSim)) +
+  geom_histogram(bins = 200) +
+  geom_vline(xintercept = bmtTTest$statistic, color = "blue") +
+  xlab("T stat: BMI difference between groups") +
+  geom_histogram(
+    data = meanDiffSimDf %>% 
+      filter(meanDiffSim >= bmtTTest$statistic), 
+    aes(meanDiffSim), 
+    bins = 200, 
+    fill = "orange"
+  )
 
 ```
 
@@ -478,7 +562,7 @@ Whereas Fisher thought that the p-value could provide evidence regarding a speci
 
 > "no test based upon a theory of probability can by itself provide any valuable evidence of the truth or falsehood of a hypothesis. But we may look at the purpose of tests from another viewpoint. Without hoping to know whether each separate hypothesis is true or false, we may search for rules to govern our behaviour with regard to them, in following which we insure that, in the long run of experience, we shall not often be wrong" [@Neyman289]
 
-That is: We can’t know which specific decisions are right or wrong, but if we follow the rules, we can at least how often our decisions will be wrong.
+That is: We can’t know which specific decisions are right or wrong, but if we follow the rules, we can at least know how often our decisions will be wrong.
 
 To understand the decision making framework that Neyman and Pearson developed, we first need to discuss statistical decision making in terms of the kinds of outcomes that can occur.  There are two possible states of reality ($H_0$ is true, or $H_0$ is false), and two possible decisions (reject $H_0$, or fail to reject $H_0$).  There are two ways in which we can make a correct decision:
 
@@ -520,39 +604,48 @@ No.  There is an important distinction between *statistical significance* and *p
 ```{r}
 # create simulated data for weight loss trial
 
-weightLossTrial <- function(nPerGroup,weightLossOz=1){
+weightLossTrial <- function(nPerGroup, weightLossOz = 1) {
   # mean and SD in Kg based on NHANES adult dataset
-  kgToOz <- 35.27396195  # conversion constant for Kg to Oz
-  meanOz <- 81.78*kgToOz
-  sdOz <- 21.29*kgToOz
+  kgToOz <- 35.27396195 # conversion constant for Kg to Oz
+  meanOz <- 81.78 * kgToOz
+  sdOz <- 21.29 * kgToOz
   # create data
-  controlGroup <- rnorm(nPerGroup)*sdOz + meanOz
-  expGroup <- rnorm(nPerGroup)*sdOz + meanOz - weightLossOz
-  ttResult <- t.test(expGroup,controlGroup)
-  return(c(nPerGroup,weightLossOz,ttResult$p.value,
-           diff(ttResult$estimate))
-    )
-
+  controlGroup <- rnorm(nPerGroup) * sdOz + meanOz
+  expGroup <- rnorm(nPerGroup) * sdOz + meanOz - weightLossOz
+  ttResult <- t.test(expGroup, controlGroup)
+  return(c(
+    nPerGroup, weightLossOz, ttResult$p.value,
+    diff(ttResult$estimate)
+  ))
 }
 
 nRuns <- 1000
 sampSizes <- 2**seq(5,17) # powers of 2
 
 simResults <- c() ## create an empty list to add results onto
-for (i in 1:length(sampSizes)){
-    tmpResults <- replicate(nRuns,
-                      weightLossTrial(sampSizes[i],weightLossOz = 10))
-    summaryResults <- c(tmpResults[1,1],tmpResults[2,1],
-                     sum(tmpResults[3,]<0.05),
-                     mean(tmpResults[4,]))
-    simResults <- rbind(simResults,summaryResults)
+for (i in 1:length(sampSizes)) {
+  tmpResults <- replicate(
+    nRuns,
+    weightLossTrial(sampSizes[i], weightLossOz = 10)
+  )
+  summaryResults <- c(
+    tmpResults[1, 1], tmpResults[2, 1],
+    sum(tmpResults[3, ] < 0.05),
+    mean(tmpResults[4, ])
+  )
+  simResults <- rbind(simResults, summaryResults)
 }
 
-simResultsDf <- data.frame(simResults)
-names(simResultsDf) <- c('sampleSize','effectSizeLbs','nSigResults','meanEffect')
+
 simResultsDf <- 
-  simResultsDf %>%
-  mutate(pSigResult=nSigResults/nRuns)
+  as.tibble(simResults) %>% 
+  rename(
+    sampleSize = V1, 
+    effectSizeLbs = V2,
+    nSigResults = V3, 
+    meanEffect = V4
+  ) %>% 
+  mutate(pSigResult = nSigResults / nRuns)
 ```
 
 Figure \@ref(fig:sigResults) shows how the proportion of significant results increases as the sample size increases, such that with a very large sample size (about 262,000 total subjects), we will find a significant result in more than 90% of studies when there is a 1 ounce weight loss.  While these are statistically significant, most physicians would not consider a weight loss of one ounce to be practically or clinically significant. We will explore this relationship in more detail when we return to the concept of *statistical power* in Section \@ref(statistical-power), but it should already be clear from this example that statistical significance is not necessarily indicative of practical significance.
@@ -572,27 +665,27 @@ ggplot(simResultsDf,aes(sampleSize,pSigResult)) +
 
 ## NHST in a modern context: Multiple testing
 
-So far we have discussed examples where we are interested in testing a single statistical hypothesis, and this is consistent with traditional science which often measured only a few variables at a time.  However, in modern science we can often measure millions of variables per individual.  For example, in genetic studies that quantify the entire genome, there may be many millions of measures per individual, and in brain imaging we often collect data from more than 100,000 locations in the brain at once.  When standard hypothesis testing is applied in these contexts, bad things can happen unless the appropriate care is taken.
+So far we have discussed examples where we are interested in testing a single statistical hypothesis, and this is consistent with traditional science which often measured only a few variables at a time.  However, in modern science we can often measure millions of variables per individual.  For example, in genetic studies that quantify the entire genome, there may be many millions of measures per individual, and in brain imaging we often collect data from more than 100,000 locations in the brain at once.  When standard hypothesis testing is applied in these contexts, bad things can happen unless we take appropriate care.
 
-Let's look at an example to see how this might work.  There is great interest in understanding the genetic factors that can predispose individuals to major mental illnesses such as schizophrenia, because we know that about 80% of the variation between individuals in the presence of schizophrenia is due to genetic differences. The Human Genome Project and the ensuing revolution in genome science has provided tools to examine the many ways in which humans differ from one another in their genomes.  One approach that has been used in recent years is known as a *genome-wide association study* (GWAS), in which the genome of each individual is characterized at one million or more places in their genome to determine which letters of the genetic code (which we call "variants") they have at that location.  Once these have been determined, then the researchers perform a statistical test at each location in the genome to determine whether people diagnosed with schizoprenia are more or less likely to have one specific variant at that location.  
+Let's look at an example to see how this might work.  There is great interest in understanding the genetic factors that can predispose individuals to major mental illnesses such as schizophrenia, because we know that about 80% of the variation between individuals in the presence of schizophrenia is due to genetic differences. The Human Genome Project and the ensuing revolution in genome science has provided tools to examine the many ways in which humans differ from one another in their genomes.  One approach that has been used in recent years is known as a *genome-wide association study* (GWAS), in which the genome of each individual is characterized at one million or more places in their genome to determine which letters of the genetic code (which we call "variants") they have at that location.  After these have been determined, the researchers perform a statistical test at each location in the genome to determine whether people diagnosed with schizoprenia are more or less likely to have one specific variant at that location.  
 
 Let's imagine what would happen if the researchers simply asked whether the test was significant at p<.05 at each location, when in fact there is no true effect at any of the locations.  To do this, we generate a large number of simulated t values from a null distribution, and ask how many of them are significant at p<.05.  Let's do this many times, and each time count up how many of the tests come out as significant (see Figure \@ref(fig:nullSim)).  
 
 ```{r}
 # simulate 1500 studies with 10,000 tests each, thresholded at p < .05
 
-nRuns <- 1500  # number of simulated studies to run
+nRuns <- 1500 # number of simulated studies to run
 nTests <- 10000 # number of simulated genes to test in each run
 
 uncAlpha <- 0.05 # alpha level
 
-uncOutcome <- replicate(nRuns,sum(rnorm(nTests)<qnorm(uncAlpha)))
+uncOutcome <- replicate(nRuns, sum(rnorm(nTests) < qnorm(uncAlpha)))
 
-sprintf('mean proportion of significant tests per run: %0.2f',mean(uncOutcome)/nTests)
+sprintf("mean proportion of significant tests per run: %0.2f", mean(uncOutcome) / nTests)
 
-# compute proportion of studies with at least one false positive result, 
+# compute proportion of studies with at least one false positive result,
 # known as the familywise error rate
-sprintf('familywise error rate: %0.3f',mean(uncOutcome>0))
+sprintf("familywise error rate: %0.3f", mean(uncOutcome > 0))
 
 ```
 
@@ -611,10 +704,11 @@ A simple way to control for the familywise error is to divide the alpha level by
 
 ```{r}
 # compute Bonferroni-corrected alpha
-corAlpha <- 0.05/nTests
+corAlpha <- 0.05 / nTests
 
-corOutcome <- replicate(nRuns,sum(rnorm(nTests)<(qnorm(corAlpha))))
-sprintf('corrected familywise error rate: %0.3f',mean(corOutcome>0))
+corOutcome <- replicate(nRuns, sum(rnorm(nTests) < (qnorm(corAlpha))))
+
+sprintf("corrected familywise error rate: %0.3f", mean(corOutcome > 0))
 
 ```
 
