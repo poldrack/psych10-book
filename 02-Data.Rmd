@@ -9,6 +9,11 @@ output:
 ---
 # Working with data
 
+```{r echo=FALSE}
+library(tidyverse)
+library(cowplot)
+```
+
 ## What are data?
 
 The first important point about data is that data *are* - meaning that the word "data" is plural (though some people disagree with me on this).  You might also wonder how to pronounce "data" -- I say "day-tah" but I know many people who say "dah-tah" and I have been able to remain friends with them in spite of this. Now if I heard them say "the data is" then that would be bigger issue...
@@ -149,8 +154,80 @@ Another way to assess reliability comes in cases where the data includes subject
 
 Reliability is important if we want to compare one measurement to another.  The relationship between two different measurements can't be any stronger than the relationship between either of the measurements and itself (i.e., its reliability).  This means that an unreliable measure can never have a strong statistical relationship with any other measure.  For this reason, researchers developing a new measurement (such as a new survey) will often go to great lengths to test its reliability.
 
-```{r ReliabilityValidity, echo=FALSE,fig.width=6, fig.height=6,fig.cap="TBD: A figure demonstrating the distinction between reliability and valdity.  ",fig.width=6,fig.height=6,out.height='33%'}
-# knitr::include_graphics("images/Reliability_and_validity.png")
+```{r ReliabilityValidity, echo=FALSE,fig.cap="A figure demonstrating the distinction between reliability and valdity. Based on  ",fig.width=6,fig.height=6,out.height='33%'}
+# Figure inspired by https://commons.wikimedia.org/wiki/File:Reliability_and_validity.svg
+
+# from https://stackoverflow.com/questions/6862742/draw-a-circle-with-ggplot2
+
+set.seed(12345)
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+    x <- xc + r*cos(seq(0, pi, length.out=100))
+    ymax <- yc + r*sin(seq(0, pi, length.out=100))
+    ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+    annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
+
+
+npoints <- 16
+rel_mult <- 0.75
+unrel_mult <- 2.5
+
+plotDf <- tibble(
+  X_RelVal = rnorm(npoints)*rel_mult,
+  Y_RelVal = rnorm(npoints)*rel_mult,
+  X_RelInval = rnorm(npoints)*rel_mult+2,
+  Y_RelInval = rnorm(npoints)*rel_mult+2,
+  X_UnrelInval = rnorm(npoints)*unrel_mult+2,
+  Y_UnrelInval = rnorm(npoints)*unrel_mult+2,
+  X_UnrelVal = rnorm(npoints)*unrel_mult,
+  Y_UnrelVal = rnorm(npoints)*unrel_mult
+)
+
+pointsize <- 5
+
+p1=ggplot(plotDf,aes(X_RelVal,Y_RelVal)) +
+  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') + 
+  geom_point(size=pointsize) + 
+  xlim(-10,10) + ylim(-10,10) + 
+  theme_void()
+
+p2=ggplot(plotDf,aes(X_UnrelVal,Y_UnrelVal)) +
+  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') +
+  geom_point(size=pointsize) + 
+  xlim(-10,10) + ylim(-10,10) + 
+  theme_void() 
+
+p3=ggplot(plotDf,aes(X_RelInval,Y_RelInval)) +
+  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') + 
+  geom_point(size=pointsize) + 
+  xlim(-10,10) + ylim(-10,10) + 
+  theme_void() 
+
+p4=ggplot(plotDf,aes(X_UnrelInval,Y_UnrelInval)) +
+  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') + 
+  geom_point(size=pointsize) + 
+  xlim(-10,10) + ylim(-10,10) + 
+  theme_void() 
+
+plot_grid(p1,p2,p3,p4,ncol=2,label_size=18,
+          labels=c('A: Reliable and valid',
+                   'B: Unreliable but valid',
+                   'C: Reliable but invalid',
+                   'D: Unreliable and invalid'))
+
+
 ```
 
 ### *Validity* 
