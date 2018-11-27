@@ -184,44 +184,44 @@ plotDf <- tibble(
 )
 
 pointsize <- 5
-
+linesize=2
 p1=ggplot(plotDf,aes(X_RelVal,Y_RelVal)) +
-  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') + 
+  gg_circle(r=4, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=linesize,color='red',fill='red') + 
   geom_point(size=pointsize) + 
   xlim(-10,10) + ylim(-10,10) + 
   theme_void()
 
 p2=ggplot(plotDf,aes(X_UnrelVal,Y_UnrelVal)) +
-  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') +
+  gg_circle(r=4, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=linesize,color='red',fill='red') +
   geom_point(size=pointsize) + 
   xlim(-10,10) + ylim(-10,10) + 
   theme_void() 
 
 p3=ggplot(plotDf,aes(X_RelInval,Y_RelInval)) +
-  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') + 
+  gg_circle(r=4, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=linesize,color='red',fill='red') + 
   geom_point(size=pointsize) + 
   xlim(-10,10) + ylim(-10,10) + 
   theme_void() 
 
 p4=ggplot(plotDf,aes(X_UnrelInval,Y_UnrelInval)) +
-  gg_circle(r=4, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=3, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=2, xc=0.0, yc=0.0,size=5,color='red') + 
-  gg_circle(r=1, xc=0.0, yc=0.0,size=5,color='red',fill='red') + 
+  gg_circle(r=4, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=3, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=2, xc=0.0, yc=0.0,size=linesize,color='red') + 
+  gg_circle(r=1, xc=0.0, yc=0.0,size=linesize,color='red',fill='red') + 
   geom_point(size=pointsize) + 
   xlim(-10,10) + ylim(-10,10) + 
   theme_void() 
 
-plot_grid(p1,p2,p3,p4,ncol=2,label_size=18,
+plot_grid(p1,p2,p3,p4,ncol=2,label_size=12,
           labels=c('A: Reliable and valid',
                    'B: Unreliable but valid',
                    'C: Reliable but invalid',
