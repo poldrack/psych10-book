@@ -8,6 +8,7 @@ jobs:
           fingerprints:
             - "73:90:5e:75:b6:2c:3c:a3:46:51:4a:09:ac:d9:84:0f"
       - checkout
+      - run: apt-get install ssh
       - run:
            name: rendering pdf
            command: |
