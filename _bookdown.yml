@@ -1,0 +1,5 @@
+book_filename: "StatsThinking21"
+language:
+  ui:
+    chapter_name: "Chapter "
+delete_merged_file: true
