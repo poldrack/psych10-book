@@ -25,10 +25,10 @@ jobs:
            name: check out site repo
            command: |
              cd /tmp
+             ssh-keyscan github.com >> ~/.ssh/known_hosts
              git clone git@github.com:psych10/thinkstats.git 
              cd thinkstats
              cp -r ~/project/_book/* . 
-             ssh-keyscan github.com >> ~/.ssh/known_hosts
              git add .
              git config --global user.email poldrack@gmail.com
              git config --global user.name "Russ Poldrack"
