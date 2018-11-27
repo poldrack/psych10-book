@@ -26,8 +26,10 @@ jobs:
              cd /tmp
              git clone git@github.com:psych10/thinkstats.git 
              cd thinkstats
-             cp -r $CIRCLE_WORKING_DIRECTORY/psych10-book/_book/* . 
+             cp -r ~/project/_book/* . 
              git add .
+             git config --global user.email poldrack@gmail.com
+             git config --global user.name "Russ Poldrack"
              git commit -m"automated update"
              git push origin master
 
