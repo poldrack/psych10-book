@@ -1,9 +1,19 @@
 all: render-pdf render-epub render-gitbook 
 
+docker-deploy: docker-login docker-upload
+
+docker-login:
+	docker login --username=$(DOCKER_USERNAME) --password=$(DOCKER_PASSWORD)
+
+docker-upload:
+	docker push poldrack/statsthinking21
+
 docker-build:
-	docker build -t thinkstats .
+	docker build -t $(DOCKER_USERNAME)/statsthinking21 .
+
 shell:
-	docker run -it --entrypoint=bash thinkstats
+	docker run -it --entrypoint=bash $(DOCKER_USERNAME)/statsthinking21
+
 deploy:
 	bash deploy.sh
 
