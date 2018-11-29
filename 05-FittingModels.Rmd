@@ -97,7 +97,7 @@ sprintf("average error from mode (inches): %0.2f", mean(error_mode))
 
 What we find is that the average individual has a fairly large error of `r I(mean(error_mode))` centimeters. We would like to have a model where the average error is zero, and it turns out that if we use the arithmetic mean (commonly known as the *average*) as our model then this will be the case. 
 
-The mean (ofted denoted by a bar over the variable, such as $\bar{X}$) is defined as:
+The mean (often denoted by a bar over the variable, such as $\bar{X}$) is defined as:
 
 $$
 \bar{X} = \frac{\sum_{i=1}^{n}x_i}{n}
