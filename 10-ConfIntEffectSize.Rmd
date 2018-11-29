@@ -48,14 +48,14 @@ So far in the book we have focused on estimating the specific value of a statist
 ```{r}
 # take a sample from adults in NHANES and summarize their weight
 
-sampSize=250
-NHANES_sample=sample_n(NHANES_adult,sampSize)
+sampSize <- 250
+NHANES_sample <- sample_n(NHANES_adult, sampSize)
 
-sample_summary <- 
+sample_summary <-
   NHANES_sample %>%
   summarize(
-    meanWeight=mean(Weight),
-    sdWeight=sd(Weight)
+    meanWeight = mean(Weight),
+    sdWeight = sd(Weight)
   )
 pander(sample_summary)
 ```
