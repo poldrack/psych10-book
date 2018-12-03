@@ -42,7 +42,7 @@ In this chapter we will introduce the concept of a Monte Carlo simulation and di
 ## Monte Carlo simulation
 
 The concept of Monte Carlo simulation was devised by the mathematicians Stan Ulam and Nicholas Metropolis, who were working to develop an atomic weapon as part of the Manhattan Project (https://en.wikipedia.org/wiki/Manhattan_Project). They needed to compute the average distance that a neutron would travel in a substance before it collided with an atomic nucleus, but they could not compute this using standard mathematics.
-Ulam realized that these computations could be simulated using random numbers, just like a casino game. In a casino game, numbers are drawn at random; to estimate the probability of a specific outcome, you could play the game hundreds of times. Ulamn's uncle had gambled at the Monte Carlo casino in Monaco, which is apparently where the name came from for this new technique.  
+Ulam realized that these computations could be simulated using random numbers, just like a casino game. In a casino game, numbers are drawn at random; to estimate the probability of a specific outcome, you could play the game hundreds of times. Ulam's uncle had gambled at the Monte Carlo casino in Monaco, which is apparently where the name came from for this new technique.
 
 There are four steps to performing a Monte Carlo simulation:
 
@@ -114,7 +114,7 @@ print(rnorm(n = 5))
 
 ## Using Monte Carlo simulation
 
-Let's go back to our example of exam finishing times. Let's say that I administer three quizzes and record the finishing times for each student for each exame, which might look like the distributions presented in Figure \@ref(fig:finishingTimes).
+Let's go back to our example of exam finishing times. Let's say that I administer three quizzes and record the finishing times for each student for each exam, which might look like the distributions presented in Figure \@ref(fig:finishingTimes).
 
 ```{r finishingTimes, echo=FALSE,fig.cap="Simulated finishing time distributions.",fig.width=8,fig.height=4,out.height='50%'}
 finishTimeDf <- tibble(finishTime=rnorm(3*150,mean=5,sd=1),
