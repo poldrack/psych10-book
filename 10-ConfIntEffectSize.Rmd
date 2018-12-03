@@ -48,14 +48,14 @@ So far in the book we have focused on estimating the specific value of a statist
 ```{r}
 # take a sample from adults in NHANES and summarize their weight
 
-sampSize=250
-NHANES_sample=sample_n(NHANES_adult,sampSize)
+sampSize <- 250
+NHANES_sample <- sample_n(NHANES_adult, sampSize)
 
-sample_summary <- 
+sample_summary <-
   NHANES_sample %>%
   summarize(
-    meanWeight=mean(Weight),
-    sdWeight=sd(Weight)
+    meanWeight = mean(Weight),
+    sdWeight = sd(Weight)
   )
 pander(sample_summary)
 ```
@@ -101,13 +101,13 @@ For the NHANES weight example (with sample size of `r I(sampSize)`), the confide
 ```{r messages=FALSE}
 # compute confidence intervals for weight in NHANES data
 
-sample_summary <- 
+sample_summary <-
   sample_summary %>%
   mutate(
-    cutoff_lower = qt(0.025,sampSize),
-    cutoff_upper = qt(0.975,sampSize),
-    CI_lower = meanWeight + cutoff_lower*sdWeight/sqrt(sampSize),
-    CI_upper = meanWeight + cutoff_upper*sdWeight/sqrt(sampSize)
+    cutoff_lower = qt(0.025, sampSize),
+    cutoff_upper = qt(0.975, sampSize),
+    CI_lower = meanWeight + cutoff_lower * sdWeight / sqrt(sampSize),
+    CI_upper = meanWeight + cutoff_upper * sdWeight / sqrt(sampSize)
   )
 pander(sample_summary)
 ```
@@ -116,7 +116,7 @@ Remember that this doesn't tell us anything about the probability of the true po
 
 ### Confidence intervals and sample size
 
-Given that the standard error decreases with sample size, that means that the confidence interval should also get narrower as the sample size increases, providing tighter bounds on our estimate.  Figure \@ref(fig:CISampSize) shows an example of how the confidence interval would change as a function of sample size for the weight example. From the figure it's evident that the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, consistent with the fact that the denominator of the confidence interval term is proportional to the square root of the sample size.
+Because the standard error decreases with sample size, the means confidence interval should  get narrowers as the sample size increases, providing progressively tighter bounds on our estimate.  Figure \@ref(fig:CISampSize) shows an example of how the confidence interval would change as a function of sample size for the weight example. From the figure it's evident that the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, consistent with the fact that the denominator of the confidence interval term is proportional to the square root of the sample size.
 
 
 ```{r CISampSize,echo=FALSE,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean.",fig.width=4,fig.height=4,out.height='50%'}
@@ -130,7 +130,11 @@ ssDf <-
 
 ggplot(ssDf, aes(sampSize, meanHeight)) +
   geom_point(size = 3) +
-  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0, size = 1)
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0, size = 1) +
+  labs(
+    x = "Sample size",
+    y = "Mean height"
+  )
 ```
 
 ### Computing confidence intervals using the bootstrap
@@ -142,16 +146,20 @@ Earlier we ran the bootstrap using hand-crafted code, but R includes a package c
 ```{r}
 # compute bootstrap confidence intervals on NHANES weight data
 
-meanWeight <- function(df,foo){
-  return(mean(df[foo,]$Weight))
+meanWeight <- function(df, foo) {
+  return(mean(df[foo, ]$Weight))
 }
 
-bs <- boot(NHANES_sample,meanWeight,1000)
+bs <- boot(NHANES_sample, meanWeight, 1000)
+
 # use the percentile bootstrap
-bootci <- boot.ci(bs,type='perc')
-print('Bootstrap confidence intervals:')
-data.frame(lower=bootci$perc[4],
-           upper=bootci$perc[5]) %>%
+bootci <- boot.ci(bs, type = "perc")
+print("Bootstrap confidence intervals:")
+
+tibble(
+  lower = bootci$perc[4],
+  upper = bootci$perc[5]
+) %>%
   pander()
 ```
 
@@ -171,9 +179,9 @@ Things get trickier if we want to compare the means of two conditions [@sche:gen
 
 > "Statistical significance is the least interesting thing about the results. You should describe the results in terms of measures of magnitude – not just, does a treatment affect people, but how much does it affect them." Gene Glass (REF)
 
-In the last chapter we discussed the idea that statistical significance may not necessarily reflect practical significance.  In order to discuss practical significance, we need a standard way to describe the size of an effect in terms of the actual data, which we refer to as an *effect size*.  In this section we will introduce the concept and discuss various ways that effect sizes can be calculated.
+In the last chapter, we discussed the idea that statistical significance may not necessarily reflect practical significance.  In order to discuss practical significance, we need a standard way to describe the size of an effect in terms of the actual data, which we refer to as an *effect size*.  In this section we will introduce the concept and discuss various ways that effect sizes can be calculated.
 
-An effect size is a standarized measurement that compares the size of some statistical effect to a reference quantity, such as the variability of the statistic. In some fields of science and engineering this idea is referred to as a "signal to noise ratio".  There are many different ways that this can be quantified, which depend on the nature of the data.
+An effect size is a standarized measurement that compares the size of some statistical effect to a reference quantity, such as the variability of the statistic. In some fields of science and engineering, this idea is referred to as a "signal to noise ratio".  There are many different ways that the effect size can be quantified, which depend on the nature of the data.
 
 ### Cohen's D
 
@@ -204,23 +212,31 @@ It can be useful to look at some commonly understood effects to help understand 
 ```{r}
 # compute effect size for gender difference in NHANES
 
-NHANES_sample <- 
-  NHANES_adult %>% 
+NHANES_sample <-
+  NHANES_adult %>%
   drop_na(Height) %>%
   sample_n(250)
 
-hsum <- 
-  NHANES_sample  %>%
+hsum <-
+  NHANES_sample %>%
   group_by(Gender) %>%
   summarize(
-    meanHeight=mean(Height),
-    varHeight=var(Height),
-    n=n()
+    meanHeight = mean(Height),
+    varHeight = var(Height),
+    n = n()
   )
 
-s_height_gender <- sqrt(((hsum$n[1]-1)*hsum$varHeight[1] +(hsum$n[2]-1)*hsum$varHeight[2])/(hsum$n[1]+hsum$n[2]-2))
-d_height_gender <- (hsum$meanHeight[2] - hsum$meanHeight[1])/s_height_gender
-sprintf('Cohens d for male vs. female height = %0.2f',d_height_gender)
+
+#pooled SD
+s_height_gender <- sqrt(
+  ((hsum$n[1] - 1) * hsum$varHeight[1] + (hsum$n[2] - 1) * hsum$varHeight[2]) / 
+    (hsum$n[1] + hsum$n[2] - 2)
+)
+
+#cohen's d
+d_height_gender <- (hsum$meanHeight[2] - hsum$meanHeight[1]) / s_height_gender
+
+sprintf("Cohens d for male vs. female height = %0.2f", d_height_gender)
 ```
 
 The effect size for gender differences in height (d = `r I(d_height_gender)`) is huge by reference to our table above.  We can also see this by looking at the distributions of male and female heights in our sample.  Figure \@ref(fig:genderHist) shows that the two distributions are quite well separated, though still overlapping, highlighting the fact that even when there is a very large effect size for the difference between two groups, there will be individuals from each group that are more like the other group.
@@ -232,11 +248,11 @@ ggplot(NHANES_sample,aes(x=Height,color=Gender)) +
   
 ```
 
-It is also worth nothing that we rarely encounter effects of this magnitude in science, in part because they are such obvious effects that we don't need scientific research to find them.  As we will see in Chapter \@ref(doing-reproducible-research) on reproducibility, very large reported effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. It is also worth noting that even for such a huge effect, the two distributions still overlap - there will be some females who are taller than the average male, and vice versa. For most interesting scientific effects the degree of overlap will be much great, so we shouldn't immediately jump to strong conclusions about different populations based on even a large effect size.
+It is also worth nothing that we rarely encounter effects of this magnitude in science, in part because they are such obvious effects that we don't need scientific research to find them.  As we will see in Chapter \@ref(doing-reproducible-research) on reproducibility, very large reported effects in scientific research often reflect the use of questionable research practices rather than truly huge effects in nature. It is also worth noting that even for such a huge effect, the two distributions still overlap - there will be some females who are taller than the average male, and vice versa. For most interesting scientific effects, the degree of overlap will be much greater, so we shouldn't immediately jump to strong conclusions about different populations based on even a large effect size.
 
 ### Pearson's r
 
-Pearson's *r*, also known as the *correlation coefficient*, is a measure of the strength of the linear relationship between two continuous variables.  We will discuss correlation in much more detail in Chapter \@ref(modeling-continuous-relationships), so we will save the details for that chapter; here we simply introduce *r* as a way to quantify the relation between two variables.
+Pearson's *r*, also known as the *correlation coefficient*, is a measure of the strength of the linear relationship between two continuous variables.  We will discuss correlation in much more detail in Chapter \@ref(modeling-continuous-relationships), so we will save the details for that chapter; here, we simply introduce *r* as a way to quantify the relation between two variables.
 
 *r* is a measure that varies from -1 to 1, where a value of 1 represents a perfect positive relationship between the variables, 0 represents no relationship, and -1 represents a perfect negative relationship.  Figure \@ref(fig:corrFig) shows examples of various levels of correlation using randomly generated data.
 
@@ -259,7 +275,7 @@ plot_grid(p[[1]],p[[2]],p[[3]],p[[4]],p[[5]])
 
 ### Odds ratio
 
-In our earlier discussion of probability we discussed the concept of odds -- that is the relative likelihood of some event happening versus not happening:
+In our earlier discussion of probability we discussed the concept of odds -- that is, the relative likelihood of some event happening versus not happening:
 
 $$
 odds\ of\ A = \frac{P(A)}{P(\neg A)}
@@ -269,9 +285,11 @@ The odds ratio is simply the ratio of two odds. For example, let's take the case
 
 ```{r}
 # create table for cancer occurrence depending on smoking status
-smokingDf <- tibble(NeverSmoked=c(2883,220),
-                    CurrentSmoker=c(3829,6784),
-                    row.names=c('NoCancer','Cancer'))
+smokingDf <- tibble(
+  NeverSmoked = c(2883, 220),
+  CurrentSmoker = c(3829, 6784),
+  row.names = c("NoCancer", "Cancer")
+)
 pander(smokingDf)
 ```
 We can convert these numbers to odds ratios for each of the groups:
@@ -279,17 +297,18 @@ We can convert these numbers to odds ratios for each of the groups:
 ```{r}
 # convert smoking data to odds
 
-smokingDf <- 
+smokingDf <-
   smokingDf %>%
   mutate(
-    pNeverSmoked=NeverSmoked/sum(NeverSmoked),
-    pCurrentSmoker=CurrentSmoker/sum(CurrentSmoker)
+    pNeverSmoked = NeverSmoked / sum(NeverSmoked),
+    pCurrentSmoker = CurrentSmoker / sum(CurrentSmoker)
   )
-oddsCancerNeverSmoked <- smokingDf$NeverSmoked[2]/smokingDf$NeverSmoked[1]
-oddsCancerCurrentSmoker <- smokingDf$CurrentSmoker[2]/smokingDf$CurrentSmoker[1]
+
+oddsCancerNeverSmoked <- smokingDf$NeverSmoked[2] / smokingDf$NeverSmoked[1]
+oddsCancerCurrentSmoker <- smokingDf$CurrentSmoker[2] / smokingDf$CurrentSmoker[1]
 ```
 
-The odds of someone having lung cancer who has never smoked is `r I(oddsCancerNeverSmoked)` whereas the odds of a current smoker having lung cancer is `r I(oddsCancerCurrentSmoker)`.  The ratio of these odds tells us about the relatively likelihood of cancer between the two groups:
+The odds of someone having lung cancer who has never smoked is `r I(oddsCancerNeverSmoked)` whereas the odds of a current smoker having lung cancer is `r I(oddsCancerCurrentSmoker)`.  The ratio of these odds tells us about the relative likelihood of cancer between the two groups:
 
 ```{r}
 #compute odds ratio
@@ -314,8 +333,8 @@ Another important aspect of the Neyman-Pearson model that we didn't discuss abov
 
 There are three factors that can affect power:
 
-- sample size: Larger samples provide greater statistical power
-- effect size: A given design will always have greater power to find a large effect than a small effect (because finding large effects is easier)
+- Sample size: Larger samples provide greater statistical power
+- Effect size: A given design will always have greater power to find a large effect than a small effect (because finding large effects is easier)
 - Type I error rate: There is a relationship between Type I error and power such that (all else being equal) decreasing Type I error will also decrease power.
 
 We can see this through simulation.  First let's simulate a single experiment, in which we compare the means of two groups using a standard t-test.  We will vary the size of the effect (specified in terms of Cohen's d), the Type I error rate, and the sample size, and for each of these we will examine how the proportion of significant results (i.e. power) is affected. Figure \@ref(fig:plotPowerSim) shows an example of how power changes as a function of these factors.  
@@ -324,30 +343,33 @@ We can see this through simulation.  First let's simulate a single experiment, i
 # Simulate power as a function of sample size, effect size, and alpha
 
 # create a set of functions to generate simulated results
-powerDf <- 
-  expand.grid(sampSizePerGroup = c(12,24,48,96),
-              effectSize=c(.2,.5,.8),
-              alpha=c(0.005,0.05)
-    ) %>%
-  tidyr::expand(effectSize,sampSizePerGroup,alpha) %>%
-  group_by(effectSize,sampSizePerGroup,alpha)
+powerDf <-
+  expand.grid(
+    sampSizePerGroup = c(12, 24, 48, 96),
+    effectSize = c(.2, .5, .8),
+    alpha = c(0.005, 0.05)
+  ) %>%
+  tidyr::expand(effectSize, sampSizePerGroup, alpha) %>%
+  group_by(effectSize, sampSizePerGroup, alpha)
 
-runPowerSim <- function(df,nsims=1000){
-  p <- array(NA,dim=nsims)
-  for (s in 1:nsims){
-    data <- data.frame(y=rnorm(df$sampSizePerGroup*2),
-                    group=array(0,dim=df$sampSizePerGroup*2))
-    
-    data$group[1:df$sampSizePerGroup]=1
-    data$y[data$group==1]=data$y[data$group==1]+df$effectSize
-    tt <- t.test(y~group,data=data)
+runPowerSim <- function(df, nsims = 1000) {
+  p <- array(NA, dim = nsims)
+  for (s in 1:nsims) {
+    data <- data.frame(
+      y = rnorm(df$sampSizePerGroup * 2),
+      group = array(0, dim = df$sampSizePerGroup * 2)
+    )
+
+    data$group[1:df$sampSizePerGroup] <- 1
+    data$y[data$group == 1] <- data$y[data$group == 1] + df$effectSize
+    tt <- t.test(y ~ group, data = data)
     p[s] <- tt$p.value
   }
-  return(data.frame(power=mean(p<df$alpha)))
+  return(data.frame(power = mean(p < df$alpha)))
 }
 
 # run the simulation
-powerSimResults <- powerDf %>% 
+powerSimResults <- powerDf %>%
   do(runPowerSim(.))
 
 ```
@@ -359,12 +381,18 @@ ggplot(powerSimResults,
   geom_line(size=1) +
   annotate('segment',x=0,xend=max(powerDf$sampSizePerGroup),
            y=0.8,yend=0.8,linetype='dotted',size=.5) +
-  scale_x_continuous( breaks=unique(powerDf$sampSizePerGroup))
+  scale_x_continuous( breaks=unique(powerDf$sampSizePerGroup)) +
+  labs(
+    color = "Effect size",
+    x = "Sample size",
+    y = "Power",
+    linetype = "alpha"
+  )
 ```
 
 This simulation shows us that even with a sample size of 96, we will have relatively little power to find a small effect ($d = 0.2$) with $\alpha = 0.005$.  This means that a study designed to do this would be *futile* -- that is, it is almost guaranteed to find nothing even if a true effect of that size exists.
 
-There are at least two important reasons to care about statistical power, one of which we discuss here and the other of which we will return to in Chapter \@ref(doing-reproducible-science).  If you are a researcher, you probably don't want to spend your time doing futile experiments.  However, running an underpowered study is essentially futile, because it means that there is a very low likelihood that one will find an effect, even if it exists.  
+There are at least two important reasons to care about statistical power, one of which we discuss here and the other of which we will return to in Chapter \@ref(doing-reproducible-science).  If you are a researcher, you probably don't want to spend your time doing futile experiments.  Running an underpowered study is essentially futile, because it means that there is a very low likelihood that one will find an effect, even if it exists.  
 
 ### Power analysis
 
@@ -374,7 +402,7 @@ Let's say that we are interested in running a study of how a particular personal
 
 ```{r}
 # power analysis for Cohen's d = 0.5, for 80% power with alpha = 0.05
-pwr.t.test(d=0.5,power=0.8,sig.level=0.05)
+pwr.t.test(d = 0.5, power = 0.8, sig.level = 0.05)
 ```
 
 This tells us that we would need at least 64 subjects in each group in order to have sufficient power to find a medium-sized effect.  It's always important to run a power analysis before one starts a new study, to make sure that the study won't be futile due to a sample that is too small.
@@ -383,8 +411,7 @@ It might have occurred to you that if the effect size is large enough, then the 
 
 ```{r echo=FALSE}
 # power analysis for a huge effect of Cohen's d = 3.0
-pwr.t.test(d=3,power=0.8,sig.level=0.05)
-
+pwr.t.test(d = 3, power = 0.8, sig.level = 0.05)
 ```
 
 However, it's rare in science to be doing an experiment where we expect to find such a large effect -- just as we don't need statistics to tell us that 16-year-olds are taller than than 6-year-olds.  When we run a power analysis, we need to specify an effect size that is plausible for our study, which would usually come from previous research.  However, in Chapter \@ref(doing-reproducible-science) we will discuss a phenomenon known as the "winner's curse" that likely results in published effect sizes being larger than the true effect size, so this should also be kept in mind.  
