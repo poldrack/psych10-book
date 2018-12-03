@@ -87,7 +87,7 @@ p1 <-
 
 p2 <-
   tibble(
-    x = runif(10000)
+    x = rnorm(10000)
   ) %>% 
   ggplot(aes(x)) +
   geom_histogram(bins = 100) +
