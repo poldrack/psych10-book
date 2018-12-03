@@ -162,14 +162,14 @@ So far we have used simulation to demonstrate statistical principles, but we can
 
 ### Computing the bootstrap
 
-In the section above, we used our knowledge of the sampling distribution of the mean to compute the standard error of the mean and confidence intervals.  But what if we can't assume that the estimates are normally distributed, or we don't know their distribution?  The idea of the bootstrap is to use the data themselves to estimate an answer.  The name comes from the idea of pulling one's self up by one's own boostraps, expressing the idea that we don't have any external source of leverage so we have to rely upon the data themselves.  The bootstrap method was conceived by Bradley Efron of the Stanford Department of Statistics, who is one of the world's most influential statisticians.
+In the section above, we used our knowledge of the sampling distribution of the mean to compute the standard error of the mean and confidence intervals.  But what if we can't assume that the estimates are normally distributed, or we don't know their distribution?  The idea of the bootstrap is to use the data themselves to estimate an answer.  The name comes from the idea of pulling one's self up by one's own bootstraps, expressing the idea that we don't have any external source of leverage so we have to rely upon the data themselves.  The bootstrap method was conceived by Bradley Efron of the Stanford Department of Statistics, who is one of the world's most influential statisticians.
 
-The idea behind the boostrap is that we repeatedly sample from the actual dataset; importantly, we sample *with replacement*, such that the same data point will often end up being represented multiple times within one of the samples.  We then compute our statistic of interest on each of the bootstrap samples, and use the distribution of those estimates 
+The idea behind the bootstrap is that we repeatedly sample from the actual dataset; importantly, we sample *with replacement*, such that the same data point will often end up being represented multiple times within one of the samples.  We then compute our statistic of interest on each of the bootstrap samples, and use the distribution of those estimates 
 
 Let's start by using the bootstrap to estimate the sampling distribution of the mean, so that we can compare the result to the standard error of the mean (SEM) that we discussed earlier.
 
 ```{r}
-# perform the boostrap to compute SEM and compare to parametric method
+# perform the bootstrap to compute SEM and compare to parametric method
 
 nRuns <- 2500
 sampleSize <- 32
@@ -206,13 +206,13 @@ tibble(bootMeans=bootMeans) %>%
 
 ```
 
-Figure \@ref(fig:bootstrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the boostrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
+Figure \@ref(fig:bootstrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the bootstrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
 
 ```{r}
 # compute bootstrap confidence interval
 
 bootCI <- quantile(bootMeans, c(0.025, 0.975))
-pander("boostrap confidence limits:")
+pander("bootstrap confidence limits:")
 pander(bootCI)
 
 # now let's compute the confidence intervals using the sample mean and SD
