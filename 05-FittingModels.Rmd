@@ -1043,13 +1043,13 @@ plot_density_and_cdf(1)
 
 ```
 
-The upper panel in Figure \@ref(fig:zDensityCDF) shows that we expect about 16% of values to fall in $Z\ge 1$, and the same proportion to fall in $Z\le 1$.  
+The upper panel in Figure \@ref(fig:zDensityCDF) shows that we expect about 16% of values to fall in $Z\ge 1$, and the same proportion to fall in $Z\le -1$.  
 
 ```{r zDensity2SD,echo=FALSE,fig.cap="Density (top) and cumulative distribution (bottom) of a standard normal distribution, with cutoffs at two standard deviations above/below the mean"}
 plot_density_and_cdf(2)
 ```
 
-Figure \@ref(fig:zDensity2SD) shows the same plot for two standard deviations. Here we see that only about 2.3% of values fall in $Z \le 2$ and the same in $Z \ge 2$.  Thus, if we know the Z-score for a particular data point, we can estimate how likely or unlikely we would be to find a value at least as extreme as that value, which lets us put values into better context.
+Figure \@ref(fig:zDensity2SD) shows the same plot for two standard deviations. Here we see that only about 2.3% of values fall in $Z \le -2$ and the same in $Z \ge 2$.  Thus, if we know the Z-score for a particular data point, we can estimate how likely or unlikely we would be to find a value at least as extreme as that value, which lets us put values into better context.
 
 ### Standardized scores
 
