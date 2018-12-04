@@ -92,7 +92,7 @@ When we get to probability theory we will see a way in which this kind of repres
  
 **Integers**.  Integers are whole numbers with no fractional or decimal part. We most commonly encounter integers when we count things, but they also often occur in psychological measurement.  For example, in my introductory survey I administer a set of questions about attitudes towards statistics (such as "Statistics seems very mysterious to me."), on which the students respond with a number between 1 ("Disagree strongly") and 7 ("Agree strongly").  
 
-**Real numbers**.  Most commonly in statistics we work with real numbers, which have a fractional/decimal part.  For example, we might measure someone's height, which can be measured to an arbitrary level of precision, from whole pounds down to micrograms.
+**Real numbers**.  Most commonly in statistics we work with real numbers, which have a fractional/decimal part.  For example, we might measure someone's weight, which can be measured to an arbitrary level of precision, from whole pounds down to micrograms.
 
 ## Scales of measurement
 
@@ -101,7 +101,7 @@ All variables must take on at least two different possible values (otherwise the
 - *Identity*: Each value of the variable has a unique meaning.  
 - *Magnitude*: The values of the variable reflect different magnitudes and have an ordered relationship to one another --- that is, some values are larger and some are smaller.
 - *Equal intervals*: Units along the scale of measurement are equal to one another. This means, for example, that the difference between 1 and 2 would be equal in its magnitude to the difference between 19 and 20.
-- *Zero is the minimum value*:  The scale has a true zero point, below which no values exist. For example, it's not possible to for a person's weight to be negative.
+- *Zero is the minimum value*:  The scale has a true zero point, below which no values exist. For example, it's not possible for a person's weight to be negative.
 
 There are four different scales of measurement that go along with these different ways that values of a variable can differ.
 
@@ -133,7 +133,7 @@ knitr::kable(
 
 ```
 
-These constraints also imply that there are certain kinds of statistics that we can compute on each type of variable.  Statistics that simply involve counting of different values (such as the most comnon value, known as the *mode*), can be calculated on any of the variable types.  Other statistics are based on ordering or ranking of values (such as the *median*, which is the middle value when all of the values are ordered by their magnitude), and these require that the value at least be on an ordinal scale.  Finally, statistics that involve adding up values (such as the average, or *mean*), require that the variables be at least on an interval scale.  Having said that, we should note that it's quite common for researchers to compute the mean of variables that are only ordinal (such as responses on personality tests), but this can sometimes be problematic.  
+These constraints also imply that there are certain kinds of statistics that we can compute on each type of variable.  Statistics that simply involve counting of different values (such as the most common value, known as the *mode*), can be calculated on any of the variable types.  Other statistics are based on ordering or ranking of values (such as the *median*, which is the middle value when all of the values are ordered by their magnitude), and these require that the value at least be on an ordinal scale.  Finally, statistics that involve adding up values (such as the average, or *mean*), require that the variables be at least on an interval scale.  Having said that, we should note that it's quite common for researchers to compute the mean of variables that are only ordinal (such as responses on personality tests), but this can sometimes be problematic.  
 
 ## What makes a good measurement?
 
@@ -141,7 +141,7 @@ In many fields such as psychology, the thing that we are measuring is not a phys
 
 It is usually impossible to measure a construct without some amount of error.  In the example above, you might know the answer but you might mis-read the question and get it wrong.  In other cases there is error intrinsic to the thing being measured, such as when we measure how long it takes a person to respond on a simple reaction time test, which will vary from trial to trial for many reasons. We generally want our measurement error to be as low as possible.  
 
-Sometimes there is a standard against which other measurements can be tested, which we might refer to as a "gold standard" --- for example, measurement of sleep can be done using many different devices (such as devices that measure movement in bed), but they are generally considered inferior to the gold standard of polysomnography (which uses measurement of brain waves to quantify the amount of time a person spends in each stage of sleep).  Often the gold standard is more diffcult or expensive to perform, and the cheaper method is used even though it might have greater error.
+Sometimes there is a standard against which other measurements can be tested, which we might refer to as a "gold standard" --- for example, measurement of sleep can be done using many different devices (such as devices that measure movement in bed), but they are generally considered inferior to the gold standard of polysomnography (which uses measurement of brain waves to quantify the amount of time a person spends in each stage of sleep).  Often the gold standard is more difficult or expensive to perform, and the cheaper method is used even though it might have greater error.
 
 
 When we think about what makes a good measurement, we usually distinguish two different aspects of a good measurement.
