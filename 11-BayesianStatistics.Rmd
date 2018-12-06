@@ -116,11 +116,12 @@ $$
 P(B|A) = \frac{P(A|B)*P(B)}{P(A|B)*P(B) + P(A|\neg B)*P(\neg B)}
 $$
 
-The marginal likelihood in this case is a weighted average of the likelihood of the data under either presence or absence of the explosive, multiplied by the probability of the explosive being present (i.e. the prior).  In this case, let's say that we know that the specifity of the test is 0.9, such that the likelihood of a positive result when there is no explosive is 0.1.  
+The marginal likelihood in this case is a weighted average of the likelihood of the data under either presence or absence of the explosive, multiplied by the probability of the explosive being present (i.e. the prior).  In this case, let's say that we know that the specificity of the test is 0.9, such that the likelihood of a positive result when there is no explosive is 0.1.  
 
 We can compute this in R as follows:
 
 ```{r}
+
 marginal_likelihood <- 
   dbinom(
     x = nPositives, 
@@ -135,11 +136,14 @@ marginal_likelihood <-
   (1 - prior)
 
 sprintf("marginal likelihood = %.3e", marginal_likelihood)
+
 ```
 
 ### Computing the posterior
 
+
 We now have all of the parts that we need to compute the posterior probability of an explosive being present, given the observed 9 positive outcomes out of 10 tests.  
+
 
 ```{r}
 posterior <- (likelihood * prior) / marginal_likelihood

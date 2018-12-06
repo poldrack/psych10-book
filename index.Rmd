@@ -6,9 +6,13 @@ site: bookdown::bookdown_site
 bibliography: ["psych10-book.bib"]
 biblio-style: "apalike"
 link-citations: false
+github-repo: poldrack/psych10-book
+always_allow_html: yes
 output:
   bookdown::gitbook:
     lib_dir: "book_assets"
+    config:
+      edit: https://github.com/poldrack/psych10-book/edit/master/%s
     includes:
       in_header: google_analytics.html
   bookdown::pdf_book:
@@ -27,7 +31,7 @@ knitr::opts_chunk$set(fig.width=6, fig.height=6, #echo=FALSE,
 
 In 2018 I began teaching an undergraduate statistics course at Stanford (Psych 10/Stats 60).  I had never taught statistics before, and this was a chance to shake things up.  I have been increasingly unhappy with undergraduate statistics education in psychology, and I wanted to bring a number of new ideas and approaches to the class.  In particular, I wanted to bring to bear the approaches that are increasingly used in real statistical practice in the 21st century.  As Brad Efron and Trevor Hastie laid out so nicely in their book "Computer Age Statistical Inference: Algorithms, Evidence, and Data Science", these methods take advantage of today's increased computing power to solve statistical problems in ways that go far beyond the more standard methods that are usually taught in the undergraduate statistics course for psychology students.
 
-The first year that I taught the class, I used Andy Field's amazing graphic novel statistics book, "An Adventure in Statstics", as the textbook.  There are many things that I really like about this book -- in particular, I like the way that it frames statistical practice around the building of models, and treats null hypothesis testing with sufficient caution (though insufficient disdain, in my opinion). Unfortunately, most of my students hated the book, primarily because it involved wading through a lot of story to get to the statistical knowledge.  I also found it wanting because there are a number of topics (particular those from the field of artificial intelligence known as *machine learning*) that I wanted to include but were not discussed in his book.  I ultimately came to feel that the students would be best served by a book that follows very closely to my lectures, so I started writing down my lectures into a set of computational notebooks that would ultimately become this book.  The outline of this book follows roughly that of Field's book, since the lectures were originally based in large part on the flow of that book, but the content is substantially different (and also much less fun and clever).
+The first year that I taught the class, I used Andy Field's amazing graphic novel statistics book, "An Adventure in Statistics", as the textbook.  There are many things that I really like about this book -- in particular, I like the way that it frames statistical practice around the building of models, and treats null hypothesis testing with sufficient caution (though insufficient disdain, in my opinion). Unfortunately, most of my students hated the book, primarily because it involved wading through a lot of story to get to the statistical knowledge.  I also found it wanting because there are a number of topics (particular those from the field of artificial intelligence known as *machine learning*) that I wanted to include but were not discussed in his book.  I ultimately came to feel that the students would be best served by a book that follows very closely to my lectures, so I started writing down my lectures into a set of computational notebooks that would ultimately become this book.  The outline of this book follows roughly that of Field's book, since the lectures were originally based in large part on the flow of that book, but the content is substantially different (and also much less fun and clever).
 
 ## You're not a statistician - why should we listen to you?
 
@@ -49,10 +53,20 @@ The question could also be interpreted to mean "Why R instead of (insert languag
 
 The other reason is that the free Rstudio software makes using R relatively easy for new users.  In particular, I like the RMarkdown Notebook feature that allows the mixing of narrative and executable code with integrated output.  It's similar in spirit to the Jupyter notebooks that many of us use for Python programming, but I find it easier to deal with because it's just a plain text file.  In my class, I give students a skeleton RMarkdown file for problem sets, and they submit the file with their solution added, which I then score using a set of automated grading scripts. 
 
+## The golden age of data
+
+Throughout this book I have tried when possible to use examples from real data.  This is now very easy because we are swimming in open datasets, as governments, scientists, and companies are increasingly making data freely available.  I think that using real datasets is important because it prepares students to work with real data rather than toy datasets, which I think should be one of the major goals of statistical training. It also helps us realize (as we will see at various points throughout the book) that data don't always come to us ready to analyze, and often need *wrangling* to help get them into shape.  Using real data also shows that the idealized statistical distributions often assumed in statistical methods don't always hold in the real world -- for example, as we will see in Chapter \@ref(summarizing-data), distributions of some real-world quantities (like the number of friends on Facebook) can have very long tails that can break many standard assumptions.
+
 ## An open source book
 
 This book is meant to be a living document, which is why its source is available online at [https://github.com/poldrack/psych10-book](https://github.com/poldrack/psych10-book).  If you find any errors in the book or want to make a suggestion for how to improve it, please open an issue on the Github site. Even better, submit a pull request with your suggested change.  
 
 ## Acknowledgements
 
-I'd first like to thank Susan Holmes, who first inspired me to consider writing this book.  Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse.  Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. I'd also like to thank others who provided helpful comments and suggestions: Wesley Tansey, Jack Van Horn.
+I'd first like to thank Susan Holmes, who first inspired me to consider writing my own statistics book.  Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse.  Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. Particular thanks also go to Yihui Xie, creator of the Bookdown package, for improving the book's use of Bookdown features (including the ability for users to directly generate edits via the Edit button).  
+
+I'd also like to thank others who provided helpful comments and suggestions: Wesley Tansey, Jack Van Horn.
+
+Thanks to the following Twitter users for helpful suggestions: \@enoriverbend
+
+Thanks to the following individuals/usernames for submitting edits or issues via Github: Mehdi Rahim, Shanaathanan Modchalingam, Alan He, Wenjin Tao,  Martijn Stegeman, Dan Kessler, Philipp Kuhnke, basicv8vc, jiamingkong

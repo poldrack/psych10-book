@@ -56,9 +56,9 @@ oringDf %>%
   scale_x_continuous(breaks = seq.int(25, 85, 5)) +
   annotate(
     "text",
-    x = 32,
+    x = 38,
     y = 11,
-    label = "Forcasted temperature",
+    label = "Forecasted temperature",
     size = 5
   )
 ```
@@ -68,12 +68,14 @@ oringDf %>%
 The goal of plotting data is to present a summary of a dataset in a two-dimensional (or occasionally three-dimensional) presentation.  We refer to the dimensions as *axes* -- the horizontal axis is called the *X-axis* and the vertical axis is called the *Y-axis*.  We can arrange the data along the axes in a way that highlights the data values. These values may be either continuous or categorical.
 
 There are many different types of plots that we can use, which have different advantages and disadvantages.  Let's say that we are interested in characterizing the difference in height between men and women in the NHANES dataset. Figure \@ref(fig:plotHeight) shows four different ways to plot these data. 
-A) The bar graph in panel A shows the difference in means, but doesn't show us how much spread there is in the data around these means -- and as we will see later, knowing this is essential to determine whether we think the difference between the groups is large enough to be important.  
-B) The second plot shows the bars with all of the data points overlaid - this  makes it a bit clearer that the distributions of height for men and women are overlapping, but it's still hard to see due to the large number of data points.  
+
+1. The bar graph in panel A shows the difference in means, but doesn't show us how much spread there is in the data around these means -- and as we will see later, knowing this is essential to determine whether we think the difference between the groups is large enough to be important.  
+2. The second plot shows the bars with all of the data points overlaid - this  makes it a bit clearer that the distributions of height for men and women are overlapping, but it's still hard to see due to the large number of data points.  
 
 In general we prefer using a plotting technique that provides a clearly view of the distribution of the data points.  
-C) In panel C, we see one example of clearly showing the data points, known as a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  
-D) Another option is the *box plot* shown in panel D, which shows the median (central line), a measure of variability (the width of the box, which is based on a measure called the interquartile range), and any outliers (noted by the points at the ends of the lines). These are both effective ways to show data that provide a good feel for the distribution of the data.
+
+3. In panel C, we see one example of clearly showing the data points, known as a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  
+4. Another option is the *box plot* shown in panel D, which shows the median (central line), a measure of variability (the width of the box, which is based on a measure called the interquartile range), and any outliers (noted by the points at the ends of the lines). These are both effective ways to show data that provide a good feel for the distribution of the data.
 
 ```{r plotHeight,echo=FALSE,fig.cap="Four different ways of plotting the difference in height between men and women in the NHANES dataset.  Panel A plots the means of the two groups, which gives no way to assess the relative overlap of the two distributions.  Panel B shows the same bars, but also overlays the data points, jittering them so that we can see their overall distribution.  Panel C shows a violin plot, which shows the distribution of the datasets for each group.  PAnel D shows a box plot, which highlights the spread of the distribution along with any outliers (which are shown as individual points)."}
 
@@ -131,7 +133,7 @@ NHANES_sample %>%
 
 We next need to add a presentation of the data. The way that we tell `ggplot` what to show is by adding various commands to the main `ggplot()` command.  In particular, we generally need to add a *geometry* or "geom", which specifies how the data will be arranged in the plot.  For example, to show each data point we can use the `geom_point()` geometry, as shown in Figure \@ref(fig:simpleGeom). Each data point represents an individual row in our `NHANES_sample` dataset with each row corresponding to an individual person in this dataset. 
 
-```{r simpleGeom,fig.cap='Simple scatter plot using geom_point()',fig.width=4,fig.height=4,out.height='50%'}
+```{r simpleGeom,fig.cap='Simple scatter plot',fig.width=4,fig.height=4,out.height='50%'}
 NHANES_sample %>% 
   ggplot(aes(x = Height, y = Weight)) +
   geom_point()
@@ -156,12 +158,14 @@ Here is our distillation of some important principles for data visualization.
 ### Show the data and make them stand out
 
 Let's say that I had performed a study that examined the relationship between dental health and time spent flossing, and I would like to visualize my data. Figure \@ref(fig:dentalFigs) shows four possible presentations of these data.  
-A) In panel A, we don't actually show the data, just a line expressing the relationship between the data.  This is clearly not optimal, because we can't actually see what the underlying data look like.  
+
+1. In panel A, we don't actually show the data, just a line expressing the relationship between the data.  This is clearly not optimal, because we can't actually see what the underlying data look like.  
 
 Panels B-D show three possible outcomes from plotting the actual data, where each plot shows a different way that the data could have been generated. 
-B) If we saw the plot in Panel B, we would probably be suspicious -- rarely would real data follow such a precise pattern.  
-C) The data in Panel C, on the other hand, look like real data -- they show a general trend, but they are messy, as data in the world usually are.  
-D) The data in Panel D show us that the apparent relationship between the two variables is solely caused by one individual, who we would refer to as an *outlier* because they fall so far outside of the pattern of the rest of the group. It should be clear that we probably don't want to conclude very much from an effect that is driven by one data point.  This figure highlights why it is *always* important to look at the raw data before putting too much faith in any summary of the data.
+
+2. If we saw the plot in Panel B, we would probably be suspicious -- rarely would real data follow such a precise pattern.  
+3. The data in Panel C, on the other hand, look like real data -- they show a general trend, but they are messy, as data in the world usually are.  
+4. The data in Panel D show us that the apparent relationship between the two variables is solely caused by one individual, who we would refer to as an *outlier* because they fall so far outside of the pattern of the rest of the group. It should be clear that we probably don't want to conclude very much from an effect that is driven by one data point.  This figure highlights why it is *always* important to look at the raw data before putting too much faith in any summary of the data.
 
 ```{r dentalFigs,echo=FALSE,fig.cap="Four different possible presentations of data for the dental health example. Each point in the scatter plot represents one data point in the dataset, and the line in each plot represents the linear trend in the data."}
 
@@ -363,7 +367,10 @@ This plot allows the viewer to make comparisons based on the the **length** of t
 Often we are interested in plotting data where the variable of interest is affected by other factors than the one we are interested in.  For example, let's say that we want to understand how the price of gasoline has changed over time.  Figure \@ref(fig:gasPrices) shows historical gas price data, plotted either with or without adjustment for inflation. Whereas the unadjusted data show a huge increase, the adjusted data show that this is mostly just reflective of inflation.  Other examples where one needs to adjust data for other factors include population size (as we saw in the crime rate examples in an earlier chapter) and data collected across different seasons.
 
 
-```{r gasPrices,echo=FALSE,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation  Inflation correction based on Consumer Price Index data obtained from https://inflationdata.com/Inflation/Consumer_Price_Index/HistoricalCPI.aspx?reloaded=true#Table.",fig.width=4,fig.height=4,out.height='50%'}
+```{r gasPrices,echo=FALSE,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation (based on Consumer Price Index).",fig.width=4,fig.height=4,out.height='50%'}
+
+# Consumer Price Index data obtained from 
+# https://inflationdata.com/Inflation/Consumer_Price_Index/HistoricalCPI.aspx
 
 # load CPI data 
 cpiData=read.table('data/cpi_data.txt')
@@ -391,8 +398,8 @@ ggplot(gasPriceData,aes(year,gasPrice)) +
 
 ## Suggested readings and videos
 
-- [Fundamentals of data visualization](https://serialmentor.com/dataviz/)
+- [*Fundamentals of data visualization*](https://serialmentor.com/dataviz/), by Claus Wilke
 - *Visual Explanations*, by Edward Tufte
 - *Visualizing Data*, by William S. Cleveland
 - *Graph Design for the Eye and Mind*, by Stephen M. Kosslyn
-- *How Humans See Data*, by John Rauser https://www.youtube.com/watch?v=fSgEeI2Xpdc&feature=youtu.be
+- [*How Humans See Data*](https://www.youtube.com/watch?v=fSgEeI2Xpdc&feature=youtu.be), by John Rauser 

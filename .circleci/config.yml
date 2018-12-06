@@ -1,0 +1,37 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: poldrack/statsthinking21
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "73:90:5e:75:b6:2c:3c:a3:46:51:4a:09:ac:d9:84:0f"
+      - checkout
+      - run: apt-get install -y ssh
+      - run:
+           name: rendering pdf
+           command: |
+             make render-pdf
+      - run:
+           name: rendering epub
+           command: |
+             make render-epub
+      - run:
+           name: rendering gitbook
+           command: |
+             make render-gitbook
+      - run:
+           name: check out site repo
+           command: |
+             cd /tmp
+             ssh-keyscan github.com >> ~/.ssh/known_hosts
+             git clone git@github.com:psych10/thinkstats.git 
+             cd thinkstats
+             cp -r ~/project/_book/* . 
+             git add .
+             git config --global user.email poldrack@gmail.com
+             git config --global user.name "Russ Poldrack"
+             git commit -m"automated update"
+             git push origin master
+

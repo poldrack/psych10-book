@@ -97,7 +97,7 @@ sprintf("average error from mode (inches): %0.2f", mean(error_mode))
 
 What we find is that the average individual has a fairly large error of `r I(mean(error_mode))` centimeters. We would like to have a model where the average error is zero, and it turns out that if we use the arithmetic mean (commonly known as the *average*) as our model then this will be the case. 
 
-The mean (ofted denoted by a bar over the variable, such as $\bar{X}$) is defined as:
+The mean (often denoted by a bar over the variable, such as $\bar{X}$) is defined as:
 
 $$
 \bar{X} = \frac{\sum_{i=1}^{n}x_i}{n}
@@ -1043,13 +1043,13 @@ plot_density_and_cdf(1)
 
 ```
 
-The upper panel in Figure \@ref(fig:zDensityCDF) shows that we expect about 16% of values to fall in $Z\ge 1$, and the same proportion to fall in $Z\le 1$.  
+The upper panel in Figure \@ref(fig:zDensityCDF) shows that we expect about 16% of values to fall in $Z\ge 1$, and the same proportion to fall in $Z\le -1$.  
 
 ```{r zDensity2SD,echo=FALSE,fig.cap="Density (top) and cumulative distribution (bottom) of a standard normal distribution, with cutoffs at two standard deviations above/below the mean"}
 plot_density_and_cdf(2)
 ```
 
-Figure \@ref(fig:zDensity2SD) shows the same plot for two standard deviations. Here we see that only about 2.3% of values fall in $Z \le 2$ and the same in $Z \ge 2$.  Thus, if we know the Z-score for a particular data point, we can estimate how likely or unlikely we would be to find a value at least as extreme as that value, which lets us put values into better context.
+Figure \@ref(fig:zDensity2SD) shows the same plot for two standard deviations. Here we see that only about 2.3% of values fall in $Z \le -2$ and the same in $Z \ge 2$.  Thus, if we know the Z-score for a particular data point, we can estimate how likely or unlikely we would be to find a value at least as extreme as that value, which lets us put values into better context.
 
 ### Standardized scores
 

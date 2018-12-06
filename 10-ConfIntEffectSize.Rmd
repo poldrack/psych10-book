@@ -167,9 +167,13 @@ These values are fairly close to the values obtained using the t distribution ab
 
 ### Relation of confidence intervals to hypothesis tests
 
-There is a close relationship between confidence intervals and hypothesis tests.  In particular, if the confidence interval does not include the null hypothesis, then the associated statistical test would be statistically significant.  
+There is a close relationship between confidence intervals and hypothesis tests.  In particular, if the confidence interval does not include the null hypothesis, then the associated statistical test would be statistically significant.  For example, if you are testing whether the mean of a sample is greater than zero with $\alpha = 0.05$, you could simply check to see whether zero is contained within the 95% confidence interval for the mean.
 
-TBD - ADD DETAILS ABOUT COMPARING CIs ACROSS CONDITIONS
+Things get trickier if we want to compare the means of two conditions [@sche:gent:2001]. There are a couple of situations that are clear.  First, each mean is contained within the confidence interval for the other mean, then there is certainly no significant difference at the chosen confidence level.  Second, if there is no overlap between the confidence intervals, then there is certainly a significant difference at the chosen level; in fact, this test is substantially *conservative*, such that the actual error rate will be lower than the chosen level.  But what about the case where the confidence intervals overlap one another but don't contain the means for the other group?  In this case the answer depends on the relative variability of the two variables, and there is no general answer.  In general we should avoid using the "visual test" for overlapping confidence intervals, because it will generally result in a higher rate of false negative (Type II) errors.
+
+```{r, echo=FALSE}
+# example of CI overlap here?
+```
 
 ## Effect sizes
 
@@ -317,7 +321,7 @@ The odds ratio of `r I(oddsRatio)` tells us that the odds of cancer in smokers a
 
 ## Statistical power
 
-Remember from the previous chapter that under the Neyman-Pearson hypothesis testing approach, we have to specify our level of tolerance for two kinds of errors: False positives (which they called *Type I error*) and false negatives (which they called *Type II error*). People often focus heavily on Type I error, because making a false positive claim is generally viewed as a very bad thing; for example, the now discredited claims by wake:1999 that autism was associated with vaccination led to anti-vaccine sentiment that has resulted in substantial increases in childhood diseases such as measles.  Similarly, we don't want to claim that a drug cures a disease if it really doesn't.  That's why the tolerance for Type I errors is generally set fairly low, usually at $\alpha = 0.05$.  But what about Type II errors?  
+Remember from the previous chapter that under the Neyman-Pearson hypothesis testing approach, we have to specify our level of tolerance for two kinds of errors: False positives (which they called *Type I error*) and false negatives (which they called *Type II error*). People often focus heavily on Type I error, because making a false positive claim is generally viewed as a very bad thing; for example, the now discredited claims by @wake:1999 that autism was associated with vaccination led to anti-vaccine sentiment that has resulted in substantial increases in childhood diseases such as measles.  Similarly, we don't want to claim that a drug cures a disease if it really doesn't.  That's why the tolerance for Type I errors is generally set fairly low, usually at $\alpha = 0.05$.  But what about Type II errors?  
 
 The concept of *statistical power* is the complement of Type II error -- that is, it is the likelihood of finding a positive result given that it exists:
 
