@@ -9,7 +9,8 @@ A Docker container to build the entire book is available at https://hub.docker.c
 
 The online version is automatically rebuilt upon each push to this repository, using CircleCi. Current status: [![CircleCI](https://circleci.com/gh/poldrack/psych10-book.svg?style=svg)](https://circleci.com/gh/poldrack/psych10-book)
 
-A paper version of the book is currently under discussion.
+#### License
+This book is licensed using the [Creative Commons Attribution-NonCommercial 2.0 Generic (CC BY-NC 2.0) License](https://creativecommons.org/licenses/by-nc/2.0/).  A paper version of the book is currently under discussion.
 
 Comments/suggestions?  Please post an issue [here](https://github.com/poldrack/psych10-book/issues)
 
