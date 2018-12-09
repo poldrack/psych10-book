@@ -400,7 +400,7 @@ P_diabetes_given_inactive <-
 P_diabetes_given_inactive
 ```
 
-The first line of code in this chunk computed $P(inactive)$ by taking the mean of a test for whether the PhysActive variable was equal to "No" for each indivdual.  This trick works because TRUE/FALSE values are treated as 1/0 respectively by R; thus, if we want to know the probaility of some event, we can generate a Boolean variable that tests for that event, and then simply take the mean of that variable.  We then use that value to compute the conditional probability, where we find that the probability of someone having diabetes given that they are physically active is 0.141.
+The first line of code in this chunk computed $P(inactive)$ by taking the mean of a test for whether the PhysActive variable was equal to "No" for each indivdual.  This trick works because TRUE/FALSE values are treated as 1/0 respectively by R; thus, if we want to know the probaility of some event, we can generate a Boolean variable that tests for that event, and then simply take the mean of that variable.  We then use that value to compute the conditional probability, where we find that the probability of someone having diabetes given that they are physically inactive is 0.141.
 
 ## Independence
 
