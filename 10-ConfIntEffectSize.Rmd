@@ -78,7 +78,7 @@ where the critical value is determined by the sampling distribution of the estim
 
 If we know the population standard deviation, then we can use the normal distribution to compute a confidence interval. We usually don't, but for our example of the NHANES dataset we do (it's `r I(sd(NHANES_adult$Weight))` for weight).  
 
-Let's say that we want to compute a 95% confidence interval for the mean. The critical value would then be the values of the normal distribution that capture 95% of the distribution; these are simply the 2.5th percentile and the 97.5th percentile of the distribution, which we can compute using the `qnorm()` function in R, and come out to $\pm 1.96$.  Thus, the confidence interval for the mean ($\bar{X}$) is:
+Let's say that we want to compute a 95% confidence interval for the mean. The critical value would then be the values of the standard normal distribution that capture 95% of the distribution; these are simply the 2.5th percentile and the 97.5th percentile of the distribution, which we can compute using the `qnorm()` function in R, and come out to $\pm 1.96$.  Thus, the confidence interval for the mean ($\bar{X}$) is:
 
 $$
 CI = \bar{X} \pm 1.96*SE
