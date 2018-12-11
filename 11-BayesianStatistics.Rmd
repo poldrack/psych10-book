@@ -58,7 +58,7 @@ sprintf(
 )
 ```
 
-That is an fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of the data given some parameter, whereas what we really want to know is the parameter value. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
+That is an fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of 7 or more heads given some particular probability of heads, whereas what we really want to know is the probability of heads. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
 
 Remember that Bayes' theorem provides us with the tool that we need to invert a conditional probability:
 
@@ -101,7 +101,7 @@ nPositives <- 9
 
 ### Computing the likelihood
 
-We want to compute the likelihood of the data under the hypothesis that there is an explosive in the bag.  Let's say that we know that the sensitivity of the test is 0.99 -- that is, when a device is present, it will detect it 99% of the time. To determine the likelihood of our data under the hypothesis that a device is present, we can treat each test as a Bernoulli trial with a probability of success of 0.99, which we can model using a binomial distribution.
+We want to compute the likelihood of the data under the hypothesis that there is an explosive in the bag.  Let's say that we know that the sensitivity of the test is 0.99 -- that is, when a device is present, it will detect it 99% of the time. To determine the likelihood of our data under the hypothesis that a device is present, we can treat each test as a Bernoulli trial (that is, a trial with an outcome of true or false) with a probability of success of 0.99, which we can model using a binomial distribution.
 
 ```{r}
 likelihood <- dbinom(nPositives, nTests, 0.99)
@@ -153,7 +153,7 @@ This result shows us that the probability of an explosive in the bag is much hig
 
 ## Estimating posterior distributions
 
-In the previous example there were only two possible outcomes - the explosive is either there or it's not.  However, in other cases we want to use Bayesian estimation to estimate the value of a parameter.  Let's say that we want to know about the effectiveness of a new drug for pain; to test this, we can administer the drug to a group of patients and then ask them whether their pain improved or not after taking the drug.  We can use Bayesian analysis to estimate the proportion of people for whom the drug will be effective using these data.
+In the previous example there were only two possible outcomes -- the explosive is either there or it's not -- and we wanted to know which outcome was most likely given the data.  However, in other cases we want to use Bayesian estimation to estimate the numeric value of a parameter.  Let's say that we want to know about the effectiveness of a new drug for pain; to test this, we can administer the drug to a group of patients and then ask them whether their pain improved or not after taking the drug.  We can use Bayesian analysis to estimate the proportion of people for whom the drug will be effective using these data.
 
 ### Specifying the prior
 
@@ -177,7 +177,7 @@ pander(drugDf)
 
 ### Computing the likelihood
 
-We can compute the likelihood of the data under the any particular value of the effectiveness parameter using the `dbinom()` function in R. In Figure \@ref(fig:like2) you can see the likelihood curves over numbers of responders for several different values of $p_{respond}$. Looking at this, it seems that our observed data are relatively more likely under the hypothesis of $p_{respond}=0.7$, somewhat less likely under the hypothesis of $p_{respond}=0.5$, and quite unlikely under the hypothesis of $p_{respond}=0.3$.  One of the fundamental ideas of Bayesian inference is that we will try to find the value of our parameter of interest that makes the data most likely, while also taking into account our prior knowledge.
+We can compute the likelihood of the data under any particular value of the effectiveness parameter using the `dbinom()` function in R. In Figure \@ref(fig:like2) you can see the likelihood curves over numbers of responders for several different values of $p_{respond}$. Looking at this, it seems that our observed data are relatively more likely under the hypothesis of $p_{respond}=0.7$, somewhat less likely under the hypothesis of $p_{respond}=0.5$, and quite unlikely under the hypothesis of $p_{respond}=0.3$.  One of the fundamental ideas of Bayesian inference is that we will try to find the value of our parameter of interest that makes the data most likely, while also taking into account our prior knowledge.
 
 ```{r like2,echo=FALSE,fig.cap='Likelihood of each possible number of responders under several different hypotheses (p(respond)=0.5 (red), 0.7 (green), 0.3 (black).  Observed value shown in blue.',fig.width=4,fig.height=4,out.height='50%'}
 
@@ -202,7 +202,7 @@ ggplot(likeDf,aes(resp,likelihood5)) +
 
 ### Computing the marginal likelihood
 
-In addition to the likelihood of the data under different hypotheses, we need to know the overall likelihood of the data, combining across all hypotheses (i.e., the marginal likelihood). This marginal likelihood is used as a normalizing constant to ensure that the posterior values are true probabilities. In this case, our use of a set of discrete possible parameter values makes it easy to compute the marginal likelihood, because we can just compute the likelihood of each parameter value under each hypothesis and add them up. 
+In addition to the likelihood of the data under different hypotheses, we need to know the overall likelihood of the data, combining across all hypotheses (i.e., the marginal likelihood). This marginal likelihood is primarily important beacuse it helps to ensure that the posterior values are true probabilities. In this case, our use of a set of discrete possible parameter values makes it easy to compute the marginal likelihood, because we can just compute the likelihood of each parameter value under each hypothesis and add them up. 
 
 ```{r}
 # compute marginal likelihood
@@ -441,7 +441,7 @@ In Figure \@ref(fig:absolutePrior) we see that there is zero density in the post
 
 ## Choosing a prior
 
-The impact of priors on the resulting inferences are the most controversial aspect of Bayesian statistics.  There are various ways to choose one's priors, which (as we saw above) can impact the resulting inferences.  *Uninformative priors* attempt to bias the resulting posterior as little as possible, as we saw in the example of the uniform prior above.  It's also common to use *weakly informative priors* (or *default priors*), which bias the result only very slightly. For example, if we had used a binomial distribution based on one heads out of two coin flips, this would have been centered around 0.5 but fairly flat, biasing the posterior only slightly.  
+The impact of priors on the resulting inferences are the most controversial aspect of Bayesian statistics.  There are various ways to choose one's priors, which (as we saw above) can impact the resulting inferences.  *Uninformative priors* attempt to bias the resulting posterior as little as possible, as we saw in the example of the uniform prior above.  It's also common to use *weakly informative priors* (or *default priors*), which bias the result only very slightly. For example, if we had used a binomial distribution based on one heads out of two coin flips, the prior would have been centered around 0.5 but fairly flat, biasing the posterior only slightly.  
 
 It is also possible to use priors based on the scientific literature or pre-existing data, which we would call *empirical priors*.  In general, however, we will stick to the use of uninformative/weakly informative priors, since they raise the least concern about biasing our results.  In general it is a good idea to try any Bayesian analysis using multiple reasonable priors, and make sure that the results don't change in an important way based on the prior.
 
