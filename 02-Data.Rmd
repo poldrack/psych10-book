@@ -101,7 +101,7 @@ All variables must take on at least two different possible values (otherwise the
 - *Identity*: Each value of the variable has a unique meaning.  
 - *Magnitude*: The values of the variable reflect different magnitudes and have an ordered relationship to one another --- that is, some values are larger and some are smaller.
 - *Equal intervals*: Units along the scale of measurement are equal to one another. This means, for example, that the difference between 1 and 2 would be equal in its magnitude to the difference between 19 and 20.
-- *Zero is the minimum value*:  The scale has a true zero point, below which no values exist. For example, it's not possible for a person's weight to be negative.
+- *Absolute zero*:  The scale has a true meaningful zero point. For example, for many measurements of physical quantities such as height or weight, this is the complete absence of the thing being measured.
 
 There are four different scales of measurement that go along with these different ways that values of a variable can differ.
 
@@ -111,7 +111,7 @@ There are four different scales of measurement that go along with these differen
 
 *Interval scale*. An interval scale has all of the features of an ordinal scale, but in addition the intervals between units on the measurement scale can be treated as equal.  A standard example is physical temperature measured in Celsius or Farenheit; the physical difference between 10 and 20 degrees is the same as the physical difference between 90 and 100 degrees, but each scale can also take on negative values.
 
-*Ratio scale*. A ratio scale variable has all four of the features outlined above: identity, magnitude, equal intervals, and a minimum value of zero.  The difference between a ratio scale variable and an interval scale variable is that the ratio scale variable has a true zero point.  Examples of ratio scale variables include physical height and weight, along with temperature measured in Kelvin.
+*Ratio scale*. A ratio scale variable has all four of the features outlined above: identity, magnitude, equal intervals, and absolute zero.  The difference between a ratio scale variable and an interval scale variable is that the ratio scale variable has a true zero point.  Examples of ratio scale variables include physical height and weight, along with temperature measured in Kelvin.
 
 ### Why do scales of measurement matter?
 
