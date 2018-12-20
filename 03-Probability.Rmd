@@ -486,9 +486,11 @@ $$
 We can plug the relevant numbers into this equation to determine the likelihood that an individual with a positive PSA result actually has cancer -- but note that in order to do this, we also need to know the overall probability of cancer in the person, which we often refer to as the *base rate*. Let's take a 60 year old man, for whom the probability of prostate cancer in the next 10 years is $P(cancer)=0.058$.  Using the sensitivity and specificity values that we outlined above, we can compute the individual's likelihood of having cancer given a positive test:
 
 $$
-P(\text{cancer|test}) = \frac{P(\text{test|cancer})*P(\text{cancer})}{P(\text{test|disease})*P(\text{disease}) + P(\text{test|}\neg\text{disease})*P(\neg\text{disease})} = \frac{0.8*0.058}{0.8*0.058 +0.3*0.942 } = 0.14
+P(\text{cancer|test}) = \frac{P(\text{test|cancer})*P(\text{cancer})}{P(\text{test|disease})*P(\text{disease}) + P(\text{test|}\neg\text{disease})*P(\neg\text{disease})} 
 $$
-
+$$
+= \frac{0.8*0.058}{0.8*0.058 +0.3*0.942 } = 0.14
+$$
 That's pretty small -- do you find that surprising? Many people do, and in fact there is a substantial psychological literature showing that people systematically neglect *base rates* (i.e. overall prevalence) in their judgments.  
 
 ## Learning from data
