@@ -44,23 +44,31 @@ One of the most common questions that we want to ask in statistics is whether th
 
 ```{r}
 # create sample with tv watching and marijuana use
-NHANES_sample <- 
-  NHANES_adult %>% 
-  drop_na(TVHrsDay,RegularMarij) %>%
+NHANES_sample <-
+  NHANES_adult %>%
+  drop_na(TVHrsDay, RegularMarij) %>%
   mutate(
-    TVHrsNum=recode(TVHrsDay,'More_4_hr'=5,
-                         '4_hr'=4,'2_hr'=2,
-                         '1_hr'=1,'3_hr'=3,'0_to_1_hr'=0.5,
-                         '0_hrs'=0)
-    ) %>%
+    TVHrsNum = recode( #recode character values into numerical values
+      TVHrsDay,
+      "More_4_hr" = 5,
+      "4_hr" = 4, 
+      "2_hr" = 2,
+      "1_hr" = 1, 
+      "3_hr" = 3, 
+      "0_to_1_hr" = 0.5,
+      "0_hrs" = 0
+    )
+  ) %>%
   sample_n(200)
-
-
 ```
 
 ```{r PotTVViolin,echo=FALSE,fig.cap='Violin plot showing distributions of TV watching separated by regular marijuana use.',fig.width=4,fig.height=4,out.height='50%'}
 ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
-  geom_violin(draw_quantiles=.50)
+  geom_violin(draw_quantiles=.50) +
+  labs(
+    x = "Regular marijuana user",
+    y = "TV hours per day"
+  )
 ```
 
 ## Student's T test
@@ -75,8 +83,11 @@ where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $
 
 ```{r}
 # compute t test for tv watching as function of marijuana use
-t.test(TVHrsNum~RegularMarij,data=NHANES_sample,
-       var.equal=TRUE)
+t.test(
+  TVHrsNum ~ RegularMarij,
+  data = NHANES_sample,
+  var.equal = TRUE
+)
 ```
 In this case we see that there is a statstically significant difference between groups, in the expected direction - regular pot smokers watch more TV.
 
@@ -87,11 +98,11 @@ The t-test is often presented as a specialized tool for comparing means, but it 
 $$
 \hat{BP} = \hat{\beta_1}*Smoking + \hat{\beta_0}
 $$
-However, smoking is a binary variable, so we treat as a *dummy variable* like we discussed in the previous chapter, setting it to a value of 1 for smokers and zero for nonsmokers.  In that case, $\hat{\beta_1}$ is simply the difference in means between the two groups, and $\hat{\beta_0}$ is the mean for the group that was coded as zero.  We can fit this model using the ```lm()``` function, and see that it gives the same t statistic as the t-test above:
+However, smoking is a binary variable, so we treat it as a *dummy variable* like we discussed in the previous chapter, setting it to a value of 1 for smokers and zero for nonsmokers.  In that case, $\hat{\beta_1}$ is simply the difference in means between the two groups, and $\hat{\beta_0}$ is the mean for the group that was coded as zero.  We can fit this model using the ```lm()``` function, and see that it gives the same t statistic as the t-test above:
 
 ```{r}
 # print summary of linear regression to perform t-test
-s <- summary(lm(TVHrsNum~RegularMarij,data=NHANES_sample))
+s <- summary(lm(TVHrsNum ~ RegularMarij, data = NHANES_sample))
 s
 ```
 
@@ -100,7 +111,11 @@ We can also view this graphically (see Figure :
 ```{r ttestFig,echo=FALSE,fig.cap="Violin plots showing data for each group, with a blue line connecting the predicted values for each group, computed on the basis of the results of the linear model.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
   geom_violin() +
-  annotate('segment',x=1,y=s$coefficients[1,1],xend=2,yend=s$coefficients[1,1]+s$coefficients[2,1],color='blue')
+  annotate('segment',x=1,y=s$coefficients[1,1],xend=2,yend=s$coefficients[1,1]+s$coefficients[2,1],color='blue') +
+  labs(
+    x = "Regular marijuana user",
+    y = "TV hours per day"
+  )
 
 ```
 
@@ -125,15 +140,17 @@ As we discussed in the chapter on Bayesian analysis, Bayes factors provide a way
 
 ```{r}
 # compute bayes factor for group comparison
-bf <- ttestBF(formula = 
-    TVHrsNum~RegularMarij,data=NHANES_sample)
+bf <- ttestBF(
+  formula = TVHrsNum ~ RegularMarij, 
+  data = NHANES_sample
+)
 bf
 ```
 This shows us that although the difference between groups is highly significant, the evidence against the null hypothesis is suggestive but not particularly strong. 
 
 ## Paired t-tests
 
-In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)).
+In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in mean blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)).
 
 ```{r BPfig, echo=FALSE,fig.cap='Violin plot of systolic blood pressure on first and second recording, from NHANES.',fig.width=4,fig.height=4,out.height='50%'}
 
@@ -158,16 +175,23 @@ NHANES_sample <-
   )
 
 p <- ggplot(NHANES_sample_tidy,aes(timepoint,BPsys)) + 
-  geom_violin()
+  geom_violin() +
+  scale_x_discrete(
+    labels = c("Time 1", "Time 2"),
+  ) 
 print(p)
 
 ```
 
-We see that there does not seem to be much of a difference overall between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that pairs of data points come from the the same individuals.   
+We see that there does not seem to be much of a difference in mean blood pressure between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that pairs of data points come from the the same individuals.   
 
 ```{r}
-t.test(BPsys~timepoint,data=NHANES_sample_tidy,
-       paired=FALSE,var.equal=TRUE)
+t.test(
+  BPsys ~ timepoint,
+  data = NHANES_sample_tidy,
+  paired = FALSE, 
+  var.equal = TRUE
+)
 ```
 
 This analysis shows no significant difference. However, this analysis is inappropriate since it assumes that the two samples are independent, when in fact they are not, since the data come from the same individuals.  We can plot the data with a line for each individual to show this (see Figure \@ref(fig:BPLinePlot)).
@@ -191,12 +215,12 @@ ggplot(NHANES_sample,aes(diff)) +
 
 ### Sign test
 
-One simple way to test for differences is using a test called the *sign test*, which asks whether the proportion of positive differences (ignoring their magnitude) is different than what we would espect by chance.  To do this, we take the differences and compute their sign, and then we use a binomial test to ask whether the proportion of positive signs differs from 0.5.
+One simple way to test for differences is using a test called the *sign test*, which asks whether the proportion of positive differences (ignoring their magnitude) is different than what we would expect by chance.  To do this, we take the differences and compute their sign, and then we use a binomial test to ask whether the proportion of positive signs differs from 0.5.
 
 ```{r}
 # compute sign test for differences between first and second measurement
 npos <- sum(NHANES_sample$diffPos)
-bt <- binom.test(npos,nrow(NHANES_sample))
+bt <- binom.test(npos, nrow(NHANES_sample))
 bt
 ```
 
@@ -207,7 +231,7 @@ A more common strategy is to use a *paired t-test*, which is equivalent to a one
 
 ```{r}
 # compute paired t-test
-t.test(BPsys~timepoint,data=NHANES_sample_tidy,paired=TRUE)
+t.test(BPsys ~ timepoint, data = NHANES_sample_tidy, paired = TRUE)
 
 ```
 
@@ -215,7 +239,7 @@ With this analyses we see that there is in fact a significant difference between
 
 ```{r}
 # compute Bayes factor for paired t-test
-ttestBF(x=NHANES_sample$BPSys1,y=NHANES_sample$BPSys2,paired=TRUE)
+ttestBF(x = NHANES_sample$BPSys1, y = NHANES_sample$BPSys2, paired = TRUE)
 
 ```
 This shows us that although the effect was significant in a paired t-test, it actually provides very little evidence in favor of the alternative hypothesis. 
@@ -227,8 +251,7 @@ We can also define the paired t-test in terms of a general linear model.  To do 
 ```{r,messages=FALSE}
 # compute mixed model for paired test
 
-lmrResult <- lmer(BPsys~timepoint + (1|ID),data=NHANES_sample_tidy)
-
+lmrResult <- lmer(BPsys ~ timepoint + (1 | ID), data = NHANES_sample_tidy)
 summary(lmrResult)
 ```
 
@@ -287,7 +310,8 @@ fdata <-
 ggplot(fdata,aes(x,f_1_1)) +
   geom_line() +
   geom_line(aes(x,f_1_50),color='blue') +
-  geom_line(aes(x,f_10_50),color='red')
+  geom_line(aes(x,f_10_50),color='red') +
+  labs(y = "Density", x = "F values")
 
   
 ```
@@ -297,22 +321,21 @@ To create an ANOVA model, we extend the idea of *dummy coding* that you encounte
 
 ```{r}
 # create dummy variables for drug1 and drug2
-df <- 
-  df %>% 
+df <-
+  df %>%
   mutate(
-    d1=as.integer(group=='drug1'),
-    d2=as.integer(group=='drug2')
+    d1 = as.integer(group == "drug1"), # 1s for drug1, 0s for all other drugs
+    d2 = as.integer(group == "drug2")  # 1s for drug2, 0s for all other drugs
   )
-
 ```
 
 Now we can fit a model using the same approach that we used in the previous chapter:
 
 ```{r}
-# fit ANOVA model  
-lmResultANOVA <- lm(sysBP ~ d1 + d2, data=df)
+# fit ANOVA model
+lmResultANOVA <- lm(sysBP ~ d1 + d2, data = df)
 summary(lmResultANOVA)
 ```
 The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, keep in mind that if we wanted to interpret these tests, we would need to correct the p-values to account for the fact that we have done multiple hypothesis tests; we will see an example of how to do this in the next chapter.
 
-Remember that the hypothesis that we started out wanting to test was whether there was any difference between any of the conditions; we refer to this as an *omnibus* hypothesis test, and it is the test that is provided by the F statistic, which basically tells us whether our model is better than a simple model that just includes an intercept.  In this case we see that the F test is highly significant, consistent with our impression that there did seem to be a difference between the groups (which in fact we know there was, because we created the data).
+Remember that the hypothesis that we started out wanting to test was whether there was any difference between any of the conditions; we refer to this as an *omnibus* hypothesis test, and it is the test that is provided by the F statistic. The F statistic basically tells us whether our model is better than a simple model that just includes an intercept.  In this case we see that the F test is highly significant, consistent with our impression that there did seem to be differences between the groups (which in fact we know there were, because we created the data).
