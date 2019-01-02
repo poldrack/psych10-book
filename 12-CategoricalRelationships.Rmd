@@ -44,9 +44,11 @@ NHANES_adult <-
 Let's say that I have purchased a bag of 100 candies, which are labeled as having 1/3 chocolates, 1/3 licorices, and 1/3 gumballs.  When I count the candies in the bag, we get the following numbers:
 
 ```{r}
-candyDf <- 
-  tibble(candyType=c('chocolate','licorice','gumball'),
-         count=c(30,33,37))
+candyDf <-
+  tibble(
+    candyType = c("chocolate", "licorice", "gumball"),
+    count = c(30, 33, 37)
+  )
 pander(candyDf)
 ```
 
@@ -64,27 +66,36 @@ In the case of our candy example, the null hypothesis is that the proportion of 
 
 ```{r}
 # compute chi-squared statistic
-nullExpectation <- c(1/3,1/3,1/3)*sum(candyDf$count)
-chisqVal <- sum(((candyDf$count - nullExpectation)**2)/nullExpectation)
+
+nullExpectation <- c(1 / 3, 1 / 3, 1 / 3) * sum(candyDf$count)
+
+chisqVal <- 
+  sum(
+    ((candyDf$count - nullExpectation)**2) / nullExpectation
+  )
 ```
 
-The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together.  Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
+The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together. The shape of the distribution depends on the number of degrees of freedom. Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
 
 ```{r chisqDist,echo=FALSE,fig.cap="Examples of the chi-squared distribution for various degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
-xvals <- seq(0.01,20,0.01)
-dfvals <- c(1,2,4,8)
-chisqDf <- 
-  data.frame(xvals,dfvals) %>% 
-  complete(xvals,dfvals)
-chisqDf <- 
+xvals <- seq(0.01, 20, 0.01)
+dfvals <- c(1, 2, 4, 8)
+chisqDf <-
+  data.frame(xvals, dfvals) %>%
+  complete(xvals, dfvals)
+chisqDf <-
   chisqDf %>%
-  mutate(chisq = dchisq(x=xvals,df=dfvals)) %>%
+  mutate(chisq = dchisq(x = xvals, df = dfvals)) %>%
   group_by(dfvals) %>%
-  mutate(chisqNorm = chisq/max(chisq))
-  
-ggplot(chisqDf,aes(xvals,chisqNorm,group=as.factor(dfvals),color=as.factor(dfvals))) +
+  mutate(chisqNorm = chisq / max(chisq))
+
+ggplot(chisqDf, aes(xvals, chisqNorm, group = as.factor(dfvals), color = as.factor(dfvals))) +
   geom_line() +
-  theme(legend.position = c(0.8,0.7)) 
+  theme(legend.position = c(0.8, 0.7)) +
+  labs(
+    color = "Degrees of freedom",
+    x = "Chi-square values"
+  )
 ```
 
 Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables, using simulation.
@@ -93,13 +104,16 @@ Let's verify that the chi-squared distribution accurately describes the sum of s
 # simulate 50,000 sums of 8 standard normal random variables and compare
 # to theoretical chi-squared distribution
 
-d <- replicate(50000,rnorm(8)**2)
-dMean <- apply(d,2,sum)
+# create a matrix with 50k columns of 8 rows of squared normal random variables
+d <- replicate(50000, rnorm(n = 8, mean = 0, sd = 1)**2) 
+# sum each column of 8 variables
+dMean <- apply(d, 2, sum)
 
-csDf <- 
-  data.frame(x=seq(0.01,30,0.01)) %>%
-  mutate(chisq=dchisq(x,8))
-
+# create a data frame of the theoretical chi-square distribution 
+# with 8 degrees of freedom
+csDf <-
+  data.frame(x = seq(0.01, 30, 0.01)) %>%
+  mutate(chisq = dchisq(x, 8))
 ```
 
 Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of a simulation that repeatedly added 
@@ -109,15 +123,19 @@ Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches close
 ggplot(data.frame(dMean),aes(dMean)) + 
   geom_histogram(aes(y=..density..),bins=100) +
   geom_line(data=csDf,aes(x,chisq),color='blue',size=1.5)+
-  xlim(0,30) + ylim(0,.12)
+  xlim(0,30) + ylim(0,.12) +
+  labs(
+    y = "Density",
+    x = "Sum of squared random normal variables"
+  )
 
 ```
 
 For the candy example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all candies. We use a chi-squared distribution with degrees of freedom equal to n - 1, since we lost one degree of freedom when we computed the mean in order to generate the expected values.
 
 ```{r}
-pval <- pchisq(chisqVal,2,lower.tail=FALSE)
-sprintf("p-value = %0.3f",pval)
+pval <- pchisq(chisqVal, df = 2, lower.tail = FALSE) #df = degrees of freedom
+sprintf("p-value = %0.3f", pval)
 ```
 
 This shows that the observed counts of candies are not particularly surprising based on the proportions printed on the bag of candy, and we would not reject the null hypothesis of equal proportions.
@@ -128,12 +146,9 @@ Another way that we often use the chi-squared test is to ask whether two categor
 
 ```{r}
 # load police stop data
-
-stopData <- 
-  read.table('data/CT_data_cleaned.csv',header=TRUE,sep=',') %>%
-  mutate(searched=recode(search_conducted,'False'=FALSE,'True'=TRUE)) %>%
-  dplyr::select(-search_conducted)
-
+stopData <-
+  read_csv("data/CT_data_cleaned.csv") %>%
+  rename(searched = search_conducted)
 ```
 
 The standard way to represent data from a categorical analysis is through a *contingency table*, which presents the number or proportion of observations falling into each possible combination of values for each of the variables.
@@ -142,19 +157,16 @@ Let's compute the contingency table for the police search data:
 
 ```{r}
 # compute and print two-way contingency table
+summaryDf2way <-
+  stopData %>%
+  count(searched, driver_race) %>%
+  arrange(driver_race, searched) 
 
-summaryDf2way <- 
-  stopData %>% 
-  group_by(searched,driver_race) %>% 
-  summarize(n=n()) %>% 
-  arrange(driver_race,searched) 
-
-summaryContingencyTable <- 
-  summaryDf2way %>% 
-  spread(driver_race,n)
+summaryContingencyTable <-
+  summaryDf2way %>%
+  spread(driver_race, n)
 
 pander(summaryContingencyTable)
-
 ```
 
 It can also be useful to look at the contingency table using proportions rather than raw numbers, since they are easier to compare visually.
@@ -162,13 +174,13 @@ It can also be useful to look at the contingency table using proportions rather 
 ```{r}
 # Compute and print contingency table using proportions 
 # rather than raw frequencies
-summaryContingencyTableProportion <- 
+summaryContingencyTableProportion <-
   summaryContingencyTable %>%
   mutate(
-    Black=Black/nrow(stopData),
-    White=White/nrow(stopData)
+    Black = Black / nrow(stopData), #count of Black individuals searched / total searched
+    White = White / nrow(stopData)
   )
-pander(summaryContingencyTableProportion,round=4)
+pander(summaryContingencyTableProportion, round = 4)
 ```
 
 The Pearson chi-squared test allows us to test whether observed frequencies are different from expected frequencies, so we need to determine what frequencies we would expect in each cell if searches and race were unrelated -- which we can define as being *independent.*  Remember from the chapter on probability that if X and Y are independent, then:
@@ -176,7 +188,7 @@ The Pearson chi-squared test allows us to test whether observed frequencies are 
 $$
 P(X \cap Y) = P(X) * P(Y)
 $$
-That is, the joint probability under the null hypothesis of independence is simply the product of the *marginal* probabilities of each individual variable. We can compute those marginal probabilities, and then multiply them together to get the expected proportions under independence.  
+That is, the joint probability under the null hypothesis of independence is simply the product of the *marginal* probabilities of each individual variable. The marginal probabilities are simply the probabilities of each event occuring regardless of other events. We can compute those marginal probabilities, and then multiply them together to get the expected proportions under independence.  
 
 
 |              | Black      | White      |       |
@@ -188,58 +200,71 @@ That is, the joint probability under the null hypothesis of independence is simp
 We can use a linear algebra trick known as the "outer product" (via the `outer()` function) to compute this easily.
 
 ```{r}
-# compute the marginal probabilities
-summaryDfRace <- 
-  stopData %>% 
-  group_by(driver_race) %>% 
-  summarize(
-    n=n(),
-    prop=n()/nrow(stopData)
+# first, compute the marginal probabilities
+
+# probability of being each race
+summaryDfRace <-
+  stopData %>%
+  count(driver_race) %>% #count the number of drivers of each race
+  mutate(
+    prop = n / sum(n) #compute the proportion of each race out of all drivers
   )
 
-summaryDfStop <- 
-  stopData %>% 
-  group_by(searched) %>% 
-  summarize(
-    n=n(),
-    prop=n()/nrow(stopData)
+# probability of being searched 
+summaryDfStop <-
+  stopData %>%
+  count(searched) %>% #count the number of searched vs. not searched
+  mutate(
+    prop = n / sum(n) # compute proportion of each outcome out all traffic stops
   )
-
-# multiply outer product by n to compute expected frequencies
-expected <- outer(summaryDfRace$prop, summaryDfStop$prop)*nrow(stopData)
-expectedDf <- data.frame(expected,driverRace = c('Black','White'))
-names(expectedDf) <- c('NotStopped','Stopped','driverRace')
-expectedDfTidy <- 
-  gather(expectedDf,searched,n,-driverRace) %>% 
-  arrange(driverRace,searched)
-
-# add expected frequencies and squared difference to summary table
-summaryDf2way <- 
-  summaryDf2way %>% 
-  mutate(expected=NA)
-
-summaryDf2way$expected = expectedDfTidy$n
-
-summaryDf2way <- 
-  summaryDf2way %>% 
-  mutate(stdSqDiff = (n - expected)**2/expected)
-
-pander(summaryDf2way)
-
 ```
 
 ```{r}
-# compute chi-squared statistic by summing standarized squared differences
-chisq <- sum(summaryDf2way$stdSqDiff)
-sprintf('Chi-squared value = %0.2f',chisq)
+# second, multiply outer product by n (all stops) to compute expected frequencies
+expected <- outer(summaryDfRace$prop, summaryDfStop$prop) * nrow(stopData)
 
+# create a data frame of expected frequences for each race 
+expectedDf <- 
+  data.frame(expected, driverRace = c("Black", "White")) %>% 
+  rename(
+    NotSearched = X1,
+    Searched = X2
+  )
+
+# tidy the data frame
+expectedDfTidy <-
+  gather(expectedDf, searched, n, -driverRace) %>%
+  arrange(driverRace, searched)
+```
+
+```{r}
+# third, add expected frequencies to the original summary table
+# and fourth, compute the standardized squared difference between 
+# the observed and expected frequences
+
+summaryDf2way <-
+  summaryDf2way %>%
+  mutate(expected = expectedDfTidy$n)
+
+summaryDf2way <-
+  summaryDf2way %>%
+  mutate(stdSqDiff = (n - expected)**2 / expected)
+
+pander(summaryDf2way)
+```
+
+```{r}
+# finally, compute chi-squared statistic by 
+# summing the standarized squared differences
+chisq <- sum(summaryDf2way$stdSqDiff)
+sprintf("Chi-squared value = %0.2f", chisq)
 ```
 
 Having computed the chi-squared statistic, we now need to compare it to the chi-squared distribution in order to determine how extreme it is compared to our expectation under the null hypothesis.  The degrees of freedom for this distribution are $df = (nRows - 1) * (nColumns - 1)$ - thus, for a 2X2 table like the one here, $df = (2-1)*(2-1)=1$.  The intuition here is that computing the expected frequencies requires us to use three values: the total number of observations and the marginal probability for each of the two variables.  Thus, once those values are computed, there is only one number that is free to vary, and thus there is one degree of freedom.  Given this, we can compute the p-value for the chi-squared statistic:
 
 ```{r}
-pval <- pchisq(chisq,1,lower.tail=FALSE)
-sprintf('p-value = %e',pval)
+pval <- pchisq(chisq, df = 1, lower.tail = FALSE)
+sprintf("p-value = %e", pval)
 ```
 
 The p value of $3.79e^{-182}$ is exceedingly small, showing that the observed data would be highly unlikely if there was truly no relationship between race and police searches, and thus we should reject the null hypothesis of independence.
@@ -248,20 +273,19 @@ We can also perform this test easily using the `chisq.test()` function in R:
 
 ```{r}
 # first need to rearrange the data into a 2x2 table
-summaryDf2wayTable <- 
-  summaryDf2way %>% 
-  dplyr::select(-expected,-stdSqDiff) %>% 
-  spread(searched,n) %>%
+summaryDf2wayTable <-
+  summaryDf2way %>%
+  dplyr::select(-expected, -stdSqDiff) %>%
+  spread(searched, n) %>%
   dplyr::select(-driver_race)
 
-chisqTestResult <- chisq.test(summaryDf2wayTable,1,correct=FALSE)
+chisqTestResult <- chisq.test(summaryDf2wayTable, 1, correct = FALSE)
 chisqTestResult
-
 ```
 
 ## Standardized residuals
 
-When we find a significant effect with the chi-squared test, this tells us that the data are unlikely under the null hypothesis, but it doesn't tell us how the data differ.  To get a deeper insight into how the data differ from what we would expect under the null hypothesis, we can examine the residuals from a model, which reflects the deviation of the data from the model in each cell. Rather than looking at the raw residuals (which will vary simply depending on the number of observations in the data), it's more common to look at ther *standardized residuals*, which are computed as:
+When we find a significant effect with the chi-squared test, this tells us that the data are unlikely under the null hypothesis, but it doesn't tell us *how* the data differ.  To get a deeper insight into how the data differ from what we would expect under the null hypothesis, we can examine the residuals from a model, which reflects the deviation of the data (i.e., the observed frequencies) from the model in each cell (i.e., the expected frequencies). Rather than looking at the raw residuals (which will vary simply depending on the number of observations in the data), it's more common to look at ther *standardized residuals*, which are computed as:
 
 $$
 standardized\ residual_{ij} = \frac{observed_{ij} - expected_{ij}}{\sqrt{expected_{ij}}}
@@ -271,7 +295,6 @@ where $i$ and $j$ are the indices for the rows and columns respectively.  We can
 
 ```{r}
 # compute standardized residuals
-
 summaryDf2way <- 
   summaryDf2way %>% 
   mutate(stdRes = (n - expected)/sqrt(expected))
@@ -320,9 +343,11 @@ We can compute the Bayes factor for the police search data using the `contingenc
 # using independent multinomial sampling plan in which row totals (driver race)
 # are fixed
 
-bf <- contingencyTableBF(as.matrix(summaryDf2wayTable), 
-                         sampleType = "indepMulti",
-                         fixedMargin='cols')
+bf <- 
+  contingencyTableBF(as.matrix(summaryDf2wayTable),
+  sampleType = "indepMulti",
+  fixedMargin = "cols"
+)
 bf
 
 ```
@@ -337,26 +362,28 @@ For example, let's look at the NHANES data and compare the variable *Depressed* 
 
 ```{r}
 # summarize depression as a function of sleep trouble
-
-depressedSleepTrouble <- 
+depressedSleepTrouble <-
   NHANES_adult %>%
-  drop_na(SleepTrouble,Depressed) %>%
-  group_by(SleepTrouble,Depressed) %>%
-  summarize(n=n()) %>%
-  arrange(SleepTrouble,Depressed)
+  drop_na(SleepTrouble, Depressed) %>%
+  count(SleepTrouble, Depressed) %>%
+  arrange(SleepTrouble, Depressed)
 
-depressedSleepTroubleTable <- 
-  depressedSleepTrouble %>% 
-  spread(SleepTrouble,n)
+depressedSleepTroubleTable <-
+  depressedSleepTrouble %>%
+  spread(SleepTrouble, n) %>% 
+  rename(
+    NoSleepTrouble = No,
+    YesSleepTrouble = Yes
+  )
 
 pander(depressedSleepTroubleTable)
 ```
 
-Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the total number of people with sleep trouble is muh less than those without, for people who report being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test:
+Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the total number of people with sleep trouble is much less than those without, for people who report being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test:
 
 ```{r}
 # need to remove the column with the label names
-depressedSleepTroubleTable <- 
+depressedSleepTroubleTable <-
   depressedSleepTroubleTable %>%
   dplyr::select(-Depressed)
 
@@ -368,9 +395,11 @@ This test shows that there is a strong relationship between depression and sleep
 
 ```{r}
 # compute bayes factor, using a joint multinomial sampling plan
-
-bf <- contingencyTableBF(as.matrix(depressedSleepTroubleTable), 
-                         sampleType = "jointMulti")
+bf <-
+  contingencyTableBF(
+    as.matrix(depressedSleepTroubleTable),
+    sampleType = "jointMulti"
+  )
 bf
 ```
 
