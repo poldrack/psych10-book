@@ -63,18 +63,19 @@ As an example, let's generate some simulated data for the relationship between s
 set.seed(12345)
 
 # the number of points that having a prior class increases grades
-betas <- c(6,5)  
+betas <- c(6, 5)
 
-df <- 
-  data.frame(
-    studyTime=c(2,3,5,6,6,8,10,12)/3,
-    priorClass=c(0,1,1,0,1,0,1,0)
+df <-
+  tibble(
+    studyTime = c(2, 3, 5, 6, 6, 8, 10, 12) / 3,
+    priorClass = c(0, 1, 1, 0, 1, 0, 1, 0)
   ) %>%
-  mutate(grade=studyTime*betas[1]+priorClass*betas[2] +round(rnorm(8,mean=70,sd=5))) 
-
-lmResult <- lm(grade~studyTime,data=df)
-
-
+  mutate(
+    grade = 
+      studyTime * betas[1] + 
+      priorClass * betas[2] + 
+      round(rnorm(8, mean = 70, sd = 5))
+  )
 ```
 
 ```{r StudytimeGrades, echo=FALSE,fig.cap='Relation between study time and grades',fig.width=4,fig.height=4,out.height='50%'}
@@ -99,16 +100,15 @@ In the last chapter we learned how to describe the relationship between two vari
 
 ```{r}
 # compute correlation between grades and study time
-corTestResult <- cor.test(df$grade,df$studyTime,alternative='greater')
+corTestResult <- cor.test(df$grade, df$studyTime, alternative = "greater")
 corTestResult
-
 ```
 
 The correlation is quite high, but just barely reaches statistical significance because the sample size is so small.  
 
 ## Linear regression
 
-We can also use the general linear model to describe the relation between two variables and to decide whether that relationship is statistically significant; in addition, the model allows us to predict the value of the dependent variable given some new value of the independent variables.  Most importantly, the general linear model will allow us to build models that incorporate multiple independent variables, whereas correlation can only tell us about the relationship between two individual variables.
+We can also use the general linear model to describe the relation between two variables and to decide whether that relationship is statistically significant; in addition, the model allows us to predict the value of the dependent variable given some new value(s) of the independent variable(s).  Most importantly, the general linear model will allow us to build models that incorporate multiple independent variables, whereas correlation can only tell us about the relationship between two individual variables.
 
 The specific version of the GLM that we use for this is referred to as as *linear regression*.  The term *regression* was coined by Francis Galton, who had noted that when he compared parents and their children on some feature (such as height), the children of extreme parents (i.e. the very tall or very short parents) generally fell closer to the mean than their parents.  This is an extremely important point that we return to below.
 
@@ -124,7 +124,7 @@ $$
 $$
 Figure  \@ref(fig:LinearRegression) shows an example of this model applied to the study time example.
 
-```{r LinearRegression,echo=FALSE,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much it changes in y for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time.",fig.width=6,fig.height=6,out.height='50%'}
+```{r LinearRegression,echo=FALSE,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much y changes for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time.",fig.width=6,fig.height=6,out.height='50%'}
 
 p2 <- p+geom_abline(slope=lmResult$coefficients[2],
                   intercept=lmResult$coefficients[1],
@@ -152,23 +152,25 @@ The concept of *regression to the mean* was one of Galton's essential contributi
 ```{r}
 # create simulated data for regression to the mean example
 
-nstudents <- 100
-readingScores  <-  data.frame(
-  test1=rnorm(nstudents)*10 + 100,
-  test2=rnorm(nstudents)*10 + 100
+nstudents <- 100 
+
+readingScores <- data.frame(
+  #random normal distribution of scores for test 1
+  test1 = rnorm(n = nstudents, mean = 0, sd = 1) * 10 + 100, 
+  #random normal distribution of scores for test 2
+  test2 = rnorm(n = nstudents, mean = 0, sd = 1) * 10 + 100 
 )
 
 # select the students in the bottom 25% on the first test
-cutoff <- quantile(readingScores$test1,0.25)
-readingScores <- 
-  readingScores %>%
-  mutate(badTest1=test1<cutoff)
+cutoff <- quantile(readingScores$test1, 0.25)
 
-readingScores %>%
-  subset(badTest1==TRUE) %>%
+readingScores <-
+  readingScores %>%
+  mutate(badTest1 = test1 < cutoff) %>% 
+  filter(badTest1 == TRUE) %>%
   summarize(
-    test1mean=mean(test1),
-    test2mean=mean(test2)
+    test1mean = mean(test1),
+    test2mean = mean(test2)
   ) %>%
   pander()
 ```
@@ -182,8 +184,9 @@ We generally estimate the parameters of a linear model from data using *linear a
 First, let's introduce the idea of vectors and matrices; you've already encountered them in the context of R, but we will review them here.  A matrix is a set of numbers that are arranged in a square or rectangle, such that there are one or more *dimensions* across which the matrix varies.  It is customary to place different observation units (such as people) in the rows, and different variables in the columns. Let's take our study time data from above. We could arrange these numbers in a matrix, which would have eight rows (one for each student) and two columns (one for study time, and one for grade).  If you are thinking "that sounds like a data frame in R" you are exactly right!  In fact, a data frame is a specialized version of a matrix, and we can convert a data frame to a matrix using the `as.matrix()` function.
 
 ```{r}
-df_matrix <- df %>% 
-  dplyr::select(studyTime,grade) %>%
+df_matrix <- 
+  df %>%
+  dplyr::select(studyTime, grade) %>%
   as.matrix()
 ```
 
@@ -200,7 +203,7 @@ We know that the grade data go into the Y matrix, but what goes into the $X$ mat
 knitr::include_graphics("images/glm_matrix.png")
 ```
 
-The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1, so the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view the linear model as a set of individual equations for each individual:
+The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1. Therfore, the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view the linear model as a set of individual equations for each individual:
 
 $\hat{y}_1 = studyTime_1*\beta_1 + 1*\beta_2$
 
@@ -221,15 +224,15 @@ The challenge here is that $X$ and $\beta$ are now matrices, not single numbers 
 ```{r}
 # compute beta estimates using linear algebra
 
-Y <- as.matrix(df$grade)
-X <- matrix(0,nrow=dim(Y)[1],ncol=2)
-X[,1] <- as.matrix(df$studyTime)
-X[,2] <- 1
+Y <- as.matrix(df$grade) #create Y variable 8 x 1 matrix
+X <- matrix(0, nrow = 8, ncol = 2) #create X variable 8 x 2 matrix
+X[, 1] <- as.matrix(df$studyTime) #assign studyTime values to first column in X matrix
+X[, 2] <- 1 #assign constant of 1 to second column in X matrix
 
 # compute inverse of X using ginv()
 # %*% is the R matrix multiplication operator
 
-beta_hat <-  ginv(X) %*% Y
+beta_hat <- ginv(X) %*% Y #multiple the inverse of X by Y
 print(beta_hat)
 ```
 
@@ -261,7 +264,7 @@ That is, the regression slope is equal to the correlation value multiplied by th
 
 ### Standard errors for regression models
 
-If we want to make inferences about the regression parameter estimates, then we also need an estimate of their variability.  To compute this, we first need to compute the *residual variance* or *error variance* for the model -- that is, how much variability is not explained by the model.  We can compute the model residuals as follows:
+If we want to make inferences about the regression parameter estimates, then we also need an estimate of their variability.  To compute this, we first need to compute the *residual variance* or *error variance* for the model -- that is, how much variability in the dependent variable is not explained by the model.  We can compute the model residuals as follows:
 
 $$
 residual = y - \hat{y} = y - (x*\hat{\beta_x} + \hat{\beta_0})
@@ -282,7 +285,7 @@ $$
 SE_{model} = \sqrt{MS_{error}}
 $$
 
-In order to get the standard error for a specific regression parameter estimate, we need to rescale $SE_{model}$ into the units of the particular parameter, by dividing it by the standard deviation of the X variable:
+In order to get the standard error for a specific regression parameter estimate, {\beta_x}, we need to rescale $SE_{model}$ into the units of the particular parameter, by dividing it by the standard deviation of the X variable:
 
 $$
 SE_{\beta_x} = \frac{SE_{model}}{S_x}
@@ -337,7 +340,14 @@ Often we would like to understand the effects of multiple variables on some part
 ```{r StudytimeGradesPrior, echo=FALSE,fig.cap='The relationship between study time and grades, with color identifying whether each student had taken a previous course on the topic',fig.width=6,fig.height=4,out.height='50%'}
 
 p <- ggplot(df,aes(studyTime,grade,color=as.factor(priorClass))) +
-  geom_point(size=3) + xlim(0,5) + ylim(70,100)
+  geom_point(size=3) + xlim(0,5) + ylim(70,100) +
+  scale_color_discrete(
+    limits = c(0, 1),
+    labels = c("No", "Yes")
+  ) +
+  labs(
+    color = "Previous course"
+  )
 print(p)
 
 ```
@@ -355,7 +365,7 @@ To model whether each individual has had a previous class or not, we use what we
 # must change priorClass to a factor variable
 df$priorClass <- as.factor(df$priorClass)
 
-lmResultTwoVars <- lm(grade ~ studyTime + priorClass,data=df)
+lmResultTwoVars <- lm(grade ~ studyTime + priorClass, data = df)
 summary(lmResultTwoVars)
 
 ```
@@ -399,13 +409,20 @@ p <- p+
            yend=lmResultTwoVars$coefficients[1]+
              lmResultTwoVars$coefficients[3] +
              2*lmResultTwoVars$coefficients[2],
-           linetype='dotted',size=1) 
+           linetype='dotted',size=1) +
+  scale_color_discrete(
+    limits = c(0, 1),
+    labels = c("No", "Yes")
+  ) +
+  labs(
+    color = "Previous course"
+  )
 print(p)
 ```
 
 ## Interactions between variables
 
-In the previous model, we assumed that the effect of study time was the same for both groups. However, in some cases we might imagine that the effect of one variable might differ depending on the value of another variable, which we refer to as an *interaction* between variables.
+In the previous model, we assumed that the effect of study time on grade (i.e., the regression slope) was the same for both groups. However, in some cases we might imagine that the effect of one variable might differ depending on the value of another variable, which we refer to as an *interaction* between variables.
 
 
 ```{r CaffeineSpeaking, echo=FALSE,fig.cap='The relationship between caffeine and public speaking',fig.width=4,fig.height=4,out.height='50%'}
@@ -431,9 +448,8 @@ Looking at Figure \@ref(fig:CaffeineSpeaking), there doesn't seem to be a relati
 
 ```{r}
 # perform linear regression with caffeine as independent variable
-lmResultCaffeine <- lm(speaking~caffeine,data=df)
+lmResultCaffeine <- lm(speaking ~ caffeine, data = df)
 summary(lmResultCaffeine)
-
 ```
 
 But now let's say that we find research suggesting that anxious and non-anxious people react differently to caffeine.  First let's plot the data separately for anxious and non-anxious people.
@@ -451,7 +467,7 @@ As we see from Figure \@ref(fig:CaffeineSpeakingAnxiety), it appears that the re
 
 ```{r}
 # compute linear regression adding anxiety to model
-lmResultCafAnx <- lm(speaking ~ caffeine + anxiety,data=df)
+lmResultCafAnx <- lm(speaking ~ caffeine + anxiety, data = df)
 summary(lmResultCafAnx)
 ```
 
@@ -459,8 +475,10 @@ Here we see there are no significant effects of either caffeine or anxiety, whic
 
 ```{r}
 # compute linear regression including caffine X anxiety interaction
-lmResultInteraction <- lm(speaking ~ caffeine + anxiety + caffeine*anxiety,
-                          data=df)
+lmResultInteraction <- lm(
+  speaking ~ caffeine + anxiety + caffeine * anxiety,
+  data = df
+)
 summary(lmResultInteraction)
 ```
 
@@ -493,7 +511,7 @@ print(p)
 Sometimes we want to compare the relative fit of two different models, in order to determine which is a better model; we refer to this as *model comparison*.  For the models above, we can compare the goodness of fit of the model with and without the interaction, using the`anova()` command in R:
 
 ```{r}
-anova(lmResultCafAnx,lmResultInteraction)
+anova(lmResultCafAnx, lmResultInteraction)
 ```
 
 This tells us that there is good evidence to prefer the model with the interaction over the one without an interaction.  Model comparison is relatively simple in this case because the two models are *nested* -- one of the models is a simplified version of the other model.  Model comparison with non-nested models can get much more complicated.
@@ -506,67 +524,88 @@ When we talk about "prediction" in daily life, we are generally referring to the
 As an example, let's take a sample of 48 children from NHANES and fit a regression model for weight that includes several regressors (age, height, hours spent watching TV and using the computer, and household income) along with their interactions.  
 
 ```{r}
-# get children with good values of all variables
-NHANES_child <- 
+# create dataframe with children with complete data on all variables
+NHANES_child <-
   NHANES %>%
-  drop_na(Height,Weight,TVHrsDayChild,HHIncomeMid,CompHrsDayChild,Age) %>%
-  subset(Age<18)
-
-# create function to sample data and compute regression on in-sample and out-of-sample data
-
-get_sample_predictions <- function(sample_size,shuffle=FALSE) {
-  
-  orig_sample <- 
-    NHANES_child %>%
-    sample_n(sample_size)
-  
-  if (shuffle){
-    orig_sample$Weight <- sample(orig_sample$Weight)
-  }
-  heightRegressOrig <- lm(Weight ~ Height*TVHrsDayChild*CompHrsDayChild*HHIncomeMid*Age,
-                          data=orig_sample)
-  
-  pred_orig <- predict(heightRegressOrig)
-  
-  new_sample <- 
-    NHANES_child %>%
-    sample_n(sample_size)
-  
-  pred_new <- predict(heightRegressOrig,new_sample)
-  # return r-squared and rmse for original and new data
-  return(c(cor(pred_orig,orig_sample$Weight)**2,
-           cor(pred_new,new_sample$Weight)**2,
-           sqrt(mean((pred_orig - orig_sample$Weight)**2)),
-          sqrt(mean((pred_new - new_sample$Weight)**2))))
-
-}
-
-sim_results <- replicate(100,get_sample_predictions(48))
-sim_results <- t(sim_results) %>%
-  data.frame()
-mean_rsquared <- 
-  sim_results%>%
-  summarize(rmse_original_data = mean(X3),
-            rmse_new_data = mean(X4))
-pander(mean_rsquared)
-
+  drop_na(Height, Weight, TVHrsDayChild, HHIncomeMid, CompHrsDayChild, Age) %>%
+  filter(Age < 18)
 ```
 
-Here we see that whereas the model fit on the original data showed a very good fit (only off by a few pounds per individual), the same model does a much worse job of predicting the weight values for new children sampled from the same population (off by more than 25 pounds per individual).  This happens because the model that we specified is quite complex, since it includes not just each of the individual variables, but also all possible combinations of them (i.e. their *interactions*), resulting in a model with 32 parameters.  Since this is almost as many coefficients as there are data points, the model *overfits* the data, just like the complex polynomial curve in our initial example of overfitting in Section \@ref(overfitting).
+```{r}
+# create function to sample data and compute regression on in-sample and out-of-sample data
 
-Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable, such that it should be impossible in principle to predict weight from the other variables, since they should have no systematic relationship.
+get_sample_predictions <- function(sample_size, shuffle = FALSE) {
+  orig_sample <-
+    NHANES_child %>%
+    sample_n(sample_size)
+
+  if (shuffle) {
+    orig_sample$Weight <- sample(orig_sample$Weight)
+  }
+  
+  heightRegressOrig <- lm(
+    Weight ~ Height * TVHrsDayChild * CompHrsDayChild * HHIncomeMid * Age,
+    data = orig_sample
+  )
+
+  pred_orig <- predict(heightRegressOrig)
+
+  new_sample <-
+    NHANES_child %>%
+    sample_n(sample_size)
+
+  pred_new <- predict(heightRegressOrig, new_sample)
+  # return r-squared and rmse for original and new data
+  return(c(
+    cor(pred_orig, orig_sample$Weight)**2,
+    cor(pred_new, new_sample$Weight)**2,
+    sqrt(mean((pred_orig - orig_sample$Weight)**2)),
+    sqrt(mean((pred_new - new_sample$Weight)**2))
+  ))
+}
+```
 
 ```{r}
-print('using shuffled y variable to simulate null effect')
-sim_results <- replicate(100,get_sample_predictions(48,shuffle=TRUE))
-sim_results <- t(sim_results) %>%
-  data.frame()
-mean_rsquared <- 
-  sim_results%>%
-  summarize(rmse_original_data = mean(X3),
-            rmse_new_data = mean(X4))
-pander(mean_rsquared)
+# implement the function
+sim_results <- 
+  replicate(100, get_sample_predictions(sample_size = 48, shuffle = FALSE))
 
+sim_results <- 
+  t(sim_results) %>%
+  data.frame()
+
+mean_rsquared <-
+  sim_results %>%
+  summarize(
+    rmse_original_data = mean(X3),
+    rmse_new_data = mean(X4)
+  )
+
+pander(mean_rsquared)
+```
+
+
+Here we see that whereas the model fit on the original data showed a very good fit (only off by a few pounds per individual), the same model does a much worse job of predicting the weight values for new children sampled from the same population (off by more than 25 pounds per individual).  This happens because the model that we specified is quite complex, since it includes not just each of the individual variables, but also all possible combinations of them (i.e. their *interactions*), resulting in a model with 32 parameters.  Since this is almost as many coefficients as there are data points (i.e., the heights of 48 children), the model *overfits* the data, just like the complex polynomial curve in our initial example of overfitting in Section \@ref(overfitting).
+
+Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable. Randomly shuffiling the value should make it impossible to predict weight from the other variables, because they should have no systematic relationship.
+
+```{r}
+print("using shuffled y variable to simulate null effect")
+
+sim_results <- 
+  replicate(100, get_sample_predictions(sample_size = 48, shuffle = TRUE))
+
+sim_results <- 
+  t(sim_results) %>%
+  data.frame()
+
+mean_rsquared <-
+  sim_results %>%
+  summarize(
+    rmse_original_data = mean(X3),
+    rmse_new_data = mean(X4)
+  )
+pander(mean_rsquared)
 ```
 
 This shows us that even when there is no true relationship to be modeled (because shuffling should have obliterated the relationship), the complex model still shows a very low error in its predictions, because it fits the noise in the specific dataset.  However, when that model is applied to a new dataset, we see that the error is much larger, as it should be.
@@ -587,17 +626,19 @@ Let's see how that would work for our weight prediction example.  In this case w
 # create a function to run cross-validation
 # returns the r-squared for the out-of-sample prediction
 
-compute_cv <- function(d,nfolds=12) {
+compute_cv <- function(d, nfolds = 12) {
   # based on https://quantdev.ssri.psu.edu/tutorials/cross-validation-tutorial
   train_ctrl <- trainControl(method = "cv", number = nfolds)
-  model_caret <- train(Weight ~ Height*TVHrsDayChild*CompHrsDayChild*HHIncomeMid*Age,
-                            data=d,        
-                       trControl = train_ctrl,  # folds
-                       method = "lm")   # specifying regression model
-  
+  model_caret <- train(
+    Weight ~ Height * TVHrsDayChild * CompHrsDayChild * HHIncomeMid * Age,
+    data = d,
+    trControl = train_ctrl, # folds
+    method = "lm"
+  ) # specifying regression model
+
   r2_cv <- mean(model_caret$resample$Rsquared)
   rmse_cv <- mean(model_caret$resample$RMSE)
-  return(c(r2_cv,rmse_cv))
+  return(c(r2_cv, rmse_cv))
 }
 
 ```
@@ -607,65 +648,80 @@ Using this function we can run cross-validation on 100 samples from the NHANES d
 ```{r, echo=FALSE,warning=FALSE}
 # create function to sample data and compute regression on in-sample and out-of-sample data
 
-get_sample_predictions_cv <- function(sample_size,shuffle=FALSE) {
-  orig_sample <- 
+get_sample_predictions_cv <- function(sample_size, shuffle = FALSE) {
+  orig_sample <-
     NHANES_child %>%
     sample_n(sample_size)
-  
-  if (shuffle){
+
+  if (shuffle) {
     orig_sample$Weight <- sample(orig_sample$Weight)
   }
-  
-  heightRegressOrig <- lm(Weight ~ Height*TVHrsDayChild*CompHrsDayChild*HHIncomeMid*Age,
-                          data=orig_sample)
-  
+
+  heightRegressOrig <- lm(
+    Weight ~ Height * TVHrsDayChild * CompHrsDayChild * HHIncomeMid * Age,
+    data = orig_sample
+  )
+
   pred_orig <- predict(heightRegressOrig)
-  
-  new_sample <- 
+
+  new_sample <-
     NHANES_child %>%
     sample_n(sample_size)
-  
-  pred_new <- predict(heightRegressOrig,new_sample)
+
+  pred_new <- predict(heightRegressOrig, new_sample)
   # run crossvalidation on original sample
-  cv_output=compute_cv(orig_sample)
-  return(c(cor(pred_orig,orig_sample$Weight)**2,
-           cor(pred_new,new_sample$Weight)**2,
-         cv_output[1],
-         sqrt(mean((pred_orig - orig_sample$Weight)**2)),
-         sqrt(mean((pred_new - new_sample$Weight)**2)),
-         cv_output[2]))
-         
+  cv_output <- compute_cv(orig_sample) #use function created above
+  return(c(
+    cor(pred_orig, orig_sample$Weight)**2,
+    cor(pred_new, new_sample$Weight)**2,
+    cv_output[1],
+    sqrt(mean((pred_orig - orig_sample$Weight)**2)),
+    sqrt(mean((pred_new - new_sample$Weight)**2)),
+    cv_output[2]
+  ))
 }
-
-
-sim_results <- replicate(100,get_sample_predictions_cv(48))
-sim_results <- t(sim_results) %>%
-  data.frame()
-mean_rsquared <- 
-  sim_results%>%
-  summarize(mse_original_data = mean(X4),
-            mse_new_data = mean(X5),
-            mse_crossvalidation = mean(X6))
-pander(mean_rsquared)
-
-
 ```
+
+```{r}
+#implement the function
+sim_results <- 
+  replicate(100, get_sample_predictions_cv(sample_size = 48, shuffle = FALSE))
+
+sim_results <- 
+  t(sim_results) %>%
+  data.frame()
+
+mean_rsquared <-
+  sim_results %>%
+  summarize(
+    mse_original_data = mean(X4),
+    mse_new_data = mean(X5),
+    mse_crossvalidation = mean(X6)
+  )
+pander(mean_rsquared)
+```
+
 
 Here we see that crossvalidation gives us an estimate of predictive accuracy that is much closer to what we see with a completely new dataset than it is to the inflated accuracy that we see with the original dataset -- in fact, it's even slighlty more pessimistic than the average for a new dataset, probably because only part of the data are being used to train each of the models.  We can also confirm that cross-validation accurately estimates the predictive accuracy when the dependent variable is randomly shuffled:
 
 ```{r echo=FALSE,warning=FALSE}
 # run crossvalidation with shuffled y variable 
 
-sim_results <- replicate(100,get_sample_predictions_cv(48, shuffle=TRUE))
-sim_results <- t(sim_results) %>%
-  data.frame()
-mean_rsquared <- 
-  sim_results%>%
-  summarize(rmse_original_data = mean(X4),
-            rmse_new_data = mean(X5),
-            rmse_crossvalidation = mean(X6))
-pander(mean_rsquared)
+sim_results <- 
+  replicate(100, get_sample_predictions_cv(sample_size = 48, shuffle = TRUE))
 
+sim_results <- 
+  t(sim_results) %>%
+  data.frame()
+
+mean_rsquared <-
+  sim_results %>%
+  summarize(
+    rmse_original_data = mean(X4),
+    rmse_new_data = mean(X5),
+    rmse_crossvalidation = mean(X6)
+  )
+pander(mean_rsquared)
 ```
 
 Here again we see that crossvalidation gives us an assessment of prediction accuracy that is is much closer to what we expect with new data, and again even somewhat more pessimistic.
