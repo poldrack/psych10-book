@@ -154,7 +154,7 @@ Another way to assess reliability comes in cases where the data includes subject
 
 Reliability is important if we want to compare one measurement to another.  The relationship between two different measurements can't be any stronger than the relationship between either of the measurements and itself (i.e., its reliability).  This means that an unreliable measure can never have a strong statistical relationship with any other measure.  For this reason, researchers developing a new measurement (such as a new survey) will often go to great lengths to test its reliability.
 
-```{r ReliabilityValidity, echo=FALSE,fig.cap="A figure demonstrating the distinction between reliability and valdity, using shots at a bullseye. Reliability refers to the consistency of location of shots, and validity refers to the accuracy of the shots with respect to the center of the bullseye. ",fig.width=6,fig.height=6,out.height='33%'}
+```{r ReliabilityValidity, echo=FALSE,fig.cap="A figure demonstrating the distinction between reliability and validity, using shots at a bullseye. Reliability refers to the consistency of location of shots, and validity refers to the accuracy of the shots with respect to the center of the bullseye. ",fig.width=6,fig.height=6,out.height='33%'}
 # Figure inspired by https://commons.wikimedia.org/wiki/File:Reliability_and_validity.svg
 
 # from https://stackoverflow.com/questions/6862742/draw-a-circle-with-ggplot2
