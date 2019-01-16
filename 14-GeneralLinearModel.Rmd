@@ -168,7 +168,7 @@ cutoff <- quantile(readingScores$test1, 0.25)
 readingScores <-
   readingScores %>%
   mutate(badTest1 = test1 < cutoff) %>% 
-  filter(badTest1 == TRUE) %>%
+  dplyr::filter(badTest1 == TRUE) %>%
   summarize(
     test1mean = mean(test1),
     test2mean = mean(test2)
@@ -529,7 +529,7 @@ As an example, let's take a sample of 48 children from NHANES and fit a regressi
 NHANES_child <-
   NHANES %>%
   drop_na(Height, Weight, TVHrsDayChild, HHIncomeMid, CompHrsDayChild, Age) %>%
-  filter(Age < 18)
+  dplyr::filter(Age < 18)
 ```
 
 ```{r}
