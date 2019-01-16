@@ -286,7 +286,7 @@ $$
 SE_{model} = \sqrt{MS_{error}}
 $$
 
-In order to get the standard error for a specific regression parameter estimate, {\beta_x}, we need to rescale $SE_{model}$ into the units of the particular parameter, by dividing it by the standard deviation of the X variable:
+In order to get the standard error for a specific regression parameter estimate, $SE_{\beta_x}$, we need to rescale $SE_{model}$ into the units of the particular parameter, by dividing it by the standard deviation of the X variable:
 
 $$
 SE_{\beta_x} = \frac{SE_{model}}{S_x}
