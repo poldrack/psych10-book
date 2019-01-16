@@ -126,11 +126,12 @@ Figure  \@ref(fig:LinearRegression) shows an example of this model applied to th
 
 ```{r LinearRegression,echo=FALSE,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much y changes for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time.",fig.width=6,fig.height=6,out.height='50%'}
 
+lmResult <- lm(grade~studyTime,data=df)
+
 p2 <- p+geom_abline(slope=lmResult$coefficients[2],
                   intercept=lmResult$coefficients[1],
                   color='blue')
 
-lmResult <- lm(grade~studyTime,data=df)
 
 p3 <- p2 +
   geom_hline(yintercept=lmResult$coefficients[1],color='black',size=0.5,linetype='dotted') +
