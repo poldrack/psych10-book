@@ -534,7 +534,7 @@ $$
 
 As an aside, this is a reason why many medical researchers have become increasingly wary of the use of widespread screening tests for relatively uncommon conditions; most positive results will turn out to be false positives.
 
-We can also use odds to compare different probabilities, by computing what is called an *odds ratio* - which is exactly what it sounds like.  For example, let's say that we want to know how much the positive test increases the individual's odds of having cancer. We can first compute the *prior odds* -- that is, the odds before we knew that the person had tested positvely.  These are computed using the base rate:
+We can also use odds to compare different probabilities, by computing what is called an *odds ratio* - which is exactly what it sounds like.  For example, let's say that we want to know how much the positive test increases the individual's odds of having cancer. We can first compute the *prior odds* -- that is, the odds before we knew that the person had tested positively.  These are computed using the base rate:
 
 $$
 \text{prior odds} = \frac{P(\text{cancer})}{P(\neg \text{cancer})} =\frac{0.058}{1 - 0.058} = 0.061
