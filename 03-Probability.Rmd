@@ -176,9 +176,11 @@ That is, the probability of A or B occurring is determined by adding together th
 
 
 $$
-P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) - P(Roll1_{throw1} \cap Roll1_{throw2}) = \frac{1}{6} + \frac{1}{6} - \frac{1}{36} = \frac{11}{36}
+P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) - P(Roll1_{throw1} \cap Roll1_{throw2}) 
 $$
-
+$$
+= \frac{1}{6} + \frac{1}{6} - \frac{1}{36} = \frac{11}{36}
+$$
 
 ```{r ThrowMatrix, echo=FALSE,fig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second throw. Cells shown in light blue represent the cells with a one in either the first or second throw; the rest are shown in dark blue.',fig.width=4,fig.height=4,out.height='50%'}
 imgmtx <-
