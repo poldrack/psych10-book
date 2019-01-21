@@ -24,7 +24,7 @@ options(digits = 2)
 
 ## Why summarize data?
 
-When we summarize data, we are necessarily throwing away information, and there are many conceivable objections to this.  As an example, let's go back to the PURE study that we discussed in Chapter 1.  Are we not supposed to be believe that all of the details about each individual matter, beyond those that are summarized in the dataset?  What about the specific details of how the data were collected, such as the time of day or the mood of the participant?  All of these details are lost when we summarize the data.
+When we summarize data, we are necessarily throwing away information, and there are many conceivable objections to this.  As an example, let's go back to the PURE study that we discussed in Chapter 1.  Are we not supposed to believe that all of the details about each individual matter, beyond those that are summarized in the dataset?  What about the specific details of how the data were collected, such as the time of day or the mood of the participant?  All of these details are lost when we summarize the data.
 
 We summarize data in general because it provides us with a way to *generalize* - that is, to make general statements that extend beyond specific observations.  The importance of generalization was highlighted by the writer Jorge Luis Borges in his short story "Funes the Memorious", which describes an individual who loses the ability to forget.  Borges focuses in on the relation between generalization (i.e. throwing away data) and thinking: "To think is to forget a difference, to generalize, to abstract. In the overly replete world of Funes, there were nothing but details."  
 
