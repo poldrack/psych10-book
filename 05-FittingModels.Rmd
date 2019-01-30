@@ -1194,6 +1194,6 @@ p2 <- crimeData %>%
 plot_grid(p1,p2)
 ```
 
-Because Z-scores are directly comparable, we can also compute a "Violence difference" score that expresses the relative rate of violent to non-violent (property) crimes across states. We can then plot those scores against population (see right panel of Figure \@ref(fig:crimeTypePopPlot). This shows how we can use Z-scores to bring different variables together on a common scale.
+Because Z-scores are directly comparable, we can also compute a "Violence difference" score that expresses the relative rate of violent to non-violent (property) crimes across states. We can then plot those scores against population (see right panel of Figure \@ref(fig:crimeTypePopPlot)). This shows how we can use Z-scores to bring different variables together on a common scale.
 
 It is worth noting that the smallest states appear to have the largest differences in both directions. While it might be tempting to look at each state and try to determine why it has a high or low difference score, this probably  reflects the fact that the estimates obtained from smaller samples are necessarily going to be more variable, as we will discuss in more detail in a couple of chapters.
