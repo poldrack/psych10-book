@@ -152,7 +152,7 @@ The average error here is a very small number, though not technically zero; we w
 
 Even though the average of errors from the mean is zero, we can see from the histogram in Figure \@ref(fig:meanError) that each individual still has some degree of error; some are positive and some are negative, and those cancel each other out. For this reason, we generally summarize errors in terms of some kind of measure that counts both positive and negative errors as bad.  We could use the absolute value of each error value, but it's more common to use the squared errors, for reasons that we will see later in the course.  
 
-There are several common ways to summarize the squared error that you will encounter at various points in this book, so it's important to understand how they relate to one another.  First, we could simply add them up; this is referred to as the *sum of squared errors*.  The reason we don't usually use this is that its magnitude depends on the number of data points, so it can be difficult to interpret unless we are looking at the same number of of observations.  Second, we could  take the mean of the squared error values, which is referred to as the *mean squared error (MSE)*.  However, because we squared the values before averaging, they are not on the same scale as the original data; they are in $centimeters^2$.  For this reason, it's also common to take the square root of the MSE, which we refer to as the *root mean squared error (RMSE)*, so that it is in the same units as the original values (in this example, centimeters).
+There are several common ways to summarize the squared error that you will encounter at various points in this book, so it's important to understand how they relate to one another.  First, we could simply add them up; this is referred to as the *sum of squared errors*.  The reason we don't usually use this is that its magnitude depends on the number of data points, so it can be difficult to interpret unless we are looking at the same number of observations.  Second, we could  take the mean of the squared error values, which is referred to as the *mean squared error (MSE)*.  However, because we squared the values before averaging, they are not on the same scale as the original data; they are in $centimeters^2$.  For this reason, it's also common to take the square root of the MSE, which we refer to as the *root mean squared error (RMSE)*, so that it is in the same units as the original values (in this example, centimeters).
 
 ```{r}
 # compute and print RMSE for mean and mode
@@ -362,7 +362,7 @@ p3 <- dataDf %>%
 plot_grid(p1,p2,p3)
 ```
 
-In this example, reaction time goes up systematically with blood alcohol content -- the blue line shows the best fitting model, and we can see that there is very little error, which is evident in the fact that the all of the points are very close to the line.  
+In this example, reaction time goes up systematically with blood alcohol content -- the blue line shows the best fitting model, and we can see that there is very little error, which is evident in the fact that all of the points are very close to the line.  
 
 We could also imagine data that show the same linear relationship, but have much more error, as in Panel B of Figure \@ref(fig:BACrt). Here we see that there is still a systematic increase of reaction time with BAC, but it's much more variable across individuals.  
 
@@ -531,7 +531,7 @@ df_error %>%
 
 ```
 
-This minimization of SSE is a good feature, and it's why the mean is the most commonly used statistic to summarize data.  However, the mean also has a dark side.  Let's say that five people are in in a bar, and we examine each person's  income:
+This minimization of SSE is a good feature, and it's why the mean is the most commonly used statistic to summarize data.  However, the mean also has a dark side.  Let's say that five people are in a bar, and we examine each person's  income:
 
 ```{r}
 # create income data frame
