@@ -728,10 +728,8 @@ This shows us that the theory outlined above was correct: The variance estimate 
 
 ## Z-scores
 
-Having characterized a distribution in terms of its central tendency and variability, it is often useful to express the individual scores in terms of where they sit with respect to the overall distribution.  Let's say that we are interested in characterizing the relative level of crimes across different states, in order to determine whether California is a particularly dangerous place. We can ask this question using data for 2014 from the [FBI's Uniform Crime Reporting site](https://www.ucrdatatool.gov/Search/Crime/State/RunCrimeOneYearofData.cfm). The left panel of Figure \@ref(fig:crimeHist) shows a histogram of the number of violent crimes per state, highlighting the value for California. Looking at these data, it seems like California is terribly dangerous, with `r I(caCrimeData$Violent.crime.total)` crimes in that year.  
+```{r setupCrimeData}
 
-
-```{r crimeHist,echo=FALSE,fig.cap="Left: Histogram of the number of violent crimes.  The value for CA is plotted in blue. Right: A map of the same data, with number of crimes plotted for each state in color.", fig.width=8,fig.height=4,out.height='50%'}
 crimeData <- 
   read.table(
     "data/CrimeOneYearofData_clean.csv", 
@@ -748,6 +746,13 @@ caCrimeData <-
   crimeData %>%
   dplyr::filter(State == "California")
 
+
+```
+
+Having characterized a distribution in terms of its central tendency and variability, it is often useful to express the individual scores in terms of where they sit with respect to the overall distribution.  Let's say that we are interested in characterizing the relative level of crimes across different states, in order to determine whether California is a particularly dangerous place. We can ask this question using data for 2014 from the [FBI's Uniform Crime Reporting site](https://www.ucrdatatool.gov/Search/Crime/State/RunCrimeOneYearofData.cfm). The left panel of Figure \@ref(fig:crimeHist) shows a histogram of the number of violent crimes per state, highlighting the value for California. Looking at these data, it seems like California is terribly dangerous, with `r I(caCrimeData$Violent.crime.total)` crimes in that year.  
+
+
+```{r crimeHist,echo=FALSE,fig.cap="Left: Histogram of the number of violent crimes.  The value for CA is plotted in blue. Right: A map of the same data, with number of crimes plotted for each state in color.", fig.width=8,fig.height=4,out.height='50%'}
 p1 <- crimeData %>% 
   ggplot(aes(Violent.crime.total)) +
   geom_histogram(bins = 25) + 
