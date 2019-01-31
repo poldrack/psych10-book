@@ -91,7 +91,7 @@ How good of a model is this?  In general we define the goodness of a model in te
 # compute error compared to the mode and plot histogram
 
 error_mode <- NHANES_child$Height - height_mode
-sprintf("average error from mode (inches): %0.2f", mean(error_mode))
+sprintf("average error from mode (cm): %0.2f", mean(error_mode))
 
 ```
 
@@ -132,7 +132,7 @@ Given that the average error is zero, this seems like a better model.  Let's con
 # compute error from mean
 
 error_mean <- NHANES_child$Height - mean(NHANES_child$Height)
-sprintf("average error for mean (inches): %e", mean(error_mean))
+sprintf("average error for mean (cm): %e", mean(error_mean))
 
 ```
 
