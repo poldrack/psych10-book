@@ -71,4 +71,4 @@ I'd also like to thank others who provided helpful comments and suggestions: Ath
 
 Thanks to the following Twitter users for helpful suggestions: \@enoriverbend
 
-Thanks to the following individuals/usernames for submitting edits or issues via Github: Mehdi Rahim, Shanaathanan Modchalingam, Alan He, Wenjin Tao,  Martijn Stegeman, Dan Kessler, Philipp Kuhnke, James Kent, Michael Waskom, Alexander Wang, Isis Anderson, Albane Valenzuela, basicv8vc, jiamingkong, carlosivanr, hktang, ttaweel, epetsen.
+Thanks to the following individuals/usernames for submitting edits or issues via Github: Mehdi Rahim, Shanaathanan Modchalingam, Alan He, Wenjin Tao,  Martijn Stegeman, Dan Kessler, Philipp Kuhnke, James Kent, Michael Waskom, Alexander Wang, Isis Anderson, Albane Valenzuela, basicv8vc, jiamingkong, carlosivanr, hktang, ttaweel, epetsen, brettelizabeth .
