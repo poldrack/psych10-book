@@ -77,7 +77,6 @@ In general we prefer using a plotting technique that provides a clearly view of 
 3. In panel C, we see one example of clearly showing the data points, known as a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  
 4. Another option is the *box plot* shown in panel D, which shows the median (central line), a measure of variability (the width of the box, which is based on a measure called the interquartile range), and any outliers (noted by the points at the ends of the lines). These are both effective ways to show data that provide a good feel for the distribution of the data.
 
-```{r plotHeight,echo=FALSE,fig.cap="Four different ways of plotting the difference in height between men and women in the NHANES dataset.  Panel A plots the means of the two groups, which gives no way to assess the relative overlap of the two distributions.  Panel B shows the same bars, but also overlays the data points, jittering them so that we can see their overall distribution.  Panel C shows a violin plot, which shows the distribution of the datasets for each group.  Panel D shows a box plot, which highlights the spread of the distribution along with any outliers (which are shown as individual points)."}
 
 # plot height by Gender
 dfmean=NHANES_adult %>% 
