@@ -384,7 +384,7 @@ df <-
 ```
 
 
-```{r strongPrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 50 heads out of 100 people.  The dotted black line shows the prior based on 550 heads out of 500 flips, and the red line shows the posterior based on that prior.",fig.width=4,fig.height=4,out.height='50%'}
+```{r strongPrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 50 heads out of 100 people.  The dotted black line shows the prior based on 250 heads out of 500 flips, and the red line shows the posterior based on that prior.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(df,aes(steps,posteriors_empirical)) + 
   geom_line(color='blue') + 
