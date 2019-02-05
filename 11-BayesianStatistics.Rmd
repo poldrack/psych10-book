@@ -423,7 +423,7 @@ df <-
 
 ```
 
-```{r absolutePrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 50 responders out of 100 people, using an absolute prior which states that p(respond) is 0.8 or greater.  The prior is shown in the dotted red line. ",fig.width=4,fig.height=4,out.height='50%'}
+```{r absolutePrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using an absolute prior which states that p(respond) is 0.8 or greater.  The prior is shown in the dotted red line.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(df,aes(steps,posteriors_absolute)) + 
   geom_line(color='blue') + 
