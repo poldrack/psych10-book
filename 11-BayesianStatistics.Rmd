@@ -83,10 +83,10 @@ What the security staff want to know is what is the likelihood that a person is 
 
 ### Specifying the prior
 
-To use Bayes' theorem, we first need to specify the prior probability for the hypothesis.  In this case, we don't know the real number but we can assume that it's quite small -- for this example, let's say that one out of every 5 million travelers is expected to have an explosive device.  
+To use Bayes' theorem, we first need to specify the prior probability for the hypothesis.  In this case, we don't know the real number but we can assume that it's quite small.  According to the [FAA](https://www.faa.gov/air_traffic/by_the_numbers/media/Air_Traffic_by_the_Numbers_2018.pdf), there were 971,595,898 air passengers in the U.S. in 2017.  For this example, let's say that one out of those travelers was carrying an explosive in their bag 
 
 ```{r}
-prior <- 1/5000000
+prior <- 1/971595898
 ```
 
 ### Collect some data
@@ -484,7 +484,7 @@ In the previous example we had specific predictions from each senator, whose lik
 
 Let's say that we are a medical researcher performing a clinical trial for the treatment of diabetes, and we wish to know whether a particular drug reduces blood glucose compared to placebo. We recruit a set of volunteers and randomly assign them to either drug or placebo group, and we measure the change in hemoglobin A1C (a marker for blood glucose levels) in each group over the period in which the drug or placebo was administered.  What we want to know is: Is there a difference between the drug and placebo?
 
-First, let's generate some data and anlayze them using null hypothesis testing (see Figure \@ref(fig:bayesTesting)).
+First, let's generate some data and analyze them using null hypothesis testing (see Figure \@ref(fig:bayesTesting)).
 
 ```{r}
 # create simulated data for drug trial example
