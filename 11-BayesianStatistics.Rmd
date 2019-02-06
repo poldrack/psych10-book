@@ -545,7 +545,20 @@ bf_drug <- ttestBF(
 bf_drug
 ```
 
-The Bayes factor here tells us that the alternative hypothesis (i.e. that the difference is greater than zero) is about 2.4 times more likely than the null hypothesis given the data.  This doesn't seem that strong, but how can we determine that?  There is a general guideline for interpretation of Bayes factors suggested by [Kass & Rafferty (1995)](https://www.andrew.cmu.edu/user/kk3n/simplicity/KassRaftery1995.pdf):
+The Bayes factor here tells us that the alternative hypothesis (i.e. that the difference is greater than zero) is about 2.4 times more likely than the point null hypothesis (i.e. a mean difference of exactly zero) given the data.  
+
+#### One-sided tests
+
+We generally are less interested in testing against the null hypothesis of a specific point value (e.g. mean difference = 0) than we are in testing against a directional null hypothesis (e.g. that the difference is less than or equal to zero).  We can also perform a directional (or *one-sided*) test using the results from `ttestBF` analysis, since it provides two Bayes factors: one for the alternative hypothesis that the mean difference is greater than zero, and one for the alternative hypothesis that the mean difference is less than zero.  If we want to assess the relative evidence for a positive effect, we can compute a Bayes factor comparing the relative evidence for a positive versus a negative effect by simply dividing the two Bayes factors returned by the function:
+
+```{r}
+bf_drug[1]/bf_drug[2]
+```
+
+Now we see that the Bayes factor for a positive effect versus a negative effect is substantially larger (almost 20).  
+
+#### Interpreting Bayes Factors
+How do we know whether a Bayes factor of 2 or 20 is good or bad? There is a general guideline for interpretation of Bayes factors suggested by [Kass & Rafferty (1995)](https://www.andrew.cmu.edu/user/kk3n/simplicity/KassRaftery1995.pdf):
 
 |BF|	Strength of evidence|
 |---------|---------------------|
@@ -554,8 +567,10 @@ The Bayes factor here tells us that the alternative hypothesis (i.e. that the di
 |20 to 150| strong|
 |>150 | very strong|
 
-Based on this, even though the statisical result is significant, the amount of evidence in favor of the alternative vs. the null hypothesis is weak enough that it's not worth even mentioning.  
+Based on this, even though the statisical result is significant, the amount of evidence in favor of the alternative vs. the point null hypothesis is weak enough that it's not worth even mentioning, whereas the evidence for the directional hypothesis is positive, but not quite strong.
 
+
+### Assessing evidence for the null hypothesis
 Because the Bayes factor is comparing evidence for two hypotheses, it also allows us to assess whether there is evidence in favor of the null hypothesis, which we couldn't do with standard null hypothesis testing (because it starts with the assumption that the null is true).  This can be very useful for determining whether a non-significant result really provides strong evidence that there is no effect, or instead just reflects weak evidence overall.
 
 ## Suggested readings
