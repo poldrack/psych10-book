@@ -168,7 +168,7 @@ $H0: BMI_{active} \ge BMI_{inactive}$
 
 and directional alternative:
 
-$H0: BMI_{active} < BMI_{inactive}$
+$HA: BMI_{active} < BMI_{inactive}$
 
 ### Step 4: Fit a model to the data and compute a test statistic
 
