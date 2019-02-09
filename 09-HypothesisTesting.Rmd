@@ -303,7 +303,7 @@ sprintf(
 
 Here we see that the p value for the two-tailed test is twice as large as that for the one-tailed test, which reflects the fact that an extreme value is less surprising since it could have occurred in either direction.
 
-How do you choose whether to use a one-tailed versus a two-tailed test?  The two-tailed test is always going to be more conservative, so it's always a good bet to use that one, unless you had a very strong prior reason for using a one-tailed test. In that case, you should have written down the hypothesis before you ever looked at the data. In Chapter \label(doing-reproducible-research) we will discuss the idea of pre-registration of hypotheses, which formalizes the idea of writing down your hypotheses before you ever see the actual data.  You should *never* make a decision about how to perform a hypothesis test once you have looked at the data, as this can introduce serious bias into the results.
+How do you choose whether to use a one-tailed versus a two-tailed test?  The two-tailed test is always going to be more conservative, so it's always a good bet to use that one, unless you had a very strong prior reason for using a one-tailed test. In that case, you should have written down the hypothesis before you ever looked at the data. In Chapter \@ref(doing-reproducible-research) we will discuss the idea of pre-registration of hypotheses, which formalizes the idea of writing down your hypotheses before you ever see the actual data.  You should *never* make a decision about how to perform a hypothesis test once you have looked at the data, as this can introduce serious bias into the results.
 
 #### Computing p-values using randomization
 
@@ -554,7 +554,7 @@ However, Fisher never intended $p < 0.05$ to be a fixed rule:
 
 Instead, it is likely that it became a ritual due to the reliance upon tables of p-values that were used before computing made it easy to compute p values for arbitrary values of a statistic.  All of the tables had an entry for 0.05, making it easy to determine whether one's statistic exceeded the value needed to reach that level of significance.
 
-The choice of statistical thresholds remains deeply controversial, and recently (Benjamin et al., 2018) it has been proposed that the standard threshold be changed from .05 to .005, making it substantially more stringent and thus more difficult to reject the null hypothesis. In large part this move is due to growing concerns that the evidence obtained from a significant result at $p < .05$ is relatively weak; we will discuss this in much more detail in our later discussion of reproducibility in Chapter \label(doing-reproducible-research).
+The choice of statistical thresholds remains deeply controversial, and recently (Benjamin et al., 2018) it has been proposed that the standard threshold be changed from .05 to .005, making it substantially more stringent and thus more difficult to reject the null hypothesis. In large part this move is due to growing concerns that the evidence obtained from a significant result at $p < .05$ is relatively weak; we will discuss this in much more detail in our later discussion of reproducibility in Chapter \@ref(doing-reproducible-research).
 
 #### Hypothesis testing as decision-making: The Neyman-Pearson approach
 
