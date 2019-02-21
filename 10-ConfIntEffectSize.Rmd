@@ -9,7 +9,7 @@ output:
 ---
 # Confidence intervals, effect sizes, and statistical power {#ci-effect-size-power}
 
-In the previous chapter we discussed how we can use data to test hypotheses.  Those methods provided a binary answer: we either reject or fail to reject the null hypothesis. However, this kind of decision overlooks a couple of important questions.  First, we would like to know how much uncertainty we have about the answer (regardless of which way it goes).  In addition, sometimes we don't have a clear null hypothesis, so we would like to see what range of estimates are consistent with the data.  Second, we would like to know how large the effect actually is, since as we saw in the weight loss example in the previous chapter, a statisticially significant effect is not necessarily a practically important effect.
+In the previous chapter we discussed how we can use data to test hypotheses.  Those methods provided a binary answer: we either reject or fail to reject the null hypothesis. However, this kind of decision overlooks a couple of important questions.  First, we would like to know how much uncertainty we have about the answer (regardless of which way it goes).  In addition, sometimes we don't have a clear null hypothesis, so we would like to see what range of estimates are consistent with the data.  Second, we would like to know how large the effect actually is, since as we saw in the weight loss example in the previous chapter, a statistically significant effect is not necessarily a practically important effect.
 
 In this chapter we will discuss methods to address these two questions: confidence intervals to provide a measure of our uncertainty about our estimates, and effect sizes to provide a standardized way to understand how large the effects are. We will also discuss the concept of *statistical power* which tells us how well we can expect to find any true effects that might exist.
 
@@ -90,7 +90,7 @@ Using the estimated mean from our sample (`r I(sample_summary$meanWeight)`) and 
 
 As stated above, if we knew the population standard deviation, then we could use the normal distribution to compute our confidence intervals. However, in general we don't -- in which case the *t* distribution is more appropriate as a sampling distribution. Remember that the t distribution is slightly broader than the normal distribution, especially for smaller samples, which means that the confidence intervals will be slightly wider than they would if we were using the normal distribution. This incorporates the extra uncertainty that arises when we make conclusions based on small samples.
 
-We can compute the 95% confidence interval in a way similar to the normal distribution example above, but the critical value is determnined by the 2.5th percentile and the 97.5th percentile of the *t* distribution, which we can compute using the `qt()` function in R.  Thus, the confidence interval for the mean ($\bar{X}$) is:
+We can compute the 95% confidence interval in a way similar to the normal distribution example above, but the critical value is determined by the 2.5th percentile and the 97.5th percentile of the *t* distribution, which we can compute using the `qt()` function in R.  Thus, the confidence interval for the mean ($\bar{X}$) is:
 
 $$
 CI = \bar{X} \pm t_{crit}*SE
@@ -116,7 +116,7 @@ Remember that this doesn't tell us anything about the probability of the true po
 
 ### Confidence intervals and sample size
 
-Because the standard error decreases with sample size, the means confidence interval should  get narrowers as the sample size increases, providing progressively tighter bounds on our estimate.  Figure \@ref(fig:CISampSize) shows an example of how the confidence interval would change as a function of sample size for the weight example. From the figure it's evident that the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, consistent with the fact that the denominator of the confidence interval term is proportional to the square root of the sample size.
+Because the standard error decreases with sample size, the means confidence interval should  get narrower as the sample size increases, providing progressively tighter bounds on our estimate.  Figure \@ref(fig:CISampSize) shows an example of how the confidence interval would change as a function of sample size for the weight example. From the figure it's evident that the confidence interval becomes increasingly tighter as the sample size increases, but increasing samples provide diminishing returns, consistent with the fact that the denominator of the confidence interval term is proportional to the square root of the sample size.
 
 
 ```{r CISampSize,echo=FALSE,fig.cap="An example of the effect of sample size on the width of the confidence interval for the mean.",fig.width=4,fig.height=4,out.height='50%'}
@@ -169,7 +169,7 @@ These values are fairly close to the values obtained using the t distribution ab
 
 There is a close relationship between confidence intervals and hypothesis tests.  In particular, if the confidence interval does not include the null hypothesis, then the associated statistical test would be statistically significant.  For example, if you are testing whether the mean of a sample is greater than zero with $\alpha = 0.05$, you could simply check to see whether zero is contained within the 95% confidence interval for the mean.
 
-Things get trickier if we want to compare the means of two conditions [@sche:gent:2001]. There are a couple of situations that are clear.  First, each mean is contained within the confidence interval for the other mean, then there is certainly no significant difference at the chosen confidence level.  Second, if there is no overlap between the confidence intervals, then there is certainly a significant difference at the chosen level; in fact, this test is substantially *conservative*, such that the actual error rate will be lower than the chosen level.  But what about the case where the confidence intervals overlap one another but don't contain the means for the other group?  In this case the answer depends on the relative variability of the two variables, and there is no general answer.  In general we should avoid using the "visual test" for overlapping confidence intervals, because it will generally result in a higher rate of false negative (Type II) errors.
+Things get trickier if we want to compare the means of two conditions [@sche:gent:2001]. There are a couple of situations that are clear.  First, if each mean is contained within the confidence interval for the other mean, then there is certainly no significant difference at the chosen confidence level.  Second, if there is no overlap between the confidence intervals, then there is certainly a significant difference at the chosen level; in fact, this test is substantially *conservative*, such that the actual error rate will be lower than the chosen level.  But what about the case where the confidence intervals overlap one another but don't contain the means for the other group?  In this case the answer depends on the relative variability of the two variables, and there is no general answer.  In general we should avoid using the "visual test" for overlapping confidence intervals, because it will generally result in a higher rate of false negative (Type II) errors.
 
 ```{r, echo=FALSE}
 # example of CI overlap here?
@@ -181,7 +181,7 @@ Things get trickier if we want to compare the means of two conditions [@sche:gen
 
 In the last chapter, we discussed the idea that statistical significance may not necessarily reflect practical significance.  In order to discuss practical significance, we need a standard way to describe the size of an effect in terms of the actual data, which we refer to as an *effect size*.  In this section we will introduce the concept and discuss various ways that effect sizes can be calculated.
 
-An effect size is a standarized measurement that compares the size of some statistical effect to a reference quantity, such as the variability of the statistic. In some fields of science and engineering, this idea is referred to as a "signal to noise ratio".  There are many different ways that the effect size can be quantified, which depend on the nature of the data.
+An effect size is a standardized measurement that compares the size of some statistical effect to a reference quantity, such as the variability of the statistic. In some fields of science and engineering, this idea is referred to as a "signal to noise ratio".  There are many different ways that the effect size can be quantified, which depend on the nature of the data.
 
 ### Cohen's D
 
@@ -375,7 +375,7 @@ powerSimResults <- powerDf %>%
 ```
 
 
-```{r plotPowerSim,echo=FALSE,fig.cap="Results from power simulation, showing power as a function of sample size, with effect sizes shown as different colors, and alpha shown as line type. The standard criterion of 80% power is shown by the dotted black line.",fig.width=6,fig.height=4,out.height='50%'}
+```{r plotPowerSim,echo=FALSE,fig.cap="Results from power simulation, showing power as a function of sample size, with effect sizes shown as different colors, and alpha shown as line type. The standard criterion of 80 percent power is shown by the dotted black line.",fig.width=6,fig.height=4,out.height='50%'}
 ggplot(powerSimResults,
        aes(sampSizePerGroup,power,color=as.factor(effectSize),linetype=as.factor(alpha))) +
   geom_line(size=1) +
@@ -392,7 +392,7 @@ ggplot(powerSimResults,
 
 This simulation shows us that even with a sample size of 96, we will have relatively little power to find a small effect ($d = 0.2$) with $\alpha = 0.005$.  This means that a study designed to do this would be *futile* -- that is, it is almost guaranteed to find nothing even if a true effect of that size exists.
 
-There are at least two important reasons to care about statistical power, one of which we discuss here and the other of which we will return to in Chapter \@ref(doing-reproducible-science).  If you are a researcher, you probably don't want to spend your time doing futile experiments.  Running an underpowered study is essentially futile, because it means that there is a very low likelihood that one will find an effect, even if it exists.  
+There are at least two important reasons to care about statistical power, one of which we discuss here and the other of which we will return to in Chapter \@ref(doing-reproducible-research).  If you are a researcher, you probably don't want to spend your time doing futile experiments.  Running an underpowered study is essentially futile, because it means that there is a very low likelihood that one will find an effect, even if it exists.  
 
 ### Power analysis
 
@@ -414,7 +414,7 @@ It might have occurred to you that if the effect size is large enough, then the 
 pwr.t.test(d = 3, power = 0.8, sig.level = 0.05)
 ```
 
-However, it's rare in science to be doing an experiment where we expect to find such a large effect -- just as we don't need statistics to tell us that 16-year-olds are taller than than 6-year-olds.  When we run a power analysis, we need to specify an effect size that is plausible for our study, which would usually come from previous research.  However, in Chapter \@ref(doing-reproducible-science) we will discuss a phenomenon known as the "winner's curse" that likely results in published effect sizes being larger than the true effect size, so this should also be kept in mind.  
+However, it's rare in science to be doing an experiment where we expect to find such a large effect -- just as we don't need statistics to tell us that 16-year-olds are taller than than 6-year-olds.  When we run a power analysis, we need to specify an effect size that is plausible for our study, which would usually come from previous research.  However, in Chapter \@ref(doing-reproducible-research) we will discuss a phenomenon known as the "winner's curse" that likely results in published effect sizes being larger than the true effect size, so this should also be kept in mind.  
 
 ## Suggested readings
 
