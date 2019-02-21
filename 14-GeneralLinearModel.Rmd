@@ -286,10 +286,10 @@ $$
 SE_{model} = \sqrt{MS_{error}}
 $$
 
-In order to get the standard error for a specific regression parameter estimate, $SE_{\beta_x}$, we need to rescale the sum of squared errors by the variability of the x variable, take the square root (to create the scaled standard deviation), and then divide by the square root of the number of degrees of freedom (n - 2) to generate a standard error:
+In order to get the standard error for a specific regression parameter estimate, $SE_{\beta_x}$, we need to rescale the standard error of the model by the square root of the sum of squares of the X variable:
 
 $$
-SE_{\beta_x} = \frac{1}{\sqrt{n-2}}*\sqrt{\frac{SS_{error}}{\sum{(x_i - \bar{x})^2}}}
+SE_{\beta_x} = \frac{SE_{model}}{\sqrt{{\sum{(x_i - \bar{x})^2}}}}
 $$
 
 ### Statistical tests for regression parameters
