@@ -92,7 +92,8 @@ p1 <- ggplot(data.frame(p=lc$p,lc=lc$lc),aes(p,lc)) +
     geom_line(color='blue') + 
     geom_point() + 
     xlim(0,1) + ylim(0,1) + 
-    xlab('proportion of population') + ylab('proportion of income') +
+    xlab('Cumulative proportion of population') + 
+    ylab('Cumulative proportion of income') +
     geom_abline(slope=1,intercept = 0,color='black',linetype='dotted') +
     ggtitle(sprintf('A: Gini coefficient = %f',lc$gc))
 
@@ -100,7 +101,8 @@ p2 <- ggplot(data.frame(p=lc2$p,lc=lc2$lc),aes(p,lc)) +
     geom_line(color='blue') + 
     geom_point() + 
     xlim(0,1) + ylim(0,1) + 
-    xlab('proportion of population') + ylab('proportion of income') +
+    xlab('Cumulative proportion of population') +
+    ylab('Cumulative proportion of income') +
     geom_abline(slope=1,intercept = 0,color='black',linetype='dotted') +
     ggtitle(sprintf('B: Gini coefficient = %f',lc2$gc))
 
@@ -108,7 +110,8 @@ p3 <- ggplot(data.frame(p=lc3$p,lc=lc3$lc),aes(p,lc)) +
     geom_line(color='blue') + 
     geom_point() + 
     xlim(0,1) + ylim(0,1) + 
-    xlab('proportion of population') + ylab('proportion of income') +
+    xlab('Cumulative proportion of population') + 
+    ylab('Cumulative proportion of income') +
     geom_abline(slope=1,intercept = 0,color='black',linetype='dotted') +
     ggtitle(sprintf('C: Gini coefficient = %f',lc3$gc))
 
@@ -135,7 +138,7 @@ ggplot(hateCrimes,aes(gini_index,avg_hatecrimes_per_100k_fbi,label=state_abb)) +
   theme(plot.title = element_text(size = 20, face = "bold")) +
   xlab('Gini index') + 
   ylab('Avg hate crimes per 100K population (FBI)') +
-  theme(plot.margin = unit(c(0,1,0,0), "cm"))
+  theme(plot.margin = unit(c(1,1,1,1), "cm"))
   
 ```
 
@@ -260,7 +263,7 @@ ggplot(data.frame(shuffleDist),aes(shuffleDist)) +
   geom_histogram(bins=100) +
   geom_vline(xintercept = corGiniHC,color='blue') +
   ggtitle(sprintf('p(shuffled r >= observed) = %0.3f',mean(shuffleDist>=corGiniHC))) +
-  theme(plot.title = element_text(size = 20, face = "bold")) +
+  theme(plot.title = element_text(size = 16, face = "bold")) +
   theme(plot.margin = unit(c(0,1,0,0), "cm")) +
   labs(
   x = "Correlation coeffcients of shuffled variables"
@@ -272,7 +275,7 @@ ggplot(data.frame(shuffleDist),aes(shuffleDist)) +
 
 You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints (the one for the District of Columbia) seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
 
-```{r outlierCorr, echo=FALSE,fig.cap="An example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive.",fig.width=4,fig.height=4,out.height='50%'}
+```{r outlierCorr, echo=FALSE,fig.cap="An simulated example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive.",fig.width=4,fig.height=4,out.height='50%'}
 n <- 10
 set.seed(1234)
 
@@ -288,7 +291,7 @@ ccSpearman <- cor(dfOutlier$x, dfOutlier$y, method = "spearman")
 p <- ggplot(dfOutlier, aes(x, y)) +
   geom_point() +
   ggtitle(sprintf("r = %0.2f (without outlier: r = %.2f)", cc, cor(dfOutlier$x[2:n], dfOutlier$y[2:n]))) +
-  theme(plot.title = element_text(size = 20, face = "bold")) +
+  theme(plot.title = element_text(size = 16, face = "bold")) +
   theme(plot.margin = unit(c(0, 1, 0, 0), "cm")) +
   labs(
     x = "variable x",
@@ -304,11 +307,13 @@ One way to address outliers is to compute the correlation on the ranks of the da
 We can compute the rank correlation on the hate crime data using the `cor.test` function:
 
 ```{r}
-corTestSpearman <- cor.test(dfOutlier$x, dfOutlier$y, method = "spearman")
+corTestSpearman <- cor.test( hateCrimes$avg_hatecrimes_per_100k_fbi,
+  hateCrimes$gini_index,
+  method = "spearman")
 corTestSpearman
 ```
 
-Now we see that the correlation is no longer significant (and in fact the estimate is negative!), suggesting that the claims of the FiveThirtyEight blog post may have been incorrect due to the effect of the outlier.
+Now we see that the correlation is no longer significant (and in fact is very near zero), suggesting that the claims of the FiveThirtyEight blog post may have been incorrect due to the effect of the outlier.
 
 ### Bayesian correlation analysis
 
