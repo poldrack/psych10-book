@@ -94,7 +94,7 @@ ggplot(chisqDf, aes(xvals, chisqNorm, group = as.factor(dfvals), color = as.fact
   theme(legend.position = c(0.8, 0.7)) +
   labs(
     color = "Degrees of freedom",
-    x = "Chi-square values"
+    x = "Chi-squared values"
   )
 ```
 
@@ -116,7 +116,7 @@ csDf <-
   mutate(chisq = dchisq(x, 8))
 ```
 
-Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of a simulation that repeatedly added 
+Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of a simulation that repeatedly added together the squares of a set of random normal variables. 
 
 ```{r chisqSim,echo=FALSE,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the blue line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
 
@@ -379,7 +379,7 @@ depressedSleepTroubleTable <-
 pander(depressedSleepTroubleTable)
 ```
 
-Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the total number of people with sleep trouble is much less than those without, for people who report being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test:
+Simply by looking at these data, we can tell that it is likely that there is a relationship between the two variables; notably, while the total number of people with sleep trouble is much less than those without, for people who report being depresssed most days the number with sleep problems is greater than those without.  We can quantify this directly using the chi-squared test; if our data frame contains only two variables, then we can simply provide the data frame as the argument to the `chisq.test()` function:
 
 ```{r}
 # need to remove the column with the label names
