@@ -200,7 +200,7 @@ This looks very much like the earlier equation that we used, except that the let
 
 We know that the grade data go into the Y matrix, but what goes into the $X$ matrix?  Remember from our initial discussion of linear regression that we need to add a constant in addition to our independent variable of interest, so our $X$ matrix (which we call the *design matrix*) needs to include two columns:  one representing the study time variable, and one column with the same value for each individual (which we generally fill with all ones). We can view the resulting design matrix graphically (see Figure \@ref(fig:GLMmatrix)).
 
-```{r GLMmatrix, echo=FALSE,fig.height=4,fig.cap="A depiction of the linear model for the study time data in terms of matrix algebra.",out.height='50%'}
+```{r GLMmatrix, echo=FALSE,fig.cap="A depiction of the linear model for the study time data in terms of matrix algebra.",out.height='50%'}
 knitr::include_graphics("images/glm_matrix.png")
 ```
 
@@ -536,26 +536,33 @@ NHANES_child <-
 # create function to sample data and compute regression on in-sample and out-of-sample data
 
 get_sample_predictions <- function(sample_size, shuffle = FALSE) {
+  # generate a sample from NHANES
   orig_sample <-
     NHANES_child %>%
     sample_n(sample_size)
 
+  # if shuffle is turned on, then randomly shuffle the weight variable
   if (shuffle) {
     orig_sample$Weight <- sample(orig_sample$Weight)
   }
-  
+  # compute the regression line for Weight, as a function of several
+  # other variables (with all possible interactions between variables)
   heightRegressOrig <- lm(
     Weight ~ Height * TVHrsDayChild * CompHrsDayChild * HHIncomeMid * Age,
     data = orig_sample
   )
-
+  # compute the predictions
   pred_orig <- predict(heightRegressOrig)
 
+  # create a new sample from the same population
   new_sample <-
     NHANES_child %>%
     sample_n(sample_size)
-
+  
+  # use the model fom the original sample to predict the 
+  # Weight values for the new sample
   pred_new <- predict(heightRegressOrig, new_sample)
+  
   # return r-squared and rmse for original and new data
   return(c(
     cor(pred_orig, orig_sample$Weight)**2,
