@@ -58,7 +58,7 @@ sprintf(
 )
 ```
 
-That is an fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of 7 or more heads given some particular probability of heads, whereas what we really want to know is the probability of heads. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
+That is a fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of 7 or more heads given some particular probability of heads, whereas what we really want to know is the probability of heads. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
 
 Remember that Bayes' theorem provides us with the tool that we need to invert a conditional probability:
 
@@ -300,7 +300,7 @@ credible_interval <- quantile(x = accepted_samples, probs = c(0.025, 0.975))
 pander(credible_interval)
 ```
 
-```{r rejectionSampling,echo=FALSE,fig.cap="Rejection sampling example.The black line shows the density of all possible values of p(respond); the blue lines show the 2.5th and 97.5th percentiles of the distribution, which represent the 95% credible interval for the estimate of p(respond).",fig.width=4,fig.height=4,out.height='50%'}
+```{r rejectionSampling,echo=FALSE,fig.cap="Rejection sampling example.The black line shows the density of all possible values of p(respond); the blue lines show the 2.5th and 97.5th percentiles of the distribution, which represent the 95 percent credible interval for the estimate of p(respond).",fig.width=4,fig.height=4,out.height='50%'}
 
 # plot histogram
 
@@ -321,7 +321,9 @@ The interpretation of this credible interval is much closer to what we had hoped
 In the previous example we used a *flat prior*, meaning that we didn't have any reason to believe that any particular value of $p_{respond}$ was more or less likely.  However, let's say that we had instead started with some previous data: In a previous study, researchers had tested 20 people and found that 10 of them had responded positively.  This would have lead us to start with a prior belief that the treatment has an effect in 50% of people.  We can do the same computation as above, but using the information from our previous study to inform our prior (see Figure \@ref(fig:posteriorDistPrior)).  
 
 ```{r}
-# compute likelihoods for data under all values of p(heads) using a flat or empirical prior.  here we use the quantized values from .01 to .99 in steps of 0.01
+# compute likelihoods for data under all values of p(heads) 
+# using a flat or empirical prior.  
+# here we use the quantized values from .01 to .99 in steps of 0.01
 
 df <-
   tibble(
@@ -423,7 +425,7 @@ df <-
 
 ```
 
-```{r absolutePrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using an absolute prior which states that p(respond) is 0.8 or greater.  The prior is shown in the dotted red line.",fig.width=4,fig.height=4,out.height='50%'}
+```{r absolutePrior,echo=FALSE,fig.cap="Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using an absolute prior which states that p(respond) is 0.8 or greater.  The prior is shown in the dotted black line.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(df,aes(steps,posteriors_absolute)) + 
   geom_line(color='blue') + 
