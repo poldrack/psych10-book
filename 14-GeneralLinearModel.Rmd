@@ -200,7 +200,7 @@ This looks very much like the earlier equation that we used, except that the let
 
 We know that the grade data go into the Y matrix, but what goes into the $X$ matrix?  Remember from our initial discussion of linear regression that we need to add a constant in addition to our independent variable of interest, so our $X$ matrix (which we call the *design matrix*) needs to include two columns:  one representing the study time variable, and one column with the same value for each individual (which we generally fill with all ones). We can view the resulting design matrix graphically (see Figure \@ref(fig:GLMmatrix)).
 
-```{r GLMmatrix, echo=FALSE,fig.cap="A depiction of the linear model for the study time data in terms of matrix algebra.",out.height='50%'}
+```{r GLMmatrix, echo=FALSE,fig.cap="A depiction of the linear model for the study time data in terms of matrix algebra.",fig.height=4,out.height='50%'}
 knitr::include_graphics("images/glm_matrix.png")
 ```
 
