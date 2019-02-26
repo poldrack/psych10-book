@@ -123,7 +123,7 @@ Figure \@ref(fig:gini0) shows the Lorenz curves for several different income dis
 
 Now that we understand the Gini index, we can look at the relationship between income inequality and rates of hate crimes (see Figure \@ref(fig:hateCrimeGini)).
 
-```{r hateCrimeGini, fig.cap="Plot of rates of hate crimes vs. Gini index.",fig.width=4,fig.height=4,out.height='50%'}
+```{r hateCrimeGini, fig.cap="Plot of rates of hate crimes vs. Gini index.",fig.width=4,fig.height=3.04}
 
 hateCrimes <- 
   hate_crimes %>%
