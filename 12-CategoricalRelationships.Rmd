@@ -131,7 +131,7 @@ ggplot(data.frame(dMean),aes(dMean)) +
 
 ```
 
-For the candy example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all candies. We use a chi-squared distribution with degrees of freedom equal to n - 1, since we lost one degree of freedom when we computed the mean in order to generate the expected values.
+For the candy example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all candies. We use a chi-squared distribution with degrees of freedom equal to k - 1 (where k = the number of categories) since we lost one degree of freedom when we computed the mean in order to generate the expected values.
 
 ```{r}
 pval <- pchisq(chisqVal, df = 2, lower.tail = FALSE) #df = degrees of freedom
