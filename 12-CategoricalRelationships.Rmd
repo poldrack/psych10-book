@@ -223,7 +223,7 @@ summaryDfStop <-
 # second, multiply outer product by n (all stops) to compute expected frequencies
 expected <- outer(summaryDfRace$prop, summaryDfStop$prop) * nrow(stopData)
 
-# create a data frame of expected frequences for each race 
+# create a data frame of expected frequencies for each race 
 expectedDf <- 
   data.frame(expected, driverRace = c("Black", "White")) %>% 
   rename(
@@ -255,7 +255,7 @@ pander(summaryDf2way)
 
 ```{r}
 # finally, compute chi-squared statistic by 
-# summing the standarized squared differences
+# summing the standardized squared differences
 chisq <- sum(summaryDf2way$stdSqDiff)
 sprintf("Chi-squared value = %0.2f", chisq)
 ```
@@ -391,7 +391,7 @@ depressedSleepChisq <- chisq.test(depressedSleepTroubleTable)
 depressedSleepChisq
 ```
 
-This test shows that there is a strong relationship between depression and sleep trouble.  We can also compute the Bayes factor to quantify the strength of the evidence in favor the alternative hypothesis:
+This test shows that there is a strong relationship between depression and sleep trouble.  We can also compute the Bayes factor to quantify the strength of the evidence in favor of the alternative hypothesis:
 
 ```{r}
 # compute bayes factor, using a joint multinomial sampling plan
@@ -403,7 +403,7 @@ bf <-
 bf
 ```
 
-Here see that the Bayes factor is exceedingly large, showing that the evidence in favor of a relation between depression and sleep problems is very strong.
+Here we see that the Bayes factor is exceedingly large, showing that the evidence in favor of a relation between depression and sleep problems is very strong.
 
 ## Beware of Simpson's paradox
 
