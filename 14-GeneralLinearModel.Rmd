@@ -204,7 +204,7 @@ We know that the grade data go into the Y matrix, but what goes into the $X$ mat
 knitr::include_graphics("images/glm_matrix.png")
 ```
 
-The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1. Therfore, the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view the linear model as a set of individual equations for each individual:
+The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1. Therefore, the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view the linear model as a set of individual equations for each individual:
 
 $\hat{y}_1 = studyTime_1*\beta_1 + 1*\beta_2$
 
@@ -475,7 +475,7 @@ summary(lmResultCafAnx)
 Here we see there are no significant effects of either caffeine or anxiety, which might seem a bit confusing.  The problem is that this model is trying to fit the same line relating speaking to caffeine for both groups. If we want to fit them using separate lines, we need to include an *interaction* in the model, which is equivalent to fitting different lines for each of the two groups; in R this is denoted by the $*$ symbol.
 
 ```{r}
-# compute linear regression including caffine X anxiety interaction
+# compute linear regression including caffeine X anxiety interaction
 lmResultInteraction <- lm(
   speaking ~ caffeine + anxiety + caffeine * anxiety,
   data = df
@@ -509,7 +509,7 @@ print(p)
 ```
 
 
-Sometimes we want to compare the relative fit of two different models, in order to determine which is a better model; we refer to this as *model comparison*.  For the models above, we can compare the goodness of fit of the model with and without the interaction, using the`anova()` command in R:
+Sometimes we want to compare the relative fit of two different models, in order to determine which is a better model; we refer to this as *model comparison*.  For the models above, we can compare the goodness of fit of the model with and without the interaction, using the `anova()` command in R:
 
 ```{r}
 anova(lmResultCafAnx, lmResultInteraction)
@@ -595,7 +595,7 @@ pander(mean_rsquared)
 
 Here we see that whereas the model fit on the original data showed a very good fit (only off by a few pounds per individual), the same model does a much worse job of predicting the weight values for new children sampled from the same population (off by more than 25 pounds per individual).  This happens because the model that we specified is quite complex, since it includes not just each of the individual variables, but also all possible combinations of them (i.e. their *interactions*), resulting in a model with 32 parameters.  Since this is almost as many coefficients as there are data points (i.e., the heights of 48 children), the model *overfits* the data, just like the complex polynomial curve in our initial example of overfitting in Section \@ref(overfitting).
 
-Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable. Randomly shuffiling the value should make it impossible to predict weight from the other variables, because they should have no systematic relationship.
+Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable. Randomly shuffling the value should make it impossible to predict weight from the other variables, because they should have no systematic relationship.
 
 ```{r}
 print("using shuffled y variable to simulate null effect")
@@ -623,7 +623,7 @@ This shows us that even when there is no true relationship to be modeled (becaus
 One method that has been developed to help address the problem of overfitting is known as *cross-validation*.  This technique is commonly used within the field of machine learning, which is focused on building models that will generalize well to new data, even when we don't have a new dataset to test the model. The idea behind cross-validation is that we fit our model repeatedly, each time leaving out a subset of the data, and then test the ability of the model to predict the values in each held-out subset.  
 
 
-```{r crossvalidation,echo=FALSE,fig.cap="A schematic of the  crossvalidation procedure.",fig.height=4,out.height='30%'}
+```{r crossvalidation,echo=FALSE,fig.cap="A schematic of the  cross-validation procedure.",fig.height=4,out.height='30%'}
 knitr::include_graphics("images/crossvalidation.png")
 
 ```
@@ -710,7 +710,7 @@ pander(mean_rsquared)
 ```
 
 
-Here we see that crossvalidation gives us an estimate of predictive accuracy that is much closer to what we see with a completely new dataset than it is to the inflated accuracy that we see with the original dataset -- in fact, it's even slighlty more pessimistic than the average for a new dataset, probably because only part of the data are being used to train each of the models.  We can also confirm that cross-validation accurately estimates the predictive accuracy when the dependent variable is randomly shuffled:
+Here we see that cross-validation gives us an estimate of predictive accuracy that is much closer to what we see with a completely new dataset than it is to the inflated accuracy that we see with the original dataset -- in fact, it's even slighlty more pessimistic than the average for a new dataset, probably because only part of the data are being used to train each of the models.  We can also confirm that cross-validation accurately estimates the predictive accuracy when the dependent variable is randomly shuffled:
 
 ```{r echo=FALSE,warning=FALSE}
 # run crossvalidation with shuffled y variable 
@@ -732,7 +732,7 @@ mean_rsquared <-
 pander(mean_rsquared)
 ```
 
-Here again we see that crossvalidation gives us an assessment of prediction accuracy that is is much closer to what we expect with new data, and again even somewhat more pessimistic.
+Here again we see that cross-validation gives us an assessment of prediction accuracy that is much closer to what we expect with new data, and again even somewhat more pessimistic.
 
 Using cross-validation properly is tricky, and it is recommended that you consult with an expert before using it in practice.  However, this section has hopefully shown you three things:
 
