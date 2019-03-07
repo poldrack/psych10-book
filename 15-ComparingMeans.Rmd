@@ -79,14 +79,15 @@ $$
 t = \frac{\bar{X_1} - \bar{X_2}}{\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}}
 $$
 
-where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances for each of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  Under the null hypothesis of no difference between means, this statistic is distributed according to a t distribution with n-2 degrees of freedom (since we have computed two parameter estimates, namely the means of the two groups).  We can compute the t-test in R using the ```t.test()``` function:
+where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances for each of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  Under the null hypothesis of no difference between means, this statistic is distributed according to a t distribution with n-2 degrees of freedom (since we have computed two parameter estimates, namely the means of the two groups).  We can compute the t-test in R using the ```t.test()``` function. In this case, we started with the specific hypothesis that smoking marijuana is associated with greater TV watching, so we will use a one-tailed test.  Since the t.test function orders the conditions alphabetically, the "No" group comes first, and thus we need to test the alternative hypothesis of whether the first group is less than the second ("Yes") group; for this reason, we specify 'less' as our alternative.
 
 ```{r}
 # compute t test for tv watching as function of marijuana use
 t.test(
   TVHrsNum ~ RegularMarij,
   data = NHANES_sample,
-  var.equal = TRUE
+  var.equal = TRUE,
+  alternative = 'less'
 )
 ```
 In this case we see that there is a statistically significant difference between groups, in the expected direction - regular pot smokers watch more TV.
@@ -106,7 +107,7 @@ s <- summary(lm(TVHrsNum ~ RegularMarij, data = NHANES_sample))
 s
 ```
 
-We can also view this graphically (see Figure \@ref(fig:ttestFig)):
+We can also view the lm() results graphically (see Figure \@ref(fig:ttestFig)):
 
 ```{r ttestFig,echo=FALSE,fig.cap="Violin plots showing data for each group, with a blue line connecting the predicted values for each group, computed on the basis of the results of the linear model.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
@@ -121,7 +122,7 @@ ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
 
 In this case, the predicted value for nonsmokers is $\hat{\beta_0}$ (`r I(s$coefficients[1,1])`) and the predicted value for smokers is $\hat{\beta_0} +\hat{\beta_1}$ (`r I(s$coefficients[1,1] + s$coefficients[2,1])`).  
 
-To compute the standard errors for this analysis, we can use exactly the same equations that we used for linear regression -- since this really is just another example of linear regression.  In fact, if you compare the p-value from the t-test above with the p-value in the linear regression analysis for the marijuana use variable, you will see that they are exactly the same.
+To compute the standard errors for this analysis, we can use exactly the same equations that we used for linear regression -- since this really is just another example of linear regression.  In fact, if you compare the p-value from the t-test above with the p-value in the linear regression analysis for the marijuana use variable, you will see that the one from the linear regression analysis is exactly twice the one from the t-test, because the linear regression analysis is performing a two-tailed test.
 
 ### Effect sizes for comparing two means
 
@@ -136,17 +137,18 @@ We can also compute $R^2$ for this analysis, which tells us how much variance in
 
 ## Bayes factor for mean differences
 
-As we discussed in the chapter on Bayesian analysis, Bayes factors provide a way to better quantify evidence in favor or against the null hypothesis of no difference.  
+As we discussed in the chapter on Bayesian analysis, Bayes factors provide a way to better quantify evidence in favor or against the null hypothesis of no difference.  In this case, we want to specifically test against the null hypothesis that the difference is less than zero - because the difference is computed by the function between the first group ('No') and the second group ('Yes'). Thus, we specify a "null interval" going from zero to infinity, which means that the alternative is less than zero.
 
 ```{r}
 # compute bayes factor for group comparison
 bf <- ttestBF(
   formula = TVHrsNum ~ RegularMarij, 
-  data = NHANES_sample
+  data = NHANES_sample, 
+  nullInterval = c(0, Inf)
 )
 bf
 ```
-This shows us that although the difference between groups is highly significant, the evidence against the null hypothesis is suggestive but not particularly strong. 
+This shows us that the evidence against the null hypothesis is reasonably strong.
 
 ## Paired t-tests
 
