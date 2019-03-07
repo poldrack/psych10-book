@@ -125,7 +125,7 @@ To compute the standard errors for this analysis, we can use exactly the same eq
 
 ### Effect sizes for comparing two means
 
-The most commonly used effect size for a comparison between two means is Cohen's d, which (as you may remember from Chapter \@ref(ci-effect-size-power)) is an expression of the effect in terms of standard error units.  For the t-test estimated using the general linear model outlined above, this is expressed as:
+The most commonly used effect size for a comparison between two means is Cohen's d, which (as you may remember from Chapter \@ref(ci-effect-size-power)) is an expression of the effect in terms of standard error units.  For the t-test estimated using the general linear model outlined above (i.e. with a single dummy-coded variable), this is expressed as:
 
 $$
 d = \frac{\hat{beta_1}}{SE_{residual}}
