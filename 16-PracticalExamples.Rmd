@@ -140,7 +140,7 @@ There are several questions that we need to ask in order to determine the approp
   * mean BMI across four diet groups
   * ANOVA is appropriate
 - Are observations independent?
-  * random assignment and use of difference scores should ensure that IID assumption is appropriate
+  * random assignment and use of difference scores should ensure that the assumption of independent and identically distributed (IID) errors is appropriate
 
 ### 5. Fit the model to the data
 
@@ -153,7 +153,7 @@ lmResult <- lm(BMIChange12Months ~ diet, data = dietDf)
 lmResult
 ```
 
-Note that lm automatically generated dummy variables that correspond to three of the four diets, leaving the Atkins diet without a dummy variable.  This means that the intercept models the Atkins diet, and the other three variables model the difference between each of the those diets and the Atkins diet.
+Note that lm automatically generated dummy variables that correspond to three of the four diets, leaving the Atkins diet without a dummy variable.  This means that the intercept models the Atkins diet, and the other three variables model the difference between each of those diets and the Atkins diet.
 
 ### 6. Criticize the model to make sure it fits properly
 
@@ -198,11 +198,11 @@ CLD(leastsquare$emmeans,
 
 ```
 
-The letters in the rightmost column show us which of the groups differ from one another, using to a method that adjusts for the number of comparisons being performed.  This shows that Atkins and LEARN diets don't differ from one another (since they share the letter a), and the LEARN, Ornish, and Zone diets don't differ from one another (since they share the letter b), but the Atkins diet differs from the Ornish and Zone diets (since they share no letters).
+The letters in the rightmost column show us which of the groups differ from one another, using a method that adjusts for the number of comparisons being performed.  This shows that Atkins and LEARN diets don't differ from one another (since they share the letter a), and the LEARN, Ornish, and Zone diets don't differ from one another (since they share the letter b), but the Atkins diet differs from the Ornish and Zone diets (since they share no letters).
 
 #### Bayes factor
 
-Let's say that we want to have a better way to describe the amount of evidence provided by the data.  One way we can do this is to compute a Bayes factor, which we can do by fitting the full model (including diet) and the reduced model (without diet) and the comparing their fit. For the reduced model, we just include a 1, which tells the fitting program to only fit an intercept.  
+Let's say that we want to have a better way to describe the amount of evidence provided by the data.  One way we can do this is to compute a Bayes factor, which we can do by fitting the full model (including diet) and the reduced model (without diet) and then comparing their fit. For the reduced model, we just include a 1, which tells the fitting program to only fit an intercept.  
 
 ```{r results='hide',message=FALSE}
 brmFullModel <- brm(BMIChange12Months ~ diet, data = dietDf,
@@ -268,7 +268,6 @@ This shows us that the alternative hypothesis is 0.058 times more likely than th
 
 #### Addressing confounds in the model
 
-We generally use random assignment to treatments (as Gardner et al. did) because we think that, on average, it will prevent the effects of other variables (which we call *confounds*) on the outcome.  However, as we see in this case, in any particular study there could be a confound that occurs randomly.  It is improtant to make sure that the differences between conditions are not due to differences between groups in the presence of metabolic syndrome, and to do this we can include the metabolic syndrome variable in our statistical model. By doing this, any variance that is associated with metabolic syndrome will be removed from the effect of the diet, so that we are left with a cleaner measurement of the effect of the diet.  
+We generally use random assignment to treatments (as Gardner et al. did) because we think that, on average, it will prevent the effects of other variables (which we call *confounds*) on the outcome.  However, as we see in this case, in any particular study there could be a confound that occurs randomly.  It is important to make sure that the differences between conditions are not due to differences between groups in the presence of metabolic syndrome, and to do this we can include the metabolic syndrome variable in our statistical model. By doing this, any variance that is associated with metabolic syndrome will be removed from the effect of the diet, so that we are left with a cleaner measurement of the effect of the diet.  
 
-In this case we don't have the original data
-
+In this case we don't have the original data, so we can't directly test this. If we had the original data, we could include the metabolic syndrome variable in our model and see whether the relationship between diet and weight loss still holds; if it does, then we can be more confident that that the relation is not driven by any differences in metabolic syndrome.
