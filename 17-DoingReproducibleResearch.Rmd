@@ -199,7 +199,7 @@ A popular book entitled "The Compleat Academic: A Career Guide", published by th
 
 > **Which article should you write?** There are two possible articles you can write: (1) the article you planned to write when you designed your study or (2) the article that makes the most sense now that you have seen the results. They are rarely the same, and the correct answer is (2).
 
-What Bem suggests here is known as *HARKing* (Hypothesizing After the Results are Known)[@kerr:1998].  This might seem innocuous, but is problematic because it allows the research to re-frame a post-hoc conclusion (which we should take with a grain of salt) as an a priori prediction (in which we would have stronger faith).  In essence, it allows the researcher to rewrite their theory based on the facts, rather that using the theory to make predictions and then test them -- akin to moving the goalpost so that it ends up whereever the ball goes.  It thus becomes very difficult to disconfirm incorrect ideas, since the goalpost can always be moved to match the data.
+What Bem suggests here is known as *HARKing* (Hypothesizing After the Results are Known)[@kerr:1998].  This might seem innocuous, but is problematic because it allows the research to re-frame a post-hoc conclusion (which we should take with a grain of salt) as an a priori prediction (in which we would have stronger faith).  In essence, it allows the researcher to rewrite their theory based on the facts, rather that using the theory to make predictions and then test them -- akin to moving the goalpost so that it ends up wherever the ball goes.  It thus becomes very difficult to disconfirm incorrect ideas, since the goalpost can always be moved to match the data.
 
 > **Analyzing data** Examine them from every angle. Analyze the sexes separately. Make up new composite indices. If a datum suggests a new hypothesis, try to find further evidence for it elsewhere in the data. If you see dim traces of interesting patterns, try to reorganize the data to bring them into bolder relief. If there are participants you don’t like, or trials, observers, or interviewers who gave you anomalous results,drop them (temporarily). Go on a fishing expedition for something — anything — interesting. No, this is not immoral. 
 
@@ -234,9 +234,9 @@ In the years since the reproducibility crisis arose, there has been a robust mov
 
 ### Pre-registration
 
-One of the ideas that has gained the greatest traction is *pre-registration*, in which one submits a detailed description of a study (including all data analyses) to a trusted repository (such as the [Open Science Framework](http://osf.io) or [AsPredicted.org](http://aspredicted.org).  By specifying one's plans in detail prior to analyzing the data, pre-registration provides greater faith that the analyses do not suffer from p-hacking or other questionable research practices.  
+One of the ideas that has gained the greatest traction is *pre-registration*, in which one submits a detailed description of a study (including all data analyses) to a trusted repository (such as the [Open Science Framework](http://osf.io) or [AsPredicted.org](http://aspredicted.org)).  By specifying one's plans in detail prior to analyzing the data, pre-registration provides greater faith that the analyses do not suffer from p-hacking or other questionable research practices.  
 
-The effects of pre-registration have been seen in clinical trials in medicine.  In 2000, the National Heart, Lung, and Blood Institute (NHLBI) began requiring all clinical trials to be pre-registered using the system at  [ClinicalTrials.gov](http://clinicaltrials.gov).  This provides a natural experiment to observe the effects of study pre-registration.  When @kapl:irvi:2015 examined clinical trial outcomes over time, they found that the number of positive outcomes in clnical trials was reduced after 2000 compared to before. While there are many possible causes, it seems likely that prior to study registration researchers were able to change their methods in order to find a positive result, which became more difficult after registration was required.
+The effects of pre-registration have been seen in clinical trials in medicine.  In 2000, the National Heart, Lung, and Blood Institute (NHLBI) began requiring all clinical trials to be pre-registered using the system at  [ClinicalTrials.gov](http://clinicaltrials.gov).  This provides a natural experiment to observe the effects of study pre-registration.  When @kapl:irvi:2015 examined clinical trial outcomes over time, they found that the number of positive outcomes in clinical trials was reduced after 2000 compared to before. While there are many possible causes, it seems likely that prior to study registration researchers were able to change their methods in order to find a positive result, which became more difficult after registration was required.
  
 ### Reproducible practices
 
@@ -246,7 +246,7 @@ The paper by @simm:nels:simo:2011 laid out a set of suggested practices for maki
 - Authors must collect at least 20 observations per cell or else provide a compelling cost-of-data-collection justification. 
 - Authors must list all variables collected in a study. 
 - Authors must report all experimental conditions, including failed manipulations. 
-- If observations are eliminated, authors must also report what (the statistical results are if those observations are included. 
+- If observations are eliminated, authors must also report what the statistical results are if those observations are included. 
 - If an analysis includes a covariate, authors must report the statistical results of the analysis without the covariate. 
 
 ### Replication
