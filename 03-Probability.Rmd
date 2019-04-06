@@ -163,7 +163,7 @@ where $\bar{A}$ means "not A". This rule derives directly from the axioms that w
 A second rule tells us how to compute the probability of a conjoint event -- that is, the probability of both of two events occurring. This  version of the rule tells us how to compute this quantity in the special case when the two events are independent from one another; we will learn later exactly what the concept of *independence* means, but for now we can just take it for granted that the two die throws are independent events.
 
 $$
-P(A \cap B) = P(A) * P(B)\ \text{iff A and B are independent}
+P(A \cap B) = P(A) * P(B)\ \text{if A and B are independent}
 $$
 Thus, the probability of throwing a six on each of two rolls is $\frac{1}{6}*\frac{1}{6}=\frac{1}{36}$.
 
