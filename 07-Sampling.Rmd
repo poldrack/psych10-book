@@ -103,8 +103,6 @@ for (i in 1:nsamps) {
   sampMeans[i] <- mean(NHANES_sample$Height)
 }
 
-sampdataDf <- tibble(mean = sampMeans)
-
 sprintf(
   "Average sample mean = %.2f",
   mean(sampMeans)
