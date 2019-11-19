@@ -46,7 +46,7 @@ Note that the students' answers were qualitative, but we generated a quantitativ
 #### Types of numbers
 There are several different types of numbers that we work with in statistics.  It's important to understand these differences, in part because programming languages like R often distinguish between them.
 
-**Binary numbers**. The simplest are binary numbers -- that is, zero or one.  We will often use binary numbers to represent whether something is true or false, or present or absent.  For example, I might ask 10 people if they have ever experienced a migraine headache.  If their answers were:
+**Binary numbers**. The simplest are binary numbers -- that is, zero or one.  We will often use binary numbers to represent whether something is true or false, or present or absent.  For example, I might ask 10 people if they have ever experienced a migraine headache.  We can put their answers into an R variable, using the ```c()``` function to create a list of values.  Then we can simply type the name of the variable to print out its value:
 
 ```{r}
 # create variable containing responses to migraine question
@@ -55,44 +55,53 @@ everHadMigraine <- c('Yes','No','Yes','No','No','No','Yes','No','No','No')
 everHadMigraine
 ```
 
-we could instead recode these into truth values, using the == symbol which is a test for equality, returning the logical value TRUE if the two things are equal and FALSE if they are not:
+It's often useful to instead use *logical* values, which take the value of either ```TRUE``` or ```FALSE```.  We can create these by testing whether each value is equal to "Yes", which we can do using the ```==``` symbol. This will return the value ```TRUE``` for any matching "Yes" values, and ```FALSE``` otherwise.  These are useful to R knows how to interpret them natively, whereas it doesn't know what "Yes" and "No" mean.
 
 ```{r}
 # create truth values from everHadMigraine variable
 
-everHadMigraineTF <- everHadMigraine == 'Yes'
-everHadMigraineTF
+everHadMigraineTruth <- everHadMigraine == 'Yes'
+everHadMigraineTruth
 ```
 
-R treats truth values and binary numbers eqivalently:
+R treats truth values and binary numbers equivalently:
 
 ```{r}
-# evaluate truth of a set of assertions
-
-# 1 is equal to TRUE - should return TRUE
+# 1 is equal to TRUE - should return the answer TRUE
 TRUE == 1
+```
 
-# 0 is equal to FALSE - should return TRUE
+```{r}
+# 0 is equal to FALSE - should return the answer TRUE
 FALSE == 0
+```
 
-# 0 is equal to true - should return FALSE
+```{r}
+# 0 is equal to true - should return the answer FALSE
 TRUE == 0
 ```
 
-And we can also turn our list of truth values into integers explicitly:
+ 
+**Integers**.  Integers are whole numbers with no fractional or decimal part. We most commonly encounter integers when we count things, but they also often occur in psychological measurement.  For example, in my introductory survey I administer a set of questions about attitudes towards statistics (such as "Statistics seems very mysterious to me."), on which the students respond with a number between 1 ("Disagree strongly") and 7 ("Agree strongly").  
+
+We can also turn our list of truth values into integers explicitly using the ```as.integer()``` function in R:
 
 ```{r}
 # create integer values from truth values using as.integer()
 
-everHadMigraineBinary <- as.integer(everHadMigraineTF)
+everHadMigraineBinary <- as.integer(everHadMigraineTruth)
 everHadMigraineBinary
 ```
 
 When we get to probability theory we will see a way in which this kind of representation can be very useful.
- 
-**Integers**.  Integers are whole numbers with no fractional or decimal part. We most commonly encounter integers when we count things, but they also often occur in psychological measurement.  For example, in my introductory survey I administer a set of questions about attitudes towards statistics (such as "Statistics seems very mysterious to me."), on which the students respond with a number between 1 ("Disagree strongly") and 7 ("Agree strongly").  
 
 **Real numbers**.  Most commonly in statistics we work with real numbers, which have a fractional/decimal part.  For example, we might measure someone's weight, which can be measured to an arbitrary level of precision, from whole pounds down to micrograms.
+
+## Discrete versus continuous measurements
+
+A *discrete* measurement is one that takes one of a set of particular values.  These could be qualitative values (for example, different breeds of dogs) or numerical values (for example, how many friends one has on Facebook).  Importantly, there is no middle ground between the measurements; it doesn't make sense to say that one has 33.7 friends.
+
+A *continuous* measurement is one that is defined in terms of a real number. It could fall anywhere in a particular range of values, though usually our measurement tools will limit the precision with which we can measure; for example, a floor scale might measure weight to the nearest pound, even though weight could in theory be measured with much more precision.
 
 ## Scales of measurement
 
@@ -148,11 +157,11 @@ When we think about what makes a good measurement, we usually distinguish two di
 
 ### *Reliability*
 
-Reliability quantifies the consistency of our measurements.  One common form of reliability, known as "test-retest reliability", measures how well the measurements agree if the same measurement is performed twice.  For example, I might give you a questionnaire about your attitude towards statistics today, repeat this same questionnaire tomorrow, and compare your answers on the two days; we would hope that they would be very similar to one another, unless something happened in between the two tests that should have changed your view of statistics (like reading this book!).  
+Reliability refers to the consistency of our measurements.  One common form of reliability, known as "test-retest reliability", measures how well the measurements agree if the same measurement is performed twice.  For example, I might give you a questionnaire about your attitude towards statistics today, repeat this same questionnaire tomorrow, and compare your answers on the two days; we would hope that they would be very similar to one another, unless something happened in between the two tests that should have changed your view of statistics (like reading this book!).  
 
-Another way to assess reliability comes in cases where the data includes subjective judgments.  For example, let's say that a researcher wants to determine whether a treatment changes how well an autistic child interacts with other children, which is measured by having experts watch the child and rate their interactions with the other children.  In this case we would like to make sure that the answers don't depend on the rater --- that is, we would like for there to be high *inter-rater reliability*.  This can be assessed by having more than one rater perform the rating, and then comparing their ratings to make sure that they agree well with one another.
+Another way to assess reliability comes in cases where the data includes subjective judgments.  For example, let's say that a researcher wants to determine whether a treatment changes how well an autistic child interacts with other children, which is measured by having experts watch the child and rate their interactions with the other children.  In this case we would like to make sure that the answers don't depend on the individual rater --- that is, we would like for there to be high *inter-rater reliability*.  This can be assessed by having more than one rater perform the rating, and then comparing their ratings to make sure that they agree well with one another.
 
-Reliability is important if we want to compare one measurement to another.  The relationship between two different measurements can't be any stronger than the relationship between either of the measurements and itself (i.e., its reliability).  This means that an unreliable measure can never have a strong statistical relationship with any other measure.  For this reason, researchers developing a new measurement (such as a new survey) will often go to great lengths to test its reliability.
+Reliability is important if we want to compare one measurement to another.  The relationship between two different variables can't be any stronger than the relationship between either of the variables and itself (i.e., its reliability).  This means that an unreliable measure can never have a strong statistical relationship with any other measure.  For this reason, researchers developing a new measurement (such as a new survey) will often go to great lengths to establish and improve its reliability.
 
 ```{r ReliabilityValidity, echo=FALSE,fig.cap="A figure demonstrating the distinction between reliability and validity, using shots at a bullseye. Reliability refers to the consistency of location of shots, and validity refers to the accuracy of the shots with respect to the center of the bullseye. ",fig.width=6,fig.height=6,out.height='33%'}
 # Figure inspired by https://commons.wikimedia.org/wiki/File:Reliability_and_validity.svg
@@ -232,13 +241,21 @@ plot_grid(p1,p2,p3,p4,ncol=2,label_size=12,
 
 ### *Validity* 
 
-Reliability is important, but on its own it's not enough: After all, I could create a highly reliable measurement on a personality test by coding every answer using a single number, regardless of how the person answers.  We want our measurements to also be *valid* --- that is, we want to make sure that we are actually measuring the construct that we think we are measuring (Figure \@ref(fig:ReliabilityValidity)). There are many different types of validity that are commonly discussed; we will focus on three of them.
+Reliability is important, but on its own it's not enough: After all, I could create a perfectly reliable measurement on a personality test by re-coding every answer using the same number, regardless of how the person actually answers.  We want our measurements to also be *valid* --- that is, we want to make sure that we are actually measuring the construct that we think we are measuring (Figure \@ref(fig:ReliabilityValidity)). There are many different types of validity that are commonly discussed; we will focus on three of them.
 
 *Face validity*. Does the measurement make sense on its face?  If I were to tell you that I was going to measure a person's blood pressure by looking at the color of their tongue, you would probably think that this was not a valid measure on its face.  On the other hand, using a blood pressure cuff would have face validity.  This is usually a first reality check before we dive into more complicated aspects of validity.
 
 *Construct validity*.  Is the measurement related to other measurements in an appropriate way?  This is often subdivided into two aspects.  *Convergent validity* means that the measurement should be closely related to other measures that are thought to reflect the same construct. Let's say that I am interested in measuring how extroverted a person is using a questionnaire or an interview.  Convergent validity would be demonstrated if both of these different measurements are closely related to one another.  On the other hand, measurements thought to reflect different constructs should be unrelated, known as *divergent validity*.  If my theory of personality says that extraversion and conscientiousness are two distinct constructs, then I should also see that my measurements of extraversion are *unrelated* to measurements of conscientiousness.  
 
 *Predictive validity*.  If our measurements are truly valid, then they should also be predictive of other outcomes.  For example, let's say that we think that the psychological trait of sensation seeking (the desire for new experiences) is related to risk taking in the real world.  To test for predictive validity of a measurement of sensation seeking, we would test how well scores on the test predict scores on a different survey that measures real-world risk taking. 
+
+## Learning Objectives
+
+Having read this chapter, you should be able to:
+
+* Distinguish between different types of variables (quantitative/qualitative, binary/integer/real, discrete/continuous) and give examples of each of these kinds of variables
+* Distinguish between the concepts of reliability and validity and apply each concept to a particular dataset
+
 
 ## Suggested readings
 
