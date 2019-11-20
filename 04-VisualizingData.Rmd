@@ -13,7 +13,7 @@ output:
 library(tidyverse)
 library(ggplot2)
 library(cowplot)
-library(pander)
+library(knitr)
 library(NHANES)
 
 # drop duplicated IDs within the NHANES dataset
@@ -25,11 +25,12 @@ NHANES_adult=NHANES %>%
   drop_na(Height) %>%
   subset(subset=Age>=18)
 
+# setup colorblind palette
+# from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette
+# The palette with grey:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 ```
-
-One of the most important things that we can do with a dataset is to look at it, but there are many ways to look at data, and some are much more effective than others.  In this chapter we will discuss how to effectively visualize data.
-
-## How data visualization can save lives
 
 On January 28, 1986, the Space Shuttle Challenger exploded 73 seconds after takeoff, killing all 7 of the astronauts on board.  As when any such disaster occurs, there was an official investigation into the cause of the accident, which found that an O-ring connecting two sections of the solid rocket booster had leaked, resulting in failure of the joint and explosion of the large liquid fuel tank (see figure \@ref(fig:srbLeak)).
 
@@ -37,18 +38,18 @@ On January 28, 1986, the Space Shuttle Challenger exploded 73 seconds after take
 knitr::include_graphics("images/Booster_Rocket_Breach_-_GPN-2000-001425.jpg")
 ```
 
-The investigation found that many aspects of the NASA decision making process were flawed, and focused in particular on a meeting that was had between NASA staff and engineers from Morton Thiokol, a contractor who had built the solid rocket boosters. These engineers were particularly concerned because the temperatures were forecast to be very cold on the morning of the launch, and they had data from previous launches showing that performance of the O-rings was compromised at lower temperatures. In a meeting on the evening before the launch, the engineers presented their data to the NASA managers, but were unable to convince them to postpone the launch.
+The investigation found that many aspects of the NASA decision making process were flawed, and focused in particular on a meeting that was had between NASA staff and engineers from Morton Thiokol, a contractor who had built the solid rocket boosters. These engineers were particularly concerned because the temperatures were forecast to be very cold on the morning of the launch, and they had data from previous launches showing that performance of the O-rings was compromised at lower temperatures. In a meeting on the evening before the launch, the engineers presented their data to the NASA managers, but were unable to convince them to postpone the launch. Their evidence was a set of hand-written slides showing numbers from various past launches.
 
-The visualization expert Edward Tufte has argued that with a proper presentation of all of the data, the engineers could have been much more persuasive.  In particular, they could have shown a figure like the one in Figure \@ref(fig:challengerTemps), which highlights two important facts. First, it shows that the amount of O-ring damage (defined by the amount of erosion and soot found outside the rings after the solid rocket boosters were retrieved from the ocean in previous flights) was closely related to the temperature at takeoff.  Second, it shows that the range of forecasted temperatures for the morning of January 28 (shown in the shaded red area) was well outside of the range of all previous launches.  While we can't know for sure, it seems at least plausible that this could have been more persuasive. 
+The visualization expert Edward Tufte has argued that with a proper presentation of all of the data, the engineers could have been much more persuasive.  In particular, they could have shown a figure like the one in Figure \@ref(fig:challengerTemps), which highlights two important facts. First, it shows that the amount of O-ring damage (defined by the amount of erosion and soot found outside the rings after the solid rocket boosters were retrieved from the ocean in previous flights) was closely related to the temperature at takeoff.  Second, it shows that the range of forecasted temperatures for the morning of January 28 (shown in the shaded area) was well outside of the range of all previous launches.  While we can't know for sure, it seems at least plausible that this could have been more persuasive. 
 
-```{r challengerTemps, echo=FALSE,fig.cap="A replotting of Tufte's damage index data. The blue line shows the trend in the data, and the red patch shows the projected temperatures for the morning of the launch.",fig.width=8,fig.height=4,out.height='50%'}
+```{r challengerTemps, echo=FALSE,fig.cap="A replotting of Tufte's damage index data. The line shows the trend in the data, and the shaded patch shows the projected temperatures for the morning of the launch.",fig.width=8,fig.height=4,out.height='50%'}
 oringDf <- read.table("data/orings.csv", sep = ",", header = TRUE)
 
 oringDf %>%
   ggplot(aes(x = Temperature, y = DamageIndex)) +
   geom_point() +
   geom_smooth(method = "loess", se = FALSE, span = 1) + ylim(0, 12) +
-  geom_vline(xintercept = 27.5, size = 7, alpha = 0.3, color = "red") +
+  geom_vline(xintercept = 27.5, size =8, alpha = 0.3, color = "red") +
   labs(
     y = "Damage Index",
     x = "Temperature at time of launch"
@@ -56,9 +57,10 @@ oringDf %>%
   scale_x_continuous(breaks = seq.int(25, 85, 5)) +
   annotate(
     "text",
-    x = 38,
-    y = 11,
-    label = "Forecasted temperature",
+    angle=90,
+    x = 27.5,
+    y = 6,
+    label = "Forecasted temperature on Jan 28",
     size = 5
   )
 ```
@@ -72,9 +74,9 @@ There are many different types of plots that we can use, which have different ad
 1. The bar graph in panel A shows the difference in means, but doesn't show us how much spread there is in the data around these means -- and as we will see later, knowing this is essential to determine whether we think the difference between the groups is large enough to be important.  
 2. The second plot shows the bars with all of the data points overlaid - this  makes it a bit clearer that the distributions of height for men and women are overlapping, but it's still hard to see due to the large number of data points.  
 
-In general we prefer using a plotting technique that provides a clearly view of the distribution of the data points.  
+In general we prefer using a plotting technique that provides a clearer view of the distribution of the data points.  
 
-3. In panel C, we see one example of clearly showing the data points, known as a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  
+3. In panel C, we see one example of a *violin plot*, which plots the distribution of data in each condition (after smoothing it out a bit).  
 4. Another option is the *box plot* shown in panel D, which shows the median (central line), a measure of variability (the width of the box, which is based on a measure called the interquartile range), and any outliers (noted by the points at the ends of the lines). These are both effective ways to show data that provide a good feel for the distribution of the data.
 
 ```{r plotHeight,echo=FALSE,fig.cap="Four different ways of plotting the difference in height between men and women in the NHANES dataset.  Panel A plots the means of the two groups, which gives no way to assess the relative overlap of the two distributions.  Panel B shows the same bars, but also overlays the data points, jittering them so that we can see their overall distribution.  Panel C shows a violin plot, which shows the distribution of the datasets for each group.  Panel D shows a box plot, which highlights the spread of the distribution along with any outliers (which are shown as individual points)."}
@@ -119,31 +121,43 @@ Let's say that we want to create a *scatterplot* that plots height against weigh
 ```{r}
 NHANES_sample <- 
   NHANES_adult %>%
-  drop_na(Weight, Gender) %>% #remove rows (individuals) with missing values for Weight and Gender
-  sample_n(150) #take a random sample of n = 150 rows (individuals)
+  # remove rows (individuals) with 
+  # missing values for Weight and Gender
+  drop_na(Weight, Gender) %>% 
+  # take a random sample of 
+  # n = 150 rows (individuals)
+  sample_n(150) 
 ```
 
-Now let's set up the `ggplot()` command. This requires us to specify two things.  First, we need to tell it which data frame to obtain the data from (in this case, `NHANES_sample`).  Second, we need to tell it which variables from the data frame to use, which we do via the *aesthetics* function `aes()`.  In this case, we want to plot height on the X axis and weight on the Y axis. The result is shown in Figure \@ref(fig:emptyPlot): The command generates a set of plot axes but doesn't actually show any data.
+Now let's set up the `ggplot()` command. This requires us to specify two things.  First, we need to tell it which data frame to obtain the data from (in this case, `NHANES_sample`).  Second, we need to tell it which variables from the data frame to use, which we do via the *aesthetics* function `aes()`.  In this case, we want to plot height on the X axis and weight on the Y axis. The result is shown in the left panel of Figure \@ref(fig:simpleGeom): The command generates a set of plot axes but doesn't actually show any data.
 
 ```{r emptyPlot,fig.cap='Empty plot frame generated by ggplot()',fig.width=4,fig.height=4,out.height='50%'}
-NHANES_sample %>%
-  ggplot(aes(x = Height, y = Weight))
 ```
 
-We next need to add a presentation of the data. The way that we tell `ggplot` what to show is by adding various commands to the main `ggplot()` command.  In particular, we generally need to add a *geometry* or "geom", which specifies how the data will be arranged in the plot.  For example, to show each data point we can use the `geom_point()` geometry, as shown in Figure \@ref(fig:simpleGeom). Each data point represents an individual row in our `NHANES_sample` dataset with each row corresponding to an individual person in this dataset. 
+We next need to add a presentation of the data. The way that we tell `ggplot` what to show is by adding various commands to the main `ggplot()` command.  In particular, we generally need to add a *geometry* or "geom", which specifies how the data will be arranged in the plot.  For example, to show each data point we can use the `geom_point()` geometry, as shown in the right panel of Figure \@ref(fig:simpleGeom). Each data point represents an individual row in our `NHANES_sample` dataset with each row corresponding to an individual person in this dataset. 
 
-```{r simpleGeom,fig.cap='Simple scatter plot',fig.width=4,fig.height=4,out.height='50%'}
-NHANES_sample %>% 
+```{r simpleGeom,fig.cap='Simple scatter plot',fig.width=8,fig.height=4,out.height='50%'}
+
+p1 <- NHANES_sample %>%
+  ggplot(aes(x = Height, y = Weight))
+
+p2 <- NHANES_sample %>% 
   ggplot(aes(x = Height, y = Weight)) +
   geom_point()
+
+plot_grid(p1,p2,labels='AUTO')
+
 ```
 
-Finally, we want to plot the points in separate colors depending on their gender. We do this by simply adding a *color* keyword to the aesthetics, which tells the `geom_point()` function to separately color points by Gender.  This is shown in Figure \@ref(fig:colorPoints).  This figure also shows an example of how we can include multiple geometry layers in a single figure -- in this case, we use `geom_smooth()` to plot the lines that best describe the relation between height and weight, separately by gender.  The shading around the lines reflects our confidence in the estimate at that point.
+Finally, we want to plot the points in separate colors depending on their gender. We do this by simply adding a *color* keyword to the aesthetics, which tells the `geom_point()` function to differently shape and color points by Gender. This is shown in Figure \@ref(fig:colorPoints).  This figure also shows an example of how we can include multiple geometry layers in a single figure -- in this case, we use `geom_smooth()` to plot the lines that best describe the relation between height and weight, separately by gender.  The shading around the lines reflects our confidence in the estimate at that point.
 
-```{r colorPoints,fig.cap='Scatterplot with points separately colored by Gender.',fig.width=4,fig.height=4,out.height='50%'}
+Why do we use both different shapes and colors for the points? For two reasons.  First, colorblind people may have difficulty seeing the differences between colors, so it's always helpful to use shape as well. In addition, we have chosen colors here that should be distinguishable even by people who are colorblind.  Second, sometimes people will print a figure out using a black-and-white laser printer, in which case the color will not be visible.
+
+```{r colorPoints,fig.cap='Scatterplot with points differently shaped and colored by Gender.', fig.width=4,fig.height=4,out.height='50%'}
 NHANES_sample %>% 
   ggplot(aes(x = Height, y = Weight, color = Gender)) +
-  geom_point() +
+  scale_colour_manual(values=cbPalette) + 
+  geom_point(aes(shape=Gender)) +
   geom_smooth(method = "lm")
 ```
 
@@ -152,15 +166,13 @@ NHANES_sample %>%
 
 Many books have been written on effective visualization of data.  There are some principles that most of these authors agree on, while others are more contentious. Here we summarize some of the major principles; if you want to learn more, then some good resources are listed in the *Suggested Readings* section at the end of this chapter.
 
-Here is our distillation of some important principles for data visualization.
-
 ### Show the data and make them stand out
 
 Let's say that I had performed a study that examined the relationship between dental health and time spent flossing, and I would like to visualize my data. Figure \@ref(fig:dentalFigs) shows four possible presentations of these data.  
 
 1. In panel A, we don't actually show the data, just a line expressing the relationship between the data.  This is clearly not optimal, because we can't actually see what the underlying data look like.  
 
-Panels B-D show three possible outcomes from plotting the actual data, where each plot shows a different way that the data could have been generated. 
+Panels B-D show three possible outcomes from plotting the actual data, where each plot shows a different way that the data might have looked. 
 
 2. If we saw the plot in Panel B, we would probably be suspicious -- rarely would real data follow such a precise pattern.  
 3. The data in Panel C, on the other hand, look like real data -- they show a general trend, but they are messy, as data in the world usually are.  
@@ -206,7 +218,7 @@ plot_grid(p1,p2,p3,p4,nrow=2,labels='AUTO')
 
 ```
 
-## Maximize the data/ink ratio
+### Maximize the data/ink ratio
 
 Edward Tufte has proposed an idea called the data/ink ratio:
 
@@ -232,21 +244,21 @@ plot_grid(p1,p2,labels='AUTO',ncol=2)
 
 ```
 
-## Avoid chartjunk
+### Avoid chartjunk
 
 It's especially common to see presentations of data in the popular media that are adorned with lots of visual elements that are thematically related to the content but unrelated to the actual data.  This is known as *chartjunk*, and should be avoided at all costs.
 
 One good way to avoid chartjunk is to avoid using popular spreadsheet programs to plot one's data.  For example, the chart in Figure \@ref(fig:chartJunk) (created using Microsoft Excel) plots the relative popularity of different religions in the United States.  There are at least three things wrong with this figure:
 
-- it has graphics overlaid on each of the bars which have nothing to do with the actual data. 
-- it has a distracting background texture.
-- it uses three-dimensional bars
+- it has graphics overlaid on each of the bars that have nothing to do with the actual data
+- it has a distracting background texture
+- it uses three-dimensional bars, which distort the data
 
-```{r chartJunk,echo=FALSE,fig.cap="An example of chart junk."}
+```{r chartJunk,echo=FALSE,fig.width=8,fig.cap="An example of chart junk."}
 knitr::include_graphics('images/excel_chartjunk.png')
 ```
 
-## Avoid distorting the data
+### Avoid distorting the data
 
 It's often possible to use visualization to distort the message of a dataset.  A very common one is use of different axis scaling to either exaggerate or hide a pattern of data.  For example, let's say that we are interested in seeing whether rates of violent crime have changed in the US.  In Figure \@ref(fig:crimePlotAxes), we can see these data plotted in ways that either make it look like crime has remained constant, or that it has plummeted.  The same data can tell two very different stories!
 
@@ -296,10 +308,7 @@ p2 = ggplot(bodyTempDf,aes(days,temp)) +
 plot_grid(p1,p2)
 ```
 
-## The lie factor
-
-
-Edward Tufte introduced the concept of the "lie factor" to describe the degree to which physical differences in a visualization correspond to the magnitude of the differences in the data. If a graphic has a lie factor near 1, then it is appropriately representing the data, whereas lie factors far from one reflect a distortion of the underlying data.
+Edward Tufte introduced the concept of the *lie factor* to describe the degree to which physical differences in a visualization correspond to the magnitude of the differences in the data. If a graphic has a lie factor near 1, then it is appropriately representing the data, whereas lie factors far from one reflect a distortion of the underlying data.
 
 The lie factor supports the argument that one should always include the zero point in a bar chart in many cases.  In Figure \@ref(fig:barCharLieFactor) we plot the same data with and without zero in the Y axis.  In panel A, the proportional difference in area between the two bars is exactly the same as the proportional difference between the values (i.e. lie factor = 1), whereas in Panel B (where zero is not included) the proportional difference in area between the two bars is roughly 2.8 times bigger than the proportional difference in the values, and thus it visually exaggerates the size of the difference.  
 
@@ -318,13 +327,13 @@ plot_grid(p1,p2,labels='AUTO')
 ```
 
 
-## Remember human limitations
+## Accommodating human limitations
 
 Humans have both perceptual and cognitive limitations that can make some visualizations very difficult to understand. It's always important to keep these in mind when building a visualization.
 
 ### Perceptual limitations
 
-One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" pallettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R
+One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" pallettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R, which we used in Figure \@ref(fig:colorPoints).
 
 ```{r badColors,echo=FALSE,fig.cap="Example of a bad figure that relies solely on color contrast.",fig.width=8,fig.height=4,out.height='50%'}
 exampleDf = data.frame(value=c(3,5,4,6,2,5,8,8),
@@ -336,9 +345,9 @@ ggplot(exampleDf,aes(v1,value)) +
 ```
 
 
-Even for people with perfect color vision, there are perceptual limitations that can make some plots ineffective.  This is one reason why statisticians never use pie charts: It can be very difficult for humans to apprehend differences in the volume of shapes. The pie chart in Figure \@ref(fig:pieChart) (presenting the same data on religious affiliation that we showed above) shows how tricky this can be. 
+Even for people with perfect color vision, there are perceptual limitations that can make some plots ineffective.  This is one reason why statisticians *never* use pie charts: It can be very difficult for humans to accurately perceive differences in the volume of shapes. The pie chart in Figure \@ref(fig:pieChart) (presenting the same data on religious affiliation that we showed above) shows how tricky this can be. 
 
-```{r pieChart,echo=FALSE,fig.cap="An example of a pie chart, highlighting the difficult in apprehending the relative volume of the different pie slices."}
+```{r pieChart,echo=FALSE,fig.cap="An example of a pie chart, highlighting the difficult in apprehending the relative volume of the different pie slices.", fig.width=8}
 knitr::include_graphics("images/religion_piechart.png")
 ```
 
@@ -358,8 +367,7 @@ ggplot(religionData,aes(Religion,Percentage,label=Percentage)) +
 
 ```
 
-This plot allows the viewer to make comparisons based on the the **length** of the bars **along a common scale** (the y-axis). Humans tend to be more accurate when decoding differences based on these perceptual elements than based on area or color. 
-
+This plot allows the viewer to make comparisons based on the the length of the bars along a common scale (the y-axis). Humans tend to be more accurate when decoding differences based on these perceptual elements than based on area or color. 
 
 ## Correcting for other factors
 
@@ -386,14 +394,24 @@ cpiRef=meanCPIData[meanCPIData$V1==1950,]$meanCPI
 gasPriceData$gasPrice1950Dollars=array(NA,dim(gasPriceData)[1])
 for (i in 1:dim(gasPriceData)[1]){
   cpiYear=meanCPIData[meanCPIData$V1==gasPriceData$year[i],]$meanCPI
-  gasPriceData$gasPrice1950Dollars[i]=gasPriceData$gasPrice[i]/(cpiYear/cpiRef)
+  gasPriceData$gasPrice1950Dollars[i]=gasPriceData$gasPrice[i]/(cpiYear/cpiRef
+                                                                )
 }
 ggplot(gasPriceData,aes(year,gasPrice)) +
-  geom_line(aes(color='Unadjusted'),size=1) +
-  geom_line(aes(year,gasPrice1950Dollars,color='Adjusted'),size=1) +
+  geom_line(aes(color='Unadjusted'),size=1, linetype='dotted') +
+  geom_line(aes(year,gasPrice1950Dollars, color='Adjusted'),size=1) +
   ylab('Gasoline prices') + xlab('Year') + 
   theme(legend.position = c(0,0.6)) 
 ```
+
+## Learning objectives
+
+Having read this chapter, you should be able to:
+
+* Describe the principles that distinguish between good and bad graphs, and use them to identify good versus bad graphs.
+* Understand the human limitations that must be accommodated in order to make effective graphs.
+* Promise to never create a pie chart. *Ever*.
+
 
 ## Suggested readings and videos
 
