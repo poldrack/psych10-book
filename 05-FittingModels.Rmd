@@ -529,7 +529,7 @@ incomeDf <-
 
 ```
 
-```{r, echo=False}
+```{r, echo=FALSE}
 kable(incomeDf)
 sprintf("Mean income: %0.2f", mean(incomeDf$income))
 
