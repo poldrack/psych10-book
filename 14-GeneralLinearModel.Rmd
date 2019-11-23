@@ -1,10 +1,10 @@
 ---
 output:
+  pdf_document: default
   bookdown::gitbook:
     lib_dir: "book_assets"
     includes:
       in_header: google_analytics.html
-  pdf_document: default
   html_document: default
 ---
 # The General Linear Model
@@ -348,7 +348,7 @@ print(p)
 In the previous model, we assumed that the effect of study time on grade (i.e., the regression slope) was the same for both groups. However, in some cases we might imagine that the effect of one variable might differ depending on the value of another variable, which we refer to as an *interaction* between variables.
 
 
-```{r CaffeineSpeaking, echo=FALSE,fig.cap='The relationship between caffeine and public speaking',fig.width=4,fig.height=4,out.height='50%'}
+```{r CaffeineSpeaking, echo=FALSE}
 set.seed(1234567)
 
 df <- 
@@ -358,10 +358,8 @@ df <-
           )
   ) %>%
   mutate(caffeine=runif(n())*100) %>%
-  mutate(speaking=0.5*caffeine*-group + group*20 + rnorm(20)*10)
-
-p1 <- ggplot(df,aes(caffeine,speaking)) +
-  geom_point()
+  mutate(speaking=0.5*caffeine*-group + group*20 + rnorm(20)*10) %>%
+  mutate(anxiety=ifelse(group==1,'anxious','notAnxious'))
 
 ```
 
@@ -375,14 +373,6 @@ summary(lmResultCaffeine)
 ```
 
 But now let's say that we find research suggesting that anxious and non-anxious people react differently to caffeine.  First let's plot the data separately for anxious and non-anxious people.
-
-```{r CaffeineSpeakingAnxiety,echo=FALSE,fig.cap='The relationship between caffeine and public speaking, with anxiety represented by the color of the data points',fig.width=6,fig.height=4,out.height='50%'}
-df <- 
-  df %>% 
-  mutate(anxiety=ifelse(group==1,'anxious','notAnxious'))
-p2 <- ggplot(df,aes(caffeine,speaking,color=anxiety)) +
-  geom_point()
-```
 
 As we see from panel B in Figure \@ref(fig:CaffeineAnxietyInteraction), it appears that the relationship between speaking and caffeine is different for the two groups, with caffeine improving performance for people without anxiety and degrading performance for those with anxiety.  We'd like to create a statistical model that addresses this question.  First let's see what happens if we just include anxiety in the model.
 
@@ -405,25 +395,34 @@ summary(lmResultInteraction)
 
 From these results we see that there are significant effects of both caffeine and anxiety (which we call *main effects*) and an interaction between caffeine and anxiety. Panel C in Figure \@ref(fig:CaffeineAnxietyInteraction) shows the separate regression lines for each group.
 
-```{r CaffeineAnxietyInteraction, echo=FALSE,fig.cap='The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group.',fig.width=4,fig.height=4,out.height='50%'}
+```{r CaffeineAnxietyInteraction, echo=FALSE,fig.cap='A: The relationship between caffeine and public speaking. B: The relationship between caffeine and public speaking, with anxiety represented by the shape of the data points. C: The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group (dashed for anxious, dotted for non-anxious).',fig.width=8,fig.height=8,out.height='50%'}
+
+p1 <- ggplot(df,aes(caffeine,speaking)) +
+  geom_point()
+
+p2 <- ggplot(df,aes(caffeine,speaking,shape=anxiety)) +
+  geom_point() + 
+  theme(legend.position = c(0.1, 0.9))
 
 df_anx <- 
   df %>%
-  subset(anxiety=='anxious')
+  subset(anxiety=='anxious') %>%
+  mutate(y=lmResultInteraction$fitted.values[df$anxiety=='anxious'])
 
 df_notanx <- 
   df %>%
-  subset(anxiety=='notAnxious')
+  subset(anxiety=='notAnxious')%>%
+  mutate(y=lmResultInteraction$fitted.values[df$anxiety=='notAnxious'])
 
-p3 <- ggplot(df_anx,aes(caffeine,speaking)) +
-  geom_point(color='blue') +
-  geom_line(data=data.frame(x=df$caffeine[df$anxiety=='anxious'],
-                    y=lmResultInteraction$fitted.values[df$anxiety=='anxious']),
-            aes(x,y),color='blue') +
-  geom_point(data=df_notanx,aes(caffeine,speaking),color='red')+
-  geom_line(data=data.frame(x=df$caffeine[df$anxiety=='notAnxious'],
-                    y=lmResultInteraction$fitted.values[df$anxiety=='notAnxious']),
-            aes(x,y),color='red')
+
+
+p3 <- ggplot(df,aes(caffeine,speaking,shape=anxiety)) +
+   geom_point() + 
+   theme(legend.position = c(0.1, 0.9)) +
+  geom_line(data=df_anx,
+             aes(caffeine,y),linetype='dashed') +
+  geom_line(data=df_notanx,
+             aes(caffeine,y),linetype='dotted')
 plot_grid(p1, p2, p3, labels='AUTO')
 ```
 
@@ -443,15 +442,13 @@ When we talk about "prediction" in daily life, we are generally referring to the
 
 As an example, let's take a sample of 48 children from NHANES and fit a regression model for weight that includes several regressors (age, height, hours spent watching TV and using the computer, and household income) along with their interactions.  
 
-```{r}
+```{r echo=FALSE}
 # create dataframe with children with complete data on all variables
 NHANES_child <-
   NHANES %>%
   drop_na(Height, Weight, TVHrsDayChild, HHIncomeMid, CompHrsDayChild, Age) %>%
   dplyr::filter(Age < 18)
-```
 
-```{r}
 # create function to sample data and compute regression on in-sample and out-of-sample data
 
 get_sample_predictions <- function(sample_size, shuffle = FALSE) {
@@ -490,9 +487,7 @@ get_sample_predictions <- function(sample_size, shuffle = FALSE) {
     sqrt(mean((pred_new - new_sample$Weight)**2))
   ))
 }
-```
 
-```{r}
 # implement the function
 sim_results <- 
   replicate(100, get_sample_predictions(sample_size = 48, shuffle = FALSE))
@@ -504,20 +499,11 @@ sim_results <-
 mean_rsquared <-
   sim_results %>%
   summarize(
-    rmse_original_data = mean(X3),
-    rmse_new_data = mean(X4)
+    `RMSE (original data)` = mean(X3),
+    `RMSE (new data)` = mean(X4)
   )
 
-pander(mean_rsquared)
-```
-
-
-Here we see that whereas the model fit on the original data showed a very good fit (only off by a few pounds per individual), the same model does a much worse job of predicting the weight values for new children sampled from the same population (off by more than 25 pounds per individual).  This happens because the model that we specified is quite complex, since it includes not just each of the individual variables, but also all possible combinations of them (i.e. their *interactions*), resulting in a model with 32 parameters.  Since this is almost as many coefficients as there are data points (i.e., the heights of 48 children), the model *overfits* the data, just like the complex polynomial curve in our initial example of overfitting in Section \@ref(overfitting).
-
-Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable. Randomly shuffling the value should make it impossible to predict weight from the other variables, because they should have no systematic relationship.
-
-```{r}
-print("using shuffled y variable to simulate null effect")
+# using shuffled y variable to simulate null effect
 
 sim_results <- 
   replicate(100, get_sample_predictions(sample_size = 48, shuffle = TRUE))
@@ -526,16 +512,22 @@ sim_results <-
   t(sim_results) %>%
   data.frame()
 
-mean_rsquared <-
+mean_rsquared_sim <-
   sim_results %>%
   summarize(
-    rmse_original_data = mean(X3),
-    rmse_new_data = mean(X4)
+    `RMSE (original data)` = mean(X3),
+    `RMSE (new data)` = mean(X4)
   )
-pander(mean_rsquared)
+combined_rsquared = rbind(mean_rsquared, mean_rsquared_sim) %>%
+  mutate(`Data type`=c('True data', 'Shuffled data')) %>%
+  dplyr::select(`Data type`,`RMSE (original data)`,`RMSE (new data)`)
+kable(combined_rsquared, caption='Root mean squared error for model applied to original data and new data, and after shuffling the order of the y variable (in essence making the null hypothesis true)')
 ```
 
-This shows us that even when there is no true relationship to be modeled (because shuffling should have obliterated the relationship), the complex model still shows a very low error in its predictions, because it fits the noise in the specific dataset.  However, when that model is applied to a new dataset, we see that the error is much larger, as it should be.
+
+Here we see that whereas the model fit on the original data showed a very good fit (only off by a few pounds per individual), the same model does a much worse job of predicting the weight values for new children sampled from the same population (off by more than 25 pounds per individual).  This happens because the model that we specified is quite complex, since it includes not just each of the individual variables, but also all possible combinations of them (i.e. their *interactions*), resulting in a model with 32 parameters.  Since this is almost as many coefficients as there are data points (i.e., the heights of 48 children), the model *overfits* the data, just like the complex polynomial curve in our initial example of overfitting in Section \@ref(overfitting).
+
+Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable (shown in the second row of the table). Randomly shuffling the value should make it impossible to predict weight from the other variables, because they should have no systematic relationship.  This shows us that even when there is no true relationship to be modeled (because shuffling should have obliterated the relationship), the complex model still shows a very low error in its predictions, because it fits the noise in the specific dataset.  However, when that model is applied to a new dataset, we see that the error is much larger, as it should be.
 
 ### Cross-validation
 
@@ -547,9 +539,14 @@ knitr::include_graphics("images/crossvalidation.png")
 
 ```
 
-Let's see how that would work for our weight prediction example.  In this case we will perform 12-fold cross-validation, which means that we will break the data into 12 subsets, and then fit the model 12 times, in each case leaving out one of the subsets and then testing the model's ability to accurately predict the value of the dependent variable for those held-out data points.  The `caret` package in R provides us with the ability to easily run cross-validation across our dataset:
 
-```{r}
+```{r echo=FALSE}
+
+```
+
+Let's see how that would work for our weight prediction example.  In this case we will perform 12-fold cross-validation, which means that we will break the data into 12 subsets, and then fit the model 12 times, in each case leaving out one of the subsets and then testing the model's ability to accurately predict the value of the dependent variable for those held-out data points.  The `caret` package in R provides us with the ability to easily run cross-validation across our dataset. Using this function we can run cross-validation on 100 samples from the NHANES dataset, and compute the RMSE for cross-validation, along with the RMSE for the original data and a new dataset, as we computed above.
+
+```{r, echo=FALSE,warning=FALSE}
 # create a function to run cross-validation
 # returns the r-squared for the out-of-sample prediction
 
@@ -568,11 +565,6 @@ compute_cv <- function(d, nfolds = 12) {
   return(c(r2_cv, rmse_cv))
 }
 
-```
-
-Using this function we can run cross-validation on 100 samples from the NHANES dataset, and compute the RMSE for cross-validation, along with the RMSE for the original data and a new dataset, as we computed above.
-
-```{r, echo=FALSE,warning=FALSE}
 # create function to sample data and compute regression on in-sample and out-of-sample data
 
 get_sample_predictions_cv <- function(sample_size, shuffle = FALSE) {
@@ -607,9 +599,7 @@ get_sample_predictions_cv <- function(sample_size, shuffle = FALSE) {
     cv_output[2]
   ))
 }
-```
 
-```{r}
 #implement the function
 sim_results <- 
   replicate(100, get_sample_predictions_cv(sample_size = 48, shuffle = FALSE))
@@ -621,47 +611,36 @@ sim_results <-
 mean_rsquared <-
   sim_results %>%
   summarize(
-    mse_original_data = mean(X4),
-    mse_new_data = mean(X5),
-    mse_crossvalidation = mean(X6)
-  )
-pander(mean_rsquared)
+    `Original data` = mean(X4),
+    `New data` = mean(X5),
+    `Cross-validation` = mean(X6)
+  ) 
+
+mean_rsquared_t = as.data.frame(t(mean_rsquared)) %>%
+  rename(`Root mean squared error`=V1)
+
+kable(mean_rsquared_t, caption="Root mean squared error from cross-validation and new data, showing that cross-validation provides a reasonable estimate of the model's performance on new data.")
 ```
 
+Here we see that cross-validation gives us an estimate of predictive accuracy that is much closer to what we see with a completely new dataset than it is to the inflated accuracy that we see with the original dataset -- in fact, it's even slighlty more pessimistic than the average for a new dataset, probably because only part of the data are being used to train each of the models.  
 
-Here we see that cross-validation gives us an estimate of predictive accuracy that is much closer to what we see with a completely new dataset than it is to the inflated accuracy that we see with the original dataset -- in fact, it's even slighlty more pessimistic than the average for a new dataset, probably because only part of the data are being used to train each of the models.  We can also confirm that cross-validation accurately estimates the predictive accuracy when the dependent variable is randomly shuffled:
-
-```{r echo=FALSE,warning=FALSE}
-# run crossvalidation with shuffled y variable 
-
-sim_results <- 
-  replicate(100, get_sample_predictions_cv(sample_size = 48, shuffle = TRUE))
-
-sim_results <- 
-  t(sim_results) %>%
-  data.frame()
-
-mean_rsquared <-
-  sim_results %>%
-  summarize(
-    rmse_original_data = mean(X4),
-    rmse_new_data = mean(X5),
-    rmse_crossvalidation = mean(X6)
-  )
-pander(mean_rsquared)
-```
-
-Here again we see that cross-validation gives us an assessment of prediction accuracy that is much closer to what we expect with new data, and again even somewhat more pessimistic.
-
-Using cross-validation properly is tricky, and it is recommended that you consult with an expert before using it in practice.  However, this section has hopefully shown you three things:
+Note that using cross-validation properly is tricky, and it is recommended that you consult with an expert before using it in practice.  However, this section has hopefully shown you three things:
 
 - "Prediction" doesn't always mean what you think it means
 - Complex models can overfit data very badly, such that one can see seemingly good prediction even when there is no true signal to predict
 - You should view claims about prediction accuracy very skeptically unless they have been done using the appropriate methods.
 
+## Learning objectives
+
+Having read this chapter, you should be able to:
+
+* Describe the concept of linear regression and apply it to a bivariate dataset
+* Describe the concept of the general linear model and provide examples of its application
+* Describe how cross-validation an allow us to estimate the predictive performance of a model on new data
+
 ## Suggested readings
 
-- [The Elements of Statistical Learning: Data Mining, Inference, and Prediction (2nd Edition)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) - The bible of machine learning methods, available freely online.
+- [The Elements of Statistical Learning: Data Mining, Inference, and Prediction (2nd Edition)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) - The "bible" of machine learning methods, available freely online.
 
 ## Appendix
 
@@ -672,6 +651,18 @@ We generally estimate the parameters of a linear model from data using *linear a
 First, let's introduce the idea of vectors and matrices; you've already encountered them in the context of R, but we will review them here.  A matrix is a set of numbers that are arranged in a square or rectangle, such that there are one or more *dimensions* across which the matrix varies.  It is customary to place different observation units (such as people) in the rows, and different variables in the columns. Let's take our study time data from above. We could arrange these numbers in a matrix, which would have eight rows (one for each student) and two columns (one for study time, and one for grade).  If you are thinking "that sounds like a data frame in R" you are exactly right!  In fact, a data frame is a specialized version of a matrix, and we can convert a data frame to a matrix using the `as.matrix()` function.
 
 ```{r}
+df <-
+  tibble(
+    studyTime = c(2, 3, 5, 6, 6, 8, 10, 12) / 3,
+    priorClass = c(0, 1, 1, 0, 1, 0, 1, 0)
+  ) %>%
+  mutate(
+    grade = 
+      studyTime * betas[1] + 
+      priorClass * betas[2] + 
+      round(rnorm(8, mean = 70, sd = 5))
+  )
+
 df_matrix <- 
   df %>%
   dplyr::select(studyTime, grade) %>%
