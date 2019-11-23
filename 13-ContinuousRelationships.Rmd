@@ -17,9 +17,10 @@ library(ggplot2)
 library(fivethirtyeight)
 library(BayesMed)
 library(cowplot)
-library(pander)
-panderOptions('round',2)
-panderOptions('digits',7)
+library(knitr)
+library(DiagrammeR)
+library(htmltools)
+library(webshot)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -40,11 +41,287 @@ NHANES_adult <-
 
 ## An example: Hate crimes and income inequality
 
-In 2017, the web site Fivethirtyeight.com published a story titled [Higher Rates Of Hate Crimes Are Tied To Income Inequality](https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/) which discussed the relationship between the prevalence of hate crimes and income inequality in the wake of the 2016 Presidential election. The story reported an analysis of hate crime data from the FBI and the Southern Poverty Law Center, on the basis of which they report:
+In 2017, the web site Fivethirtyeight.com published a story titled [*Higher Rates Of Hate Crimes Are Tied To Income Inequality*](https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/) which discussed the relationship between the prevalence of hate crimes and income inequality in the wake of the 2016 Presidential election. The story reported an analysis of hate crime data from the FBI and the Southern Poverty Law Center, on the basis of which they report:
 
 > "we found that income inequality was the most significant determinant of population-adjusted hate crimes and hate incidents across the United States".  
 
-The data for this analysis are included in the ``fivethirtyeight`` R package, which makes it easy for us to access them.  The analysis reported in the story focused on the relationship between income inequality (defined by a quantity called the *Gini index*) and the prevalence of hate crimes in each state.  
+The data for this analysis are included in the ``fivethirtyeight`` R package, which makes it easy for us to access them.  The analysis reported in the story focused on the relationship between income inequality (defined by a quantity called the *Gini index* --- see Appendix for more details) and the prevalence of hate crimes in each state.  
+
+## Is income inequality related to hate crimes?
+
+
+```{r hateCrimeGini, fig.cap="Plot of rates of hate crimes vs. Gini index.",out.width='75%', echo=FALSE, fig.height=4, fig.width=4}
+
+hateCrimes <- 
+  hate_crimes %>%
+  mutate(state_abb = state.abb[match(state,state.name)]) %>%
+  drop_na(avg_hatecrimes_per_100k_fbi)
+
+hateCrimes$state_abb[hateCrimes$state=="District of Columbia"]='DC'
+
+ggplot(hateCrimes,aes(gini_index,avg_hatecrimes_per_100k_fbi,label=state_abb)) +
+  geom_point() + 
+  geom_text(aes(label=state_abb),hjust=0, vjust=0) +
+  theme(plot.title = element_text(size = 20, face = "bold")) +
+  xlab('Gini index') + 
+  ylab('Avg hate crimes per 100K population (FBI)') +
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) 
+  
+```
+
+The relationship between income inequality and rates of hate crimes is shown in Figure \@ref(fig:hateCrimeGini).
+Looking at the data, it seems that there may be a positive relationship between the two variables.  How can we quantify that relationship?
+
+## Covariance and correlation
+
+One way to quantify the relationship between two variables is the *covariance*.  Remember that variance for a single variable is computed as the average squared difference between each data point and the mean:
+
+$$
+s^2 = \frac{\sum_{i=1}^n (x_i - \bar{x})^2}{N - 1}
+$$
+
+This tells us how far each observation is from the mean, on average, in squared units.  Covariance tells us whether there is a relation between the deviations of two different variables across observations.  It is defined as:
+
+$$
+covariance = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{N - 1}
+$$
+
+This value will be far from zero when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.  The data are shown in the table, along with their individual deviations from the mean and their crossproducts.
+
+```{r echo=FALSE}
+# create data for toy example of covariance
+df <-
+  tibble(x = c(3, 5, 8, 10, 12)) %>%
+  mutate(y = x + round(rnorm(n = 5, mean = 0, sd = 2))) %>%
+  mutate(
+    y_dev = y - mean(y),
+    x_dev = x - mean(x)
+  ) %>%
+  mutate(crossproduct = y_dev * x_dev)
+
+covXY <- sum(df$crossproduct) / (nrow(df) - 1)
+corXY <- sum(df$crossproduct) / ((nrow(df) - 1) * sd(df$x) * sd(df$y))
+
+kable(df, caption='Data for toy example of covariance')
+```
+
+The covariance is simply the mean of the crossproducts, which in this case is `r I(covXY)`. We don't usually use the covariance to describe relationships between variables, because it varies with the overall level of variance in the data.  Instead, we would usually use the *correlation coefficient* (often referred to as *Pearson's correlation* after the statistician Karl Pearson). The correlation is computed by scaling the covariance by the standard deviations of the two variables:
+
+$$
+r = \frac{covariance}{s_xs_y} = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{(N - 1)s_x s_y}
+$$
+In this case, the value is`r I(corXY)`. We can also compute the correlation value easily using the `cor()` function in R, rather than computing it by hand.
+
+The correlation coefficient is useful because it varies between -1 and 1 regardless of the nature of the data - in fact, we already discussed the correlation coefficient earlier in the discussion of effect sizes.  As we saw in the previous chapter on effect sizes, a correlation of 1 indicates a perfect linear relationship, a correlation of -1 indicates a perfect negative relationship, and a correlation of zero indicates no linear relationship.
+
+
+```{r echo=FALSE}
+corGiniHC <-
+  cor(
+    hateCrimes$gini_index,
+    hateCrimes$avg_hatecrimes_per_100k_fbi
+  )
+```
+
+### Hypothesis testing for correlations
+
+The correlation value of `r I(corGiniHC)` seems to indicate a reasonably strong relationship between the hate crimes and income inequality, but we can also imagine that this could occur by chance even if there is no relationship.  We can test the null hypothesis that the correlation is zero, using a simple equation that lets us convert a correlation value into a *t* statistic:
+
+$$
+\textit{t}_r =  \frac{r\sqrt{N-2}}{\sqrt{1-r^2}}
+$$
+
+Under the null hypothesis $H_0:r=0$, this statistic is distributed as a t distribution with $N - 2$ degrees of freedom.  We can compute this using the ``cor.test()`` function in R:
+
+```{r echo=FALSE}
+# perform correlation test on hate crime data
+cor.test(
+  hateCrimes$avg_hatecrimes_per_100k_fbi,
+  hateCrimes$gini_index
+)
+```
+
+This test shows that the likelihood of an r value this extreme or more is quite low, so we would reject the null hypothesis of $r=0$.  Note that this test assumes that both variables are normally distributed.
+
+We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis. The results are shown in Figure \@ref(fig:shuffleCorr).  The p-value computed using randomization is reasonably similar to the answer give by the t-test.
+
+```{r echo=FALSE}
+# compute null distribution by shuffling order of variable values
+
+# create a function to compute the correlation on the shuffled values 
+shuffleCorr <- function(x, y) {
+  xShuffled <- sample(x)
+  return(cor(xShuffled, y))
+}
+
+# run this function 2500 times 
+shuffleDist <- 
+  replicate(
+    2500, 
+    shuffleCorr(hateCrimes$avg_hatecrimes_per_100k_fbi, hateCrimes$gini_index)
+  )
+```
+
+```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line.",fig.width=4,fig.height=4,out.height='50%'}
+
+ggplot(data.frame(shuffleDist),aes(shuffleDist)) + 
+  geom_histogram(bins=100) +
+  geom_vline(xintercept = corGiniHC,color='blue') +
+  ggtitle(sprintf('p(shuffled r >= observed) = %0.3f',mean(shuffleDist>=corGiniHC))) +
+  theme(plot.title = element_text(size = 16, face = "bold")) +
+  theme(plot.margin = unit(c(0,1,0,0), "cm")) +
+  labs(
+  x = "Correlation coeffcients of shuffled variables"
+  )
+
+```
+
+We could also use Bayesian inference to estimate the correlation; see the Appendix for more on this.
+
+### Robust correlations
+
+You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints (the one for the District of Columbia) seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
+
+```{r outlierCorr, echo=FALSE,fig.cap="An simulated example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive.",fig.width=4,fig.height=4,out.height='50%'}
+n <- 10
+set.seed(1234)
+
+dfOutlier <-
+  data.frame(x = rnorm(n)) %>%
+  mutate(y = x * -1)
+
+dfOutlier$x[1] <- 10
+dfOutlier$y[1] <- 10
+cc <- cor(dfOutlier$x, dfOutlier$y)
+ccSpearman <- cor(dfOutlier$x, dfOutlier$y, method = "spearman")
+
+p <- ggplot(dfOutlier, aes(x, y)) +
+  geom_point() +
+  ggtitle(sprintf("r = %0.2f (without outlier: r = %.2f)", cc, cor(dfOutlier$x[2:n], dfOutlier$y[2:n]))) +
+  theme(plot.title = element_text(size = 16, face = "bold")) +
+  theme(plot.margin = unit(c(0, 1, 0, 0), "cm")) +
+  labs(
+    x = "variable x",
+    y = "variable y"
+  )
+print(p)
+
+
+```
+
+One way to address outliers is to compute the correlation on the ranks of the data after ordering them, rather than on the data themselves; this is known as the *Spearman correlation*.  Whereas the Pearson correlation for the example in Figure \@ref(fig:outlierCorr) was `r I(cc)`, the Spearman correlation is `r I(ccSpearman)`, showing that the rank correlation reduces the effect of the outlier.
+
+We can compute the rank correlation on the hate crime data using the `cor.test` function:
+
+```{r}
+corTestSpearman <- cor.test( hateCrimes$avg_hatecrimes_per_100k_fbi,
+  hateCrimes$gini_index,
+  method = "spearman")
+corTestSpearman
+```
+
+Now we see that the correlation is no longer significant (and in fact is very near zero), suggesting that the claims of the FiveThirtyEight blog post may have been incorrect due to the effect of the outlier.
+
+
+## Correlation and causation
+
+When we say that one thing *causes* another, what do we mean?  There is a long history in philosophy of discussion about the meaning of causality, but in statistics one way that we commonly think of causation is in terms of experimental control.  That is, if we think that factor X causes factor Y, then manipulating the value of X should also change the value of Y.
+
+In medicine, there is a set of ideas known as [*Koch's postulates*](https://en.wikipedia.org/wiki/Koch%27s_postulates) which have historically been used to determine whether a particular organism causes a disease.   The basic idea is that the organism should be present in people with the disease, and not present in those without it -- thus, a treatment that eliminates the organism should also eliminate the disease.  Further, infecting someone with the organism should cause them to contract the disease.  An example of this was seen in the work of Dr. Barry Marshall, who had a hypothesis that stomach ulcers were caused by a bacterium (*Helicobacter pylori*).  To demonstrate this, he infected himself with the bacterium, and soon thereafter developed severe inflammation in his stomach.  He then treated himself with an antibiotic, and his stomach soon recovered.  He later won the Nobel Prize in Medicine for this work.
+
+Often we would like to test causal hypotheses but we can't actually do an experiment, either because it's impossible ("What is the relationship between human carbon emissions and the earth's climate?") or unethical ("What are the effects of severe abuse on child brain development?"). However, we can still collect data that might be relevant to those questions.  For example, in the latter example, we can potentially collect data from children who have been abused as well as those who have not, and we can then ask whether their brain development differs.
+
+Let's say that we did such an analysis, and we found that abused children had poorer brain development than non-abused children. Would this demonstrate that abuse *causes* poorer brain development?  No.  Whenever we observe a statistical association between two variables, it is certainly possible that one of those two variables causes the other.  However, it is also possible that both of the variables are being influenced by a third variable; in this example, it could be that child abuse is associated with family stress, which could also cause poorer brain development through less intellectual engagement, food stress, or many other possible avenues.  The point is that a correlation between two variables generally tells us that something is *probably* causing somethign else, but it doesn't tell us what is causing what.
+
+### Causal graphs
+
+One useful way to describe causal relations between variables is through a *causal graph*, which shows variables as circles and causal relations between them as arrows.  For example, Figure \@ref(fig:simpleCausalGraph) shows the causal relationships between study time and two variables that we think should be affected by it: exam grades and exam finishing times.  
+
+```{r simpleCausalGraph, echo=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam).",fig.width=6,fig.height=6,out.height='50%'}
+
+graph = "
+digraph boxes_and_circles {
+
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 6]
+
+  # several 'node' statements
+ 
+  node [shape = circle,
+        fixedsize = true,
+        width = 0.9,
+        fontsize=6] // sets as circles
+  StudyTime; ExamGrade; FinishTime
+
+  # several 'edge' statements
+  StudyTime->ExamGrade [color=green]
+  StudyTime->FinishTime [color=red]
+}
+"
+
+html_print(add_mathjax(grViz(graph))) %>%
+  webshot(file = 'images/dag_example.png', delay = 10,
+          selector = '.html-widget-static-bound')
+
+latent_graph = "
+digraph boxes_and_circles {
+
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 6]
+
+  # several 'node' statements
+ 
+  node [shape = circle,
+        fixedsize = true,
+        width = 0.9,
+        fontsize=6] // sets as circles
+  StudyTime; ExamGrade; FinishTime; Knowledge
+
+  # several 'edge' statements
+  StudyTime->Knowledge [color=green]
+  Knowledge->ExamGrade [color=green]
+  Knowledge->FinishTime [color=red]
+}
+"
+html_print(add_mathjax(grViz(latent_graph))) %>%
+  webshot(file = 'images/dag_latent_example.png', delay = 10,
+          selector = '.html-widget-static-bound')
+
+```
+
+However, in reality the effects on finishing time and grades are not due directly to the amount of time spent studying, but rather to the amount of knowledge that the student gains by studying.  We would usually say that knowledge is a *latent* variable -- that is, we can't measure it directly but we can see it reflected in variables that we can measure (like grades and finishing times).  Figure \@ref(fig:latentCausalGraph) shows this.
+
+```{r simpleCausalGraph, echo=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam).",fig.width=6,out.height='50%'}
+
+knitr::include_graphics("images/dag_example.png")
+
+```
+
+```{r latentCausalGraph, echo=FALSE,fig.cap="A graph showing the same causal relationships as above, but now also showing the latent variable (knowledge) using a square box.",fig.width=6,out.height='50%'}
+
+knitr::include_graphics("images/dag_latent_example.png")
+
+```
+
+Here we would say that knowledge *mediates* the relationship between study time and grades/finishing times.  That means that if we were able to hold knowledge constant (for example, by administering a drug that causes immediate forgetting), then the amount of study time should no longer have an effect on grades and finishing times.
+
+Note that if we simply measured exam grades and finishing times we would generally see negative relationship between them, because people who finish exams the fastest in general get the highest grades.  However, if we were to interpret this correlation as a causal relation, this would tell us that in order to get better grades, we should actually finish the exam more quickly! This example shows how tricky the inference of causality from non-experimental data can be.
+
+Within statistics and machine learning, there is a very active research community that is currently studying the question of when and how we can infer causal relationships from non-experimental data.  However, these methods often require strong assumptions, and must generally be used with great caution.
+
+## Learning objectives
+
+After reading this chapter, you should be able to:
+
+* Describe the concept of the correlation coefficient and its interpretation
+* Compute the correlation between two continuous variables
+* Describe the potential causal influences that can give rise to a correlation.
+
+## Suggested readings
+
+- [The Book of Why](http://bayes.cs.ucla.edu/WHY/) by Judea Pearl - an excellent introduction to the ideas behind causal inference.
+
+## Appendix:
 
 ### Quantifying inequality: The Gini index
 
@@ -119,208 +396,13 @@ plot_grid(p1,p2,p3,ncol=2)
 ```
 Figure \@ref(fig:gini0) shows the Lorenz curves for several different income distributions.  The top left panel (A) shows an example with 10 people where everyone has exactly the same income. The length of the intervals between points are equal, indicating each person earns an identical share of the total income in the population.  The top right panel (B) shows an example where income is normally distributed. The bottom left panel shows an example with high inequality; everyone has equal income (\$40,000) except for one person, who has income of \$40,000,000. According to the US Census, the United States had a Gini index of 0.469 in 2010, falling roughly half way between our normally distributed and maximally inequal examples.
 
-## Is income inequality related to hate crimes?
-
-Now that we understand the Gini index, we can look at the relationship between income inequality and rates of hate crimes (see Figure \@ref(fig:hateCrimeGini)).
-
-```{r hateCrimeGini, fig.cap="Plot of rates of hate crimes vs. Gini index.",out.height='75%'}
-
-hateCrimes <- 
-  hate_crimes %>%
-  mutate(state_abb = state.abb[match(state,state.name)]) %>%
-  drop_na(avg_hatecrimes_per_100k_fbi)
-
-hateCrimes$state_abb[hateCrimes$state=="District of Columbia"]='DC'
-
-ggplot(hateCrimes,aes(gini_index,avg_hatecrimes_per_100k_fbi,label=state_abb)) +
-  geom_point() + 
-  geom_text(aes(label=state_abb),hjust=0, vjust=0) +
-  theme(plot.title = element_text(size = 20, face = "bold")) +
-  xlab('Gini index') + 
-  ylab('Avg hate crimes per 100K population (FBI)') +
-  theme(plot.margin = unit(c(1,1,1,1), "cm"))
-  
-```
-
-Looking at the data, it seems that there may be a positive relationship between the two variables.  How can we quantify that relationship?
-
-## Covariance and correlation
-
-One way to quantify the relationship between two variables is the *covariance*.  Remember that variance for a single variable is computed as:
-
-$$
-s^2 = \frac{\sum_{i=1}^n (x_i - \bar{x})^2}{N - 1}
-$$
-
-This tells us how far each observation is from the mean.  Covariance tells us whether there is a relation between the deviations of two different variables across observations.  It is defined as:
-
-$$
-covariance = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{N - 1}
-$$
-
-This value will be far from zero when x and y are both highly deviant from the mean; if they are deviant in the same direction then the covariance is positive, whereas if they are deviant in opposite directions the covariance is negative.  Let's look at a toy example first.
-
-```{r }
-# create data for toy example of covariance
-df <-
-  tibble(x = c(3, 5, 8, 10, 12)) %>%
-  mutate(y = x + round(rnorm(n = 5, mean = 0, sd = 2))) %>%
-  mutate(
-    y_dev = y - mean(y),
-    x_dev = x - mean(x)
-  ) %>%
-  mutate(crossproduct = y_dev * x_dev)
-
-pander(df)
-```
-
-```{r}
-# compute covariance
-
-sprintf("sum of cross products = %.2f", sum(df$crossproduct))
-covXY <- sum(df$crossproduct) / (nrow(df) - 1)
-sprintf("covariance: %.2f", covXY)
-
-```
-
-We don't usually use the covariance to describe relationships between variables, because it varies with the overall level of variance in the data.  Instead, we would usually use the *correlation coefficient* (often referred to as *Pearson's correlation* after the statistician Karl Pearson). The correlation is computed by scaling the covariance by the standard deviations of the two variables:
-
-$$
-r = \frac{covariance}{s_xs_y} = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{(N - 1)s_x s_y}
-$$
-
-```{r}
-# compute the correlation coefficient
-
-corXY <- sum(df$crossproduct) / ((nrow(df) - 1) * sd(df$x) * sd(df$y))
-sprintf("correlation coefficient = %.2f", corXY)
-```
-
-We can also compute the correlation value easily using the `cor()` function in R:
-
-```{r}
-# compute r using built-in function
-
-c <- cor(df$x, df$y)
-sprintf("correlation coefficient = %.2f", c)
-```
-
-The correlation coefficient is useful because it varies between -1 and 1 regardless of the nature of the data - in fact, we already discussed the correlation coefficient earlier in the discussion of effect sizes.  As we saw in the previous chapter on effect sizes, a correlation of 1 indicates a perfect linear relationship, a correlation of -1 indicates a perfect negative relationship, and a correlation of zero indicates no linear relationship.
-
-We can compute the correlation coefficient for the hate crime data:
-
-```{r}
-corGiniHC <-
-  cor(
-    hateCrimes$gini_index,
-    hateCrimes$avg_hatecrimes_per_100k_fbi
-  )
-sprintf('correlation coefficient = %.2f',corGiniHC)
-```
-
-### Hypothesis testing for correlations
-
-A correlation value of `r I(corGiniHC)` seems to indicate a reasonably strong relationship between the two variables, but we can also imagine that this could occur by chance even if there is no relationship.  We can test the null hypothesis that the correlation is zero, using a simple equation that lets us convert a correlation value into a *t* statistic:
-
-$$
-\textit{t}_r =  \frac{r\sqrt{N-2}}{\sqrt{1-r^2}}
-$$
-
-Under the null hypothesis $H_0:r=0$, this statistic is distributed as a t distribution with $N - 2$ degrees of freedom.  We can compute this using the ``cor.test()`` function in R:
-
-```{r}
-# perform correlation test on hate crime data
-cor.test(
-  hateCrimes$avg_hatecrimes_per_100k_fbi,
-  hateCrimes$gini_index
-)
-```
-
-This test shows that the likelihood of an r value this extreme or more is quite low, so we would reject the null hypothesis of $r=0$.  Note that this test assumes that both variables are normally distributed.
-
-We could also test this by randomization, in which we repeatedly shuffle the values of one of the variables and compute the correlation, and then compare our observed correlation value to this null distribution to determine how likely our observed value would be under the null hypothesis. The results are shown in Figure \@ref(fig:shuffleCorr).  The p-value computed using randomization is reasonably similar to the answer give by the t-test.
-
-```{r}
-# compute null distribution by shuffling order of variable values
-
-# create a function to compute the correlation on the shuffled values 
-shuffleCorr <- function(x, y) {
-  xShuffled <- sample(x)
-  return(cor(xShuffled, y))
-}
-
-# run this function 2500 times 
-shuffleDist <- 
-  replicate(
-    2500, 
-    shuffleCorr(hateCrimes$avg_hatecrimes_per_100k_fbi, hateCrimes$gini_index)
-  )
-```
-
-```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line.",fig.width=4,fig.height=4,out.height='50%'}
-
-ggplot(data.frame(shuffleDist),aes(shuffleDist)) + 
-  geom_histogram(bins=100) +
-  geom_vline(xintercept = corGiniHC,color='blue') +
-  ggtitle(sprintf('p(shuffled r >= observed) = %0.3f',mean(shuffleDist>=corGiniHC))) +
-  theme(plot.title = element_text(size = 16, face = "bold")) +
-  theme(plot.margin = unit(c(0,1,0,0), "cm")) +
-  labs(
-  x = "Correlation coeffcients of shuffled variables"
-  )
-
-```
-
-### Robust correlations
-
-You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints (the one for the District of Columbia) seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
-
-```{r outlierCorr, echo=FALSE,fig.cap="An simulated example of the effects of outliers on correlation.  Without the outlier the remainder of the datapoints have a perfect negative correlation, but the single outlier changes the correlation value to highly positive.",fig.width=4,fig.height=4,out.height='50%'}
-n <- 10
-set.seed(1234)
-
-dfOutlier <-
-  data.frame(x = rnorm(n)) %>%
-  mutate(y = x * -1)
-
-dfOutlier$x[1] <- 10
-dfOutlier$y[1] <- 10
-cc <- cor(dfOutlier$x, dfOutlier$y)
-ccSpearman <- cor(dfOutlier$x, dfOutlier$y, method = "spearman")
-
-p <- ggplot(dfOutlier, aes(x, y)) +
-  geom_point() +
-  ggtitle(sprintf("r = %0.2f (without outlier: r = %.2f)", cc, cor(dfOutlier$x[2:n], dfOutlier$y[2:n]))) +
-  theme(plot.title = element_text(size = 16, face = "bold")) +
-  theme(plot.margin = unit(c(0, 1, 0, 0), "cm")) +
-  labs(
-    x = "variable x",
-    y = "variable y"
-  )
-print(p)
-
-
-```
-
-One way to address outliers is to compute the correlation on the ranks of the data after ordering them, rather than on the data themselves; this is known as *Spearman's correlation*.  Whereas the Pearson correlation for the example in Figure \@ref(fig:outlierCorr) was `r I(cc)`, the Spearman correlation is `r I(ccSpearman)`, showing that the rank correlation reduces the effect of the outlier.
-
-We can compute the rank correlation on the hate crime data using the `cor.test` function:
-
-```{r}
-corTestSpearman <- cor.test( hateCrimes$avg_hatecrimes_per_100k_fbi,
-  hateCrimes$gini_index,
-  method = "spearman")
-corTestSpearman
-```
-
-Now we see that the correlation is no longer significant (and in fact is very near zero), suggesting that the claims of the FiveThirtyEight blog post may have been incorrect due to the effect of the outlier.
 
 ### Bayesian correlation analysis
 
 We can also analyze the FiveThirtyEight data using Bayesian analysis, which has two advantages.  First, it provides us with a posterior probability -- in this case, the probability that the correlation value exceeds zero.  Second, the Bayesian estimate combines the observed evidence with a *prior*, which has the effect of *regularizing* the correlation estimate, effectively pulling it towards zero.  Here we can compute it using the `jzs_cor` function from the BayesMed package.
 
 
-```{r}
+```{r echo=FALSE}
 bayesCor <- jzs_cor(
   hateCrimes$avg_hatecrimes_per_100k_fbi,
   hateCrimes$gini_index
@@ -330,79 +412,3 @@ bayesCor
 ```
 
 Notice that the correlation estimated using the Bayesian method is slightly smaller than the one estimated using the standard correlation coefficient, which is due to the fact that the estimate is based on a combination of the evidence and the prior, which effectively shrinks the estimate toward zero. However, notice that the Bayesian analysis is not robust to the outlier, and it still says that there is fairly strong evidence that the correlation is greater than zero.
-
-## Correlation and causation
-
-When we say that one thing *causes* another, what do we mean?  There is a long history in philosophy of discussion about the meaning of causality, but in statistics one way that we commonly think of causation is in terms of experimental control.  That is, if we think that factor X causes factor Y, then manipulating the value of X should also manipulate the value of Y.
-
-In medicine, there is a set of ideas known as [*Koch's postulates*](https://en.wikipedia.org/wiki/Koch%27s_postulates) which have historically been used to determine whether a particular organism causes a disease.   The basic idea is that the organism should be present in people with the disease, and not present in those without it -- thus, a treatment that eliminates the organism should also eliminate the disease.  Further, infecting someone with the organism should cause them to contract the disease.  An example of this was seen in the work of Dr. Barry Marshall, who had a hypothesis that stomach ulcers were caused by a bacterium (*Helicobacter pylori*).  To demonstrate this, he infected himself with the bacterium, and soon thereafter developed severe inflammation in his stomach.  He then treated himself with an antibiotic, and his stomach soon recovered.  He later won the Nobel Prize in Medicine for this work.
-
-Often we would like to test causal hypotheses but we can't actually do an experiment, either because it's impossible ("What is the relationship between human carbon emissions and the earth's climate?") or unethical ("What are the effects of severe abuse on child brain development?"). However, we can still collect data that might be relevant to those questions.  For example, in the latter example, we can potentially collect data from children who have been abused as well as those who have not, and we can then ask whether their brain development differs.
-
-Let's say that we did such an analysis, and we found that abused children had poorer brain development than non-abused children. Would this demonstrate that abuse *causes* poorer brain development?  No.  Whenever we observe a statistical association between two variables, it is certainly possible that one of those two variables causes the other.  However, it is also possible that both of the variables are being influenced by a third variable; in this example, it could be that child abuse is associated with family stress, which could also cause poorer brain development through less intellectual engagement, food stress, or many other possible avenues.  The point is that a correlation between two variables generally tells us that something is causing somethign else, but it doesn't tell us what is causing what.  As the statistician Edward Tufte says, "Correlation does not imply causation, but it's a pretty good hint."
-
-### Causal graphs
-
-One useful way to describe causal relations between variables is through a *causal graph*, which shows variables as circles and causal relations between them as arrows.  For example, Figure \@ref(fig:simpleCausalGraph) shows the causal relationships between study time and two variables that we think should be affected by it: exam grades and exam finishing times.  
-
-```{r simpleCausalGraph, echo=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam).",fig.width=6,fig.height=6,out.height='50%'}
-
-library(DiagrammeR)
-grViz("
-digraph boxes_and_circles {
-
-  # a 'graph' statement
-  graph [overlap = true, fontsize = 6]
-
-  # several 'node' statements
- 
-  node [shape = circle,
-        fixedsize = true,
-        width = 0.9,
-        fontsize=6] // sets as circles
-  StudyTime; ExamGrade; FinishTime
-
-  # several 'edge' statements
-  StudyTime->ExamGrade [color=green]
-  StudyTime->FinishTime [color=red]
-}
-")
-```
-
-However, in reality the effects on finishing time and grades are not due directly to the amount of time spent studying, but rather to the amount of knowledge that the student gains by studying.  We would usually say that knowledge is a *latent* variable -- that is, we can't measure it directly but we can see it reflected in variables that we can measure (like grades and finishing times).  Figure \@ref(fig:latentCausalGraph) shows this.
-
-```{r latentCausalGraph, echo=FALSE,fig.cap="A graph showing the same causal relationships as above, but now also showing the latent variable (knowledge) using a square box.",fig.width=6,fig.height=6,out.height='50%'}
-
-library(DiagrammeR)
-grViz("
-digraph boxes_and_circles {
-
-  # a 'graph' statement
-  graph [overlap = true, fontsize = 6]
-
-  # several 'node' statements
- 
-  node [shape = circle,
-        fixedsize = true,
-        width = 0.9,
-        fontsize=6] // sets as circles
-  StudyTime; ExamGrade; FinishTime; Knowledge
-
-  # several 'edge' statements
-  StudyTime->Knowledge [color=green]
-  Knowledge->ExamGrade [color=green]
-  Knowledge->FinishTime [color=red]
-}
-")
-```
-
-Here we would say that knowledge *mediates* the relationship between study time and grades/finishing times.  That means that if we were able to hold knowledge constant (for example, by administering a drug that causes immediate forgetting), then the amount of study time should no longer have an effect on grades and finishing times.
-
-Note that if we simply measured exam grades and finishing times we would generally see negative relationship between them, because people who finish exams the fastest in general get the highest grades.  However, if we were to interpret this correlation as a causal relation, this would tell us that in order to get better grades, we should actually finish the exam more quickly! This example shows how tricky the inference of causality from non-experimental data can be.
-
-Within statistics and machine learning, there is a very active research community that is currently studying the question of when and how we can infer causal relationships from non-experimental data.  However, these methods often require strong assumptions, and must generally be used with great caution.
-
-## Suggested readings
-
-- [The Book of Why](http://bayes.cs.ucla.edu/WHY/) by Judea Pearl - an excellent introduction to the ideas behind causal inference.
-
