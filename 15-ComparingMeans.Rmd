@@ -12,16 +12,15 @@ output:
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(tidyr)
 library(fivethirtyeight)
 library(BayesMed)
 library(BayesFactor)
 library(lme4)
 library(lmerTest)
 library(cowplot)
-
-library(pander)
-panderOptions('round',2)
-panderOptions('digits',7)
+library(psych)
+library(knitr)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -35,14 +34,69 @@ NHANES <-
 
 NHANES_adult <- 
   NHANES %>%
-  subset(Age>=18)
+  subset(Age>=18) %>%
+  drop_na(BMI)
 
 
 ```
 
-One of the most common questions that we want to ask in statistics is whether there is a difference between the means of two different groups.  Let's say that we would like to know whether regular marijuana smokers watch more television.  We can ask this question using the NHANES dataset; let's take a sample of 200 individuals from the dataset and test whether the number of hours of television watching per day is related to regular marijuana use.  Figure \@ref(fig:PotTVViolin) shows these data using a violin plot.
+We have already encountered a number of cases where we wanted to ask questions about the mean of a sample.  In this chapter, we will delve deeper into the various ways that we can compare means.
 
-```{r}
+
+## Testing the value of a single mean
+
+The simplest question we might want to ask of a mean is whether it has a specific value.  Let's say that we want to test whether the mean BMI value in adults from the NHANES dataset is above 25, which is the lower cutoff for being overweight according to the US Centers for Disease Control.  We take a sample of 200 adults in order to ask this question.
+
+```{r echo=FALSE}
+NHANES_sample <-
+  NHANES_adult %>%
+  drop_na(BMI) %>%
+  mutate(BMIdiff = BMI > 25) %>%
+  sample_n(200)
+
+```
+
+
+One simple way to test for this difference is using a test called the *sign test*, which asks whether the proportion of positive differences between the actual value and the hypothesized value is different than what we would expect by chance.  To do this, we take the differences between each data point and the hypothesized mean value and compute their sign.  In our sample, we see that `r I(sprintf('%0.1f',mean(NHANES_sample$BMIdiff)*100))` percent of individuals have a BMI greater than 25.  We can then use a binomial test to ask whether this proportion of positive differences is greater than 0.5.
+
+```{r echo=FALSE}
+# compute sign test for differences between first and second measurement
+npos <- sum(NHANES_sample$BMIdiff)
+bt <- binom.test(npos, nrow(NHANES_sample), alternative='greater')
+bt
+```
+
+Here we see that the proportion of individuals with positive signs would be *very* surprising under the null hypothesis of $p=0.5$. 
+
+We can also ask this question using Student's t-test, which you have already encountered earlier in the book.  We will refer to the mean as $\bar{X}$ and the hypothesized population mean as $\mu$.  Then, the t test for a single mean is:
+
+$$
+t = \frac{\bar{X} - \mu}{SEM}
+$$
+where SEM (as you may remember from the chapter on sampling) is defined as:
+
+$$
+SEM = \frac{\hat{\sigma}}{\sqrt{n}}
+$$
+
+In essence, the t statistic asks how large the deviation of the sample mean from the hypothesized quantity is with respect to the sampling variability of the mean.
+
+We can compute this for the NHANES dataset using the ```t.test()``` function in R:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+tt = t.test(x=NHANES_adult$BMI, mu=25)
+tt
+```
+
+This shows us that the mean BMI in the dataset (`r I(tt$estimate)`) is significantly larger than the cutoff for overweight.
+
+## Comparing two means
+
+A more common question that often arises in statistics is whether there is a difference between the means of two different groups.  Let's say that we would like to know whether regular marijuana smokers watch more television.  We can ask this question using the NHANES dataset; let's take a sample of 200 individuals from the dataset and test whether the number of hours of television watching per day is related to regular marijuana use.  The left panel of Figure \@ref(fig:PotTVViolin) shows these data using a violin plot.
+
+```{r PotTVViolin,echo=FALSE,fig.cap='Left: Violin plot showing distributions of TV watching separated by regular marijuana use. Right: Violin plots showing data for each group, with a dotted line connecting the predicted values for each group, computed on the basis of the results of the linear model.. ',fig.width=8,fig.height=4,out.height='50%'}
+
 # create sample with tv watching and marijuana use
 NHANES_sample <-
   NHANES_adult %>%
@@ -60,20 +114,38 @@ NHANES_sample <-
     )
   ) %>%
   sample_n(200)
-```
 
-```{r PotTVViolin,echo=FALSE,fig.cap='Violin plot showing distributions of TV watching separated by regular marijuana use.',fig.width=4,fig.height=4,out.height='50%'}
-ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
+p1 <- ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
   geom_violin(draw_quantiles=.50) +
   labs(
     x = "Regular marijuana user",
     y = "TV hours per day"
   )
+
+lm_summary <- summary(lm(TVHrsNum ~ RegularMarij, data = NHANES_sample))
+
+ttresult <- t.test(
+  TVHrsNum ~ RegularMarij,
+  data = NHANES_sample,
+  var.equal = TRUE,
+  alternative = 'less'
+)
+
+p2 <- ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
+  geom_violin() +
+  annotate('segment',x=1,y=lm_summary$coefficients[1,1],
+           xend=2,
+           yend=lm_summary$coefficients[1,1]+lm_summary$coefficients[2,1],
+           linetype='dotted') +
+  labs(
+    x = "Regular marijuana user",
+    y = "TV hours per day"
+  )
+
+plot_grid(p1, p2)
 ```
 
-## Student's T test
-
-We have already encountered Student's t statistic in the previous chapter on hypothesis testing.  This statistic provides us with a way to test for differences between two groups of independent observations; we will turn later in the chapter to cases where the observations are not independent.  As a reminder, the t-statistic for comparison of two independent groups is computed as:
+We can also use Student's t test to test for differences between two groups of independent observations (as we saw in an earlier chapter); we will turn later in the chapter to cases where the observations are not independent.  As a reminder, the t-statistic for comparison of two independent groups is computed as:
 
 $$
 t = \frac{\bar{X_1} - \bar{X_2}}{\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}}
@@ -81,15 +153,11 @@ $$
 
 where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the variances for each of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  Under the null hypothesis of no difference between means, this statistic is distributed according to a t distribution with n-2 degrees of freedom (since we have computed two parameter estimates, namely the means of the two groups).  We can compute the t-test in R using the ```t.test()``` function. In this case, we started with the specific hypothesis that smoking marijuana is associated with greater TV watching, so we will use a one-tailed test.  Since the t.test function orders the conditions alphabetically, the "No" group comes first, and thus we need to test the alternative hypothesis of whether the first group is less than the second ("Yes") group; for this reason, we specify 'less' as our alternative.
 
-```{r}
+```{r echo=FALSE,warning=FALSE}
 # compute t test for tv watching as function of marijuana use
-t.test(
-  TVHrsNum ~ RegularMarij,
-  data = NHANES_sample,
-  var.equal = TRUE,
-  alternative = 'less'
-)
+ttresult
 ```
+
 In this case we see that there is a statistically significant difference between groups, in the expected direction - regular pot smokers watch more TV.
 
 ## The t-test as a linear model
@@ -97,32 +165,18 @@ In this case we see that there is a statistically significant difference between
 The t-test is often presented as a specialized tool for comparing means, but it can also be viewed as an application of the general linear model.  In this case, the model would look like this:
 
 $$
-\hat{BP} = \hat{\beta_1}*Smoking + \hat{\beta_0}
+\hat{BP} = \hat{\beta_1}*Marijuana + \hat{\beta_0}
 $$
 However, smoking is a binary variable, so we treat it as a *dummy variable* like we discussed in the previous chapter, setting it to a value of 1 for smokers and zero for nonsmokers.  In that case, $\hat{\beta_1}$ is simply the difference in means between the two groups, and $\hat{\beta_0}$ is the mean for the group that was coded as zero.  We can fit this model using the ```lm()``` function, and see that it gives the same t statistic as the t-test above:
 
-```{r}
+```{r echo=FALSE, warning=FALSE}
 # print summary of linear regression to perform t-test
-s <- summary(lm(TVHrsNum ~ RegularMarij, data = NHANES_sample))
-s
+lm_summary
 ```
 
-We can also view the lm() results graphically (see Figure \@ref(fig:ttestFig)):
+We can also view the lm() results graphically (see the right panel of Figure \@ref(fig:PotTVViolin)).  In this case, the predicted value for nonsmokers is $\hat{\beta_0}$ (`r I(s$coefficients[1,1])`) and the predicted value for smokers is $\hat{\beta_0} +\hat{\beta_1}$ (`r I(s$coefficients[1,1] + s$coefficients[2,1])`).  
 
-```{r ttestFig,echo=FALSE,fig.cap="Violin plots showing data for each group, with a blue line connecting the predicted values for each group, computed on the basis of the results of the linear model.",fig.width=4,fig.height=4,out.height='50%'}
-ggplot(NHANES_sample,aes(RegularMarij,TVHrsNum)) +
-  geom_violin() +
-  annotate('segment',x=1,y=s$coefficients[1,1],xend=2,yend=s$coefficients[1,1]+s$coefficients[2,1],color='blue') +
-  labs(
-    x = "Regular marijuana user",
-    y = "TV hours per day"
-  )
-
-```
-
-In this case, the predicted value for nonsmokers is $\hat{\beta_0}$ (`r I(s$coefficients[1,1])`) and the predicted value for smokers is $\hat{\beta_0} +\hat{\beta_1}$ (`r I(s$coefficients[1,1] + s$coefficients[2,1])`).  
-
-To compute the standard errors for this analysis, we can use exactly the same equations that we used for linear regression -- since this really is just another example of linear regression.  In fact, if you compare the p-value from the t-test above with the p-value in the linear regression analysis for the marijuana use variable, you will see that the one from the linear regression analysis is exactly twice the one from the t-test, because the linear regression analysis is performing a two-tailed test.
+To compute the standard errors for this analysis, we can use exactly the same equations that we used for linear regression -- since this really is just another example of linear regression.  In fact, if you compare the p-value from the t-test above with the p-value in the linear regression analysis for the marijuana use variable, you will see that the one from the linear regression analysis is exactly twice the one from the t-test, because the linear regression analysis is performing a two-tailed test.  
 
 ### Effect sizes for comparing two means
 
@@ -137,9 +191,9 @@ We can also compute $R^2$ for this analysis, which tells us how much variance in
 
 ## Bayes factor for mean differences
 
-As we discussed in the chapter on Bayesian analysis, Bayes factors provide a way to better quantify evidence in favor or against the null hypothesis of no difference.  In this case, we want to specifically test against the null hypothesis that the difference is less than zero - because the difference is computed by the function between the first group ('No') and the second group ('Yes'). Thus, we specify a "null interval" going from zero to infinity, which means that the alternative is less than zero.
+As we discussed in the chapter on Bayesian analysis, Bayes factors provide a way to better quantify evidence in favor or against the null hypothesis of no difference.  In this case, we want to specifically test against the null hypothesis that the difference is greater than zero - because the difference is computed by the function between the first group ('No') and the second group ('Yes'). Thus, we specify a "null interval" going from zero to infinity, which means that the alternative is less than zero.
 
-```{r}
+```{r echo=FALSE}
 # compute bayes factor for group comparison
 bf <- ttestBF(
   formula = TVHrsNum ~ RegularMarij, 
@@ -148,13 +202,12 @@ bf <- ttestBF(
 )
 bf
 ```
-This shows us that the evidence against the null hypothesis is reasonably strong.
+This shows us that the evidence against the null hypothesis is moderately strong.
 
 ## Paired t-tests
 
-In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in mean blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)).
 
-```{r BPfig, echo=FALSE,fig.cap='Violin plot of systolic blood pressure on first and second recording, from NHANES.',fig.width=4,fig.height=4,out.height='50%'}
+```{r BPfig, echo=FALSE,fig.cap='Left: Violin plot of systolic blood pressure on first and second recording, from NHANES. Right: Same violin plot with lines connecting the two data points for each individual.',fig.width=8,fig.height=4,out.height='50%'}
 
 set.seed(12345678)
 
@@ -176,18 +229,19 @@ NHANES_sample <-
     meanBP=(BPSys1+BPSys2)/2
   )
 
-p <- ggplot(NHANES_sample_tidy,aes(timepoint,BPsys)) + 
+p1 <- ggplot(NHANES_sample_tidy,aes(timepoint,BPsys)) + 
   geom_violin() +
   scale_x_discrete(
     labels = c("Time 1", "Time 2"),
   ) 
-print(p)
+p2 <- p+geom_line(aes(group=ID))
 
+plot_grid(p1, p2)
 ```
 
-We see that there does not seem to be much of a difference in mean blood pressure between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that pairs of data points come from the the same individuals.   
+In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in mean blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)). We see that there does not seem to be much of a difference in mean blood pressure between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that pairs of data points come from the the same individuals.   
 
-```{r}
+```{r echo=FALSE}
 t.test(
   BPsys ~ timepoint,
   data = NHANES_sample_tidy,
@@ -198,16 +252,9 @@ t.test(
 
 This analysis shows no significant difference. However, this analysis is inappropriate since it assumes that the two samples are independent, when in fact they are not, since the data come from the same individuals.  We can plot the data with a line for each individual to show this (see Figure \@ref(fig:BPLinePlot)).
 
-```{r BPLinePlot,echo=FALSE,fig.cap='Violin plot of systolic BP on each recording, with lines connecting the two data points for each individual.',fig.width=4,fig.height=4,out.height='50%'}
-
-p <- p+geom_line(aes(group=ID))
-print(p)
-
-```
-
 In this analysis, what we really care about is whether the blood pressure for each person changed in a systematic way between the two measurements, so another way to represent the data is to compute the difference between the two timepoints for each individual, and then analyze these difference scores rather than analyzing the individual measurements. In Figure \@ref(fig:BPDiffHist), we show a histogram of these difference scores, with a blue line denoting the mean difference.
 
-```{r BPDiffHist,echo=FALSE,fig.cap="Histogram of difference scores between first and second BP measurement.",fig.width=4,fig.height=4,out.height='50%'}
+```{r BPDiffHist,echo=FALSE,fig.cap="Histogram of difference scores between first and second BP measurement. The vertical line represents the mean difference in the sample.",fig.width=4,fig.height=4,out.height='50%'}
 
 ggplot(NHANES_sample,aes(diff)) + 
   geom_histogram(bins=20) +
@@ -217,9 +264,9 @@ ggplot(NHANES_sample,aes(diff)) +
 
 ### Sign test
 
-One simple way to test for differences is using a test called the *sign test*, which asks whether the proportion of positive differences (ignoring their magnitude) is different than what we would expect by chance.  To do this, we take the differences and compute their sign, and then we use a binomial test to ask whether the proportion of positive signs differs from 0.5.
+One simple way to test for differences is using the *sign test*. To do this, we take the differences and compute their sign, and then we use a binomial test to ask whether the proportion of positive signs differs from 0.5.
 
-```{r}
+```{r echo=FALSE}
 # compute sign test for differences between first and second measurement
 npos <- sum(NHANES_sample$diffPos)
 bt <- binom.test(npos, nrow(NHANES_sample))
@@ -231,39 +278,28 @@ Here we see that the proportion of individuals with positive signs (`r I(bt$esti
 ### Paired t-test
 A more common strategy is to use a *paired t-test*, which is equivalent to a one-sample t-test for whether the mean difference between the measurements is zero.  We can compute this using the ```t.test()``` function in R and setting ```paired=TRUE```.  
 
-```{r}
+```{r echo=FALSE}
 # compute paired t-test
 t.test(BPsys ~ timepoint, data = NHANES_sample_tidy, paired = TRUE)
 
 ```
 
-With this analyses we see that there is in fact a significant difference between the two measurements.  Let's compute the Bayes factor to see how strong this effect is:
+With this analyses we see that there is in fact a significant difference between the two measurements. Let's compute the Bayes factor to see how much evidence is provided by the result:
 
-```{r}
+```{r echo=FALSE}
 # compute Bayes factor for paired t-test
 ttestBF(x = NHANES_sample$BPSys1, y = NHANES_sample$BPSys2, paired = TRUE)
 
 ```
 This shows us that although the effect was significant in a paired t-test, it actually provides very little evidence in favor of the alternative hypothesis. 
 
-### The paired t-test as a linear model
-
-We can also define the paired t-test in terms of a general linear model.  To do this, we include all of the measurements for each subject as data points (within a tidy data frame).  We then include in the model a variable that codes for the identity of each individual (in this case, the ID variable that contains a subject ID for each person). This is known as a *mixed model*, since it includes effects of independent variables as well as effects of individuals.  The standard model fitting procedure ```lm()``` can't do this, but we can do it using the ```lmer()``` function from a popular R package called *lme4*, which is specialized for estimating mixed models.  The ```(1|ID)``` in the formula tells `lmer()` to estimate a separate intercept (which is what the ```1``` refers to) for each value of the ```ID``` variable (i.e. for each individual in the dataset), and then estimate a common slope relating timepoint to BP.
-
-```{r,messages=FALSE}
-# compute mixed model for paired test
-
-lmrResult <- lmer(BPsys ~ timepoint + (1 | ID), data = NHANES_sample_tidy)
-summary(lmrResult)
-```
-
-You can see that this shows us a p-value that is very close to the result from the paired t-test computed using the ```t.test()``` function.
+The paired t-test can also be defined in terms of a linear model; see the Appendix for more details on this.
 
 ## Comparing more than two means
 
 Often we want to compare more than two means to determine whether any of them differ from one another.  Let's say that we are analyzing data from a clinical trial for the treatment of high blood pressure.  In the study, volunteers are randomized to one of three conditions: Drug 1, Drug 2 or placebo.  Let's generate some data and plot them (see Figure \@ref(fig:DrugTrial))
 
-```{r DrugTrial, echo=FALSE,fig.cap='Box plots showing blood pressure for three different groups in our clinical trial.',fig.width=6,fig.height=4,out.height='50%'}
+```{r DrugTrial, echo=FALSE,fig.cap='Box plots showing blood pressure for three different groups in our clinical trial.',fig.width=4,fig.height=4,out.height='50%'}
 
 set.seed(123456)
 
@@ -300,7 +336,7 @@ $$
 
 With ANOVA, we want to test whether the variance accounted for by the model is greater than what we would expect by chance, under the null hypothesis of no differences between means.  Whereas for the t distribution the expected value is zero under the null hypothesis, that's not the case here, since sums of squares are always positive numbers.  Fortunately, there is another standard distribution that describes how ratios of sums of squares are distributed under the null hypothesis: The *F* distribution (see figure \@ref(fig:FDist)). This distribution has two degrees of freedom, which correspond to the degrees of freedom for the numerator (which in this case is the model), and the denominator (which in this case is the error).
 
-```{r FDist, echo=FALSE,fig.cap='F distributions under the null hypothesis, for different values of degrees of freedom.',fig.width=6,fig.height=4,out.height='50%'}
+```{r FDist, echo=FALSE,fig.cap='F distributions under the null hypothesis, for different values of degrees of freedom.',fig.width=4,fig.height=4,out.height='50%'}
 fdata <- 
   data.frame(x=seq(0.1,10,.1)) %>%
   mutate(
@@ -311,8 +347,8 @@ fdata <-
 
 ggplot(fdata,aes(x,f_1_1)) +
   geom_line() +
-  geom_line(aes(x,f_1_50),color='blue') +
-  geom_line(aes(x,f_10_50),color='red') +
+  geom_line(aes(x,f_1_50),linetype='dotted') +
+  geom_line(aes(x,f_10_50),linetype='dashed') +
   labs(y = "Density", x = "F values")
 
   
@@ -341,3 +377,27 @@ summary(lmResultANOVA)
 The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, keep in mind that if we wanted to interpret these tests, we would need to correct the p-values to account for the fact that we have done multiple hypothesis tests; we will see an example of how to do this in the next chapter.
 
 Remember that the hypothesis that we started out wanting to test was whether there was any difference between any of the conditions; we refer to this as an *omnibus* hypothesis test, and it is the test that is provided by the F statistic. The F statistic basically tells us whether our model is better than a simple model that just includes an intercept.  In this case we see that the F test is highly significant, consistent with our impression that there did seem to be differences between the groups (which in fact we know there were, because we created the data).
+
+## Learning objectives
+
+After reading this chapter, you should be able to:
+
+* Describe the rationale behind the sign test
+* Describe how the t-test can be used to compare a single mean to a hypothesized value
+* Compare the means for two paired or unpaired groups using a two-sample t-test
+
+
+## Appendix
+
+### The paired t-test as a linear model
+
+We can also define the paired t-test in terms of a general linear model.  To do this, we include all of the measurements for each subject as data points (within a tidy data frame).  We then include in the model a variable that codes for the identity of each individual (in this case, the ID variable that contains a subject ID for each person). This is known as a *mixed model*, since it includes effects of independent variables as well as effects of individuals.  The standard model fitting procedure ```lm()``` can't do this, but we can do it using the ```lmer()``` function from a popular R package called *lme4*, which is specialized for estimating mixed models.  The ```(1|ID)``` in the formula tells `lmer()` to estimate a separate intercept (which is what the ```1``` refers to) for each value of the ```ID``` variable (i.e. for each individual in the dataset), and then estimate a common slope relating timepoint to BP.
+
+```{r,messages=FALSE}
+# compute mixed model for paired test
+
+lmrResult <- lmer(BPsys ~ timepoint + (1 | ID), data = NHANES_sample_tidy)
+summary(lmrResult)
+```
+
+You can see that this shows us a p-value that is very close to the result from the paired t-test computed using the ```t.test()``` function.
