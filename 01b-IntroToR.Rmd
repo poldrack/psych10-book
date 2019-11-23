@@ -314,6 +314,8 @@ This is just like any other vector, in that we can refer to its individual value
 
 ```
 
+In some of the examples in the book, you will see something called a *tibble*; this is basically a souped-up version of a data frame, and can be treated mostly in the same way.
+
 ## Working with data files
 
 When we are doing statistics, we often need to load in the data that we will analyze. Those data will live in a file on one's computer or on the internet.  For this example, let's use a file that is hosted on the internet, which contains the gross domestic product (GDP) values for a number of countries around the world.  This file is stored as *comma-delimited text*, meaning that the values for each of the variables in the dataset are separate by commas.  There are three variables: the relative rank of the countries, the name of the country, and its GDP value.  Here is what the first few lines of the file look like:

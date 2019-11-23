@@ -13,11 +13,9 @@ output:
 library(tidyverse)
 library(ggplot2)
 library(cowplot)
-set.seed(123456) # set random seed to exactly replicate results
+library(knitr)
 
-library(pander)
-panderOptions('round',3)
-panderOptions('digits',7)
+set.seed(123456) # set random seed to exactly replicate results
 
 # load the NHANES data library
 library(NHANES)
@@ -42,7 +40,7 @@ In this chapter we will introduce the concept of a Monte Carlo simulation and di
 ## Monte Carlo simulation
 
 The concept of Monte Carlo simulation was devised by the mathematicians Stan Ulam and Nicholas Metropolis, who were working to develop an atomic weapon as part of the Manhattan Project (https://en.wikipedia.org/wiki/Manhattan_Project). They needed to compute the average distance that a neutron would travel in a substance before it collided with an atomic nucleus, but they could not compute this using standard mathematics.
-Ulam realized that these computations could be simulated using random numbers, just like a casino game. In a casino game, numbers are drawn at random; to estimate the probability of a specific outcome, you could play the game hundreds of times. Ulam's uncle had gambled at the Monte Carlo casino in Monaco, which is apparently where the name came from for this new technique.
+Ulam realized that these computations could be simulated using random numbers, just like a casino game. In a casino game such as a roulette wheel, numbers are generated at random; to estimate the probability of a specific outcome, you could play the game hundreds of times. Ulam's uncle had gambled at the Monte Carlo casino in Monaco, which is apparently where the name came from for this new technique.
 
 There are four steps to performing a Monte Carlo simulation:
 
@@ -51,15 +49,13 @@ There are four steps to performing a Monte Carlo simulation:
 3. Perform a computation using the random numbers
 4. Combine the results across many repetitions
 
-As an example, let's say that I want to figure out how much time to allow for an in-class quiz.  Say that we know that the distribution of quiz completion times is normal, with mean of 5 mins and standard deviation of 1 min.  Given this, how long does the test period need to be so that we expect everyone to finish 99% of the time?
-There are two ways to solve this problem.  The first is to calculate the answer using a mathematical theory known as the statistics of extreme values. However, this is quite complicated mathematically. Alternatively, we could use Monte Carlo simulation. 
-To do this, we need to generate random samples from a normal distribution.  
+As an example, let's say that I want to figure out how much time to allow for an in-class quiz.  Say that we know that the distribution of quiz completion times is normal, with mean of 5 minutes and standard deviation of 1 minute.  Given this, how long does the test period need to be so that we expect all students to finish the exam 99% of the time? There are two ways to solve this problem.  The first is to calculate the answer using a mathematical theory known as the statistics of extreme values. However, this involves complicated mathematics. Alternatively, we could use Monte Carlo simulation.  To do this, we need to generate random samples from a normal distribution.  
 
 ## Randomness in statistics
 
 The term "random" is often used colloquially to refer to things that are bizarre or unexpected, but in statistics the term has a very specific meaning: A process is *random* if it is unpredictable.  For example, if I flip a fair coin 10 times, the value of the outcome on one flip does not provide me with any information that lets me predict the outcome on the next flip. It's important to note that the fact that something is unpredictable doesn't necessarily mean that it is not deterministic.  For example, when we flip a coin, the outcome of the flip is determined by the laws of physics; if we knew all of the conditions in enough detail, we should be able to predict the outcome of the flip.  However, many factors combine to make the outcome of the coin flip unpredictable in practice.
 
-Psychologists have shown that humans actually have a fairly bad sense of randomness. First, we tend to see patterns when they don't exist. In the extreme, this leads to the phenomenon of *pareidolia*, in which people will perceive familiar objects within random patterns (such as perceiving a cloud as a human face or seeing the Virgin Mary in a piece of toast).  Second, humans tend to think of random processes as self-correcting, which leads us to expect that we are "due for a win" after losing many rounds in a game, a phenonenon known as the "gambler's fallacy". 
+Psychologists have shown that humans actually have a fairly bad sense of randomness. First, we tend to see patterns when they don't exist. In the extreme, this leads to the phenomenon of *pareidolia*, in which people will perceive familiar objects within random patterns (such as perceiving a cloud as a human face or seeing the Virgin Mary in a piece of toast).  Second, humans tend to think of random processes as self-correcting, which leads us to expect that we are "due for a win" after losing many rounds in a game of chance, a phenonenon known as the "gambler's fallacy". 
 
 ## Generating random numbers
 
@@ -75,7 +71,7 @@ In R, there is a function to generate random numbers for each of the major proba
 
 Figure \@ref(fig:rngExamples) shows examples of numbers generated using the `runif()` and `rnorm()` functions, generated using the following code:
 
-```{r rngExamples,fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution.",fig.width=8,fig.height=4,out.height='50%'}
+```{r rngExamples,echo=FALSE, fig.cap="Examples of random numbers generated from a uniform (left) or normal (right) distribution.",fig.width=8,fig.height=4,out.height='50%'}
 
 p1 <-
   tibble(
@@ -100,12 +96,16 @@ You can also generate random numbers for any distribution if you have a *quantil
 
 By default, R will generate a different set of random numbers every time you run one of the random number generator functions described above. However, it is also possible to generate exactly the same set of random numbers, by setting what is called the *random seed* to a specific value.  We will do this in many of the examples in this book, in order to make sure that the examples are reproducible.
 
-```{r}
-# if we run the rnorm() command twice, it will give us different sets of pseudorandom numbers each time
-print(rnorm(n = 5))
-print(rnorm(n = 5))
+If we run the ```rnorm()``` function twice, it will give us different sets of pseudorandom numbers each time:
 
-# if we set the random seed to the same value each time, then it will give us the same series of pseudorandom numbers each time.
+```{r}
+print(rnorm(n = 5))
+print(rnorm(n = 5))
+```
+
+However, if we set the random seed to the same value each time using the ```set.seed()``` function, then it will give us the same series of pseudorandom numbers each time:
+
+```{r}
 set.seed(12345)
 print(rnorm(n = 5))
 set.seed(12345)
@@ -127,9 +127,10 @@ ggplot(finishTimeDf,aes(finishTime)) +
 
 ```
 
-However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate a large number of quizzes (using the assumption that the finishing times are distributed normally, as stated above); for each of these simulated quizzes, we can record the longest finishing time.  To do this, we create a new function in R called `sampleMax()` which simulates a sample of the appropriate size (i.e. the number of students in the class) from the appropriate distribution (i.e., normal), and returns the maximum value in the sample.  We then repeat this simulation a large number of times (5000 should be enough) using the `replicate()` function, which will store all of the outputs into a single variable.  The distribution of finishing times is shown in Figure \@ref(fig:finishTimeSim).
+However, what we really want to know is not what the distribution of finishing times looks like, but rather what the distribution of the *longest* finishing time for each quiz looks like.  To do this, we can simulate the finishing time for a quiz, using the assumption that the finishing times are distributed normally, as stated above; for each of these simulated quizzes, we then record the longest finishing time. We repeat this simulation a large number of times (5000 should be enough) and record the distribution of finishing times, which is shown in Figure \@ref(fig:finishTimeSim).
 
-```{r}
+```{r finishTimeSim,echo=FALSE,fig.cap="Distribution of maximum finishing times across simulations.",fig.width=4,fig.height=4,out.height='50%'}
+
 # sample maximum value 5000 times and compute 99th percentile
 nRuns <- 5000
 sampSize <- 150
@@ -142,10 +143,7 @@ sampleMax <- function(sampSize = 150) {
 maxTime <- replicate(nRuns, sampleMax())
 
 cutoff <- quantile(maxTime, 0.99)
-sprintf("99th percentile of maxTime distribution: %.2f", cutoff)
-```
 
-```{r finishTimeSim,echo=FALSE,fig.cap="Distribution of maximum finishing times across simulations.",fig.width=4,fig.height=4,out.height='50%'}
 tibble(maxTime) %>%
   ggplot(aes(maxTime)) +
   geom_histogram(bins = 100) +
@@ -153,12 +151,11 @@ tibble(maxTime) %>%
 
 ```
 
-This shows that the 99th percentile of the finishing time distribution falls at `r I(cutoff)`, meaning that if we were to give that much time for the quiz, then everyone should finish 99% of the time.
-It's always important to remember that our assumptions matter -- if they are wrong, then the results of the simulation are useless. In this case, we assumed that the finishing time distribution was normally distributed with a particular mean and standard deviation; if these assumptions are incorrect (and they almost certainly are), then the true answer could be very different.
+This shows that the 99th percentile of the finishing time distribution falls at `r I(cutoff)`, meaning that if we were to give that much time for the quiz, then everyone should finish 99% of the time. It's always important to remember that our assumptions matter -- if they are wrong, then the results of the simulation are useless. In this case, we assumed that the finishing time distribution was normally distributed with a particular mean and standard deviation; if these assumptions are incorrect (and they almost certainly are), then the true answer could be very different.
 
 ## Using simulation for statistics: The bootstrap
 
-So far we have used simulation to demonstrate statistical principles, but we can also use simulation to answer real statistical questions.  In this section we will introduce a concept known as the *bootstrap* that lets us use simulation to quantify our uncertainty about statistical estimates. Later in the course, we will see other examples of how simulation can often be used to answer statistical questions, especially when theoretical statistical methods are not available or when their assumptions are too stifling.
+So far we have used simulation to demonstrate statistical principles, but we can also use simulation to answer real statistical questions.  In this section we will introduce a concept known as the *bootstrap* that lets us use simulation to quantify our uncertainty about statistical estimates. Later in the course, we will see other examples of how simulation can often be used to answer statistical questions, especially when theoretical statistical methods are not available or when their assumptions are too difficult to meet.
 
 ### Computing the bootstrap
 
@@ -186,14 +183,13 @@ bootMeanHeight <- function(df) {
 bootMeans <- replicate(nRuns, bootMeanHeight(heightSample))
 
 SEM_standard <- sd(heightSample$Height) / sqrt(sampleSize)
-sprintf("SEM computed using sample SD: %f", SEM_standard)
-
 SEM_bootstrap <- sd(bootMeans)
-sprintf("SEM computed using SD of bootstrap estimates: %f", SEM_bootstrap)
 
 ```
 
 ```{r bootstrapSEM,echo=FALSE,fig.cap="An example of bootstrapping to compute the standard error of the mean. The histogram shows the distribution of means across bootstrap samples, while the red line shows the normal distribution based on the sample mean and standard deviation.",fig.width=4,fig.height=4,out.height='50%'}
+
+options(pillar.sigfig = 3)
 
 tibble(bootMeans=bootMeans) %>%
   ggplot(aes(bootMeans)) + 
@@ -212,23 +208,33 @@ Figure \@ref(fig:bootstrapSEM) shows that the distribution of means across boots
 # compute bootstrap confidence interval
 
 bootCI <- quantile(bootMeans, c(0.025, 0.975))
-pander("bootstrap confidence limits:")
-pander(bootCI)
+#bootCI$type <- c('Bootstrap')
 
 # now let's compute the confidence intervals using the sample mean and SD
 sampleMean <- mean(heightSample$Height)
-
 normalCI <- 
   tibble(
   "2.5%" = sampleMean - 1.96 * SEM_standard,
   "97.5%" = sampleMean + 1.96 * SEM_standard
 )
 
-print("confidence limits based on sample SD and normal distribution:")
-pander(normalCI)
+allCI <- rbind(normalCI, bootCI)
+allCI$type <- c('Normal', 'Bootstrap')
+allCI <- allCI %>% dplyr::select(type, `2.5%`, `97.5%`)
+
+kable(allCI, digits=2, caption="Confidence limits for normal distribution and bootstrap methods")
 ```
 
 We would not usually employ the bootstrap to compute confidence intervals for the mean (since we can generally assume that the normal distribution is appropriate for the sampling distribution of the mean, as long as our sample is large enough), but this example shows how the method gives us roughly the same result as the standard method based on the normal distribution.  The bootstrap would more often be used to generate standard errors for estimates of other statistics where we know or suspect that the normal distribution is not appropriate.
+
+## Learning objectives
+
+After reading this chapter, you should be able to:
+
+* Describe the concept of a Monte Carlo simulation.
+* Describe the meaning of randomness in statistics
+* Obtain random numbers from the uniform and normal distributions
+* Describe the concept of the bootstrap
 
 ## Suggested readings
 

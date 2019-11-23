@@ -1,10 +1,10 @@
 ---
 output:
+  pdf_document: default
   bookdown::gitbook:
     lib_dir: "book_assets"
     includes:
       in_header: google_analytics.html
-  pdf_document: default
   html_document: default
 ---
 # Hypothesis testing
@@ -14,10 +14,7 @@ library(tidyverse)
 library(ggplot2)
 library(cowplot)
 set.seed(123456) # set random seed to exactly replicate results
-
-library(pander)
-panderOptions('round',2)
-panderOptions('digits',7)
+library(knitr)
 
 # load the NHANES data library
 library(NHANES)
@@ -44,7 +41,7 @@ In this chapter we will introduce the ideas behind the use of statistics to make
 
 ## Null Hypothesis Statistical Testing (NHST)
 
-The specific type of hypothesis testing that we will discuss is known (for reasons that will become clear) as *null hypothesis statistical testing* (NHST).  If you pick up almost any scientific or biomedical research publication, you will see NHST being used to test hypotheses, and in their introductory psycholology textbook, Gerrig & Zimbardo (2002) referred to NHST as the “backbone of psychological research”.  Thus, learning how to use and interpret the results from hypothesis testing is essential to understand the results from this research.
+The specific type of hypothesis testing that we will discuss is known (for reasons that will become clear) as *null hypothesis statistical testing* (NHST).  If you pick up almost any scientific or biomedical research publication, you will see NHST being used to test hypotheses, and in their introductory psycholology textbook, Gerrig & Zimbardo (2002) referred to NHST as the “backbone of psychological research”.  Thus, learning how to use and interpret the results from hypothesis testing is essential to understand the results from many fields of research.
 
 It is also important for you to know, however, that NHST is deeply flawed, and that many statisticians and researchers (including myself) think that it has been the cause of serious problems in science, which we will discuss in Chapter \@ref(doing-reproducible-research).  For more than 50 years, there have been calls to abandon NHST in favor of other approaches (like those that we will discuss in the following chapters):
 
@@ -74,20 +71,20 @@ We can break the process of null hypothesis testing down into a number of steps:
 5. Compute the probability of the observed value of that statistic assuming that the null hypothesis is true
 5. Assess the “statistical significance” of the result
 
-For a hands-on example, let's use the NHANES data to ask the following question: Is physical activity related to body mass index?  In the NHANES dataset, participants were asked whether they engage regularly in moderate or vigorous-intensity sports, fitness or recreational activities (stored in the variable $PhysActive$). They also measured height and weight and computed Body Mass Index:
+For a hands-on example, let's use the NHANES data to ask the following question: Is physical activity related to body mass index?  In the NHANES dataset, participants were asked whether they engage regularly in moderate or vigorous-intensity sports, fitness or recreational activities (stored in the variable $PhysActive$). The researchers also measured height and weight and used them to compute the *Body Mass Index* (BMI):
 
 $$
 BMI = \frac{weight(kg)}{height(m)^2}
 $$
 
-### Step 1: Formulate a hypothesis
+### Step 1: Formulate a hypothesis of interest
 
-For step 1, we hypothesize that BMI should be greater for people who do not engage in physical activity, compared to those who do.  
+For step 1, we hypothesize that BMI is greater for people who do not engage in physical activity, compared to those who do.  
 
 ### Step 2: Collect some data
 For step 2, we collect some data.  In this case, we will sample 250 individuals from the NHANES dataset.  Figure \@ref(fig:bmiSample) shows an example of such a sample, with BMI shown separately for active and inactive individuals.
 
-```{r}
+```{r echo=FALSE}
 # sample 250 adults from NHANES and compute mean BMI separately for active
 # and inactive individuals
 
@@ -139,7 +136,7 @@ sumVariance <-
 
 
 # print sampleSummary table
-pander(sampleSummary)
+kable(sampleSummary, digits=4,caption='Summary of BMI data for active versus inactive individuals')
 ```
 
 ```{r bmiSample, echo=FALSE,fig.cap="Box plot of BMI data from a sample of adults from the NHANES dataset, split by whether they reported engaging in regular physical activity.",fig.width=4,fig.height=4,out.height='50%'}
@@ -170,6 +167,8 @@ and directional alternative:
 
 $HA: BMI_{active} < BMI_{inactive}$
 
+As we will see later, testing a non-directional hypothesis is more conservative, so this is generally to be preferred unless there is a strong *a priori* reason to hypothesize an effect in a particular direction.  Any direction hypotheses should be specified prior to looking at the data!
+
 ### Step 4: Fit a model to the data and compute a test statistic
 
 For step 4, we want to use the data to compute a statistic that will ultimately let us decide whether the null hypothesis is rejected or not.  To do this, the model needs to quantify the amount of evidence in favor of the alternative hypothesis, relative to the variability in the data. Thus we can think of the test statistic as providing a measure of the size of the effect compared to the variability in the data.  In general, this test statistic will have a probability distribution associated with it, because that allows us to determine how likely our observed value of the statistic is under the null hypothesis.  
@@ -180,9 +179,11 @@ $$
 t = \frac{\bar{X_1} - \bar{X_2}}{\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}}
 $$
 
-where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the estimated variances of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  The t-statistic is distributed according to a probability distribution known as a *t* distribution.  The *t* distribution looks quite similar to a normal distribution, but it differs depending on the number of degrees of freedom, which for this example is the number of observations minus 2, since we have computed two means and thus given up two degrees of freedom.  When the degrees of freedom are large (say 1000), then the *t* distribution looks essentialy like the normal distribution, but when they are small then the *t* distribution has longer tails than the normal (see Figure \@ref(fig:tVersusNormal)).
+where $\bar{X}_1$ and $\bar{X}_2$ are the means of the two groups, $S^2_1$ and $S^2_2$ are the estimated variances of the groups, and $n_1$ and $n_2$ are the sizes of the two groups.  Note that the denominator is basically an average of the standard error of the mean for the two samples.  Thus, one can view the the t-statistic as a way of quantifying how large the difference between groups is in relation to the sampling variability of the means that are being compared.
 
-```{r tVersusNormal,echo=FALSE,fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 4 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal.",fig.width=4,fig.height=4,out.height='50%'}
+The t-statistic is distributed according to a probability distribution known as a *t* distribution.  The *t* distribution looks quite similar to a normal distribution, but it differs depending on the number of degrees of freedom, which for this example is the number of observations minus 2, since we have computed two means and thus given up two degrees of freedom.  When the degrees of freedom are large (say 1000), then the *t* distribution looks essentialy like the normal distribution, but when they are small then the *t* distribution has longer tails than the normal (see Figure \@ref(fig:tVersusNormal)).
+
+```{r tVersusNormal,echo=FALSE,fig.cap="Each panel shows the t distribution (in blue dashed line) overlaid on the normal distribution (in solid red line).  The left panel shows a t distribution with 4 degrees of freedom, in which case the distribution is similar but has slightly wider tails.  The right panel shows a t distribution with 1000 degrees of freedom, in which case it is virtually identical to the normal.",fig.width=8,fig.height=4,out.height='50%'}
 distDf <- data.frame(x=seq(-4,4,0.01))
 
 p1 <- ggplot(distDf,aes(x)) + 
@@ -206,34 +207,21 @@ plot_grid(p1,p2)
 
 This is the step where NHST starts to violate our intuition -- rather than determining the likelihood that the null hypothesis is true given the data, we instead determine the likelihood of the data under the null hypothesis - because we started out by assuming that the null hypothesis is true!  To do this, we need to know the probability distribution for the statistic under the null hypothesis, so that we can ask how likely the data are under that distribution. Before we move to our BMI data, let's start with some simpler examples. 
 
-##### Randomization: A very simple example
+#### Randomization: A very simple example
+
 Let's say that we wish to determine whether a coin is fair.  To collect data, we flip the coin 100 times, and we count 70 heads.  In this example, $H_0: P(heads)=0.5$ and $H_A: P(heads) \neq 0.5$, and our test statistic is simply the number of heads that we counted.  The question that we then want to ask is: How likely is it that we would observe 70 heads if the true probability of heads is 0.5.  We can imagine that this might happen very occasionally just by chance, but doesn't seem very likely. To quantify this probability, we can use the *binomial distribution*:
 
 $$
 P(X < k) = \sum_{i=0}^k \binom{N}{k} p^i (1-p)^{(n-i)}
 $$
-This equation will tell us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the probability of a certain number or more, which we can obtain by subtracting from one:
+This equation will tell us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the probability of a certain number or more, which we can obtain by subtracting from one, based on the rules of probability:
 
 $$
 P(X \ge k) = 1 - P(X < k)
 $$
 
-We can compute the probability for our example using the `pbinom()` function in R as follows:
+```{r coinFlips,echo=FALSE,fig.cap="Distribution of numbers of heads (out of 100 flips) across 100,000 simulated runsl with the observed value of 70 flips represented by the vertical line.",fig.width=4,fig.height=4,out.height='50%'}
 
-```{r}
-# compute the probability of 69 or fewer heads, when P(heads)=0.5
-p_lt_70 <- pbinom(69, 100, 0.5) 
-sprintf("probability of 69 or fewer heads given P(heads)=0.5: %0.6f", p_lt_70)
-
-# the probability of 70 or more heads is simply the complement of p_lt_70
-p_ge_70 <- 1 - p_lt_70
-sprintf("probability of 70 or more heads given P(heads)=0.5: %0.6f", p_ge_70)
-```
-
-
-This computation shows us that the likelihood of getting 70 heads if the coin is indeed fair is very small.  Now, what if we didn't have the `pbinom()` function to tell us the probability of that number of heads?  We could instead determine it by simulation -- we repeatedly flip a coin 100 times using a true probability of 0.5, and then compute the distribution of the number of heads across those simulation runs.  Figure \@ref(fig:coinFlips) shows the result from this simulation.
-
-```{r}
 # simulate tossing of 100,000 flips of 100 coins to identify empirical 
 # probability of 70 or more heads out of 100 flips
 
@@ -243,78 +231,58 @@ tossCoins <- function() {
   return(sum(flips))
 }
 
+# compute the probability of 69 or fewer heads, when P(heads)=0.5
+p_lt_70 <- pbinom(69, 100, 0.5) 
+
+# the probability of 70 or more heads is simply the complement of p_lt_70
+p_ge_70 <- 1 - p_lt_70
+
 # use a large number of replications since this is fast
 coinFlips <- replicate(100000, tossCoins())
 
 p_ge_70_sim <- mean(coinFlips >= 70)
-sprintf(
-  "empirical probability of 70 or more heads given P(heads)=0.5: %0.6f", 
-  p_ge_70_sim
-)
-```
 
-```{r coinFlips,echo=FALSE,fig.cap="Distribution of numbers of heads (out of 100 flips) across 100,000 simulated runs.",fig.width=4,fig.height=4,out.height='50%'}
 ggplot(data.frame(coinFlips),aes(coinFlips))  +
   geom_histogram(binwidth = 1) + 
   geom_vline(xintercept = 70,color='red',size=1)
 
 ```
 
-Here we can see that the probability computed via simulation (`r I(sprintf('%0.6f',p_ge_70_sim))`) is very close to the theoretical probability (.00004).  
+We can compute the probability for our example using the `pbinom()` function.  The probability of 69 or fewer heads given P(heads)=0.5 is `r I(sprintf("%0.6f", p_lt_70))`, so the probability of 70 or more heads is simply one minus that value (`r I(sprintf("%0.6f", p_ge_70))`)
+This computation shows us that the likelihood of getting 70 heads if the coin is indeed fair is very small.  
 
-Let's do the analogous computation for our BMI example. First we compute the t statistic using the values from our sample that we calculated above:
+Now, what if we didn't have the `pbinom()` function to tell us the probability of that number of heads?  We could instead determine it by simulation -- we repeatedly flip a coin 100 times using a true probability of 0.5, and then compute the distribution of the number of heads across those simulation runs.  Figure \@ref(fig:coinFlips) shows the result from this simulation. Here we can see that the probability computed via simulation (`r I(sprintf('%0.6f',p_ge_70_sim))`) is very close to the theoretical probability (.00004).  
 
-```{r}
+```{r echo=FALSE}
 tStat <- 
   meanDiff / sqrt(sumVariance)
-
-sprintf("t statistic = %0.3f", tStat)
-
-```
-
-
-The question that we then want to ask is: What is the likelihood that we would find a t statistic of this size, if the true difference between groups is zero or less (i.e. the directional null hypothesis)?  
-We can use the t distribution to determine this probability. Our sample size is 250, so the appropriate t distribution has 248 degrees of freedom.  We can use the `pt()` function in R to determine the probability of finding a value of the t-statistic greater than or equal to our observed value.  Note that we want to know the probability of a value greater than our observed value, but by default `pt()` gives us the probability of a value less than the one that we provide it, so we have to tell it explicitly to provide us with the "upper tail" probability (by setting `lower.tail = FALSE`).
-
-```{r}
 pvalue_tdist <- 
   pt(tStat, df = 248, lower.tail = FALSE)
-
-sprintf("p(t > %0.2f, df = 248) = %0.3f", tStat, pvalue_tdist)
-```
-
-This tells us that our observed t-statistic value of `r I(tStat)` is relatively unlikely if the null hypothesis really is true.
-
-In this case, we used a directional hypothesis, so we only had to look at one end of the null distribution. If we wanted to test a non-directional hypothesis, then we would need to be able to identify how unexpected the size of the effect is, regardless of its direction.  In the context of the t-test, this means that we need to know how likely it is that the statistic would be as extreme in either the positive or negative direction.  To do this, we multiply the observed *t* value by -1, since the *t* distribution is centered around zero, and then add together the two tail probabilities to get a *two-tailed* p-value:
-
-
-
-```{r}
 pvalue_tdist_twotailed <- 
   pt(tStat, df = 248, lower.tail = FALSE) +
   pt(-1 * tStat, df = 248, lower.tail = TRUE)
 
-sprintf(
-  "p(t > %0.2f or t< %0.2f, df = 248) = %0.3f", 
-  tStat, 
-  -1 * tStat, pvalue_tdist_twotailed
-)
 ```
 
-Here we see that the p value for the two-tailed test is twice as large as that for the one-tailed test, which reflects the fact that an extreme value is less surprising since it could have occurred in either direction.
+Let's do the analogous computation for our BMI example. First we compute the t statistic using the values from our sample that we calculated above, where we find that (`r I(sprintf('t = %0.2f',tStat))`). The question that we then want to ask is: What is the likelihood that we would find a t statistic of this size, if the true difference between groups is zero or less (i.e. the directional null hypothesis)?  
+
+We can use the t distribution to determine this probability. Our sample size is 250, so the appropriate t distribution has 248 degrees of freedom because lose one for each of the two means that we computed.  We can use the `pt()` function in R to determine the probability of finding a value of the t-statistic greater than or equal to our observed value.  Note that we want to know the probability of a value greater than our observed value, but by default `pt()` gives us the probability of a value less than the one that we provide it, so we have to tell it explicitly to provide us with the "upper tail" probability (by setting `lower.tail = FALSE`).  We find that (`r I(sprintf("p(t > %0.2f, df = 248) = %0.3f", tStat, pvalue_tdist))`), which tells us that our observed t-statistic value of `r I(tStat)` is relatively unlikely if the null hypothesis really is true.
+
+In this case, we used a directional hypothesis, so we only had to look at one end of the null distribution. If we wanted to test a non-directional hypothesis, then we would need to be able to identify how unexpected the size of the effect is, regardless of its direction.  In the context of the t-test, this means that we need to know how likely it is that the statistic would be as extreme in either the positive or negative direction.  To do this, we multiply the observed *t* value by -1, since the *t* distribution is centered around zero, and then add together the two tail probabilities to get a *two-tailed* p-value: (`r I(sprintf("p(t > %0.2f or t< %0.2f, df = 248) = %0.3f", tStat, -1 * tStat, pvalue_tdist_twotailed))`). Here we see that the p value for the two-tailed test is twice as large as that for the one-tailed test, which reflects the fact that an extreme value is less surprising since it could have occurred in either direction.
 
 How do you choose whether to use a one-tailed versus a two-tailed test?  The two-tailed test is always going to be more conservative, so it's always a good bet to use that one, unless you had a very strong prior reason for using a one-tailed test. In that case, you should have written down the hypothesis before you ever looked at the data. In Chapter \@ref(doing-reproducible-research) we will discuss the idea of pre-registration of hypotheses, which formalizes the idea of writing down your hypotheses before you ever see the actual data.  You should *never* make a decision about how to perform a hypothesis test once you have looked at the data, as this can introduce serious bias into the results.
 
 #### Computing p-values using randomization
 
-So far we have seen how we can use the t-distribution to compute the probability of the data under the null hypothesis, but we can also do this using simulation. The basic idea is that we generate simulated data like those that we would expect under the null hypothesis, and then ask how extreme the observed data are in comparison to those simulated data.  The key question is: How can we generate data for which the null hypothesis is true?  The general answer is that we can randomly rearrange the data in a specific way that makes the data look like they would if the null was really true.  This is similar to the idea of bootstrapping, in the sense that it uses our own data to come up with an answer, but it does it in a different way.
+So far we have seen how we can use the t-distribution to compute the probability of the data under the null hypothesis, but we can also do this using simulation. The basic idea is that we generate simulated data like those that we would expect under the null hypothesis, and then ask how extreme the observed data are in comparison to those simulated data.  The key question is: How can we generate data for which the null hypothesis is true?  The general answer is that we can randomly rearrange the data in a particular way that makes the data look like they would if the null was really true.  This is similar to the idea of bootstrapping, in the sense that it uses our own data to come up with an answer, but it does it in a different way.
 
-##### Randomization: a simple example
+#### Randomization: a simple example
 
-Let's start with a simple example. Let's say that we want to compare the mean squatting ability of football players with cross-country runners, with $H_0: \mu_{FB} \le \mu_{XC}$ and $H_A: \mu_{FB} > \mu_{XC}$.  We measure the maximum squatting ability of 5 football players and 5 cross-country runners (which we will generate randomly, assuming that $\mu_{FB} = 300$,  $\mu_{XC} = 140$, and $\sigma = 30$.
+Let's start with a simple example. Let's say that we want to compare the mean squatting ability of football players with cross-country runners, with $H_0: \mu_{FB} \le \mu_{XC}$ and $H_A: \mu_{FB} > \mu_{XC}$.  We measure the maximum squatting ability of 5 football players and 5 cross-country runners (which we will generate randomly, assuming that $\mu_{FB} = 300$,  $\mu_{XC} = 140$, and $\sigma = 30$).
 
 
-```{r}
+```{r squatPlot,echo=FALSE,fig.cap="Left: Box plots of simulated squatting ability for football players and cross-country runners.Right: Box plots for subjects assigned to each group after scrambling group labels.",fig.width=8,fig.height=4,out.height='50%'}
+
 # generate simulated data for squatting ability across football players 
 # and cross country runners
 
@@ -333,36 +301,12 @@ squatDf <- tibble(
   squat = roundToNearest5(c(rnorm(5) * 30 + 300, rnorm(5) * 30 + 140))
 )
 
-pander(squatDf)
-```
+kable(squatDf, caption='Squatting data for the two groups')
 
-```{r squatPlot,echo=FALSE,fig.cap="Box plots of simulated squatting ability for football players and cross-country runners.",fig.width=4,fig.height=4,out.height='50%'}
-
-ggplot(squatDf,aes(x=group,y=squat)) +
+p1 <- ggplot(squatDf,aes(x=group,y=squat)) +
   geom_boxplot() +
   ylab('max squat (lbs)')
 
-```
-
-From the plot in Figure \@ref(fig:squatPlot) it's clear that there is a large difference between the two groups.  We can do a standard t-test to test our hypothesis, using the `t.test()` command in R:
-
-```{r}
-# compute and print t statistic comparing two groups
-
-tt <- 
-  t.test(
-    squat ~ group, 
-    data = squatDf, 
-    alternative = "greater", 
-    var.equal = TRUE
-  )
-
-sprintf("p(t > %0.2f, df = 8) = %0.5f", tt$statistic, tt$p.value)
-```
-
-This shows that the likelihood of such a difference under the null hypothesis is very small, using the *t* distribution to define the null.   Now let's see how we could answer the same question using randomization.  The basic idea is that if the null hypothesis of no difference between groups is true, then it shouldn't matter which group one comes from (football players versus cross-country runners) -- thus, to create data that are like our actual data but also conform to the null hypothesis, we can randomly reorder the group labels for the individuals in the dataset, and then recompute the difference between the groups. The results of such a shuffle are shown in Figure \@ref(fig:scramPlot).
-
-```{r}
 # create a scrambled version of the group membership variable
 
 dfScram <-
@@ -372,21 +316,38 @@ dfScram <-
   ) %>%
   select(-group)
 
-pander(dfScram)
+kable(dfScram, caption='Squatting data after randomly scrambling group labels')
 
-```
-
-```{r scramPlot,echo=FALSE,fig.cap="Box plots for subjects assigned to each group after scrambling group labels.",fig.width=4,fig.height=4,out.height='50%'}
-
-ggplot(dfScram,aes(x=scrambledGroup,y=squat)) +
+p2 <- ggplot(dfScram,aes(x=scrambledGroup,y=squat)) +
   geom_boxplot() +
   ylab('max squat (lbs)')
 
+plot_grid(p1, p2)
+
 ```
 
-After scrambling the labels, we see that the two groups are now much more similar, and in fact the cross-country group now has a slightly higher mean.  Now let's do that 10000 times and store the t statistic for each iteration; this may take a moment to complete.
+From the plot in Figure \@ref(fig:squatPlot) it's clear that there is a large difference between the two groups.  We can do a standard t-test to test our hypothesis, using the `t.test()` command in R, which gives the following result:
 
-```{r}
+```{r echo=FALSE}
+# compute and print t statistic comparing two groups
+
+tt <- 
+  t.test(
+    squat ~ group, 
+    data = squatDf, 
+    alternative = "greater", 
+    var.equal = TRUE
+  )
+print(tt)
+```
+
+If we look at the p-value reported here, we see that the likelihood of such a difference under the null hypothesis is very small, using the *t* distribution to define the null.   
+
+Now let's see how we could answer the same question using randomization.  The basic idea is that if the null hypothesis of no difference between groups is true, then it shouldn't matter which group one comes from (football players versus cross-country runners) -- thus, to create data that are like our actual data but also conform to the null hypothesis, we can randomly reorder the group labels for the individuals in the dataset, and then recompute the difference between the groups. The results of such a shuffle are shown in Figure \@ref(fig:scramPlot).
+
+
+```{r shuffleHist, echo=FALSE,fig.cap="Histogram of t-values for the difference in means between the football and cross-country groups after randomly shuffling group membership.  The vertical line denotes the actual difference observed between the two groups, and the dotted line shows the theoretical t distribution for this analysis.",fig.width=4,fig.height=4,out.height='50%'}
+
 # shuffle data 10,000 times and compute distribution of t values
 
 nRuns <- 10000
@@ -408,61 +369,23 @@ shuffleAndMeasure <- function(df) {
 
 shuffleDiff <- replicate(nRuns, shuffleAndMeasure(squatDf))
 
-sprintf("mean t value across shuffles = %0.3f", mean(shuffleDiff))
-```
-
-We can now look at the distribution of mean differences across the shuffled datasets. Figure \@ref(fig:shuffleHist) shows the histogram of the group differences across all of the random shuffles.  As expected under the null hypothesis, this distribution is centered at zero.  
-
-```{r shuffleHist, echo=FALSE,fig.cap="Histogram of differences between the football and cross-country groups after randomly shuffling group membership.  The red line denotes the actual difference observed between the two groups, and the blue line shows the theoretical t distribution for this analysis.",fig.width=4,fig.height=4,out.height='50%'}
-ggplot(data.frame(shuffleDiff),aes(shuffleDiff)) +
-  geom_histogram(aes(y=..density..),bins=50) + 
-  geom_vline(xintercept = tt$statistic,color='red') +
-  xlab('t values after random shuffling') +
-  stat_function(fun = dt, args = list(df = 8),n = 50,size=1.5,color='blue')
-  
-
-
-
-```
-
-We can see that the distribution of t values after shuffling roughly follows the theoretical t distribution under the null hypothesis (with mean=0), showing that randomization worked to generate null data.  We also see something interesting if we compare the shuffled t values to the actual t value:
-
-```{r}
-# compute number of runs on which t statistic for shuffle data was 
-# equal to observed t statistic
-
-equalSum <- sum(shuffleDiff == tt$statistic)
-sprintf("Number of runs on which shuffled t == observed t: %d", equalSum)
-
-# compute number of runs on which t statistic for shuffle data was
-# equal to observed t statistic times -1
-
-equalSumMinus <- sum(shuffleDiff == tt$statistic * -1)
-sprintf("Number of runs on which shuffled t == observed t*-1: %d", equalSumMinus)
-```
-
-There are `r I(equalSum)` shuffle runs on which the t statistic for the shuffled data was exactly the same as the observed data -- which means that shuffling resulted in the same labeling as the actual data!  This is unlikely, but not *that* unlikely, and we can actually compute its likelihood using a bit of probability theory.  The number of possible permutations of 10 items is $10!$ which comes out to 3628800.  The number of possible rearrangements of each set of 5 is $5!$ which comes out to 120, so the number of possible rearrangements of two sets of five is $5! * 5!$ or 14400.  Thus, we expect that 0.0039 of the random labelings should come out exactly the same as the original, which is fairly close to the 0.0033 that we see in our simulation. We have a similar expectation for the number of times that the labeling will be exactly opposite of the true labeling, giving us the negative of the observed t value.
-
-We can compute the p-value from the randomized data by measuring how many of the shuffled values are at least as extreme as the observed value:
-
-```{r}
 # compute p value using randomization
 pvalRandomization <- mean(shuffleDiff >= tt$statistic)
 
-sprintf(
-  'p(t > %0.2f, df = 8) using randomization = %0.5f',
-  tt$statistic,
-  pvalRandomization
-)
+
+ggplot(data.frame(shuffleDiff),aes(shuffleDiff)) +
+  geom_histogram(aes(y=..density..),bins=50, color='gray', fill='gray') + 
+  geom_vline(xintercept = tt$statistic,color='red') +
+  xlab('t values after random shuffling') +
+  stat_function(fun = dt, args = list(df = 8),n = 50,size=1.5,linetype='dotted')
+
 ```
 
-This p-value is very similar to the p-value that we obtained using the t distribution, and both are quite extreme, suggesting that the observed data are very unlikely to have arisen if the null hypothesis is true - and in this case we *know* that it's not true, because we generated the data.
+After scrambling the labels, we see that the two groups are now much more similar, and in fact the cross-country group now has a slightly higher mean.  Now let's do that 10000 times and store the t statistic for each iteration; this may take a moment to complete. Figure \@ref(fig:shuffleHist) shows the histogram of the t-values across all of the random shuffles.  As expected under the null hypothesis, this distribution is centered at zero (the mean of the distribution is `r I(sprintf("%0.3f", mean(shuffleDiff)))`.  From the figure we can also see that the distribution of t values after shuffling roughly follows the theoretical t distribution under the null hypothesis (with mean=0), showing that randomization worked to generate null data.  We can compute the p-value from the randomized data by measuring how many of the shuffled values are at least as extreme as the observed value: `r I(sprintf('p(t > %0.2f, df = 8) using randomization = %0.5f',tt$statistic, pvalRandomization))`. This p-value is very similar to the p-value that we obtained using the t distribution, and both are quite extreme, suggesting that the observed data are very unlikely to have arisen if the null hypothesis is true - and in this case we *know* that it's not true, because we generated the data.
 
 ##### Randomization: BMI/activity example
 
-Now let's use randomization to compute the p-value for the BMI/activity example. In this case, we will randomly shuffle the `PhysActive` variable and compute the difference between groups after each shuffle, and then compare our observed t statistic to the distribution of t statistics from the shuffled datasets.
-
-```{r}
+```{r echo=FALSE}
 # create function to shuffle BMI data
 
 shuffleBMIstat <- function() {
@@ -488,11 +411,7 @@ meanDiffSimDf <-
   data.frame(
     meanDiffSim = replicate(nRuns, shuffleBMIstat())
   )
-```
 
-Let's look at the results.  Figure \@ref(fig:simDiff) shows the distribution of t values from the shuffled samples, and we can also compute the probability of finding a value as large or larger than the observed value:
-
-```{r}
 # compute the empirical probability of t values larger than observed
 # value under the randomization null
 bmtTTest <- 
@@ -506,20 +425,11 @@ bmtTTest <-
 bmiPvalRand <- 
   mean(meanDiffSimDf$meanDiffSim >= bmtTTest$statistic)
 
-sprintf(
-  "p(mean > %0.2f, df = 248) using randomization = %0.5f", 
-  bmtTTest$statistic, 
-  bmiPvalRand
-)
-
-sprintf(
-  "p(mean > %0.2f, df = 248) using parametric t-test = %0.5f", 
-  bmtTTest$statistic, 
-  bmtTTest$p.value
-  )
 ```
 
-```{r simDiff,echo=FALSE,fig.cap="Histogram of t statistics after shuffling of group labels, with the observed value of the t statistic shown in the blue line, and values more extreme than the observed value shown in orange.",fig.width=4,fig.height=4,out.height='50%'}
+Now let's use randomization to compute the p-value for the BMI/activity example. In this case, we will randomly shuffle the `PhysActive` variable and compute the difference between groups after each shuffle, and then compare our observed t statistic to the distribution of t statistics from the shuffled datasets. Figure \@ref(fig:simDiff) shows the distribution of t values from the shuffled samples, and we can also compute the probability of finding a value as large or larger than the observed value.  The p-value obtained from randomization (`r sprintf("%.4f",bmiPvalRand)`) is very similar to the one obtained using the t distribution (`r sprintf("%.4f",bmtTTest$p.value)`).  The advantage of the randomization test is that it doesn't require that we assume that the data from each of the groups are normally distributed, though the t-test is generally quite robust to violations of that assumption.  In addition, the randomization test can allow us to compute p-values for statistics when we don't have a theoretical distribution like we do for the t-test.
+
+```{r simDiff,echo=FALSE,fig.cap="Histogram of t statistics after shuffling of group labels, with the observed value of the t statistic shown in the vertical line, and values at least as extreme as the observed value shown in lighter gray",fig.width=4,fig.height=4,out.height='50%'}
 
 meanDiffSimDf %>% 
   ggplot(aes(meanDiffSim)) +
@@ -531,12 +441,11 @@ meanDiffSimDf %>%
       filter(meanDiffSim >= bmtTTest$statistic), 
     aes(meanDiffSim), 
     bins = 200, 
-    fill = "orange"
+    fill = "gray"
   )
 
 ```
 
-Again, the p-value obtained from randomization (`r sprintf("%.3f",bmiPvalRand)`) is very similar to the one obtained using the t distribution (`r sprintf("%.3f",bmtTTest$p.value)`).  The advantage of the randomization test is that it doesn't require that we assume that the data from each of the groups are normally distributed, though the t-test is generally quite robust to violations of that assumption.  In addition, the randomization test can allow us to compute p-values for statistics when we don't have a theoretical distribution like we do for the t-test.
 
 We do have to make one main assumption when we use the randomization test, which we refer to as *exchangeability*.  This means that all of the observations are distributed in the same way, such that we can interchange them without changing the overall distribution.  The main place where this can break down is when there are related observations in the data; for example, if we had data from individuals in 4 different families, then we couldn't assume that individuals were exchangeable, because siblings would be closer to each other than they are to individuals from other families. In general, if the data were obtained by random sampling, then the assumption of exchangeability should hold.
 
@@ -554,7 +463,7 @@ However, Fisher never intended $p < 0.05$ to be a fixed rule:
 
 Instead, it is likely that it became a ritual due to the reliance upon tables of p-values that were used before computing made it easy to compute p values for arbitrary values of a statistic.  All of the tables had an entry for 0.05, making it easy to determine whether one's statistic exceeded the value needed to reach that level of significance.
 
-The choice of statistical thresholds remains deeply controversial, and recently (Benjamin et al., 2018) it has been proposed that the standard threshold be changed from .05 to .005, making it substantially more stringent and thus more difficult to reject the null hypothesis. In large part this move is due to growing concerns that the evidence obtained from a significant result at $p < .05$ is relatively weak; we will discuss this in much more detail in our later discussion of reproducibility in Chapter \@ref(doing-reproducible-research).
+The choice of statistical thresholds remains deeply controversial, and recently (Benjamin et al., 2018) it has been proposed that the standard threshold be changed from .05 to .005, making it substantially more stringent and thus more difficult to reject the null hypothesis. In large part this move is due to growing concerns that the evidence obtained from a significant result at $p < .05$ is relatively weak; we will discuss this in more detail in our later discussion of reproducibility in Chapter \@ref(doing-reproducible-research).
 
 #### Hypothesis testing as decision-making: The Neyman-Pearson approach
 
@@ -562,7 +471,7 @@ Whereas Fisher thought that the p-value could provide evidence regarding a speci
 
 > "no test based upon a theory of probability can by itself provide any valuable evidence of the truth or falsehood of a hypothesis. But we may look at the purpose of tests from another viewpoint. Without hoping to know whether each separate hypothesis is true or false, we may search for rules to govern our behaviour with regard to them, in following which we insure that, in the long run of experience, we shall not often be wrong" [@Neyman289]
 
-That is: We can’t know which specific decisions are right or wrong, but if we follow the rules, we can at least know how often our decisions will be wrong.
+That is: We can’t know which specific decisions are right or wrong, but if we follow the rules, we can at least know how often our decisions will be wrong on average.
 
 To understand the decision making framework that Neyman and Pearson developed, we first need to discuss statistical decision making in terms of the kinds of outcomes that can occur.  There are two possible states of reality ($H_0$ is true, or $H_0$ is false), and two possible decisions (reject $H_0$, or fail to reject $H_0$).  There are two ways in which we can make a correct decision:
 
@@ -601,7 +510,7 @@ No. The p-value is a statement about the likelihood of a particular dataset unde
 
 No.  There is an important distinction between *statistical significance* and *practical significance*.  As an example, let's say that we performed a randomized controlled trial to examine the effect of a particular diet on body weight, and we find a statistically significant effect at p<.05.  What this doesn't tell us is how much weight was actually lost, which we refer to as the *effect size* (to be discussed in more detail in Chapter \@ref(ci-effect-size-power)).  If we think about a study of weight loss, then we probably don't think that the loss of ten ounces (i.e. the weight of a bag of potato chips) is practically significant.  Let's look at our ability to detect a significant difference of 1 ounce as the sample size increases.
 
-```{r}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 # create simulated data for weight loss trial
 
 weightLossTrial <- function(nPerGroup, weightLossOz = 1) {
@@ -671,7 +580,7 @@ Let's look at an example to see how this might work.  There is great interest in
 
 Let's imagine what would happen if the researchers simply asked whether the test was significant at p<.05 at each location, when in fact there is no true effect at any of the locations.  To do this, we generate a large number of simulated t values from a null distribution, and ask how many of them are significant at p<.05.  Let's do this many times, and each time count up how many of the tests come out as significant (see Figure \@ref(fig:nullSim)).  
 
-```{r}
+```{r echo=FALSE}
 # simulate 1500 studies with 10,000 tests each, thresholded at p < .05
 
 nRuns <- 1500 # number of simulated studies to run
@@ -681,29 +590,12 @@ uncAlpha <- 0.05 # alpha level
 
 uncOutcome <- replicate(nRuns, sum(rnorm(nTests) < qnorm(uncAlpha)))
 
-sprintf("mean proportion of significant tests per run: %0.2f", mean(uncOutcome) / nTests)
+#sprintf("mean proportion of significant tests per run: %0.2f", mean(uncOutcome) / nTests)
 
 # compute proportion of studies with at least one false positive result,
 # known as the familywise error rate
-sprintf("familywise error rate: %0.3f", mean(uncOutcome > 0))
+#sprintf("familywise error rate: %0.3f", mean(uncOutcome > 0))
 
-```
-
-```{r nullSim,echo=FALSE,fig.cap="A histogram of the number of significant results in each set of 1 million statistical tests, when there is in fact no true effect.",fig.width=4,fig.height=4,out.height='50%'}
-
-data.frame(nsig=uncOutcome) %>%
-  ggplot(aes(nsig)) +
-  geom_histogram(bins=50) +
-  xlab(sprintf('Number of significant results (out of %d)',nTests)) +
-  theme(plot.margin = unit(c(0,1.5,0,0), "cm"))
-
-```
-
-This shows that about 5% of all of the tests were significant in each run, meaning that if we were to use p < .05 as our threshold for statistical significance, then even if there were no truly significant relationships present, we would still "find" about 500 genes that were seemingly significant (the expected number of significant results is simply $n * \alpha$).  That is because while we controlled for the error per test, we didn't control the *familywise error*, or the error across all of the tests, which is what we really want to control if we are going to be looking at the results from a large number of tests. Using p<.05, our familywise error rate in the above example is one -- that is, we are pretty much guaranteed to make at least one error in any particular study.  
-
-A simple way to control for the familywise error is to divide the alpha level by the number of tests; this is known as the *Bonferroni* correction, named after the Italian statistician Carlo Bonferroni.  Using the data from our example above, we see in Figure \@ref(fig:bonferroniSim) that only about 5 percent of studies show any significant results using the corrected alpha level of 0.000005 instead of the nominal level of .05.  We have effectively controlled the familywise error, such that the probability of making *any* errors in our study is controlled at right around .05.
-
-```{r}
 # compute Bonferroni-corrected alpha
 corAlpha <- 0.05 / nTests
 
@@ -713,15 +605,34 @@ sprintf("corrected familywise error rate: %0.3f", mean(corOutcome > 0))
 
 ```
 
-```{r bonferroniSim,echo=FALSE,fig.cap="A histogram of the number of significant results across all simulation runs after applying the Bonferroni correction for multiple tests.",fig.width=4,fig.height=4,out.height='50%'}
+```{r nullSim,echo=FALSE,fig.cap="Left: A histogram of the number of significant results in each set of 1 million statistical tests, when there is in fact no true effect. Right: A histogram of the number of significant results across all simulation runs after applying the Bonferroni correction for multiple tests.",fig.width=8,fig.height=4,out.height='50%'}
 
-ggplot(data.frame(nsig=corOutcome),aes(nsig)) +
+p1 <- data.frame(nsig=uncOutcome) %>%
+  ggplot(aes(nsig)) +
+  geom_histogram(bins=50) +
+  xlab(sprintf('Number of significant results (out of %d)',nTests)) +
+  theme(plot.margin = unit(c(0,1.5,0,0), "cm"))
+
+p2 <- ggplot(data.frame(nsig=corOutcome),aes(nsig)) +
   geom_histogram(bins=50) +
   xlab(sprintf('Number of significant results (out of %d)',nTests)) +
   theme(plot.margin = unit(c(0,1,0,0), "cm"))
 
+plot_grid(p1, p2)
 ```
 
+This shows that about 5% of all of the tests were significant in each run, meaning that if we were to use p < .05 as our threshold for statistical significance, then even if there were no truly significant relationships present, we would still "find" about 500 genes that were seemingly significant (the expected number of significant results is simply $n * \alpha$).  That is because while we controlled for the error per test, we didn't control the *familywise error*, or the error across all of the tests, which is what we really want to control if we are going to be looking at the results from a large number of tests. Using p<.05, our familywise error rate in the above example is one -- that is, we are pretty much guaranteed to make at least one error in any particular study.  
+
+A simple way to control for the familywise error is to divide the alpha level by the number of tests; this is known as the *Bonferroni* correction, named after the Italian statistician Carlo Bonferroni.  Using the data from our example above, we see in Figure \@ref(fig:bonferroniSim) that only about 5 percent of studies show any significant results using the corrected alpha level of 0.000005 instead of the nominal level of .05.  We have effectively controlled the familywise error, such that the probability of making *any* errors in our study is controlled at right around .05.
+
+## Learning objectives
+
+* Identify the components of a hypothesis test, including the parameter of interest, the null and alternative hypotheses, and the test statistic.
+* Describe the proper interpretations of a p-value as well as common misinterpretations
+* Distinguish between the two types of error in hypothesis testing, and the factors that determine them.
+* Describe how resampling can be used to compute a p-value.
+* Define the concept of statistical power, and compute statistical power for a given statistical test.
+* Describe the main criticisms of null hypothesis statistical testing
 
 ## Suggested readings
 
