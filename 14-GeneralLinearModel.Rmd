@@ -18,9 +18,7 @@ library(caret)
 library(MASS)
 library(cowplot)
 
-library(pander)
-panderOptions('round',2)
-panderOptions('digits',7)
+library(knitr)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -52,13 +50,11 @@ Before we discuss the general linear model, let's first define two terms that wi
 - *dependent variable*: This is the outcome variable that our model aims to explain (usually referred to as *Y*)
 - *independent variable*: This is a variable that we wish to use in order to explain the dependent variable (usually referred to as *X*).  
 
-There may be multiple independent variables, but for this course there will only be one dependent variable in our analyses.
+There may be multiple independent variables, but for this course we will focus primarily on situations where there is only one dependent variable in our analysis.
 
 A general linear model is one in which the model for the dependent variable is composed of a *linear combination* of independent variables that are each multiplied by a weight (which is often referred to as the Greek letter beta - $\beta$), which determines the relative contribution of that independent variable to the model prediction.
 
-As an example, let's generate some simulated data for the relationship between study time and exam grades (see Figure \@ref(fig:StudytimeGrades)).
-
-```{r}
+```{r echo=FALSE}
 # create simulated data for example
 set.seed(12345)
 
@@ -78,7 +74,7 @@ df <-
   )
 ```
 
-```{r StudytimeGrades, echo=FALSE,fig.cap='Relation between study time and grades',fig.width=4,fig.height=4,out.height='50%'}
+```{r StudytimeGrades, echo=FALSE,fig.cap='Relation between study time and grades',fig.width=3,fig.height=3,out.height='50%'}
 p <- ggplot(df,aes(studyTime,grade)) +
   geom_point(size=3) +
   xlab('Study time (hours)') +
@@ -90,7 +86,7 @@ print(p)
 ```
 
 
-Given these data, we might want to engage in each of the three fundamental activities of statistics:
+As an example, let's generate some simulated data for the relationship between study time and exam grades (see Figure \@ref(fig:StudytimeGrades)). Given these data, we might want to engage in each of the three fundamental activities of statistics:
 
 - *Describe*: How strong is the relationship between grade and study time?
 - *Decide*: Is there a statistically significant relationship between grade and study time?
@@ -98,7 +94,7 @@ Given these data, we might want to engage in each of the three fundamental activ
 
 In the last chapter we learned how to describe the relationship between two variables using the correlation coefficient, so we can use that to describe the relationship here, and to test whether the correlation is statistically significant:
 
-```{r}
+```{r echo=FALSE}
 # compute correlation between grades and study time
 corTestResult <- cor.test(df$grade, df$studyTime, alternative = "greater")
 corTestResult
@@ -122,9 +118,9 @@ The $\beta_x$ value tells us how much we would expect y to change given a one-un
 $$
 \hat{y} = x * \beta_x + \beta_0 
 $$
-Figure  \@ref(fig:LinearRegression) shows an example of this model applied to the study time example.
+Note that this is simply the equation for a line, where $\beta_x$ is the slope and $\beta_0$ is the intercept. Figure  \@ref(fig:LinearRegression) shows an example of this model applied to the study time example.
 
-```{r LinearRegression,echo=FALSE,fig.cap="The linear regression solution for the study time data is shown in blue. The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted black line.  The value of beta is equal to the slope of the line -- that is, how much y changes for a unit change in x.  This is shown schematically in the red dashed lines, which show the degree of increase in grade for a single unit increase in study time.",fig.width=6,fig.height=6,out.height='50%'}
+```{r LinearRegression,echo=FALSE,fig.cap="The linear regression solution for the study time data is shown in the solid line The value of the intercept is equivalent to the predicted value of the y variable when the x variable is equal to zero; this is shown with a dotted line.  The value of beta is equal to the slope of the line -- that is, how much y changes for a unit change in x.  This is shown schematically in the dashed lines, which show the degree of increase in grade for a single unit increase in study time.",fig.width=4,fig.height=4,out.height='50%'}
 
 lmResult <- lm(grade~studyTime,data=df)
 
@@ -146,11 +142,13 @@ print(p3)
 
 ```
 
+We will not go into the details of how the best fitting slope and intercept are actually estimated from the data; if you are interested, details are available in the Appendix.
+
 ### Regression to the mean
 
-The concept of *regression to the mean* was one of Galton's essential contributions to science, and it remains a critical point to understand when we interpret the results of experimental data analyses.  Let's say that we want to study the effects of a reading intervention on the performance of poor readers.  To test our hypothesis, we might go into a school and recruit those individuals in the bottom 25% of the distribution on some reading test, administer the intervention, and then examine their performance.  Let's say that the intervention actually has no effect, and that reading scores for each individual are simply independent samples from a normal distribution.  We can simulate this:
+The concept of *regression to the mean* was one of Galton's essential contributions to science, and it remains a critical point to understand when we interpret the results of experimental data analyses.  Let's say that we want to study the effects of a reading intervention on the performance of poor readers.  To test our hypothesis, we might go into a school and recruit those individuals in the bottom 25% of the distribution on some reading test, administer the intervention, and then examine their performance.  Let's say that the intervention actually has no effect, such that reading scores for each individual are simply independent samples from a normal distribution.  We can simulate this:
 
-```{r}
+```{r echo=FALSE}
 # create simulated data for regression to the mean example
 
 nstudents <- 100 
@@ -170,74 +168,15 @@ readingScores <-
   mutate(badTest1 = test1 < cutoff) %>% 
   dplyr::filter(badTest1 == TRUE) %>%
   summarize(
-    test1mean = mean(test1),
-    test2mean = mean(test2)
-  ) %>%
-  pander()
+    `Test 1` = mean(test1),
+    `Test 2` = mean(test2)
+  )
+readingScores = as.data.frame(t(readingScores)) %>% rename(Score = V1)
+kable(readingScores, caption='Reading scores for Test 1 (which is lower, because it was the basis for selecting the students) and Test 2 (which is higher because it was not related to Test 1).')
 ```
 
 If we look at the difference between the mean test performance at the first and second test, it appears that the intervention has helped these students substantially, as their scores have gone up by more than ten points on the test!  However, we know that in fact the students didn't improve at all, since in both cases the scores were simply selected from a random normal distribution. What has happened is that some subjects scored badly on the first test simply due to random chance. If we select just those subjects on the basis of their first test scores, they are guaranteed to move back towards the mean of the entire group on the second test, even if there is no effect of training. This is the reason that we need an untreated *control group* in order to interpret any changes in reading over time; otherwise we are likely to be tricked by regression to the mean.
 
-### Estimating linear regression parameters
-
-We generally estimate the parameters of a linear model from data using *linear algebra*, which is the form of algebra that is applied to vectors and matrices.  If you aren't familiar with linear algebra, don't worry -- you won't actually need to use it here, as R will do all the work for us.  However, a brief excursion in linear algebra can provide some insight into how the model parameters are estimated in practice.
-
-First, let's introduce the idea of vectors and matrices; you've already encountered them in the context of R, but we will review them here.  A matrix is a set of numbers that are arranged in a square or rectangle, such that there are one or more *dimensions* across which the matrix varies.  It is customary to place different observation units (such as people) in the rows, and different variables in the columns. Let's take our study time data from above. We could arrange these numbers in a matrix, which would have eight rows (one for each student) and two columns (one for study time, and one for grade).  If you are thinking "that sounds like a data frame in R" you are exactly right!  In fact, a data frame is a specialized version of a matrix, and we can convert a data frame to a matrix using the `as.matrix()` function.
-
-```{r}
-df_matrix <- 
-  df %>%
-  dplyr::select(studyTime, grade) %>%
-  as.matrix()
-```
-
-We can write the general linear model in linear algebra as follows:
-
-$$
-Y = X*\beta + E
-$$
-This looks very much like the earlier equation that we used, except that the letters are all capitalized, which is meant to express the fact that they are vectors.  
-
-We know that the grade data go into the Y matrix, but what goes into the $X$ matrix?  Remember from our initial discussion of linear regression that we need to add a constant in addition to our independent variable of interest, so our $X$ matrix (which we call the *design matrix*) needs to include two columns:  one representing the study time variable, and one column with the same value for each individual (which we generally fill with all ones). We can view the resulting design matrix graphically (see Figure \@ref(fig:GLMmatrix)).
-
-```{r GLMmatrix, echo=FALSE,fig.cap="A depiction of the linear model for the study time data in terms of matrix algebra.",fig.width=4,fig.height=3.04}
-knitr::include_graphics("images/glm_matrix.png")
-```
-
-The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1. Therefore, the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view the linear model as a set of individual equations for each individual:
-
-$\hat{y}_1 = studyTime_1*\beta_1 + 1*\beta_2$
-
-$\hat{y}_2 = studyTime_2*\beta_1 + 1*\beta_2$
-
-...
-
-$\hat{y}_8 = studyTime_8*\beta_1 + 1*\beta_2$
-
-Remember that our goal is to determine the best fitting values of $\beta$ given the known values of $X$ and $Y$.  A naive way to do this would be to solve for $\beta$ using simple algebra -- here we drop the error term $E$ because it's out of our control:
-
-$$
-\hat{\beta} = \frac{Y}{X}
-$$
-
-The challenge here is that $X$ and $\beta$ are now matrices, not single numbers -- but the rules of linear algebra tell us how to divide by a matrix, which is the same as multiplying by the *inverse* of the matrix (referred to as $X^{-1}$).  We can do this in R:
-
-```{r}
-# compute beta estimates using linear algebra
-
-Y <- as.matrix(df$grade) #create Y variable 8 x 1 matrix
-X <- matrix(0, nrow = 8, ncol = 2) #create X variable 8 x 2 matrix
-X[, 1] <- as.matrix(df$studyTime) #assign studyTime values to first column in X matrix
-X[, 2] <- 1 #assign constant of 1 to second column in X matrix
-
-# compute inverse of X using ginv()
-# %*% is the R matrix multiplication operator
-
-beta_hat <- ginv(X) %*% Y #multiple the inverse of X by Y
-print(beta_hat)
-```
-
-Anyone who is interested in serious use of statistical methods is highly encouraged to invest some time in learning linear algebra, as it provides the basis for nearly all of the tools that are used in standard statistics.
 
 ### The relation between correlation and regression
 
@@ -306,11 +245,11 @@ $$
 
 In R, we don't need to compute these by hand, as they are automatically returned to us by the ```lm()``` function:
 
-```{r}
+```{r echo=FALSE}
 summary(lmResult)
 ```
 
-In this case we see that the intercept is significantly different from zero (which is not very interesting) and that the effect of studyTime on grades is marginally significant.
+In this case we see that the intercept is significantly different from zero (which is not very interesting) and that the effect of studyTime on grades is marginally significant (p = .09).
 
 ### Quantifying goodness of fit of the model
 
@@ -319,7 +258,7 @@ Sometimes it's useful to quantify how well the model fits the data overall, and 
 $$
 R^2 = r^2
 $$
-In the case of our study time data, $R^2$ = `r I(cor(df$studyTime,df$grade)**2)`, which means that we have accounted for about 40% of the variance in the data.
+In the case of our study time example, $R^2$ = `r I(cor(df$studyTime,df$grade)**2)`, which means that we have accounted for about 40% of the variance in grades.
 
 More generally we can think of $R^2$ as a measure of the fraction of variance in the data that is accounted for by the model, which can be computed by breaking the variance into multiple components:
 
@@ -336,31 +275,14 @@ A small value of $R^2$ tells us that even if the model fit is statistically sign
 
 ## Fitting more complex models
 
-Often we would like to understand the effects of multiple variables on some particular outcome, and how they relate to one another.  In the context of our study time example, let's say that we discovered that some of the students had previously taken a course on the topic.  If we plot their grades (see Figure  \@ref(fig:StudytimeGradesPrior)), we can see that those who had a prior course perform much better than those who had not, given the same amount of study time.
-
-```{r StudytimeGradesPrior, echo=FALSE,fig.cap='The relationship between study time and grades, with color identifying whether each student had taken a previous course on the topic',fig.width=6,fig.height=4,out.height='50%'}
-
-p <- ggplot(df,aes(studyTime,grade,color=as.factor(priorClass))) +
-  geom_point(size=3) + xlim(0,5) + ylim(70,100) +
-  scale_color_discrete(
-    limits = c(0, 1),
-    labels = c("No", "Yes")
-  ) +
-  labs(
-    color = "Previous course"
-  )
-print(p)
-
-```
-
-We would like to build a statistical model that takes this into account, which we can do by extending the model that we built above:
+Often we would like to understand the effects of multiple variables on some particular outcome, and how they relate to one another.  In the context of our study time example, let's say that we discovered that some of the students had previously taken a course on the topic.  If we plot their grades (see Figure  \@ref(fig:LinearRegressionByPriorClass)), we can see that those who had a prior course perform much better than those who had not, given the same amount of study time. We would like to build a statistical model that takes this into account, which we can do by extending the model that we built above:
 
 $$
 \hat{y} = \hat{\beta_1}*studyTime + \hat{\beta_2}*priorClass + \hat{\beta_0}
 $$
 To model whether each individual has had a previous class or not, we use what we call *dummy coding* in which we create a new variable that has a value of one to represent having had a class before, and zero otherwise.  This means that for people who have had the class before, we will simply add the value of $\hat{\beta_2}$ to our predicted value for them -- that is, using dummy coding $\hat{\beta_2}$ simply reflects the difference in means between the two groups. Our estimate of $\hat{\beta_1}$ reflects the regression slope over all of the data points --  we are assuming that regression slope is the same regardless of whether someone has had a class before (see Figure  \@ref(fig:LinearRegressionByPriorClass)).
 
-```{r}
+```{r echo=FALSE}
 # perform linear regression for study time and prior class
 
 # must change priorClass to a factor variable
@@ -371,37 +293,37 @@ summary(lmResultTwoVars)
 
 ```
 
-```{r LinearRegressionByPriorClass,echo=FALSE, fig.cap='The relation between study time and grade including prior experience as an additional component in the model.  The blue line shows the slope relating grades to study time, and the black dotted line corresponds to the difference in means between the two groups.',fig.width=6,fig.height=4,out.height='50%'}
+```{r LinearRegressionByPriorClass,echo=FALSE, fig.cap='The relation between study time and grade including prior experience as an additional component in the model.  The solid line relates study time to grades for students who have not had prior experience, and the dashed line relates grades to study time for students with prior experience. The dotted line corresponds to the difference in means between the two groups.',fig.width=6,fig.height=4,out.height='50%'}
 
 
-p <- ggplot(df,aes(studyTime,grade,color=priorClass)) +
+p <- ggplot(df,aes(studyTime,grade,shape=priorClass)) +
   geom_point(size=3) + xlim(0,5) + ylim(70,100)
 
 
 p <- p+
   geom_abline(slope=lmResultTwoVars$coefficients[2],
-              intercept=lmResultTwoVars$coefficients[1],color='red')
+              intercept=lmResultTwoVars$coefficients[1],lineype='dotted')
 
-p <- p+
-  annotate('segment',x=2,xend=3,
-           y=lmResultTwoVars$coefficients[1]+
-             2*lmResultTwoVars$coefficients[2],
-           yend=lmResultTwoVars$coefficients[1]+
-             2*lmResultTwoVars$coefficients[2],
-           color='blue') +
-  annotate('segment',x=3,xend=3,
-           y=lmResultTwoVars$coefficients[1]+
-             2*lmResultTwoVars$coefficients[2],
-           yend=lmResultTwoVars$coefficients[1]+
-             3*lmResultTwoVars$coefficients[2],
-           color='blue')
+# p <- p+
+#   annotate('segment',x=2,xend=3,
+#            y=lmResultTwoVars$coefficients[1]+
+#              2*lmResultTwoVars$coefficients[2],
+#            yend=lmResultTwoVars$coefficients[1]+
+#              2*lmResultTwoVars$coefficients[2],
+#            color='blue') +
+#   annotate('segment',x=3,xend=3,
+#            y=lmResultTwoVars$coefficients[1]+
+#              2*lmResultTwoVars$coefficients[2],
+#            yend=lmResultTwoVars$coefficients[1]+
+#              3*lmResultTwoVars$coefficients[2],
+#            color='blue')
 
 
 p <- p+
   geom_abline(slope=lmResultTwoVars$coefficients[2],
               intercept=lmResultTwoVars$coefficients[1]+
                 lmResultTwoVars$coefficients[3],
-              color='green') 
+              linetype='dashed') 
 
 p <- p+
   annotate('segment',x=2,xend=2,
@@ -438,16 +360,15 @@ df <-
   mutate(caffeine=runif(n())*100) %>%
   mutate(speaking=0.5*caffeine*-group + group*20 + rnorm(20)*10)
 
-p <- ggplot(df,aes(caffeine,speaking)) +
+p1 <- ggplot(df,aes(caffeine,speaking)) +
   geom_point()
-print(p)
 
 ```
 
 Let's use a new example that asks the question: What is the effect of caffeine on public speaking?  First let's generate some data and plot them.
-Looking at Figure \@ref(fig:CaffeineSpeaking), there doesn't seem to be a relationship, and we can confirm that by performing linear regression on the data:
+Looking at panel A of Figure \@ref(fig:CaffeineAnxietyInteraction), there doesn't seem to be a relationship, and we can confirm that by performing linear regression on the data:
 
-```{r}
+```{r echo=FALSE}
 # perform linear regression with caffeine as independent variable
 lmResultCaffeine <- lm(speaking ~ caffeine, data = df)
 summary(lmResultCaffeine)
@@ -459,14 +380,13 @@ But now let's say that we find research suggesting that anxious and non-anxious 
 df <- 
   df %>% 
   mutate(anxiety=ifelse(group==1,'anxious','notAnxious'))
-p <- ggplot(df,aes(caffeine,speaking,color=anxiety)) +
+p2 <- ggplot(df,aes(caffeine,speaking,color=anxiety)) +
   geom_point()
-print(p)
 ```
 
-As we see from Figure \@ref(fig:CaffeineSpeakingAnxiety), it appears that the relationship between speaking and caffeine is different for the two groups, with caffeine improving performance for people without anxiety and degrading performance for those with anxiety.  We'd like to create a statistical model that addresses this question.  First let's see what happens if we just include anxiety in the model.
+As we see from panel B in Figure \@ref(fig:CaffeineAnxietyInteraction), it appears that the relationship between speaking and caffeine is different for the two groups, with caffeine improving performance for people without anxiety and degrading performance for those with anxiety.  We'd like to create a statistical model that addresses this question.  First let's see what happens if we just include anxiety in the model.
 
-```{r}
+```{r echo=FALSE}
 # compute linear regression adding anxiety to model
 lmResultCafAnx <- lm(speaking ~ caffeine + anxiety, data = df)
 summary(lmResultCafAnx)
@@ -474,7 +394,7 @@ summary(lmResultCafAnx)
 
 Here we see there are no significant effects of either caffeine or anxiety, which might seem a bit confusing.  The problem is that this model is trying to fit the same line relating speaking to caffeine for both groups. If we want to fit them using separate lines, we need to include an *interaction* in the model, which is equivalent to fitting different lines for each of the two groups; in R this is denoted by the $*$ symbol.
 
-```{r}
+```{r echo=FALSE}
 # compute linear regression including caffeine X anxiety interaction
 lmResultInteraction <- lm(
   speaking ~ caffeine + anxiety + caffeine * anxiety,
@@ -483,8 +403,7 @@ lmResultInteraction <- lm(
 summary(lmResultInteraction)
 ```
 
-From these results we see that there are significant effects of both caffeine and anxiety (which we call *main effects*) and an interaction between caffeine and anxiety.  Figure \@ref(fig:CaffeineAnxietyInteraction) shows the separate regression lines for each group.
-
+From these results we see that there are significant effects of both caffeine and anxiety (which we call *main effects*) and an interaction between caffeine and anxiety. Panel C in Figure \@ref(fig:CaffeineAnxietyInteraction) shows the separate regression lines for each group.
 
 ```{r CaffeineAnxietyInteraction, echo=FALSE,fig.cap='The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group.',fig.width=4,fig.height=4,out.height='50%'}
 
@@ -496,7 +415,7 @@ df_notanx <-
   df %>%
   subset(anxiety=='notAnxious')
 
-p <- ggplot(df_anx,aes(caffeine,speaking)) +
+p3 <- ggplot(df_anx,aes(caffeine,speaking)) +
   geom_point(color='blue') +
   geom_line(data=data.frame(x=df$caffeine[df$anxiety=='anxious'],
                     y=lmResultInteraction$fitted.values[df$anxiety=='anxious']),
@@ -505,13 +424,13 @@ p <- ggplot(df_anx,aes(caffeine,speaking)) +
   geom_line(data=data.frame(x=df$caffeine[df$anxiety=='notAnxious'],
                     y=lmResultInteraction$fitted.values[df$anxiety=='notAnxious']),
             aes(x,y),color='red')
-print(p)
+plot_grid(p1, p2, p3, labels='AUTO')
 ```
 
 
 Sometimes we want to compare the relative fit of two different models, in order to determine which is a better model; we refer to this as *model comparison*.  For the models above, we can compare the goodness of fit of the model with and without the interaction, using the `anova()` command in R:
 
-```{r}
+```{r echo=FALSE}
 anova(lmResultCafAnx, lmResultInteraction)
 ```
 
@@ -743,3 +662,67 @@ Using cross-validation properly is tricky, and it is recommended that you consul
 ## Suggested readings
 
 - [The Elements of Statistical Learning: Data Mining, Inference, and Prediction (2nd Edition)](https://web.stanford.edu/~hastie/Papers/ESLII.pdf) - The bible of machine learning methods, available freely online.
+
+## Appendix
+
+### Estimating linear regression parameters
+
+We generally estimate the parameters of a linear model from data using *linear algebra*, which is the form of algebra that is applied to vectors and matrices.  If you aren't familiar with linear algebra, don't worry -- you won't actually need to use it here, as R will do all the work for us.  However, a brief excursion in linear algebra can provide some insight into how the model parameters are estimated in practice.
+
+First, let's introduce the idea of vectors and matrices; you've already encountered them in the context of R, but we will review them here.  A matrix is a set of numbers that are arranged in a square or rectangle, such that there are one or more *dimensions* across which the matrix varies.  It is customary to place different observation units (such as people) in the rows, and different variables in the columns. Let's take our study time data from above. We could arrange these numbers in a matrix, which would have eight rows (one for each student) and two columns (one for study time, and one for grade).  If you are thinking "that sounds like a data frame in R" you are exactly right!  In fact, a data frame is a specialized version of a matrix, and we can convert a data frame to a matrix using the `as.matrix()` function.
+
+```{r}
+df_matrix <- 
+  df %>%
+  dplyr::select(studyTime, grade) %>%
+  as.matrix()
+```
+
+We can write the general linear model in linear algebra as follows:
+
+$$
+Y = X*\beta + E
+$$
+This looks very much like the earlier equation that we used, except that the letters are all capitalized, which is meant to express the fact that they are vectors.  
+
+We know that the grade data go into the Y matrix, but what goes into the $X$ matrix?  Remember from our initial discussion of linear regression that we need to add a constant in addition to our independent variable of interest, so our $X$ matrix (which we call the *design matrix*) needs to include two columns:  one representing the study time variable, and one column with the same value for each individual (which we generally fill with all ones). We can view the resulting design matrix graphically (see Figure \@ref(fig:GLMmatrix)).
+
+```{r GLMmatrix, echo=FALSE,fig.cap="A depiction of the linear model for the study time data in terms of matrix algebra.",fig.width=4,fig.height=3.04}
+knitr::include_graphics("images/glm_matrix.png")
+```
+
+The rules of matrix multiplication tell us that the dimensions of the matrices have to match with one another; in this case, the design matrix has dimensions of 8 (rows) X 2 (columns) and the Y variable has dimensions of 8 X 1. Therefore, the $\beta$ matrix needs to have dimensions 2 X 1, since an 8 X 2 matrix multiplied by a 2 X 1 matrix results in an 8 X 1 matrix (as the matching middle dimensions drop out).  The interpretation of the two values in the $\beta$ matrix is that they are the values to be multipled by study time and 1 respectively to obtain the estimated grade for each individual. We can also view the linear model as a set of individual equations for each individual:
+
+$\hat{y}_1 = studyTime_1*\beta_1 + 1*\beta_2$
+
+$\hat{y}_2 = studyTime_2*\beta_1 + 1*\beta_2$
+
+...
+
+$\hat{y}_8 = studyTime_8*\beta_1 + 1*\beta_2$
+
+Remember that our goal is to determine the best fitting values of $\beta$ given the known values of $X$ and $Y$.  A naive way to do this would be to solve for $\beta$ using simple algebra -- here we drop the error term $E$ because it's out of our control:
+
+$$
+\hat{\beta} = \frac{Y}{X}
+$$
+
+The challenge here is that $X$ and $\beta$ are now matrices, not single numbers -- but the rules of linear algebra tell us how to divide by a matrix, which is the same as multiplying by the *inverse* of the matrix (referred to as $X^{-1}$).  We can do this in R:
+
+```{r}
+# compute beta estimates using linear algebra
+
+Y <- as.matrix(df$grade) #create Y variable 8 x 1 matrix
+X <- matrix(0, nrow = 8, ncol = 2) #create X variable 8 x 2 matrix
+X[, 1] <- as.matrix(df$studyTime) #assign studyTime values to first column in X matrix
+X[, 2] <- 1 #assign constant of 1 to second column in X matrix
+
+# compute inverse of X using ginv()
+# %*% is the R matrix multiplication operator
+
+beta_hat <- ginv(X) %*% Y #multiple the inverse of X by Y
+print(beta_hat)
+```
+
+Anyone who is interested in serious use of statistical methods is highly encouraged to invest some time in learning linear algebra, as it provides the basis for nearly all of the tools that are used in standard statistics.
+
