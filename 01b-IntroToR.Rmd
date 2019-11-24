@@ -318,6 +318,35 @@ This is just like any other vector, in that we can refer to its individual value
 
 In some of the examples in the book, you will see something called a *tibble*; this is basically a souped-up version of a data frame, and can be treated mostly in the same way.
 
+## Using R libraries
+
+Many of the useful features in R are not contained in the primary R package, but instead come from *libraries* that have been developed by various members of the R community. For example, the ```ggplot2``` package provides a number of features for visualizing data, as we will see in a later chapter.  Before we can use a package, we need to install it on our system, using the ```install.packages()``` function:
+
+```
+> install.packages("ggplot2")
+trying URL 'https://cran.rstudio.com/bin/macosx/el-capitan/contrib/3.5/ggplot2_3.2.1.tgz'
+Content type 'application/x-gzip' length 3961383 bytes (3.8 MB)
+==================================================
+downloaded 3.8 MB
+
+
+The downloaded binary packages are in
+	/var/folders/n9/8g4nr7h903l13tltdm4yhdkh0000gq/T//RtmpniKMQw/downloaded_packages
+
+```
+
+This will automatically download the package from the Comprehensive R Archive Network (CRAN) and install it on your system. Once it's installed, you can then load the library using the ```library()``` function:
+
+```
+> library(ggplot2)
+```
+
+After loading the function, you can now access all of its features.  If you want to learn more about its features, you can find them using the help function:
+
+```
+> help(ggplot2)
+```
+
 ## Working with data files
 
 When we are doing statistics, we often need to load in the data that we will analyze. Those data will live in a file on one's computer or on the internet.  For this example, let's use a file that is hosted on the internet, which contains the gross domestic product (GDP) values for a number of countries around the world.  This file is stored as *comma-delimited text*, meaning that the values for each of the variables in the dataset are separate by commas.  There are three variables: the relative rank of the countries, the name of the country, and its GDP value.  Here is what the first few lines of the file look like:
@@ -371,6 +400,7 @@ Having finished this chapter, you should be able to:
 * Describe the difference between a variable and a function
 * Describe the different types of variables
 * Create a vector or data frame and access its elements
+* Install and load an R library
 * Load data from a file and view the data frame
 
 ## Suggested readings and videos
