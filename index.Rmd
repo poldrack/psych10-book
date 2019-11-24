@@ -2,22 +2,28 @@
 title: "Statistical Thinking for the 21st Century"
 author: "Copyright 2018 Russell A. Poldrack"
 date: "Draft: `r Sys.Date()`"
-site: bookdown::bookdown_site
+knit: "bookdown::render_book"
 bibliography: ["psych10-book.bib"]
 biblio-style: "apalike"
-link-citations: false
+documentclass: book
+link-citations: yes
 github-repo: poldrack/psych10-book
+description: "A book about statistics."
 always_allow_html: yes
+fontsize: 12pt
+monofont: "Source Code Pro"
+monofontoptions: "Scale=0.7"
 output:
+  bookdown::pdf_book:
+    keep_tex: yes
   bookdown::gitbook:
     lib_dir: "book_assets"
     config:
       edit: https://github.com/poldrack/psych10-book/edit/master/%s
     includes:
-      in_header: google_analytics.html
-  bookdown::pdf_book:
-    keep_tex: yes
-documentclass: book
+      in_header:
+        - google_analytics.html
+        - css/style.css
 ---
 
 ```{r global_options, include=FALSE}
@@ -27,19 +33,20 @@ knitr::opts_chunk$set(fig.width=6, fig.height=6, #echo=FALSE,
 
 # Preface {-}
 
+
 ## Why does this book exist?
 
 In 2018 I began teaching an undergraduate statistics course at Stanford (Psych 10/Stats 60).  I had never taught statistics before, and this was a chance to shake things up.  I have been increasingly unhappy with undergraduate statistics education in psychology, and I wanted to bring a number of new ideas and approaches to the class.  In particular, I wanted to bring to bear the approaches that are increasingly used in real statistical practice in the 21st century.  As Brad Efron and Trevor Hastie laid out so nicely in their book "Computer Age Statistical Inference: Algorithms, Evidence, and Data Science", these methods take advantage of today's increased computing power to solve statistical problems in ways that go far beyond the more standard methods that are usually taught in the undergraduate statistics course for psychology students.
 
 The first year that I taught the class, I used Andy Field's amazing graphic novel statistics book, "An Adventure in Statistics", as the textbook.  There are many things that I really like about this book -- in particular, I like the way that it frames statistical practice around the building of models, and treats null hypothesis testing with sufficient caution (though insufficient disdain, in my opinion). Unfortunately, most of my students hated the book, primarily because it involved wading through a lot of story to get to the statistical knowledge.  I also found it wanting because there are a number of topics (particular those from the field of artificial intelligence known as *machine learning*) that I wanted to include but were not discussed in his book.  I ultimately came to feel that the students would be best served by a book that follows very closely to my lectures, so I started writing down my lectures into a set of computational notebooks that would ultimately become this book.  The outline of this book follows roughly that of Field's book, since the lectures were originally based in large part on the flow of that book, but the content is substantially different (and also much less fun and clever).
 
-## You're not a statistician - why should we listen to you?
-
-I am trained as a psychologist and neuroscientist, not a statistician.  However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics.  Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches.  There are almost certainly some things in this book that would annoy a real statistician (for example, I'm sure that there are places where I should have put a $\hat{hat}$ on a variable but did not).  
-
-Having said that, I welcome input from readers with greater statistical expertise than mine.  
 
 ```{r echo=FALSE}
+## You're not a statistician - why should we listen to you?
+
+#I am trained as a psychologist and neuroscientist, not a statistician.  However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics.  Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches.  There are almost certainly some things in this book that would annoy a real statistician (for example, I'm sure that there are places where I should have put a $\hat{hat}$ on a variable but did not).  
+
+#Having said that, I welcome input from readers with greater statistical expertise than mine.  
 # *if I have a statistician read it, then discuss that here*
 
 ```
