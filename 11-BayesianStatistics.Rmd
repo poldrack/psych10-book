@@ -17,7 +17,7 @@ library(cowplot)
 library(boot)
 library(MASS)
 library(BayesFactor)
-library(pander)
+library(knitr)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -44,7 +44,7 @@ Say you are walking down the street and a friend of yours walks right by but doe
 
 The idea behind a generative model is that a *latent* (unseen) process generates the data we observe, usually with some amount of randomness in the process. When we take a sample of data from a population and estimate a parameter from the sample, what we are doing in essence is trying to learn the value of a latent variable (the population mean) that gives rise through sampling to the observed data (the sample mean).  Figure \@ref(fig:GenerativeModel) shows a schematic of this idea.
 
-```{r GenerativeModel, echo=FALSE,fig.cap="A schematic of the idea of a generative model.",width=8}
+```{r GenerativeModel, echo=FALSE,fig.cap="A schematic of the idea of a generative model.",fig.width=6}
 knitr::include_graphics("images/BayesianInference.png")
 ```
 
@@ -158,7 +158,7 @@ In the previous example there were only two possible outcomes -- the explosive i
 
 ### Specifying the prior
 
-*MH: USE PRIOR BIASED TOWARDS ZERO?*
+*TBD: MH: USE PRIOR BIASED TOWARDS ZERO?*
 
 In this case, we don't have any prior information about the effectiveness of the drug, so we will use a *uniform distribution* as our prior, since all values are equally likely under a uniform distribution.  In order to simplify the example, we will only look at a subset of 99 possible values of effectiveness (from .01 to .99, in steps of .01). Therefore, each possible value has a prior probability of 1/99. 
 
@@ -288,7 +288,7 @@ Given our data we would like to obtain an estimate of $p_{respond}$ for our samp
 
 Often we would like to know not just a single estimate for the posterior, but an interval in which we are confident that the posterior falls.  We previously discussed the concept of confidence intervals in the context of frequentist inference, and you may remember that the interpretation of confidence intervals was particularly convoluted: It was an interval that will contain the the value of the parameter 95% of the time.  What we really want is an interval in which we are confident that the true parameter falls, and Bayesian statistics can give us such an interval, which we call a *credible interval*.
 
-*USE POSTERIOR FROM ABOVE*
+*TBD: USE POSTERIOR FROM ABOVE*
 
 The interpretation of this credible interval is much closer to what we had hoped we could get from a confidence interval (but could not): It tells us that there is a 95% probability that the value of $p_{respond}$ falls between these two values.  Importantly, it shows that we have high confidence that $p_{respond} > 0.0$, meaning that the drug seems to have a positive effect.
 
@@ -588,8 +588,9 @@ fx <- dbinom(x = nResponders, size = 100, prob = x)
 accept <- which(y < fx)
 accepted_samples <- x[accept]
 
-credible_interval <- quantile(x = accepted_samples, probs = c(0.025, 0.975))
-pander(credible_interval)
+credible_interval <- quantile(x = accepted_samples, 
+                              probs = c(0.025, 0.975))
+kable(credible_interval)
 ```
 
 ```{r rejectionSampling,echo=FALSE,fig.cap="Rejection sampling example.The black line shows the density of all possible values of p(respond); the blue lines show the 2.5th and 97.5th percentiles of the distribution, which represent the 95 percent credible interval for the estimate of p(respond).",fig.width=4,fig.height=4,out.height='50%'}

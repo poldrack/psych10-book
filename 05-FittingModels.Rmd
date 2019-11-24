@@ -66,10 +66,11 @@ NHANES_child %>%
   geom_histogram(bins = 100)
 ```
 
-Remember that we want to describe the data as simply as possible while still capturing their important features. What is the simplest model we can imagine that might still capture the essence of the data?  How about the most common value in the dataset (which we call the *mode*)?  R doesn't have a built-in function for the mode, so we will create one first, which we will call ``getmode()``.
+Remember that we want to describe the data as simply as possible while still capturing their important features. What is the simplest model we can imagine that might still capture the essence of the data?  How about the most common value in the dataset (which we call the *mode*)?  
 
-```{r}
+```{r echo=FALSE}
 # create function to compute mode and apply to child height data from NHANES
+# R doesn't have a built-in mode function
 getmode <- function(v) {
   uniqv <- unique(v)
   return(uniqv[which.max(tabulate(match(v, uniqv)))])
@@ -77,7 +78,6 @@ getmode <- function(v) {
 
 height_mode <- getmode(NHANES_child$Height)
 
-paste("mode of children's height from NHANES:", height_mode)
 ```
 
 This redescribes the entire set of `r I(dim(NHANES_child)[1])` children in terms of a single number. If we wanted to predict the height of any new children, then our guess would be the same number: `r I(height_mode)` centimeters.  
@@ -94,11 +94,10 @@ $$
 
 How good of a model is this?  In general we define the goodness of a model in terms of the error, which represents the difference between model and the data; all things being equal, the model that produces lower error is the better model. 
 
-```{r errorMode"}
+```{r errorMode, echo=FALSE}
 # compute error compared to the mode and plot histogram
 
 error_mode <- NHANES_child$Height - height_mode
-sprintf("average error from mode (cm): %0.2f", mean(error_mode))
 
 ```
 
@@ -115,7 +114,7 @@ We can prove mathematically that the sum of errors from the mean (and thus the a
 ```{r meanError, echo=FALSE,fig.cap="Distribution of errors from the mean.",fig.width=4,fig.height=4,out.height='50%'}
 # compute error compared to the mean and plot histogram
 
-error_mean <- error_mode <- NHANES_child$Height - mean(NHANES_child$Height)
+error_mean <- NHANES_child$Height - mean(NHANES_child$Height)
 
 ggplot(NULL, aes(error_mean)) +
   geom_histogram(bins = 100) + 
@@ -130,17 +129,15 @@ Even though the average of errors from the mean is zero, we can see from the his
 
 There are several common ways to summarize the squared error that you will encounter at various points in this book, so it's important to understand how they relate to one another.  First, we could simply add them up; this is referred to as the *sum of squared errors*.  The reason we don't usually use this is that its magnitude depends on the number of data points, so it can be difficult to interpret unless we are looking at the same number of observations.  Second, we could  take the mean of the squared error values, which is referred to as the *mean squared error (MSE)*.  However, because we squared the values before averaging, they are not on the same scale as the original data; they are in $centimeters^2$.  For this reason, it's also common to take the square root of the MSE, which we refer to as the *root mean squared error (RMSE)*, so that the error is measured in the same units as the original values (in this example, centimeters).
 
-```{r}
+```{r echo=FALSE}
 # compute and print RMSE for mean and mode
 rmse_mean <- sqrt(mean(error_mean**2))
 
 rmse_mode <- sqrt(mean(error_mode**2))
 
-print(paste("Mode: root mean squared error (centimeters):", rmse_mode))
-print(paste("Mean: root mean squared error (centimeters):", rmse_mean))
 ```
 
-This shows that the mean has a pretty substantial amount of error -- any individual data point will be about 27 cm from the mean on average -- but it's still much better than the mode. 
+The mean has a pretty substantial amount of error -- any individual data point will be about `r I(sprintf('%.0f',rmse_mean))` cm from the mean on average -- but it's still much better than the mode, which has an average error of about `r I(sprintf('%.0f',rmse_mode))` cm.
 
 ### Improving our model
 
@@ -215,12 +212,6 @@ where *constant* is a constant value added to the prediction for each individual
 # find the best fitting model to predict height given age
 model_age <- lm(Height ~ Age, data = NHANES_child)
 
-sprintf(
-  "model: height = %0.2f + %0.2f*Age",
-  model_age$coefficients[1],
-  model_age$coefficients[2]
-)
-
 # the add_predictions() function uses the fitted model to add the predicted values for each person to our dataset
 NHANES_child <-
   NHANES_child %>% 
@@ -236,13 +227,10 @@ rmse_age <-
   ) %>% 
   pull()
 
-sprintf("root mean squared error: %0.2f", rmse_age)
-
 ```
 
-Our error is much smaller using this model -- only `r I(rmse_age)` centimeters on average.  Can you think of other variables that might also be related to height? What about gender?  In Panel D of Figure \@ref(fig:childHeightLine) we plot the data with lines fitted separately for males and females. From the plot, it seems that there is a difference between males and females, but it is relatively small and only emerges after the age of puberty.  Let's estimate this model and see how the errors look:
 
-```{r}
+```{r echo=FALSE}
 # compute model fit for modeling with age and gender
 
 model_age_gender <- lm(Height ~ Age + Gender, data = NHANES_child)
@@ -255,18 +243,9 @@ rmse_age_gender <-
   ) %>% 
   pull()
 
-sprintf(
-  "model: height = %0.2f + %0.2f*Age + %0.2f*Gender",
-  model_age_gender$coefficients[1],
-  model_age_gender$coefficients[2],
-  model_age_gender$coefficients[3]
-)
-
-print(sprintf("root mean squared error: %0.2f", rmse_age_gender))
-
 ```
 
-In Figure \@ref(fig:msePlot) we plot the root mean squared error values across the different models. From this we see that the model got a little bit better going from mode to mean, much better going from mean to mean+age, and only very slighly better by including gender as well.
+Our error is much smaller using this model -- only `r I(rmse_age)` centimeters on average.  Can you think of other variables that might also be related to height? What about gender?  In Panel D of Figure \@ref(fig:childHeightLine) we plot the data with lines fitted separately for males and females. From the plot, it seems that there is a difference between males and females, but it is relatively small and only emerges after the age of puberty.  Let's estimate this model and see how the errors look.  In Figure \@ref(fig:msePlot) we plot the root mean squared error values across the different models. From this we see that the model got a little bit better going from mode to mean, much better going from mean to mean+age, and only very slighly better by including gender as well.
 
 
 ```{r msePlot,echo=FALSE, fig.cap="Mean squared error plotted for each of the models tested above.",fig.width=4,fig.height=4,out.height='50%'}
@@ -518,7 +497,7 @@ df_error %>%
 
 This minimization of SSE is a good feature, and it's why the mean is the most commonly used statistic to summarize data.  However, the mean also has a dark side.  Let's say that five people are in a bar, and we examine each person's  income:
 
-```{r}
+```{r echo=FALSE}
 # create income data frame
 
 incomeDf <- 
@@ -530,14 +509,12 @@ incomeDf <-
 ```
 
 ```{r, echo=FALSE}
-kable(incomeDf)
-sprintf("Mean income: %0.2f", mean(incomeDf$income))
-
+kable(incomeDf, caption='Income for our five bar patrons')
 ```
 
-The mean seems to be a pretty good summary of the income of those five people.  Now let's look at what happens if Beyoncé Knowles walks into the bar:
+The mean (`r I(sprintf("%0.2f", mean(incomeDf$income)))`) seems to be a pretty good summary of the income of those five people.  Now let's look at what happens if Beyoncé Knowles walks into the bar:
 
-```{r}
+```{r echo=FALSE}
 # add Beyonce to income data frame
 
 incomeDf <- 
@@ -548,8 +525,7 @@ incomeDf <-
 ```
 
 ```{r echo=FALSE}
-kable(incomeDf)
-sprintf("Mean income: %0.2f", mean(incomeDf$income))
+kable(incomeDf, caption='Income for our five bar patrons plus Beyoncé Knowles.')
 
 ```
 
@@ -561,56 +537,37 @@ If we want to summarize the data in a way that is less sensitive to outliers, we
 
 Let's look at an example.  Say we want to summarize the following values:
 
-```{r}
-# create example data frame
-dataDf <- 
-  tibble(
-    values = c(8, 6, 3, 14, 12, 7, 6, 4, 9)
-  )
-
-
+```
+8  6  3 14 12  7  6  4  9
 ```
 
-```{r echo=FALSE}
-kable(dataDf)
-```
 
 If we sort those values:
 
-```{r}
-# sort values and print
-dataDf <-
-  dataDf %>% 
-  arrange(values)
-
-
 ```
-
-```{r echo=FALSE}
-kable(dataDf)
+3  4  6  6  7  8  9 12 14
 ```
 
 Then the median is the middle value -- in this case, the 5th of the 9 values.
 
-Whereas the mean minimizes the sum of squared errors, the median minimizes a slighty different quantity: The sum of *absolute* errors.  This explains why it is less sensitive to outliers -- squaring is going to exacerbate the effect of large errors compared to taking the absolute value.  We can see this in the case of the income example:
+Whereas the mean minimizes the sum of squared errors, the median minimizes a slighty different quantity: The sum of *absolute* errors.  This explains why it is less sensitive to outliers -- squaring is going to exacerbate the effect of large errors compared to taking the absolute value.  We can see this in the case of the income example: The median is much more representative of the group as a whole, and less sensitive to the one large outlier.
+
 
 ```{r echo=FALSE}
 income_summary_df <- data.frame(Statistic=c('Mean','Median'), 
                                 Value=c(mean(incomeDf$income),
                                         median(incomeDf$income)))
-kable(income_summary_df)
+kable(income_summary_df, caption='Summary statistics for income after arrival of Beyoncé Knowles.')
 
 ```
 
-The median is much more representative of the group as a whole, and less sensitive to the one large outlier.
 
 Given this, why would we ever use the mean?  As we will see in a later chapter, the mean is the "best" estimator in the sense that it will vary less from sample to sample compared to other estimators.  It's up to us to decide whether that is worth the sensitivity to potential outliers -- statistics is all about tradeoffs.
 
 ## The mode
 
-Sometimes we wish to describe the central tendency of a dataset that is not numeric.  For example, let's say that we want to know which models of iPhone are most commonly used.  Let's say we ask a group of iPhone users which model they own, and get the following results:
 
-```{r}
+```{r echo=FALSE}
 # compute mean of iPhone model numbers
 iphoneDf <- 
   tribble(
@@ -631,7 +588,7 @@ meanPhoneNumber <-
   
 ```
 
-If we were to take the average of these values, we would see that the mean iPhone model is `r I(meanPhoneNumber)`, which is clearly nonsensical, since the iPhone model numbers are on an ordinal scale. In this case, a more appropriate measure of central tendency is the mode, which is the most common value in the dataset, as we discussed above. 
+Sometimes we wish to describe the central tendency of a dataset that is not numeric.  For example, let's say that we want to know which models of iPhone are most commonly used.  Let's say we ask a large group of iPhone users which model each one owns. If we were to take the average of these values, we would see that the mean iPhone model is `r I(meanPhoneNumber)`, which is clearly nonsensical, since the iPhone model numbers are not meant to be quantitative measurements. In this case, a more appropriate measure of central tendency is the mode, which is the most common value in the dataset, as we discussed above. 
 
 ## Variability: How well does the mean fit the data?
 
@@ -662,7 +619,7 @@ I am a strong beleiver in the use of computer simulations to understand statisti
 
 Let's treat the entire sample of children from the NHANES data as our "population", and see how well the calculations of sample variance using either $n$ or $n-1$ in the denominator will estimate variance of this population, across a large number of simulated random samples from the data.  We will return to the details of how to do this in a later chapter.
 
-```{r}
+```{r echo=FALSE}
 # compare variance estimates using N or N-1 in denominator
 
 population_variance <- 
@@ -687,14 +644,14 @@ for (i in 1:nsamp) {
   varhat_nm1[i] <- sse / (sampsize - 1)
 }
 
+summary_df <- data.frame(Estimate=c("Population variance",
+                                    "Variance estimate using n",
+                                    "Variance estimate using n-1"),
+                         Value=c(population_variance,
+                                 mean(varhat_n),
+                                 mean(varhat_nm1)))
 
-```
-
-```{r echo=FALSE}
-sprintf("Population variance: %.2f", population_variance)
-sprintf("Variance estimate using n: %.2f", mean(varhat_n))
-sprintf("Variance estimate using n-1: %.2f", mean(varhat_nm1))
-
+kable(summary_df, caption='Variance estimates using n versus n-1; the estimate using n-1 is closer to the population value')
 ```
 
 This shows us that the theory outlined above was correct: The variance estimate using $n - 1$ as the denominator is very close to the variance computed on the full data (i.e, the population), whereas the variance computed using $n$ as the denominator is biased (smaller) compared to the true value.
@@ -807,18 +764,7 @@ plot_grid(p1,p2)
 
 ```
 
-Instead of using the raw numbers of crimes, we should instead use the per-capita violent crime rate, which we obtain by dividing the number of crimes by the population of the state.  The dataset from the FBI already includes this value (expressed as rate per 100,000 people):
-
-```{r echo=FALSE}
-# print crime rate statistics, normalizing for population
-
-sprintf("Rate of 2014 violent crimes in CA: %.2f", caCrimeData$Violent.Crime.rate)
-sprintf("Mean rate across states: %.2f", mean(crimeData$Violent.Crime.rate))
-sprintf("Std. deviation of rate across states: %.2f", sd(crimeData$Violent.Crime.rate))
-
-```
-
-From the right panel of Figure \@ref(fig:popVsCrime) we see that California is not so dangerous after all -- its crime rate of `r I(caCrimeData$Violent.Crime.rate)` per 100,000 people is a bit above the mean of `r I(mean(crimeData$Violent.Crime.rate))`, but well within the range of many other states. But what if we want to get a clearer view of how far it is from the rest of the distribution? 
+Instead of using the raw numbers of crimes, we should instead use the per-capita violent crime rate, which we obtain by dividing the number of crimes by the population of the state.  The dataset from the FBI already includes this value (expressed as rate per 100,000 people). Looking at the right panel of Figure \@ref(fig:popVsCrime), we see that California is not so dangerous after all -- its crime rate of `r I(sprintf("%.2f", caCrimeData$Violent.Crime.rate))` per 100,000 people is a bit above the mean across states of `r I(sprintf("%.2f", mean(crimeData$Violent.Crime.rate)))`, but well within the range of many other states. But what if we want to get a clearer view of how far it is from the rest of the distribution? 
 
 The *Z-score* allows us to express data in a way that provides more insight into each data point's relationship to the overall distribution.  The formula to compute a Z-score for a data point given that we know the value of the population mean $\mu$ and standard deviation $\sigma$ is:
 
@@ -1025,9 +971,6 @@ crimeData <-
 caCrimeData <- 
   crimeData %>% 
   filter(State == "California")
-
-print(paste("mean of standardized score data:", mean(crimeData$ViolentCrimeRateStdScore)))
-print(paste("std deviation of standardized score data:", sd(crimeData$ViolentCrimeRateStdScore)))
 
 crimeData %>%
   ggplot(aes(ViolentCrimeRateStdScore)) +

@@ -435,6 +435,11 @@ anova(lmResultCafAnx, lmResultInteraction)
 
 This tells us that there is good evidence to prefer the model with the interaction over the one without an interaction.  Model comparison is relatively simple in this case because the two models are *nested* -- one of the models is a simplified version of the other model.  Model comparison with non-nested models can get much more complicated.
 
+## Criticizing our model and checking assumptions
+
+
+
+*TBD: MORE HERE on diagnostics*
 
 ## What does "predict" really mean?
 
@@ -703,10 +708,14 @@ The challenge here is that $X$ and $\beta$ are now matrices, not single numbers 
 ```{r}
 # compute beta estimates using linear algebra
 
-Y <- as.matrix(df$grade) #create Y variable 8 x 1 matrix
-X <- matrix(0, nrow = 8, ncol = 2) #create X variable 8 x 2 matrix
-X[, 1] <- as.matrix(df$studyTime) #assign studyTime values to first column in X matrix
-X[, 2] <- 1 #assign constant of 1 to second column in X matrix
+#create Y variable 8 x 1 matrix
+Y <- as.matrix(df$grade) 
+ #create X variable 8 x 2 matrix
+X <- matrix(0, nrow = 8, ncol = 2)
+#assign studyTime values to first column in X matrix
+X[, 1] <- as.matrix(df$studyTime) 
+#assign constant of 1 to second column in X matrix
+X[, 2] <- 1 
 
 # compute inverse of X using ginv()
 # %*% is the R matrix multiplication operator

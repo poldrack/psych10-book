@@ -19,7 +19,6 @@ library(BayesFactor)
 library(lme4)
 library(lmerTest)
 library(cowplot)
-library(psych)
 library(knitr)
 
 set.seed(123456) # set random seed to exactly replicate results
@@ -174,7 +173,7 @@ However, smoking is a binary variable, so we treat it as a *dummy variable* like
 lm_summary
 ```
 
-We can also view the lm() results graphically (see the right panel of Figure \@ref(fig:PotTVViolin)).  In this case, the predicted value for nonsmokers is $\hat{\beta_0}$ (`r I(s$coefficients[1,1])`) and the predicted value for smokers is $\hat{\beta_0} +\hat{\beta_1}$ (`r I(s$coefficients[1,1] + s$coefficients[2,1])`).  
+We can also view the linear model results graphically (see the right panel of Figure \@ref(fig:PotTVViolin)).  In this case, the predicted value for nonsmokers is $\hat{\beta_0}$ (`r I(lm_summary$coefficients[1,1])`) and the predicted value for smokers is $\hat{\beta_0} +\hat{\beta_1}$ (`r I(lm_summary$coefficients[1,1] + lm_summary$coefficients[2,1])`).  
 
 To compute the standard errors for this analysis, we can use exactly the same equations that we used for linear regression -- since this really is just another example of linear regression.  In fact, if you compare the p-value from the t-test above with the p-value in the linear regression analysis for the marijuana use variable, you will see that the one from the linear regression analysis is exactly twice the one from the t-test, because the linear regression analysis is performing a two-tailed test.  
 
@@ -185,9 +184,9 @@ The most commonly used effect size for a comparison between two means is Cohen's
 $$
 d = \frac{\hat{beta_1}}{SE_{residual}}
 $$
-We can obtain these values from the analysis output above, giving us a d = `r I(s$coefficients[2,1]/s$sigma)`, which we would generally interpret as a medium sized effect.
+We can obtain these values from the analysis output above, giving us a d = `r I(lm_summary$coefficients[2,1]/lm_summary$sigma)`, which we would generally interpret as a medium sized effect.
 
-We can also compute $R^2$ for this analysis, which tells us how much variance in TV watching is accounted for.  This value (which is reported in the summary of the lm() analysis) is `r I(s$r.squared)`, which tells us that while the effect may be statistically significant, it accounts for relatively little of the variance in TV watching.
+We can also compute $R^2$ for this analysis, which tells us how much variance in TV watching is accounted for.  This value (which is reported in the summary of the lm() analysis) is `r I(lm_summary$r.squared)`, which tells us that while the effect may be statistically significant, it accounts for relatively little of the variance in TV watching.
 
 ## Bayes factor for mean differences
 
@@ -234,7 +233,7 @@ p1 <- ggplot(NHANES_sample_tidy,aes(timepoint,BPsys)) +
   scale_x_discrete(
     labels = c("Time 1", "Time 2"),
   ) 
-p2 <- p+geom_line(aes(group=ID))
+p2 <- p1 +geom_line(aes(group=ID))
 
 plot_grid(p1, p2)
 ```
@@ -357,7 +356,7 @@ ggplot(fdata,aes(x,f_1_1)) +
 
 To create an ANOVA model, we extend the idea of *dummy coding* that you encountered in the last chapter. Remember that for the t-test comparing two means, we created a single dummy variable that took the value of 1 for one of the conditions and zero for the others.  Here we extend that idea by creating two dummy variables, one that codes for the Drug 1 condition and the other that codes for the Drug 2 condition.  Just as in the t-test, we will have one condition (in this case, placebo) that doesn't have a dummy variable, and thus represents the baseline against which the others are compared; its mean defines the intercept of the model. Let's create the dummy coding for drugs 1 and 2.
 
-```{r}
+```{r echo=FALSE}
 # create dummy variables for drug1 and drug2
 df <-
   df %>%
@@ -369,7 +368,7 @@ df <-
 
 Now we can fit a model using the same approach that we used in the previous chapter:
 
-```{r}
+```{r echo=FALSE}
 # fit ANOVA model
 lmResultANOVA <- lm(sysBP ~ d1 + d2, data = df)
 summary(lmResultANOVA)

@@ -7,7 +7,7 @@ output:
   pdf_document: default
   html_document: default
 ---
-# The process of statistical modeling: A practical example {#practical-example}
+# Practical statistical modeling {#practical-example}
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -16,10 +16,8 @@ library(BayesFactor)
 library(emmeans)
 library(brms)
 library(cowplot)
-
-library(pander)
-panderOptions('round',2)
-panderOptions('digits',7)
+library(knitr)
+library(ggfortify)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -62,15 +60,14 @@ According to the authors, the goal of their study was:
 
 ### 2: Identify or collect the appropriate data
 
-To answer their question, the investigators randomly assigned each of 311 overweight/obese women to one of four different diets (Atkins, Zone, Ornish, or LEARN), and followed their weight and other measures of health over time.  
+To answer their question, the investigators randomly assigned each of 311 overweight/obese women to one of four different diets (Atkins, Zone, Ornish, or LEARN), and measured their weight and other measures of health over time.  
 
 The authors recorded a large number of variables, but for the main question of interest let's focus on a single variable: Body Mass Index (BMI).  Further, since our goal is to measure lasting changes in BMI, we will only look at the measurement taken at 12 months after onset of the diet.
 
 ### 3: Prepare the data for analysis
 
-The actual data from the A to Z study are not publicly available, so we will use the summary data reported in their paper to generate some synthetic data that roughly match the data obtained in their study.
 
-```{r}
+```{r echo=FALSE}
 # generate a dataset based on the results of Gardner et al. Table 3
 
 set.seed(123456)
@@ -111,80 +108,72 @@ summaryDf <-
     ci.upper=meanBMIChange12Months+(sqrt(varBMIChange12Months)*crit_val_upper)/sqrt(n)
   )
 
-summaryDf %>%
-  dplyr::select(-crit_val_lower,-crit_val_upper) %>%
-  pander()
-
-
+tableDf <- summaryDf %>%
+  dplyr::select(-crit_val_lower,
+                -crit_val_upper, 
+                -varBMIChange12Months) %>%
+  rename(Diet = diet,
+         N = n,
+         `Mean BMI change (12 months)`=meanBMIChange12Months,
+         `CI (lower limit)`=ci.lower,
+         `CI (upper limit)`=ci.upper)
 ```
 
 
-
-
-
-```{r AtoZBMIChangeDensity,echo=FALSE,fig.cap="Violin plots for each condition, with the 50th percentile (i.e the median) shown as a black line for each group."}
+```{r AtoZBMIChangeDensity,echo=FALSE,fig.cap="Violin plots for each condition, with the 50th percentile (i.e the median) shown as a black line for each group.", fig.width=4, fig.height=4}
 ggplot(dietDf,aes(diet,BMIChange12Months)) + 
   geom_violin(draw_quantiles=.5)
 
 ```
 
-Now that we have the data, let's visualize them to make sure that there are no outliers. Violin plots are useful to see the shape of the distributions, as shown in Figure \@ref(fig:AtoZBMIChangeDensity). Those data look fairly reasonable - in particular, there don't seem to be any serious outliers. However, we can see that the distributions seem to vary a bit in the variance, with Atkins and Ornish showing greater variability than the others.  This means that any analyses that assume the variances are equal across groups could be inappropriate.
+The actual data from the A to Z study are not publicly available, so we will use the summary data reported in their paper to generate some synthetic data that roughly match the data obtained in their study. Once we have the data, we can visualize them to make sure that there are no outliers. Violin plots are useful to see the shape of the distributions, as shown in Figure \@ref(fig:AtoZBMIChangeDensity). Those data look fairly reasonable - in particular, there don't seem to be any serious outliers. However, we can see that the distributions seem to differ a bit in their variance, with Atkins and Ornish showing greater variability than the others.  
+
+This means that any analyses that assume the variances are equal across groups might be inappropriate.  Fortunately, the ANOVA model that we plan to use is fairly robust to this.
 
 ### 4. Determine the appropriate model
 
 There are several questions that we need to ask in order to determine the appropriate statistical model for our analysis.
 
-- What kind of dependent variable?
-  * BMI : continuous, roughly normally distributed
-- What are we comparing?
-  * mean BMI across four diet groups
-  * ANOVA is appropriate
-- Are observations independent?
-  * random assignment and use of difference scores should ensure that the assumption of independent and identically distributed (IID) errors is appropriate
+* What kind of dependent variable?
+    * BMI : continuous, roughly normally distributed
+* What are we comparing?
+    * mean BMI across four diet groups
+    * ANOVA is appropriate
+* Are observations independent?
+    * Random assignment and use of difference scores should ensure that the assumption of independence is appropriate
 
 ### 5. Fit the model to the data
 
-Let's run an ANOVA on BMI change to compare it across the four diets. It turns out that we don't actually need to generate the dummy-coded variables ourselves; if we give `lm()` a categorical variable, it will automatically generate them for us.
+Let's run an ANOVA on BMI change to compare it across the four diets. It turns out that we don't actually need to generate the dummy-coded variables ourselves; if we pass `lm()` a categorical variable, it will automatically generate them for us.
 
-```{r}
+```{r echo=FALSE}
 # perform ANOVA and print result
 
 lmResult <- lm(BMIChange12Months ~ diet, data = dietDf)
-lmResult
-```
-
-Note that lm automatically generated dummy variables that correspond to three of the four diets, leaving the Atkins diet without a dummy variable.  This means that the intercept models the Atkins diet, and the other three variables model the difference between each of those diets and the Atkins diet.
-
-### 6. Criticize the model to make sure it fits properly
-
-
-```{r residPlot,echo=FALSE,fig.cap="Residuals from model plotted for each group separately."}
-data.frame(residuals=lmResult$residuals,
-           diet=dietDf$diet
-           ) %>%
-  ggplot(aes(x=diet,y=residuals)) +
-  geom_point(position=position_jitter(.1))
-
-```
-
-The first thing we want to do is to critique the model to make sure that it is appropriate. One thing we can do is to look at the residuals from the model. In Figure \@ref(fig:residPlot), we will plot the residuals for each individual grouped by diet. We have jittered the points so that we can see all of them.
-There are no obvious differences in the residuals across conditions, suggesting that we can move forward and interpret the model outputs.
-
-### 7. Test hypothesis and quantify effect size
-
-First let's look at the summary of results from the ANOVA:
-
-```{r}
-# print summary of ANOVA statistics
-
 summary(lmResult)
 ```
 
-The significant F test shows us that there is a significant difference between diets, but we should also note that the model doesn't actually account for much variance in the data; the R-squared value is only 0.03, showing that the model is only accounting for a few percent of the variance in weight loss.  Thus, we would not want to overinterpret this result.
+Note that lm automatically generated dummy variables that correspond to three of the four diets, leaving the Atkins diet without a dummy variable. This means that the intercept models the Atkins diet, and the other three variables model the difference between each of those diets and the Atkins diet. By default, ```lm()``` treats the first value (in alphabetical order) as the baseline. 
+
+### 6. Criticize the model to make sure it fits properly
+
+```{r diagnosticsPlot, echo=FALSE, fig.width=8, fig.height=4}
+autoplot(lmResult,which=1:2)
+
+```
+
+The first thing we want to do is to critique the model to make sure that it is appropriate. One thing we can do is to look at the residuals from the model. In the left panel of Figure \@ref(fig:diagnosticsPlot), we plot the residuals for each individual grouped by diet, which are positioned by the mean for each diet. 
+There are no obvious differences in the residuals across conditions, although there are a couple of datapoints (#34 and #304) that seem to be slight outliers.
+
+Another important assumption of the statistical tests that we apply to linear models is that the residuals from the model are normally distributed. The right panel of Figure \@ref(fig:diagnosticsPlot) shows a Q-Q (quantile-quantile) plot, which plots the residuals against their expected values based on their quantiles in the normal distribution. If the residuals are normally distributed then the data points should fall along the dashed line --- in this case it looks pretty good, except for those two outliers that are once again apparent here.
+
+### 7. Test hypothesis and quantify effect size
+
+First let's look back at the summary of results from the ANOVA, shown in Step 5 above. The significant F test shows us that there is a significant difference between diets, but we should also note that the model doesn't actually account for much variance in the data; the R-squared value is only 0.03, showing that the model is only accounting for a few percent of the variance in weight loss.  Thus, we would not want to overinterpret this result.
 
 The significant result also doesn't tell us which diets differ from which others. We can find out more by comparing means across conditions using the ```emmeans()``` ("estimated marginal means") function:
 
-```{r}
+```{r echo=FALSE}
 # compute the differences between each of the means
 leastsquare <- emmeans(lmResult, 
                       pairwise ~ diet,
@@ -202,9 +191,9 @@ The letters in the rightmost column show us which of the groups differ from one 
 
 #### Bayes factor
 
-Let's say that we want to have a better way to describe the amount of evidence provided by the data.  One way we can do this is to compute a Bayes factor, which we can do by fitting the full model (including diet) and the reduced model (without diet) and then comparing their fit. For the reduced model, we just include a 1, which tells the fitting program to only fit an intercept.  
+Let's say that we want to have a better way to describe the amount of evidence provided by the data.  One way we can do this is to compute a Bayes factor, which we can do by fitting the full model (including diet) and the reduced model (without diet) and then comparing their fit. For the reduced model, we just include a 1, which tells the fitting program to only fit an intercept.  Note that this will take a few minutes to run.
 
-```{r results='hide',message=FALSE}
+```{r echo=FALSE, results='hide',message=FALSE}
 brmFullModel <- brm(BMIChange12Months ~ diet, data = dietDf,
                     save_all_pars = TRUE)
 
@@ -212,7 +201,7 @@ brmReducedModel <- brm(BMIChange12Months ~ 1, data = dietDf,
                       save_all_pars = TRUE)
 ```
 
-```{r}
+```{r echo=FALSE, results='hide',message=FALSE}
 bayes_factor(brmFullModel,brmReducedModel)
 ```
 
@@ -222,43 +211,48 @@ This shows us that there is very strong evidence (Bayes factor of nearly 100) fo
 
 If we look more closely at the Garder paper, we will see that they also report statistics on how many individuals in each group had been diagnosed with *metabolic syndrome*, which is a syndrome characterized by high blood pressure, high blood glucose, excess body fat around the waist, and abnormal cholesterol levels and is associated with increased risk for cardiovascular problems. Let's first add those data into the summary data frame:
 
-```{r}
+```{r echo=FALSE}
 summaryDf <- 
   summaryDf %>% 
   mutate(
     nMetSym=c(22,20,29,27),
     nNoMetSym=n-nMetSym,
     pMetSym=nMetSym/(nMetSym+nNoMetSym)
-  )
+  ) 
 
-summaryDf %>%
+displayDf <- summaryDf %>%
   dplyr::select(diet,n,pMetSym) %>%
-  pander()
+  rename(`P(metabolic syndrome)`=pMetSym,
+         N=n,
+         Diet=diet)
+
+kable(displayDf, caption="Presence of metabolic syndrome in each group in the AtoZ study.")
 ```
 
 Looking at the data it seems that the rates are slightly different across groups, with more metabolic syndrome cases in the Ornish and Zone diets -- which were exactly the diets with poorer outcomes.  Let's say that we are interested in testing whether the rate of metabolic syndrome was significantly different between the groups, since this might make us concerned that these differences could have affected the results of the diet outcomes. 
 
 #### Determine the appropriate model
 
-- What kind of dependent variable?
-  * proportions
-- What are we comparing?
-  * proportion with metabolic syndrome across four diet groups
-  * chi-squared test for goodness of fit is appropriate against null hypothesis of no difference
+* What kind of dependent variable?
+    * proportions
+* What are we comparing?
+    * proportion with metabolic syndrome across four diet groups
+    * chi-squared test for goodness of fit is appropriate against null hypothesis of no difference
 
-Let's compute that statistic using the ```chisq.test()``` function:
+Let's compute that statistic using the ```chisq.test()``` function. Here we will use the `simulate.p.value` option, which will help deal with the relatively small 
 
-```{r}
-chisq.test(summaryDf$nMetSym,summaryDf$nNoMetSym)
+```{r echo=FALSE}
+contTable <- as.matrix(summaryDf[,9:10])
+chisq.test(contTable)
 ```
 
 This test shows that there is not a significant difference between means. However, it doesn't tell us how certain we are that there is no difference; remember that under NHST, we are always working under the assumption that the null is true unless the data show us enough evidence to cause us to reject this null hypothesis.
 
 What if we want to quantify the evidence for or against the null?  We can do this using the Bayes factor.
 
-```{r}
+```{r echo=FALSE}
 
-bf <- contingencyTableBF(as.matrix(summaryDf[,9:10]), 
+bf <- contingencyTableBF(contTable, 
                          sampleType = "indepMulti", 
                          fixedMargin = "cols")
 bf
@@ -266,8 +260,3 @@ bf
 
 This shows us that the alternative hypothesis is 0.058 times more likely than the null hypothesis, which means that the null hypothesis is 1/0.058 ~ 17 times more likely than the alternative hypothesis given these data. This is fairly strong, if not completely overwhelming, evidence.
 
-#### Addressing confounds in the model
-
-We generally use random assignment to treatments (as Gardner et al. did) because we think that, on average, it will prevent the effects of other variables (which we call *confounds*) on the outcome.  However, as we see in this case, in any particular study there could be a confound that occurs randomly.  It is important to make sure that the differences between conditions are not due to differences between groups in the presence of metabolic syndrome, and to do this we can include the metabolic syndrome variable in our statistical model. By doing this, any variance that is associated with metabolic syndrome will be removed from the effect of the diet, so that we are left with a cleaner measurement of the effect of the diet.  
-
-In this case we don't have the original data, so we can't directly test this. If we had the original data, we could include the metabolic syndrome variable in our model and see whether the relationship between diet and weight loss still holds; if it does, then we can be more confident that that the relation is not driven by any differences in metabolic syndrome.

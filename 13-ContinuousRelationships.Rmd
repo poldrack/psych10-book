@@ -65,7 +65,8 @@ ggplot(hateCrimes,aes(gini_index,avg_hatecrimes_per_100k_fbi,label=state_abb)) +
   theme(plot.title = element_text(size = 20, face = "bold")) +
   xlab('Gini index') + 
   ylab('Avg hate crimes per 100K population (FBI)') +
-  theme(plot.margin = unit(c(1,1,1,1), "cm")) 
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  xlim(0.4, 0.55)
   
 ```
 
@@ -213,7 +214,7 @@ One way to address outliers is to compute the correlation on the ranks of the da
 
 We can compute the rank correlation on the hate crime data using the `cor.test` function:
 
-```{r}
+```{r echo=FALSE}
 corTestSpearman <- cor.test( hateCrimes$avg_hatecrimes_per_100k_fbi,
   hateCrimes$gini_index,
   method = "spearman")
@@ -237,7 +238,7 @@ Let's say that we did such an analysis, and we found that abused children had po
 
 One useful way to describe causal relations between variables is through a *causal graph*, which shows variables as circles and causal relations between them as arrows.  For example, Figure \@ref(fig:simpleCausalGraph) shows the causal relationships between study time and two variables that we think should be affected by it: exam grades and exam finishing times.  
 
-```{r simpleCausalGraph, echo=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam).",fig.width=6,fig.height=6,out.height='50%'}
+```{r mkCausalGraphs, echo=FALSE,message=FALSE,fig.cap="A graph showing causal relationships between three variables: study time, exam grades, and exam finishing time.  A green arrow represents a positive relationship (i.e. more study time causes exam grades to increase), and a red arrow represents a negative relationship (i.e. more study time causes faster completion of the exam).",fig.width=6,fig.height=6,out.height='50%'}
 
 graph = "
 digraph boxes_and_circles {

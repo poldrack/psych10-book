@@ -17,6 +17,7 @@ library(ggplot2)
 library(kableExtra)
 library(BayesFactor)
 library(sfsmisc)
+library(cowplot)
 
 library(knitr)
 
@@ -75,9 +76,10 @@ chisqVal <-
   )
 ```
 
-The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together. The shape of the distribution depends on the number of degrees of freedom. Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
+The chi-squared statistic for this analysis comes out to `r I(chisqVal)`, which on its own is not interpretable, since it depends on the number of different values that were added together.  However, we can take advantage of the fact that the chi-squared statistic is distributed according to a specific distribution under the null hypothesis, which is known as the *chi-squared* distribution.  This distribution is defined as the sum of squares of a set of standard normal random variables; it has a number of degrees of freedom that is equal to the number of variables being added together. The shape of the distribution depends on the number of degrees of freedom. The left panel of Figure \@ref(fig:chisqDist) shows examples of the distribution for several different degrees of freedom.
 
-```{r chisqDist,echo=FALSE,fig.cap="Examples of the chi-squared distribution for various degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
+```{r chisqDist,echo=FALSE,fig.cap="Left: Examples of the chi-squared distribution for various degrees of freedom.  Right: Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the dotted line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom.",fig.width=8,fig.height=4,out.height='50%'}
+
 xvals <- seq(0.01, 20, 0.01)
 dfvals <- c(1, 2, 4, 8)
 chisqDf <-
@@ -93,7 +95,7 @@ chisqDf <-
          )
   
 
-ggplot(chisqDf, aes(xvals, chisqNorm, group = Df, linetype = Df)) +
+p1 <- ggplot(chisqDf, aes(xvals, chisqNorm, group = Df, linetype = Df)) +
   geom_line() +
   theme(legend.position = c(0.8, 0.7)) +
   labs(
@@ -101,10 +103,8 @@ ggplot(chisqDf, aes(xvals, chisqNorm, group = Df, linetype = Df)) +
     color = "Degrees of freedom",
     x = "Chi-squared values"
   ) + ylab('Density')
-```
 
 
-```{r echo=FALSE}
 # simulate 50,000 sums of 8 standard normal random variables and compare
 # to theoretical chi-squared distribution
 
@@ -121,13 +121,7 @@ csDf <-
 
 pval <- pchisq(chisqVal, df = 2, lower.tail = FALSE) #df = degrees of freedom
 
-```
-
-Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables, using simulation. To do this, we repeatedly draw sets of 8 random numbers (using the ```rnorm()``` function), and add up each set.  Figure \@ref(fig:chisqSim) shows that the theoretical distribution matches closely with the results of a simulation that repeatedly added together the squares of a set of random normal variables. 
-
-```{r chisqSim,echo=FALSE,message=FALSE, warning=FALSE,fig.cap="Simulation of sum of squared random normal variables.   The histogram is based on the sum of squares of 50,000 sets of 8 random normal variables; the dotted line shows the values of the theoretical chi-squared distribution with 8 degrees of freedom.",fig.width=4,fig.height=4,out.height='50%'}
-
-ggplot(data.frame(dMean),aes(dMean)) + 
+p2 <- ggplot(data.frame(dMean),aes(dMean)) + 
   geom_histogram(aes(y=..density..),bins=100, fill='gray') +
   geom_line(data=csDf,aes(x,chisq),linetype='dotted',size=1.5)+
   xlim(0,30) + ylim(0,.12) +
@@ -136,7 +130,15 @@ ggplot(data.frame(dMean),aes(dMean)) +
     x = "Sum of squared random normal variables"
   )
 
+plot_grid(p1, p2)
 ```
+
+
+```{r echo=FALSE}
+
+```
+
+Let's verify that the chi-squared distribution accurately describes the sum of squares of a set of standard normal random variables, using simulation. To do this, we repeatedly draw sets of 8 random numbers (using the ```rnorm()``` function), and add up each set.  The right panel of Figure \@ref(fig:chisqDist) shows that the theoretical distribution matches closely with the results of a simulation that repeatedly added together the squares of a set of random normal variables. 
 
 For the candy example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all candies. We use a chi-squared distribution with degrees of freedom equal to k - 1 (where k = the number of categories) since we lost one degree of freedom when we computed the mean in order to generate the expected values.  The resulting p-value (`r I(sprintf('P(Chi-squared) > %0.2f = %0.3f',chisqVal,pval))`) shows that the observed counts of candies are not particularly surprising based on the proportions printed on the bag of candy, and we would not reject the null hypothesis of equal proportions.
 

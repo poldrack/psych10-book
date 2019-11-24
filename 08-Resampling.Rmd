@@ -39,7 +39,7 @@ In this chapter we will introduce the concept of a Monte Carlo simulation and di
 
 ## Monte Carlo simulation
 
-The concept of Monte Carlo simulation was devised by the mathematicians Stan Ulam and Nicholas Metropolis, who were working to develop an atomic weapon as part of the Manhattan Project (https://en.wikipedia.org/wiki/Manhattan_Project). They needed to compute the average distance that a neutron would travel in a substance before it collided with an atomic nucleus, but they could not compute this using standard mathematics.
+The concept of Monte Carlo simulation was devised by the mathematicians Stan Ulam and Nicholas Metropolis, who were working to develop an atomic weapon for the US as part of the Manhattan Project. They needed to compute the average distance that a neutron would travel in a substance before it collided with an atomic nucleus, but they could not compute this using standard mathematics.
 Ulam realized that these computations could be simulated using random numbers, just like a casino game. In a casino game such as a roulette wheel, numbers are generated at random; to estimate the probability of a specific outcome, you could play the game hundreds of times. Ulam's uncle had gambled at the Monte Carlo casino in Monaco, which is apparently where the name came from for this new technique.
 
 There are four steps to performing a Monte Carlo simulation:
@@ -165,7 +165,7 @@ The idea behind the bootstrap is that we repeatedly sample from the actual datas
 
 Let's start by using the bootstrap to estimate the sampling distribution of the mean, so that we can compare the result to the standard error of the mean (SEM) that we discussed earlier.
 
-```{r}
+```{r echo=FALSE}
 # perform the bootstrap to compute SEM and compare to parametric method
 
 nRuns <- 2500
@@ -204,7 +204,7 @@ tibble(bootMeans=bootMeans) %>%
 
 Figure \@ref(fig:bootstrapSEM) shows that the distribution of means across bootstrap samples is fairly close to the theoretical estimate based on the assumption of normality.  We can also use the bootstrap samples to compute a confidence interval for the mean, simply by computing the quantiles of interest from the distribution of bootstrap samples.
 
-```{r}
+```{r echo=FALSE}
 # compute bootstrap confidence interval
 
 bootCI <- quantile(bootMeans, c(0.025, 0.975))
@@ -222,7 +222,8 @@ allCI <- rbind(normalCI, bootCI)
 allCI$type <- c('Normal', 'Bootstrap')
 allCI <- allCI %>% dplyr::select(type, `2.5%`, `97.5%`)
 
-kable(allCI, digits=2, caption="Confidence limits for normal distribution and bootstrap methods")
+kable(allCI, digits=2, 
+      caption="Confidence limits for normal distribution and bootstrap methods")
 ```
 
 We would not usually employ the bootstrap to compute confidence intervals for the mean (since we can generally assume that the normal distribution is appropriate for the sampling distribution of the mean, as long as our sample is large enough), but this example shows how the method gives us roughly the same result as the standard method based on the normal distribution.  The bootstrap would more often be used to generate standard errors for estimates of other statistics where we know or suspect that the normal distribution is not appropriate.

@@ -307,7 +307,7 @@ $$
 
 In many cases the number of possible outcomes would be too large for us to compute the cumulative probability by enumerating all possible values; fortunately, it can be computed directly. For the binomial, we can do this in R using the `pbinom()` function:
 
-```{r}
+```{r echo=FALSE}
 # compute cumulative probability distribution for Curry's free throws
 
 curry_df <- tibble(
@@ -352,7 +352,7 @@ For many examples in this course we will use data obtained from the National Hea
 
 Let's say that we are interested in the following question: What is the probability that someone has diabetes, given that they are not physically active? -- that is, $P(diabetes|inactive)$. NHANES records two variables that address the two parts of this question.  The first (```Diabetes```) asks whether the person has ever been told that they have diabetes, and the second (```PhysActive```) records whether the person engages in sports, fitness, or recreational activities that are at least of moderate intensity.  Let's first compute the simple probabilities.
 
-```{r}
+```{r echo=FALSE}
 # Summarize NHANES data for diabetes and physical activity
 
 # drop duplicated IDs within the NHANES dataset
@@ -387,11 +387,11 @@ kable(all_summary, caption='Summary data for diabetes and physical activity')
 ```
 
 
-This shows that the probability that someone in the NHANES dataset has diabetes is .1, and the probability that someone is inactive is .45.  
+The table shows that the probability that someone in the NHANES dataset has diabetes is .1, and the probability that someone is inactive is .45.  
 
 To compute  $P(diabetes|inactive)$ we would also need to know the joint probability of being diabetic *and* inactive, in addition to the simple probabilities of each:
 
-```{r}
+```{r echo=FALSE}
 # compute joint probabilities for diabetes and physical activity
 
 NHANES_diabetes_stats_by_activity <- 
@@ -404,9 +404,8 @@ NHANES_diabetes_stats_by_activity <-
 kable(NHANES_diabetes_stats_by_activity, caption='Joint probabilities for Diabetes and PhysActive variables.')
 ```
 
-Based on these joint probabilities, we can compute $P(diabetes|inactive)$:
 
-```{r}
+```{r echo=FALSE}
 # compute conditional probability p(diabetes|inactive)
 
 P_inactive <- 
@@ -427,7 +426,7 @@ P_diabetes_given_inactive <-
 P_diabetes_given_inactive
 ```
 
-The first line of code in this chunk computed $P(inactive)$ by taking the mean of a test for whether the PhysActive variable was equal to "No" for each indivdual.  This trick works because TRUE/FALSE values are treated as 1/0 respectively by R; thus, if we want to know the probaility of some event, we can generate a Boolean variable that tests for that event, and then simply take the mean of that variable.  We then use that value to compute the conditional probability, where we find that the probability of someone having diabetes given that they are physically inactive is 0.141.
+Based on these joint probabilities, we can compute $P(diabetes|inactive)$.  To do this, we can first determine the truth value of whether the PhysActive variable was equal to "No" for each indivdual, and then take the mean of those truth values.  Since TRUE/FALSE values are treated as 1/0 respectively by most programming languages (including R), this allows us to easily identify the probability of a simple event by simply taking the mean of a logical variable representing its truth value. We then use that value to compute the conditional probability, where we find that the probability of someone having diabetes given that they are physically inactive is `r I(sprintf('%0.3f',P_diabetes_given_inactive))`.
 
 ## Independence
 
@@ -441,7 +440,7 @@ That is, the probability of A given some value of B is just the same as the over
 
 Let's look at another example, using the NHANES data: Are physical health and mental health independent of one another?  NHANES includes two relevant questions: *PhysActive*, which asks whether the individual is physically active, and *DaysMentHlthBad*, which asks how many days out of the last 30 that the individual experienced bad mental health.  Let's consider anyone who had more than 7 days of bad mental health in the last month to be in bad mental health.  Based on this, we can define a new variable called *badMentalHealth* as a logical variable telling whether each person had more than 7 days of bad mental health or not. Using this new variable, we can then determine whether mental health and physical activity are independent by asking whether the simple probability of bad mental health is different from the conditional probability of bad mental health given that one is physically active.
 
-```{r}
+```{r echo=FALSE}
 # compute probabilities for mental health and physical activity
 NHANES_adult <- 
   NHANES %>%
@@ -468,7 +467,7 @@ The overall probability of bad mental health $P(\text{bad mental health})$ is `r
 
 ## Reversing a conditional probability: Bayes' rule {#bayestheorem}
 
-In many cases, we know $P(A|B)$ but we really want to know $P(B|A)$. This commonly occurs in medical screening, where we know $P(\text{positive test result|disease})$ but what we want to know is $P(\text{disease|positive test result})$.  For example, some doctors recommend that men over the age of 50 undergo screening using a test called prostate specific antigen (PSA) to screen for possible prostate cancer.  Before a test is approved for use in medical practice, the manufacturer needs to test two aspects of the test's performance. First, they need to show how *sensitive* it is -- that is, how likely is it to find the disease when it is present: $\text{sensitivity} = P(\text{positive test| disease})$.  They also need to show how *specific* it is: that is, how likely is it to give a negative result when there is no disease present: $\text{specificity} = P(\text{negative test|no disease})$.  For the PSA test, we know that sensitivity is about 80% and specificity is about 70%.  However, these don't answer the question that the physician wants to answer for any particular patient: what is the likelihood that they actually have cancer, given that the test comes back positive? This requires that we reverse the conditional probability that defines sensitivity: instead of  $P(positive\ test| disease)$ we want to know $P(disease|positive\ test)$. 
+In many cases, we know $P(A|B)$ but we really want to know $P(B|A)$. This commonly occurs in medical screening, where we know $P(\text{positive test result| disease})$ but what we want to know is $P(\text{disease|positive test result})$.  For example, some doctors recommend that men over the age of 50 undergo screening using a test called prostate specific antigen (PSA) to screen for possible prostate cancer.  Before a test is approved for use in medical practice, the manufacturer needs to test two aspects of the test's performance. First, they need to show how *sensitive* it is -- that is, how likely is it to find the disease when it is present: $\text{sensitivity} = P(\text{positive test| disease})$.  They also need to show how *specific* it is: that is, how likely is it to give a negative result when there is no disease present: $\text{specificity} = P(\text{negative test|no disease})$.  For the PSA test, we know that sensitivity is about 80% and specificity is about 70%.  However, these don't answer the question that the physician wants to answer for any particular patient: what is the likelihood that they actually have cancer, given that the test comes back positive? This requires that we reverse the conditional probability that defines sensitivity: instead of  $P(positive\ test| disease)$ we want to know $P(disease|positive\ test)$. 
 
 In order to reverse a conditional probability, we can use *Bayes' rule*:
 

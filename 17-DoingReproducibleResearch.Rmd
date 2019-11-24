@@ -12,8 +12,14 @@ output:
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(cowplot)
 
 set.seed(123456) # set random seed to exactly replicate results
+
+# setup colorblind palette
+# from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette
+# The palette with grey:
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 ```
 
@@ -24,14 +30,14 @@ Most people think that science is a reliable way to answer questions about the w
 
 Let's say that we are interested in a research project on how children choose what to eat. This is a question that was asked in a study by the well-known eating researcher Brian Wansink and his colleagues in 2012.  The standard (and, as we will see, somewhat naive) view goes something like this:
 
-- You start with a hypothesis
-  * Branding with popular characters should cause children to choose “healthy” food more often
-- You collect some data
-  * Offer children the choice between a cookie and an apple with either an Elmo-branded sticker or a control sticker, and record what they choose
-- You do statistics to test the null hypothesis
-  * "The preplanned comparison shows Elmo-branded apples were associated with an increase in a child’s selection of an apple over a cookie, from 20.7% to 33.8% ($\chi^2$=5.158; P=.02)" [@wans:just:payn:2012]
-- You make a conclusion based on the data
-  *"this study suggests that the use of branding or appealing branded characters may benefit healthier foods more than they benefit indulgent, more highly processed foods. Just as attractive names have been shown to increase the selection of healthier foods in school lunchrooms, brands and cartoon characters could do the same with young children."[@wans:just:payn:2012]
+* You start with a hypothesis
+    * Branding with popular characters should cause children to choose “healthy” food more often
+* You collect some data
+    * Offer children the choice between a cookie and an apple with either an Elmo-branded sticker or a control sticker, and record what they choose
+* You do statistics to test the null hypothesis
+    * "The preplanned comparison shows Elmo-branded apples were associated with an increase in a child’s selection of an apple over a cookie, from 20.7% to 33.8% ($\chi^2$=5.158; P=.02)" [@wans:just:payn:2012]
+* You make a conclusion based on the data
+    * "This study suggests that the use of branding or appealing branded characters may benefit healthier foods more than they benefit indulgent, more highly processed foods. Just as attractive names have been shown to increase the selection of healthier foods in school lunchrooms, brands and cartoon characters could do the same with young children."[@wans:just:payn:2012]
   
 ## How science (sometimes) actually works
 
@@ -47,7 +53,7 @@ This kind of behavior finally caught up with Wansink; [fifteen of his research s
 
 ## The reproducibility crisis in science
 
-One might hope that Brian Wansink was a rare outlier, but it has become increasingly clear that problems with reproducibility are much more widespread in science than previously thought.  This became clear in 2015, when a large group of researchers published a study in the journal *Science* titled "Estimating the reproducibility of psychological science"[@open:2015]. In this study, the researchers took 100 published studies in psychology and attempted to reproduce the results originally reported in the papers.  Their findings were shocking: Whereas 97% of the original papers had reported statistically significant findings, only 37% of these effects were statistically significant in the replication study.  Although these problems in psychology have received a great deal of attention, they seem to be present in nearly every area of science, from cancer biology [@erri:iorn:gunn:2014] and chemistry [@bake:2017] to economics [@NBERw22989] and the social sciences [@Camerer2018EvaluatingTR].
+While we think that the kind of frauduent behavior seen in Wansink's case is relatively rare, it has become increasingly clear that problems with reproducibility are much more widespread in science than previously thought.  This became clear in 2015, when a large group of researchers published a study in the journal *Science* titled "Estimating the reproducibility of psychological science"[@open:2015]. In this study, the researchers took 100 published studies in psychology and attempted to reproduce the results originally reported in the papers.  Their findings were shocking: Whereas 97% of the original papers had reported statistically significant findings, only 37% of these effects were statistically significant in the replication study.  Although these problems in psychology have received a great deal of attention, they seem to be present in nearly every area of science, from cancer biology [@erri:iorn:gunn:2014] and chemistry [@bake:2017] to economics [@NBERw22989] and the social sciences [@Camerer2018EvaluatingTR].
 
 The reproducibility crisis that emerged after 2010 was actually predicted by John Ioannidis, a physician from Stanford who wrote a paper in 2005 titled "Why most published research findings are false"[@ioan:2005].  In this article, Ioannidis argued that the use of null hypothesis statistical testing in the context of modern science will necessarily lead to high levels of false results.  
 
@@ -113,7 +119,7 @@ PPV = function(df) {
 }
 
 df=PPV(df)
-ggplot(df,aes(power,PPV,color=as.factor(priorVal))) + 
+ggplot(df,aes(power,PPV,linetype=as.factor(priorVal))) + 
   geom_line(size=1) + 
   ylim(0,1) +
   xlim(0,1) +
@@ -121,15 +127,17 @@ ggplot(df,aes(power,PPV,color=as.factor(priorVal))) +
 
 ```
 
-Unfortunately, statistical power remains low in many areas of science [@smal:mcel:2016], suggesting that many published research findings are false.
+Unfortunately, statistical power remains low in many areas of science [@smal:mcel:2016], suggesting that many published research findings are false. 
+
+An amusing example of this was seen in a paper by Jonathan Schoenfeld and John Ioannidis, titled "Is everything we eat associated with cancer? A systematic cookbook review"[scho:ioan:2013].  They examined a large number of papers that had assessed the relation between different foods and cancer risk, and found that 80% of ingredients had been associated with either increased or decreased cancer risk.  In most of these cases, the statistical evidence was weak, and when the results were combined across studies, the result was null.
 
 ### The winner's curse
 
-Another kind of error can also occur when statistical power is low: Our estimates of the effect size will be inflated.  This phenomenon often goes by the term "winner's curse", which comes from economics, where it refers to the fact that for certain types of auctions (where the value is the same for everyone, like a jar of quarters, and the bids are private), the winner almost always pays more than the good is worth.  In science, the winner's curse refers to the fact that the effect size estimated from a significant result (i.e. a winner) is almost always an overestimate of the true effect size.
+Another kind of error can also occur when statistical power is low: Our estimates of the effect size will be inflated.  This phenomenon often goes by the term "winner's curse", which comes from economics, where it refers to the fact that for certain types of auctions (where the value is the same for everyone, like a jar of quarters, and the bids are private), the winner is guaranteed to pay more than the good is worth.  In science, the winner's curse refers to the fact that the effect size estimated from a significant result (i.e. a winner) is almost always an overestimate of the true effect size.
 
-We can simulate this in order to see how the estimated effect size for significant results is related to the actual underlying effect size. Let's generate data for which there is a true effect size of 0.2, and estimate the effect size for those results where there is a significant effect detected. Figure \@ref(fig:CurseSim) shows that when power is low, the estimated effect size for significant results can be highly inflated compared to the actual effect size.
+We can simulate this in order to see how the estimated effect size for significant results is related to the actual underlying effect size. Let's generate data for which there is a true effect size of 0.2, and estimate the effect size for those results where there is a significant effect detected. The left panel of Figure \@ref(fig:CurseSim) shows that when power is low, the estimated effect size for significant results can be highly inflated compared to the actual effect size.
 
-```{r CurseSim, echo=FALSE,message=FALSE,fig.cap="A simulation of the winner's curse as a function of statistical power (x axis). The black line shows the estimated effect size, and the red dashed line shows the actual effect size. ",fig.width=4,fig.height=4,out.height='50%'}
+```{r CurseSim, echo=FALSE,message=FALSE,fig.cap="Left: A simulation of the winner's curse as a function of statistical power (x axis). The solid line shows the estimated effect size, and the dotted line shows the actual effect size. Right: A histogram showing sample sizes for a number of samples from a dataset, with significant results shown in blue and non-significant results in red. ",fig.width=8,fig.height=4,out.height='50%'}
 
 trueEffectSize=0.2
 dfCurse=data.frame(sampSize=seq(20,300,20)) %>%
@@ -154,14 +162,13 @@ simCurse = function(df,nruns=1000){
 
 dfCurse = dfCurse %>% group_by(sampSize) %>% do(simCurse(.))
 
-ggplot(dfCurse,aes(power,effectSizeEstimate)) +
+p1 <- ggplot(dfCurse,aes(power,effectSizeEstimate)) +
   geom_line(size=1) +
   ylim(0,max(dfCurse$effectSizeEstimate)*1.2) +
   geom_hline(yintercept = trueEffectSize,size=1,linetype='dotted',color='red')
-```
 
+# single
 
-```{r curseSimSingle, echo=FALSE,fig.cap="A histogram showing sample sizes for a number of samples from a dataset, with significant results shown in blue and non-significant results in red.",fig.width=4,fig.height=4,out.height='50%'}
 sampSize=60
 effectSize=0.2
 nruns=1000
@@ -186,12 +193,13 @@ meanSigEffect=mean(df$estimate[df$pval<alpha])
 
 meanTrueEffect=mean(df$estimate)
 
-ggplot(df,aes(estimate,fill=significant)) + 
+p2 <- ggplot(df,aes(estimate,fill=significant)) + 
   geom_histogram(bins=50)
 
+plot_grid(p1, p2)
 ```
 
-We can look at a single simulation to see why this is the case.  In Figure \@ref(fig:curseSimSingle), you can see a histogram of the estimated effect sizes for 1000 samples, separated by whether the test was statistically significant.  It should be clear from the figure that if we estimate the effect size only based on significant results, then our estimate will be inflated; only when most results are significant (i.e. power is high and the effect is relatively large) will our estimate come near the actual effect size.  
+We can look at a single simulation to see why this is the case.  In the right panel of Figure \@ref(fig:CurseSim), you can see a histogram of the estimated effect sizes for 1000 samples, separated by whether the test was statistically significant.  It should be clear from the figure that if we estimate the effect size only based on significant results, then our estimate will be inflated; only when most results are significant (i.e. power is high and the effect is relatively large) will our estimate come near the actual effect size.  
 
 ## Questionable research practices
 
@@ -199,7 +207,7 @@ A popular book entitled "The Compleat Academic: A Career Guide", published by th
 
 > **Which article should you write?** There are two possible articles you can write: (1) the article you planned to write when you designed your study or (2) the article that makes the most sense now that you have seen the results. They are rarely the same, and the correct answer is (2).
 
-What Bem suggests here is known as *HARKing* (Hypothesizing After the Results are Known)[@kerr:1998].  This might seem innocuous, but is problematic because it allows the research to re-frame a post-hoc conclusion (which we should take with a grain of salt) as an a priori prediction (in which we would have stronger faith).  In essence, it allows the researcher to rewrite their theory based on the facts, rather that using the theory to make predictions and then test them -- akin to moving the goalpost so that it ends up wherever the ball goes.  It thus becomes very difficult to disconfirm incorrect ideas, since the goalpost can always be moved to match the data.
+What Bem suggests here is known as *HARKing* (Hypothesizing After the Results are Known)[@kerr:1998].  This might seem innocuous, but is problematic because it allows the research to re-frame a post-hoc conclusion (which we should take with a grain of salt) as an a priori prediction (in which we would have stronger faith).  In essence, it allows the researcher to rewrite their theory based on the facts, rather that using the theory to make predictions and then test them -- akin to moving the goalpost so that it ends up wherever the ball goes.  It thus becomes very difficult to disconfirm incorrect ideas, since the goalpost can always be moved to match the data. Bem continues:
 
 > **Analyzing data** Examine them from every angle. Analyze the sexes separately. Make up new composite indices. If a datum suggests a new hypothesis, try to find further evidence for it elsewhere in the data. If you see dim traces of interesting patterns, try to reorganize the data to bring them into bolder relief. If there are participants you don’t like, or trials, observers, or interviewers who gave you anomalous results,drop them (temporarily). Go on a fishing expedition for something — anything — interesting. No, this is not immoral. 
 
@@ -253,7 +261,7 @@ The paper by @simm:nels:simo:2011 laid out a set of suggested practices for maki
 
 One of the hallmarks of science is the idea of *replication* -- that is, other researchers should be able to perform the same study and obtain the same result.  Unfortunately, as we saw in the outcome of the Replication Project discussed earlier, many findings are not replicable.  The best way to ensure replicability of one's research is to first replicate it on your own; for some studies this just won't be possible, but whenever it is possible one should make sure that one's finding holds up in a new sample.  That new sample should be sufficiently powered to find the effect size of interest; in many cases, this will actually require a larger sample than the original. 
 
-It's important to keep a couple of things in mind with regard to replication.  First, the fact that a replication attempt fails does not necessarily mean that the original finding was false; remember that with the standard level of 80% power, there is still a one in five chance that the result will be nonsignificant, even if there is a true effect. For this reason, we generally want to see multiple replications of any important finding before we come to believe it.  Unfortunately, many fields including psychology have failed to follow this advice in the past, leading to "textbook" findings that turn out to be likely false.  With regard to Daryl Bem's studies of ESP, a large replication attempt involving 7 studies failed to replicate his findings [@gala:lebo:nels:2012].
+It's important to keep a couple of things in mind with regard to replication.  First, the fact that a replication attempt fails does not necessarily mean that the original finding was false; remember that with the standard level of 80% power, there is still a one in five chance that the result will be nonsignificant, even if there is a true effect. For this reason, we generally want to see multiple replications of any important finding before we decide whether or not to believe it.  Unfortunately, many fields including psychology have failed to follow this advice in the past, leading to "textbook" findings that turn out to be likely false.  With regard to Daryl Bem's studies of ESP, a large replication attempt involving 7 studies failed to replicate his findings [@gala:lebo:nels:2012].
 
 Second, remember that the p-value doesn't provide us with a measure of the likelihood of a finding to replicate.  As we discussed previously, the p-value is a statement about the likelihood of one's data under a specific null hypothesis; it doesn't tell us anything about the probability that the finding is actually true (as we learned in the chapter on Bayesian analysis).  In order to know the likelihood of replication we need to know the probability that the finding is true, which we generally don't know.
 
@@ -268,6 +276,12 @@ There are many ways to share both code and data.  A common way to share code is 
 ## Conclusion: Doing better science
 
 It is every scientist's responsibility to improve their research practices in order to increase the reproducibility of their research.  It is essential to remember that the goal of research is not to find a significant result; rather, it is to ask and answer questions about nature in the most truthful way possible.  Most of our hypotheses will be wrong, and we should be comfortable with that, so that when we find one that's right, we will be even more confident in its truth.
+
+## Learning objectives
+
+* Describe the concept of P-hacking and its effects on scientific practice
+* Describe the concept of positive predictive value and its relation to statstical power
+* Describe the concept of pre-registration and how it can help protect against questionable research practices
 
 ## Suggested Readings
 

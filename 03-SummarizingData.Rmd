@@ -58,7 +58,7 @@ Let's look at some examples of the use of tables, again using the NHANES dataset
 
 Let's look at how many people fall into each of these categories. We will do this in R by selecting the variable of interest (PhysActive) from the NHANES dataset, grouping the data by the different values of the variable, and then counting how many values there are in each group.
 
-```{r MakePhysActiveTable, warning=FALSE}
+```{r MakePhysActiveTable, echo=FALSE, warning=FALSE}
 # summarize physical activity data
 
 PhysActive_table <- NHANES %>%
@@ -81,7 +81,7 @@ relative\ frequency_i = \frac{absolute\ frequency_i}{\sum_{j=1}^N absolute\ freq
 $$
 The relative frequency provides a much easier way to see how big the imbalance is.  We can also interpret the relative frequencies as percentages by multiplying them by 100. In this example, we will drop the NA values as well, since we would like to be able to interpret the relative frequencies of active versus inactive people.
 
-```{r}
+```{r echo=FALSE}
 # compute percentages for physical activity categories
 
 PhysActive_table_filtered <- NHANES %>%
@@ -109,7 +109,7 @@ The PhysActive variable that we examined above only had two possible values, but
 
 Let's look at another variable in the NHANES dataset, called SleepHrsNight which records how many hours the participant reports sleeping on usual weekdays.  Let's create a frequency table as we did above, after removing anyone who didn't provide a response to the question.
 
-```{r}
+```{r echo=FALSE}
 # create summary table for relative frequency of different
 # values of SleepHrsNight 
 
@@ -124,7 +124,7 @@ sleepTable <- NHANES %>%
   )
 
 ```
-\newpage
+
 ```{r echo=FALSE}
 kable(sleepTable, caption='Frequency distribution for number of hours of sleep per night in the NHANES dataset')
 ```
@@ -169,7 +169,7 @@ cumulative\ frequency_j = \sum_{i=1}^{j}{absolute\ frequency_i}
 $$
 Let's do this for our sleep variable, computing the absolute and cumulative frequency in R:
 
-```{r}
+```{r echo=FALSE}
 # create cumulative frequency distribution of SleepHrsNight data
 
 SleepHrsNight_cumulative <- 
@@ -227,7 +227,7 @@ p2 <- SleepHrsNight_cumulative %>%
 
 plot_grid(p1,p2)
 ```
-\newpage
+
 
 ### Plotting histograms
 
@@ -299,7 +299,7 @@ plot_grid(p1,p2,p3,ncol=2)
 ### Histogram bins
 
 In our earlier example with the sleep variable, the data were reported in whole numbers, and we simply counted the number of people who reported each possible value. However, if you look at a few values of the Height variable in NHANES, you will see that it was measured in centimeters down to the first decimal place:
-```{r}
+```{r echo=FALSE}
 # take a slice of a few values from the full data frame
 nhanes_slice <- NHANES_adult %>%
   dplyr::select(Height) %>%

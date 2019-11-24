@@ -7,7 +7,7 @@ output:
   html_document: default
   pdf_document: default
 ---
-# Confidence intervals, effect sizes, and statistical power {#ci-effect-size-power}
+# Quantifying effects and desiging studies {#ci-effect-size-power}
 
 In the previous chapter we discussed how we can use data to test hypotheses.  Those methods provided a binary answer: we either reject or fail to reject the null hypothesis. However, this kind of decision overlooks a couple of important questions.  First, we would like to know how much uncertainty we have about the answer (regardless of which way it goes).  In addition, sometimes we don't have a clear null hypothesis, so we would like to see what range of estimates are consistent with the data.  Second, we would like to know how large the effect actually is, since as we saw in the weight loss example in the previous chapter, a statistically significant effect is not necessarily a practically important effect.
 
@@ -328,7 +328,7 @@ There are three factors that can affect power:
 
 We can see this through simulation.  First let's simulate a single experiment, in which we compare the means of two groups using a standard t-test.  We will vary the size of the effect (specified in terms of Cohen's d), the Type I error rate, and the sample size, and for each of these we will examine how the proportion of significant results (i.e. power) is affected. Figure \@ref(fig:plotPowerSim) shows an example of how power changes as a function of these factors.  
 
-```{r powerSim echo=FALSE}
+```{r powerSim, echo=FALSE}
 # Simulate power as a function of sample size, effect size, and alpha
 
 # create a set of functions to generate simulated results
@@ -389,7 +389,7 @@ Fortunately, there are tools available that allow us to determine the statistica
 
 Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the `pwr.t.test()` function from the `pwr` library:
 
-```{r}
+```{r echo=FALSE}
 pwr.t.test(d = 0.5, power = 0.8, sig.level = 0.05)
 ```
 
@@ -397,7 +397,7 @@ This tells us that we would need at least 64 subjects in each group in order to 
 
 It might have occurred to you that if the effect size is large enough, then the necessary sample will be very small.  For example, if we run the same power analysis with an effect size of d=2, then we will see that we only need about 5 subjects in each group to have sufficient power to find the difference.  
 
-```{r}
+```{r echo=FALSE}
 pwr.t.test(d = 2, power = 0.8, sig.level = 0.05)
 ```
 

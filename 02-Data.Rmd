@@ -46,54 +46,22 @@ Note that the students' answers were qualitative, but we generated a quantitativ
 #### Types of numbers
 There are several different types of numbers that we work with in statistics.  It's important to understand these differences, in part because programming languages like R often distinguish between them.
 
-**Binary numbers**. The simplest are binary numbers -- that is, zero or one.  We will often use binary numbers to represent whether something is true or false, or present or absent.  For example, I might ask 10 people if they have ever experienced a migraine headache.  We can put their answers into an R variable, using the ```c()``` function to create a list of values.  Then we can simply type the name of the variable to print out its value:
+**Binary numbers**. The simplest are binary numbers -- that is, zero or one.  We will often use binary numbers to represent whether something is true or false, or present or absent.  For example, I might ask 10 people if they have ever experienced a migraine headache, recording their answers as "Yes" or "No".  It's often useful to instead use *logical* values, which take the value of either ```TRUE``` or ```FALSE```.  We can create these by testing whether each value is equal to "Yes", which we can do using the ```==``` symbol. This will return the value ```TRUE``` for any matching "Yes" values, and ```FALSE``` otherwise.  These are useful to R knows how to interpret them natively, whereas it doesn't know what "Yes" and "No" mean.
 
-```{r}
-# create variable containing responses to migraine question
+In general, most programming languages treat truth values and binary numbers equivalently. The number 1 is equal to the logical value ```TRUE```:
 
-everHadMigraine <- c('Yes','No','Yes','No','No','No','Yes','No','No','No')
-everHadMigraine
+```
+> TRUE == 1
+[1] TRUE
 ```
 
-It's often useful to instead use *logical* values, which take the value of either ```TRUE``` or ```FALSE```.  We can create these by testing whether each value is equal to "Yes", which we can do using the ```==``` symbol. This will return the value ```TRUE``` for any matching "Yes" values, and ```FALSE``` otherwise.  These are useful to R knows how to interpret them natively, whereas it doesn't know what "Yes" and "No" mean.
-
-```{r}
-# create truth values from everHadMigraine variable
-
-everHadMigraineTruth <- everHadMigraine == 'Yes'
-everHadMigraineTruth
+And the number zero is equal to the logical value ``FALSE``:
+```
+> FALSE == 0
+[1] TRUE
 ```
 
-R treats truth values and binary numbers equivalently:
-
-```{r}
-# 1 is equal to TRUE - should return the answer TRUE
-TRUE == 1
-```
-
-```{r}
-# 0 is equal to FALSE - should return the answer TRUE
-FALSE == 0
-```
-
-```{r}
-# 0 is equal to true - should return the answer FALSE
-TRUE == 0
-```
-
- 
 **Integers**.  Integers are whole numbers with no fractional or decimal part. We most commonly encounter integers when we count things, but they also often occur in psychological measurement.  For example, in my introductory survey I administer a set of questions about attitudes towards statistics (such as "Statistics seems very mysterious to me."), on which the students respond with a number between 1 ("Disagree strongly") and 7 ("Agree strongly").  
-
-We can also turn our list of truth values into integers explicitly using the ```as.integer()``` function in R:
-
-```{r}
-# create integer values from truth values using as.integer()
-
-everHadMigraineBinary <- as.integer(everHadMigraineTruth)
-everHadMigraineBinary
-```
-
-When we get to probability theory we will see a way in which this kind of representation can be very useful.
 
 **Real numbers**.  Most commonly in statistics we work with real numbers, which have a fractional/decimal part.  For example, we might measure someone's weight, which can be measured to an arbitrary level of precision, from whole pounds down to micrograms.
 
@@ -103,46 +71,7 @@ A *discrete* measurement is one that takes one of a set of particular values.  T
 
 A *continuous* measurement is one that is defined in terms of a real number. It could fall anywhere in a particular range of values, though usually our measurement tools will limit the precision with which we can measure; for example, a floor scale might measure weight to the nearest pound, even though weight could in theory be measured with much more precision.
 
-## Scales of measurement
-
-All variables must take on at least two different possible values (otherwise they would be a *constant* rather than a variable), but different values of the variable can relate to each other in different ways, which we refer to as *scales of measurement*.  There are four ways in which the different values of a variable can differ.
-
-- *Identity*: Each value of the variable has a unique meaning.  
-- *Magnitude*: The values of the variable reflect different magnitudes and have an ordered relationship to one another --- that is, some values are larger and some are smaller.
-- *Equal intervals*: Units along the scale of measurement are equal to one another. This means, for example, that the difference between 1 and 2 would be equal in its magnitude to the difference between 19 and 20.
-- *Absolute zero*:  The scale has a true meaningful zero point. For example, for many measurements of physical quantities such as height or weight, this is the complete absence of the thing being measured.
-
-There are four different scales of measurement that go along with these different ways that values of a variable can differ.
-
-*Nominal scale*.  A nominal variable satisfies the criterion of identity, such that each value of the variable represents something different, but the numbers simply serve as qualitative labels as discussed above.  For example, we might ask people for their political party affiliation, and then code those as numbers: 1 = "Republican", 2 = "Democrat", 3 = "Libertarian", and so on. However, the different numbers do not have any ordered relationship with one another.  
-
-*Ordinal scale*. An ordinal variable satisfies the criteria of identity and magnitude, such that the values can be ordered in terms of their magnitude.  For example, we might ask a person with chronic pain to complete a form every day assessing how bad their pain is, using a 1-7 numeric scale. Note that while the person is presumably feeling more pain on a day when they report a 6 versus a day when they report a 3, it wouldn't make sense to say that their pain is twice as bad on the former versus the latter day; the ordering gives us information about relative magnitude, but the differences between values are not necessarily equal in magnitude.
-
-*Interval scale*. An interval scale has all of the features of an ordinal scale, but in addition the intervals between units on the measurement scale can be treated as equal.  A standard example is physical temperature measured in Celsius or Farenheit; the physical difference between 10 and 20 degrees is the same as the physical difference between 90 and 100 degrees, but each scale can also take on negative values.
-
-*Ratio scale*. A ratio scale variable has all four of the features outlined above: identity, magnitude, equal intervals, and absolute zero.  The difference between a ratio scale variable and an interval scale variable is that the ratio scale variable has a true zero point.  Examples of ratio scale variables include physical height and weight, along with temperature measured in Kelvin.
-
-### Why do scales of measurement matter?
-
-There are two important reasons that we must pay attention to the scale of measurement of a variable.  First, the scale determines what kind of mathematical operations we can apply to the data (see Table \@ref(tab:MeasurementTypes)).  A nominal variable can only be compared for equality; that is, do two observations on that variable have the same numeric value?  It would not make sense to apply other mathematical operations to a nominal variable, since they don't really function as numbers in a nominal variable, but rather as labels.  With ordinal variables, we can also test whether one value is greater or lesser than another, but we can't do any arithmetic.  Interval and ratio variables allow us to perform arithmetic; with interval variables we can only add or subtract values, whereas with ratio variables we can also multiply and divide values.  
-
-```{r echo=FALSE,MeasurementTypes}
-
-measTypes=data.frame(equal=c('OK','OK','OK','OK'),
-                     gtlt=c('','OK','OK','OK'),
-                     addsub=c('','','OK','OK'),
-                     multdiv=c('','','','OK'),
-                     row.names=c('Nominal','Ordinal','Interval','Ratio'))
-knitr::kable(
-  measTypes, booktabs = TRUE,
-  caption = 'Different scales of measurement admit different types of numeric operations',
-  col.names=c("Equal/not equal","Greater than/less than", "Add/subtract", "Multiply/divide")
-)
-
-
-```
-
-These constraints also imply that there are certain kinds of statistics that we can compute on each type of variable.  Statistics that simply involve counting of different values (such as the most common value, known as the *mode*), can be calculated on any of the variable types.  Other statistics are based on ordering or ranking of values (such as the *median*, which is the middle value when all of the values are ordered by their magnitude), and these require that the value at least be on an ordinal scale.  Finally, statistics that involve adding up values (such as the average, or *mean*), require that the variables be at least on an interval scale.  Having said that, we should note that it's quite common for researchers to compute the mean of variables that are only ordinal (such as responses on personality tests), but this can sometimes be problematic.  
+It is common in statistics courses to go into more detail about different "scales" of measurement, which are discussed in more detail in the Appendix to this chapter.  The most important takeaway is that some kinds of statistics don't make sense on some kinds of data.  For example, imagine that we were to collect postal Zip Code data from a number of individuals. Those numbers are represented as integers, but they don't actually refer to a numeric scale; each zip code basically serves as a label for a different region. For this reason, it wouldn't make sense to talk about the average zip code, for example.  
 
 ## What makes a good measurement?
 
@@ -152,10 +81,9 @@ It is usually impossible to measure a construct without some amount of error.  I
 
 Sometimes there is a standard against which other measurements can be tested, which we might refer to as a "gold standard" --- for example, measurement of sleep can be done using many different devices (such as devices that measure movement in bed), but they are generally considered inferior to the gold standard of polysomnography (which uses measurement of brain waves to quantify the amount of time a person spends in each stage of sleep).  Often the gold standard is more difficult or expensive to perform, and the cheaper method is used even though it might have greater error.
 
-
 When we think about what makes a good measurement, we usually distinguish two different aspects of a good measurement.
 
-### *Reliability*
+### Reliability
 
 Reliability refers to the consistency of our measurements.  One common form of reliability, known as "test-retest reliability", measures how well the measurements agree if the same measurement is performed twice.  For example, I might give you a questionnaire about your attitude towards statistics today, repeat this same questionnaire tomorrow, and compare your answers on the two days; we would hope that they would be very similar to one another, unless something happened in between the two tests that should have changed your view of statistics (like reading this book!).  
 
@@ -239,7 +167,7 @@ plot_grid(p1,p2,p3,p4,ncol=2,label_size=12,
 
 ```
 
-### *Validity* 
+### Validity
 
 Reliability is important, but on its own it's not enough: After all, I could create a perfectly reliable measurement on a personality test by re-coding every answer using the same number, regardless of how the person actually answers.  We want our measurements to also be *valid* --- that is, we want to make sure that we are actually measuring the construct that we think we are measuring (Figure \@ref(fig:ReliabilityValidity)). There are many different types of validity that are commonly discussed; we will focus on three of them.
 
@@ -261,6 +189,46 @@ Having read this chapter, you should be able to:
 
 - [*An introduction to psychometric theory with applications in R*](http://www.personality-project.org/r/book/) - A free online textbook on psychological measurement
 
+## Appendix
+
+### Scales of measurement
+
+All variables must take on at least two different possible values (otherwise they would be a *constant* rather than a variable), but different values of the variable can relate to each other in different ways, which we refer to as *scales of measurement*.  There are four ways in which the different values of a variable can differ.
+
+- *Identity*: Each value of the variable has a unique meaning.  
+- *Magnitude*: The values of the variable reflect different magnitudes and have an ordered relationship to one another --- that is, some values are larger and some are smaller.
+- *Equal intervals*: Units along the scale of measurement are equal to one another. This means, for example, that the difference between 1 and 2 would be equal in its magnitude to the difference between 19 and 20.
+- *Absolute zero*:  The scale has a true meaningful zero point. For example, for many measurements of physical quantities such as height or weight, this is the complete absence of the thing being measured.
+
+There are four different scales of measurement that go along with these different ways that values of a variable can differ.
+
+*Nominal scale*.  A nominal variable satisfies the criterion of identity, such that each value of the variable represents something different, but the numbers simply serve as qualitative labels as discussed above.  For example, we might ask people for their political party affiliation, and then code those as numbers: 1 = "Republican", 2 = "Democrat", 3 = "Libertarian", and so on. However, the different numbers do not have any ordered relationship with one another.  
+
+*Ordinal scale*. An ordinal variable satisfies the criteria of identity and magnitude, such that the values can be ordered in terms of their magnitude.  For example, we might ask a person with chronic pain to complete a form every day assessing how bad their pain is, using a 1-7 numeric scale. Note that while the person is presumably feeling more pain on a day when they report a 6 versus a day when they report a 3, it wouldn't make sense to say that their pain is twice as bad on the former versus the latter day; the ordering gives us information about relative magnitude, but the differences between values are not necessarily equal in magnitude.
+
+*Interval scale*. An interval scale has all of the features of an ordinal scale, but in addition the intervals between units on the measurement scale can be treated as equal.  A standard example is physical temperature measured in Celsius or Farenheit; the physical difference between 10 and 20 degrees is the same as the physical difference between 90 and 100 degrees, but each scale can also take on negative values.
+
+*Ratio scale*. A ratio scale variable has all four of the features outlined above: identity, magnitude, equal intervals, and absolute zero.  The difference between a ratio scale variable and an interval scale variable is that the ratio scale variable has a true zero point.  Examples of ratio scale variables include physical height and weight, along with temperature measured in Kelvin.
+
+There are two important reasons that we must pay attention to the scale of measurement of a variable.  First, the scale determines what kind of mathematical operations we can apply to the data (see Table \@ref(tab:MeasurementTypes)).  A nominal variable can only be compared for equality; that is, do two observations on that variable have the same numeric value?  It would not make sense to apply other mathematical operations to a nominal variable, since they don't really function as numbers in a nominal variable, but rather as labels.  With ordinal variables, we can also test whether one value is greater or lesser than another, but we can't do any arithmetic.  Interval and ratio variables allow us to perform arithmetic; with interval variables we can only add or subtract values, whereas with ratio variables we can also multiply and divide values.  
+
+```{r echo=FALSE,MeasurementTypes}
+
+measTypes=data.frame(equal=c('OK','OK','OK','OK'),
+                     gtlt=c('','OK','OK','OK'),
+                     addsub=c('','','OK','OK'),
+                     multdiv=c('','','','OK'),
+                     row.names=c('Nominal','Ordinal','Interval','Ratio'))
+knitr::kable(
+  measTypes, booktabs = TRUE,
+  caption = 'Different scales of measurement admit different types of numeric operations',
+  col.names=c("Equal/not equal","Greater than/less than", "Add/subtract", "Multiply/divide")
+)
+
+
+```
+
+These constraints also imply that there are certain kinds of statistics that we can compute on each type of variable.  Statistics that simply involve counting of different values (such as the most common value, known as the *mode*), can be calculated on any of the variable types.  Other statistics are based on ordering or ranking of values (such as the *median*, which is the middle value when all of the values are ordered by their magnitude), and these require that the value at least be on an ordinal scale.  Finally, statistics that involve adding up values (such as the average, or *mean*), require that the variables be at least on an interval scale.  Having said that, we should note that it's quite common for researchers to compute the mean of variables that are only ordinal (such as responses on personality tests), but this can sometimes be problematic.  
 
 
 
