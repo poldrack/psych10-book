@@ -12,7 +12,7 @@ docker-build:
 	docker build -t $(DOCKER_USERNAME)/statsthinking21 .
 
 shell:
-	docker run -it --entrypoint=bash $(DOCKER_USERNAME)/statsthinking21
+	docker run -it -v $(shell pwd):/book -w /book --entrypoint=bash $(DOCKER_USERNAME)/statsthinking21
 
 deploy:
 	bash deploy.sh
@@ -25,9 +25,14 @@ render-gitbook:
 	echo "bookdown::render_book('index.Rmd', 'bookdown::gitbook')" | R --no-save
 	rm 99-References.Rmd
 
+render-epub-mathjax:
+	cp _gitbook_99-References.Rmd 99-References.Rmd
+	echo "bookdown::render_book('index.Rmd', 'bookdown::epub_book',pandoc_args='--mathjax')" | R --no-save
+	rm 99-References.Rmd
+
 render-epub:
 	cp _gitbook_99-References.Rmd 99-References.Rmd
-	echo "bookdown::render_book('index.Rmd', 'bookdown::epub_book')" | R --no-save
+	echo "bookdown::render_book('index.Rmd', 'bookdown::epub_book',)" | R --no-save
 	rm 99-References.Rmd
 
 render-pdf:
@@ -35,6 +40,12 @@ render-pdf:
 	cp _latex_99-References.Rmd 99-References.Rmd
 	echo "bookdown::render_book('index.Rmd', 'bookdown::pdf_book')" | R --no-save
 	rm 99-References.Rmd
+
+render-pdf-docker:
+	docker run -it -v $(shell pwd):/book -w /book --entrypoint="" $(DOCKER_USERNAME)/statsthinking21  make render-pdf
+
+render-gitbook-docker:
+	docker run -it -v $(shell pwd):/book -w /book --entrypoint="" $(DOCKER_USERNAME)/statsthinking21  make render-gitbook
 
 pkgsetup:
 	cd setup && python get_packages.py 
