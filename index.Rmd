@@ -23,7 +23,6 @@ output:
     includes:
       in_header:
         - google_analytics.html
-        - css/style.css
 ---
 
 ```{r global_options, include=FALSE}
@@ -74,7 +73,7 @@ The book is licensed according to the [Creative Commons Attribution-NonCommercia
 
 I'd first like to thank Susan Holmes, who first inspired me to consider writing my own statistics book.  Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse.  Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. Particular thanks also go to Yihui Xie, creator of the Bookdown package, for improving the book's use of Bookdown features (including the ability for users to directly generate edits via the Edit button).  
 
-I'd also like to thank others who provided helpful comments and suggestions: Athanassios Protopapas, Wesley Tansey, Jack Van Horn.
+I'd also like to thank others who provided helpful comments and suggestions: Athanassios Protopapas, Wesley Tansey, Jack Van Horn, Thor Aspelund.
 
 Thanks to the following Twitter users for helpful suggestions: \@enoriverbend
 
