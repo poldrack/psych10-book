@@ -1,0 +1,55 @@
+---
+output:
+  pdf_document: default
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  html_document: default
+---
+
+# Modeling categorical relationships in R
+
+So far we have discussed the general concept of statistical modeling and hypothesis testing, and applied them to some simple analyses. In this chapter we will focus on the modeling of *categorical* relationships, by which we mean relationships between variables that are measured qualitatively.  These data are usually expressed in terms of counts; that is, for each value of the variable (or combination of values of multiple variables), how many observations take that value?  For example, when we count how many people from each major are in our class, we are fitting a categorical model to the data.
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(kableExtra)
+library(BayesFactor)
+library(sfsmisc)
+library(cowplot)
+
+library(knitr)
+
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult <- 
+  NHANES %>%
+  drop_na(Weight) %>%
+  subset(Age>=18)
+
+```
+
+## The Pearson Chi-squared test (Section \@ref(chi-squared-test))
+
+```{r}
+
+```
+
+
+
+## Two-way tests (Section \@refwo-way-test})
+
+```{r}
+
+```
+

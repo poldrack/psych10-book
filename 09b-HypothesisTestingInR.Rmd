@@ -1,0 +1,101 @@
+---
+output:
+  pdf_document: default
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  html_document: default
+---
+# Hypothesis testing in R
+
+In this chapter we will present several examples of using R to perform hypothesis testing.
+
+## Simple example: Coin-flipping (Section \@ref(randomization-very-simple))
+
+Let's say that we flipped 100 coins and observed 70 heads. We would like to use these data to test the hypothesis that the true probability is 0.5.
+
+First let's generate our data, simulating 100,000 sets of 100 flips. We use such a large number because it turns out that it's very rare to get 70 heads, so we need many attempts in order to get a reliable estimate of these probabilties.  This will take a couple of minutes to complete.
+
+```{r}
+# simulate tossing of 100,000 flips of 100 coins to identify empirical 
+# probability of 70 or more heads out of 100 flips
+
+nRuns <- 100000
+
+# create function to toss coins
+tossCoins <- function() {
+  flips <- runif(100) > 0.5 
+  return(tibble(nHeads=sum(flips)))
+}
+
+# create an input data frame for do()
+input_df <- tibble(id=seq(nRuns)) %>%
+  group_by(id)
+
+# use do() to perform the coin flips
+flip_results <- input_df %>%
+  do(tossCoins()) %>%
+  ungroup()
+
+p_ge_70_sim <- 
+  flip_results %>%
+  summarise(p_gt_70 = mean(nHeads >= 70)) %>%
+  pull()
+
+p_ge_70_sim
+
+
+```
+
+
+For comparison, we can also compute the p-value for 70 or more heads based on a null hypothesis of $P_{heads}=0.5$, using the binomial distribution.
+
+```{r}
+# compute the probability of 69 or fewer heads, when P(heads)=0.5
+p_lt_70 <- pbinom(69, 100, 0.5) 
+
+# the probability of 70 or more heads is simply the complement of p_lt_70
+p_ge_70 <- 1 - p_lt_70
+
+p_ge_70
+```
+
+## Simulating p-values
+
+In this exercise we will perform hypothesis testing many times in order to test whether the p-values provided by our statistical test are valid.  We will sample data from a normal distribution with a mean of zero, and for each sample perform a t-test to determine whether the mean is different from zero.  We will then count how often we reject the null hypothesis; since we know that the true mean is zero, these are by definition Type I errors.
+
+```{r}
+nRuns <- 5000
+
+# create input data frame for do()
+input_df <- tibble(id=seq(nRuns)) %>%
+  group_by(id)
+
+# create a function that will take a sample
+# and perform a one-sample t-test
+
+sample_ttest <- function(sampSize=32){
+  tt.result <- t.test(rnorm(sampSize))
+  return(tibble(pvalue=tt.result$p.value))
+}
+
+# perform simulations
+
+sample_ttest_result <- input_df %>%
+  do(sample_ttest())
+
+p_error <-
+  sample_ttest_result %>%
+  ungroup() %>%
+  summarize(p_error = mean(pvalue<.05)) %>%
+  pull()
+
+p_error
+
+```
+
+We should see that the proportion of samples with $p < .05$ is about 5%.
+
+
+

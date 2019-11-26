@@ -1,0 +1,387 @@
+---
+output:
+  pdf_document: default
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  html_document: default
+---
+
+# Summarizing data with R (with Lucy King)
+
+This chapter will introduce you to how to summarize data using R, as well as providing an introduction to a popular set of R tools known as the "Tidyverse."
+
+Before doing anything else we need to load the libraries that we will use in this notebook.  
+
+```{r loadLibraries}
+library(tidyverse)
+library(cowplot)
+library(knitr)
+
+```
+
+We will use the NHANES dataset for several of our examples, so let's load the library that contains the data.
+
+```{r}
+# load the NHANES data library
+library(NHANES)
+```
+
+## Introduction to the Tidyverse
+
+In this chapter we will introduce a way of working with data in R that is often referred to as the "Tidyverse." 
+
+### Making a data frame using tibble()
+
+It's best to work with "tibbles" instead of R's traditional `data.frame`." A tibble is a data frame but with some smart tweaks that make it easier to work with, expecially when using the tidyverse. See here for more information on  the function tibble(): https://r4ds.had.co.nz/tibbles.html
+
+```{r}
+# first create the individual variables
+n <- c("russ", "lucy", "jaclyn", "tyler")
+x <- c(1, 2, 3, 4)
+y <- c(4, 5, 6, 7)
+z <- c(7, 8, 9, 10)
+
+# create the data frame
+myDataFrame <-
+  tibble(
+    n, #list each of your columns in the order you want them
+    x,
+    y,
+    z
+  )
+
+myDataFrame
+```
+
+Take a quick look at the properties of the data frame us `glimpse()`:
+
+```{r}
+glimpse(myDataFrame) 
+```
+
+### Selecting an element
+
+There are various ways to access the contents within a data frame.  
+
+#### Selecting a row or column by name
+
+```{r}
+myDataFrame$x
+```
+
+
+The first index refers to the row, the second to the column.
+
+```{r}
+myDataFrame[1, 2]
+
+myDataFrame[2, 3]
+```
+
+
+#### Selecting a row or column by index
+
+```{r}
+myDataFrame[1, ]
+
+myDataFrame[, 1]
+```
+
+#### Select a set of rows 
+
+```{r}
+myDataFrame %>% 
+  slice(1:2) 
+```
+
+`slice()` is a function that selects out rows based on their row number.
+
+You will also notice something we haven't discussed before: %>%.  This is called a "pipe", which is commonly used within the tidyverse (which we will discuss more in the R lab on data wrangling); you can read more [here](http://magrittr.tidyverse.org/). A pipe takes the output from one command and feeds it as input to the next command. In this case, simply writing the name of the data frame (myDataFrame) causes it to be input to the slice() command following the pipe. The benefit of pipes will become especially apparent when we want to start stringing together multiple functions into a single command.
+
+In this example, no new variable is created - the output is printed to the screen, just like it would be if you typed the name of the variable.  If you wanted to save it to a new variable, you would use the <- assignment operator, like this:
+
+```{r}
+myDataFrameSlice <- myDataFrame %>% 
+  slice(1:2) 
+
+myDataFrameSlice
+
+```
+
+#### Select a set of rows based on specific value(s)
+
+```{r}
+myDataFrame %>% 
+  filter(n == "russ")
+
+```
+
+`filter()` is a function that retains only those rows that meet your stated criteria
+
+```{r}
+myDataFrame %>% 
+  filter(n == "russ" | n == "lucy") # | indicates "or"
+
+```
+
+#### Select a set of columns
+
+```{r}
+myDataFrame %>% 
+  select(x:y)
+```
+
+`select()` is a function that selects out only those columns you specify using their names
+
+You can also specify a vector of columns to select.
+
+```{r}
+myDataFrame %>% 
+  select(c(x,z))
+```
+
+### Adding a row or column
+
+add a named row
+
+```{r}
+tiffanyDataFrame <-
+  tibble(
+    n = "tiffany",
+    x = 13,
+    y = 14,
+    z = 15
+  )
+
+myDataFrame %>% 
+  bind_rows(tiffanyDataFrame)
+```
+
+`bind_rows()` is a function that combines the rows from another dataframe to the current dataframe 
+
+
+## Creating or modifying variables using `mutate()`
+
+Often we will want to either create a new variable based on an existing variable, or modify the value of an existing variable.  Within the tidyverse, we do this using a function called ```mutate()```.  Let's start with a toy example by creating a data frame containing a single variable.
+
+```{r}
+toy_df <- data.frame(x = c(1,2,3,4))
+glimpse(toy_df)
+```
+
+Let's say that we wanted to create a new variable called `y` that would contain the value of x multiplied by 10.  We could do this using ```mutate()``` and then assign the result back to the same data frame:
+
+```{r}
+toy_df <- toy_df %>%
+  # create a new variable called y that contains x*10
+  mutate(y = x*10)
+glimpse(toy_df)
+```
+
+
+We could also overwrite a variable with a new value:
+
+```{r}
+toy_df2 <- toy_df %>%
+  # create a new variable called y that contains x*10
+  mutate(y = y + 1)
+glimpse(toy_df2)
+
+```
+We will use `mutate()` often so it's an important function to understand.
+
+Here we can use it with our example data frame to create a new variable that is the sum of several other variables.
+```{r}
+myDataFrame <- 
+  myDataFrame %>%
+  mutate(total = x + y + z)
+
+myDataFrame
+```
+
+mutate() is a function that creates a new variable in a data frame using the existing variables.  In this case, it creates a variable called total that is the sum of the existing variables x, y, and z.
+
+### Remove a column using the select() function
+
+```{r}
+myDataFrame <- 
+  myDataFrame %>%
+  dplyr::select(-total)
+
+myDataFrame
+```
+
+## Tidyverse in action
+
+To see the tidyverse in action, let's clean up the NHANES dataset.  Each individual in the NHANES dataset has a unique identifier stored in the variable ```ID```.  First let's look at the number of rows in the dataset:
+
+```{r}
+nrow(NHANES)
+```
+
+Now let's see how many unique IDs there are. The ```unique()``` function returns a vector containing all of the unique values for a particular variable, and the ```length()``` function returns the length of the resulting vector.
+
+```{r}
+length(unique(NHANES$ID))
+```
+
+This shows us that while there are 10,000 observations in the data frame, there are only `r I(length(unique(NHANES$ID)))` unique IDs.  This means that if we were to use the entire dataset, we would be reusing data from some individuals, which could give us incorrect results. For this reason, we wold like to discard any observations that are duplicated.  
+
+Let's create a new variable called ```NHANES_unique``` that will contain only the distinct observations, with no individuals appearing more than once. The `dplyr` library  provides a function called ```distinct()``` that will do this for us. You may notice that we didn't explicitly load the `dplyr` library above; however, if you look at the messages that appeared when we loaded the `tidyverse` library, you will see that it loaded `dplyr` for us.  To create the new data frame with unique observations, we will pipe the NHANES data frame into the ```distinct()``` function and then save the output to our new variable.
+
+
+```{r dropDupes, warning=FALSE}
+NHANES_unique <- 
+  NHANES %>% 
+  distinct(ID, .keep_all = TRUE)
+```
+
+If we number of rows in the new data frame, it should be the same as the number of unique IDs (`r I(length(unique(NHANES$ID)))`):
+
+```{r}
+nrow(NHANES_unique)
+```
+
+In the next example you will see the power of pipes come to life, when we start tying together multiple functions into a single operation (or "pipeline").
+
+
+
+## Looking at individual variables using pull() and head()
+
+The NHANES data frame contains a large number of variables, but usually we are only interested in a particular variable.  We can extract a particular variable from a data frame using the ```pull()``` function.  Let's say that we want to extract the variable `PhysActive`.  We could do this by piping the data frame into the pull command, which will result in a list of many thousands of values.  Instead of printing out this entire list, we will pipe the result into the ```head()``` function, which just shows us the first few values contained in a variable.  In this case we are not assigning the value back to a variable, so it will simply be printed to the screen.  
+
+```{r}
+NHANES %>%
+  # extract the PhysActive variable
+  pull(PhysActive) %>%
+  # extract the first 10 values 
+  head(10)
+
+```
+
+There are two important things to notice here.  The first is that there are three different values apparent in the answers: "Yes", "No", and <NA>, which means that the value is missing for this person (perhaps they didn't want to answer that question on the survey).  When we are working with data we generally need to remove missing values, as we will see below.
+
+The second thing to notice is that R prints out a list of "Levels" of the variable. This is because this variable is defined as a particular kind of variable in R known as a *factor*. You can think of a factor variable as a categorial variable with a specific set of levels.  The missing data are not treated as a level, so it can be useful to make the missing values explicit, which can be done using a function called ```fct_explicit_na()``` in the `forcats` package.  Let's add a line to do that:
+
+```{r}
+NHANES %>%
+  mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
+  # extract the PhysActive variable
+  pull(PhysActive) %>%
+  # extract the first 10 values 
+  head(10)
+
+```
+
+This new line overwrote the old value of `PhysActive` with a version that has been processed by the ```fct_explicit_na()``` function to convert <NA> values to explicitly missing values. Now you can see that Missing values are treated as an explicit level, which will be useful later.  
+
+Now we are ready to start summarizing data!
+
+## Computing a frequency distribution (Section \@ref(frequency-distributions))
+
+We would like to compute a frequency distribution showing how many people report being either active or inactive.  The following statement is fairly complex so we will step through it one bit at a time.
+
+```{r makePhysActiveTable}
+PhysActive_table <- NHANES_unique %>%
+  # convert the implicit missing values to explicit
+  mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
+  # select the variable of interest
+  dplyr::select(PhysActive) %>% 
+  # group by values of the variable
+  group_by(PhysActive) %>% 
+  # count the values
+  summarize(AbsoluteFrequency = n()) 
+
+# kable() prints out the table in a prettier way.
+kable(PhysActive_table)
+```
+
+The first step should be familiar from the previous section (we are adding the  ```head()``` function here to show us the first few rows of the data frame):
+
+```{r}
+NHANES_unique %>%
+  mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
+  head(10) %>% 
+  kable()
+```
+
+You can see that this data frame contains all of the original variables.  Since we are only interested in the `PhysActive` variable, let's extract that one and get rid of the rest.  We can do this using the ```select()``` command from the `dplyr` package.  Because there is also another select command available in R, we need to explicitly refer to the one from the `dplyr` package, which we do by including the package name followed by two colons: ```dplyr::select()```.
+
+```{r}
+NHANES_unique %>%
+  # convert the implicit missing values to explicit
+  mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
+  # select the variable of interest
+  dplyr::select(PhysActive) %>% 
+  head(10)
+
+```
+
+The next function, ```group_by()``` tells R that we are going to want to analyze the data separate according to the different levels of the `PhysActive` variable:
+
+```{r}
+NHANES_unique %>%
+  # convert the implicit missing values to explicit
+  mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
+  # select the variable of interest
+  dplyr::select(PhysActive) %>% 
+  group_by(PhysActive) %>%
+  head(10)
+```
+
+The final command tells R to create a new data frame by summarizing the data that we are passing in (which in this case is the PhysActive variable, grouped by its different levels).  We tell the ```summarize()``` function to create a new variable (called `AbsoluteFrequency`) will contain a count of the number of observations for each group, which is generated by the ```n()``` function.
+
+```{r}
+NHANES_unique %>%
+  # convert the implicit missing values to explicit
+  mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
+  # select the variable of interest
+  dplyr::select(PhysActive) %>% 
+  group_by(PhysActive) %>%
+  summarize(AbsoluteFrequency = n()) 
+
+```
+
+Now let's say we want to add another column with percentage of observations in each group.  We compute the percentage by dividing the absolute frequency for each group by the total number. We can use the table that we already generated, and add a new variable, again using ```mutate()```:
+
+```{r}
+PhysActive_table <- PhysActive_table %>%
+  mutate(
+    Percentage = AbsoluteFrequency / sum(AbsoluteFrequency) * 100
+  )
+
+kable(PhysActive_table, digits=2)
+```
+
+## Computing a cumulative distribution (Section \@ref(cumulative-distributions))
+
+Let's compute a cumulative distribution for the `SleepHrsNight` variable in NHANES.  This looks very similar to what we saw in the previous section.  
+
+```{r}
+# create summary table for relative frequency of different
+# values of SleepHrsNight 
+
+SleepHrsNight_cumulative <- 
+  NHANES_unique %>%
+  # drop NA values for SleepHrsNight variable
+  drop_na(SleepHrsNight) %>%
+  # remove other variables
+  dplyr::select(SleepHrsNight) %>%
+  # group by values
+  group_by(SleepHrsNight) %>%
+  # create summary table
+  summarize(AbsoluteFrequency = n()) %>%
+  # create relative and cumulative frequencies
+  mutate(
+    RelativeFrequency = AbsoluteFrequency / sum(AbsoluteFrequency),
+    CumulativeDensity = cumsum(RelativeFrequency)
+  )
+
+kable(SleepHrsNight_cumulative)
+```
+
+## Exercises
+
+

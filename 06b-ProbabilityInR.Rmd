@@ -1,0 +1,167 @@
+---
+output:
+  pdf_document: default
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  html_document: default
+---
+
+# Probability in R (with Lucy King)
+
+In this chapter we will go over probability computations in R. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(NHANES)
+library(tidyverse)
+```
+
+## Basic probability calculations
+
+Let's create a vector of outcomes from one to 6, using the `seq()` function to create such a sequence:
+
+```{r}
+outcomes <- seq(1, 6)
+outcomes
+
+```
+
+Now let's create a vector of logical values based on whether the outcome in each position is equal to 1. Remember that `==` tests for equality of each element in a vector:
+
+```{r}
+outcome1isTrue <- outcomes == 1 
+outcome1isTrue
+
+```
+
+Rememer that the simple probability of an outcome is number of occurrences of the outcome divided by the total number of events.  To compute a probability, we can take advantage of the fact that TRUE/FALSE are equivalent to 1/0 in R.  The formula for the mean (sum of values divided by the number of values) is thus exactly the same as the formula for the simple probability!  So, we can compute the probability of the event by simply taking the mean of the logical vector.
+
+```{r}
+p1isTrue <- mean(outcome1isTrue)
+p1isTrue
+
+```
+
+## Empirical frequency (Section \@ref(empirical-frequency))
+
+Let's walk through how we computed empirical frequency of rain in San Francisco.
+
+First we load the data:
+
+```{r message=FALSE}
+# we will remove the STATION and NAME variables since they are identical for all rows
+SFrain <- read_csv("https://raw.githubusercontent.com/poldrack/psych10-book/master/data/SanFranciscoRain/1329219.csv") %>% 
+  dplyr::select(-STATION, -NAME)
+  
+glimpse(SFrain)
+```
+We see that the data frame contains a variable called `PRCP` which denotes the amount of rain each day. Let's create a new variable called `rainToday` that denotes whether the amount of precipitation was above zero:
+
+```{r}
+SFrain <- 
+  SFrain %>%
+  mutate(rainToday = as.integer(PRCP > 0))
+
+glimpse(SFrain)
+
+```
+
+Now we will summarize the data to compute the probability of rain:
+
+```{r}
+
+pRainInSF <- 
+  SFrain %>%
+  summarize(
+    pRainInSF = mean(rainToday)
+  ) %>%
+  pull()
+
+pRainInSF
+```
+
+## Conditional probability (Section \@ref(conditional-probability))
+
+Let's determine the conditional probability of someone being unhealthy, given that they are over 70 years of age, using the NHANES dataset.  Let's create a new data frame that 
+
+```{r}
+healthDataFrame <-
+  NHANES %>%
+  mutate(
+    Over70 = Age > 70,
+    Unhealthy = DaysPhysHlthBad > 0
+  ) %>%
+  dplyr::select(Unhealthy, Over70) %>%
+  drop_na()
+
+glimpse(healthDataFrame)
+```
+
+First, what's the probability of being over 70?
+
+```{r}
+pOver70 <- 
+  healthDataFrame %>%
+  summarise(pOver70 = mean(Over70)) %>% 
+  pull()
+
+# to obtain the specific value, we need to extract it from the data frame
+
+pOver70
+```
+
+Second, what's the probability of being unhealthy?
+
+```{r}
+pUnhealthy <- 
+  healthDataFrame %>%
+  summarise(pUnhealthy = mean(Unhealthy)) %>% 
+  pull()
+
+pUnhealthy
+```
+
+What's the probability for each combination of unhealthy/healthly and over 70/ not? We can create a new variable that finds the joint probability by multiplying the two individual binary variables together; since anything times zero is zero, this will only have the value 1 for any case where both are true.
+
+```{r}
+pBoth <- healthDataFrame %>% 
+  mutate(
+    both = Unhealthy*Over70
+  ) %>%
+  summarise(
+    pBoth = mean(both)) %>% 
+  pull()
+
+pBoth
+```
+
+Finally, what's the probability of someone being unhealthy, given that they are over 70 years of age?
+
+```{r}
+
+pUnhealthyGivenOver70 <-
+  healthDataFrame %>%
+  filter(Over70 == TRUE) %>% # limit to Over70
+  summarise(pUnhealthy = mean(Unhealthy)) %>% 
+  pull()
+
+pUnhealthyGivenOver70
+
+
+```
+
+```{r}
+# compute the opposite:
+# what the probability of being over 70 given that 
+# one is unhealthy?
+pOver70givenUnhealthy <-
+  healthDataFrame %>%
+  filter(Unhealthy == TRUE) %>% # limit to Unhealthy
+  summarise(pOver70 = mean(Over70)) %>% 
+  pull()
+
+pOver70givenUnhealthy
+
+```
+
