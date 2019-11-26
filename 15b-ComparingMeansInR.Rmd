@@ -1,0 +1,63 @@
+---
+  output:
+  bookdown::gitbook:
+  lib_dir: "book_assets"
+includes:
+  in_header: google_analytics.html
+pdf_document: default
+html_document: default
+---
+
+# Comparing means in R
+  
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+library(fivethirtyeight)
+library(BayesMed)
+library(BayesFactor)
+library(lme4)
+library(lmerTest)
+library(cowplot)
+library(knitr)
+
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult <- 
+  NHANES %>%
+  subset(Age>=18) %>%
+  drop_na(BMI)
+
+
+```
+
+## Testing the value of a single mean (Section \@ref(single-mean))
+
+
+## Comparing two means (Section \@ref(comparing-two-means))
+
+## The t-test as a linear model (Section \@ref(ttest-linear-model))
+
+
+## Comparing paired observations (Section \@ref(paired-ttests))
+
+### Sign test
+
+
+### Paired t-test
+
+
+## Analysis of variance (Section \@ref(ANOVA))
+
+
+
+

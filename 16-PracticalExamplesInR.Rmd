@@ -1,0 +1,38 @@
+---
+output:
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  pdf_document: default
+  html_document: default
+---
+
+# Practical statistical modeling in R {#practical-example}
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(BayesFactor)
+library(emmeans)
+library(brms)
+library(cowplot)
+library(knitr)
+library(ggfortify)
+
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult <- 
+  NHANES %>%
+  subset(Age>=18)
+
+```
+

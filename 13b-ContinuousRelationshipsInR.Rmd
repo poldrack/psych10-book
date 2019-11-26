@@ -1,0 +1,106 @@
+---
+output:
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  pdf_document: default
+  html_document: default
+---
+
+# Modeling continuous relationships in R
+
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(fivethirtyeight)
+library(BayesMed)
+library(cowplot)
+library(knitr)
+library(DiagrammeR)
+library(htmltools)
+library(webshot)
+
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult <- 
+  NHANES %>%
+  drop_na(Weight) %>%
+  subset(Age>=18)
+
+```
+
+
+## Computing covariance and correlation (Section \@#ref(covariance-and-correlation))
+
+
+```{r echo=FALSE}
+# create data for toy example of covariance
+df <-
+  tibble(x = c(3, 5, 8, 10, 12)) %>%
+  mutate(y = x + round(rnorm(n = 5, mean = 0, sd = 2))) %>%
+  mutate(
+    y_dev = y - mean(y),
+    x_dev = x - mean(x)
+  ) %>%
+  mutate(crossproduct = y_dev * x_dev)
+
+covXY <- sum(df$crossproduct) / (nrow(df) - 1)
+corXY <- sum(df$crossproduct) / ((nrow(df) - 1) * sd(df$x) * sd(df$y))
+
+kable(df, caption='Data for toy example of covariance')
+```
+
+```{r echo=FALSE}
+# perform correlation test on hate crime data
+cor.test(
+  hateCrimes$avg_hatecrimes_per_100k_fbi,
+  hateCrimes$gini_index
+)
+```
+
+```{r echo=FALSE}
+# compute null distribution by shuffling order of variable values
+
+# create a function to compute the correlation on the shuffled values 
+shuffleCorr <- function(x, y) {
+  xShuffled <- sample(x)
+  return(cor(xShuffled, y))
+}
+
+# run this function 2500 times 
+shuffleDist <- 
+  replicate(
+    2500, 
+    shuffleCorr(hateCrimes$avg_hatecrimes_per_100k_fbi, hateCrimes$gini_index)
+  )
+```
+
+```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line.",fig.width=4,fig.height=4,out.height='50%'}
+
+ggplot(data.frame(shuffleDist),aes(shuffleDist)) + 
+  geom_histogram(bins=100) +
+  geom_vline(xintercept = corGiniHC,color='blue') +
+  ggtitle(sprintf('p(shuffled r >= observed) = %0.3f',mean(shuffleDist>=corGiniHC))) +
+  theme(plot.title = element_text(size = 16, face = "bold")) +
+  theme(plot.margin = unit(c(0,1,0,0), "cm")) +
+  labs(
+  x = "Correlation coeffcients of shuffled variables"
+  )
+
+```
+
+
+## Robust correlations (\@ref(robust-correlations))
+
+show example of computing spearman from scratch
+

@@ -1,0 +1,81 @@
+---
+output:
+  pdf_document: default
+  bookdown::gitbook:
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  html_document: default
+---
+
+# The General Linear Model in R
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(fivethirtyeight)
+library(BayesMed)
+library(caret)
+library(MASS)
+library(cowplot)
+
+library(knitr)
+
+set.seed(123456) # set random seed to exactly replicate results
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all=TRUE)
+
+NHANES_adult <- 
+  NHANES %>%
+  drop_na(Weight) %>%
+  subset(Age>=18)
+
+
+```
+
+
+## Linear regression (Section \@ref(linear-regression))
+
+## Regression to the mean (Section \@ref(regression-to-the-mean))
+
+```{r echo=FALSE}
+# create simulated data for regression to the mean example
+
+nstudents <- 100 
+
+readingScores <- data.frame(
+  #random normal distribution of scores for test 1
+  test1 = rnorm(n = nstudents, mean = 0, sd = 1) * 10 + 100, 
+  #random normal distribution of scores for test 2
+  test2 = rnorm(n = nstudents, mean = 0, sd = 1) * 10 + 100 
+)
+
+# select the students in the bottom 25% on the first test
+cutoff <- quantile(readingScores$test1, 0.25)
+
+readingScores <-
+  readingScores %>%
+  mutate(badTest1 = test1 < cutoff) %>% 
+  dplyr::filter(badTest1 == TRUE) %>%
+  summarize(
+    `Test 1` = mean(test1),
+    `Test 2` = mean(test2)
+  )
+readingScores = as.data.frame(t(readingScores)) %>% rename(Score = V1)
+kable(readingScores, caption='Reading scores for Test 1 (which is lower, because it was the basis for selecting the students) and Test 2 (which is higher because it was not related to Test 1).')
+```
+
+## Model criticism and diagnostics (Section \@ref(model-criticism))
+
+
+
+
+## Cross-validation (Section \@ref(cross-validation))
+
+
