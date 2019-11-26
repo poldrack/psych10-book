@@ -51,7 +51,7 @@ candyDf <-
 
 Let's say that I have purchased a bag of 100 candies, which are labeled as having 1/3 chocolates, 1/3 licorices, and 1/3 gumballs.  When I count the candies in the bag, we get the following numbers: 30 chccolates, 33 licorices, and 37 gumballs. Because I like chocolate much more than licorice or gumballs, I feel slightly ripped off and I'd like to know if this was just a random accident.  To answer than question, I need to know: What is the likelihood that the count would come out this way if the true probability of each candy type is the averaged proportion of 1/3 each?
 
-## Pearson's chi-squared test
+## Pearson's chi-squared test {#chi-squared-test}
 
 The Pearson chi-squared test provides us with a way to test whether observed count data differs from some specific expected values that define the null hypothesis:
 
@@ -142,7 +142,7 @@ Let's verify that the chi-squared distribution accurately describes the sum of s
 
 For the candy example, we can compute the likelihood of our observed chi-squared value of `r I(chisqVal)` under the null hypothesis of equal frequency across all candies. We use a chi-squared distribution with degrees of freedom equal to k - 1 (where k = the number of categories) since we lost one degree of freedom when we computed the mean in order to generate the expected values.  The resulting p-value (`r I(sprintf('P(Chi-squared) > %0.2f = %0.3f',chisqVal,pval))`) shows that the observed counts of candies are not particularly surprising based on the proportions printed on the bag of candy, and we would not reject the null hypothesis of equal proportions.
 
-## Contingency tables and the two-way test
+## Contingency tables and the two-way test {#two-way-test}
 
 Another way that we often use the chi-squared test is to ask whether two categorical variables are related to one another.  As a more realistic example, let's take the question of whether a black driver is more likely to be searched when they are pulled over by a police officer, compared to a white driver.  The Stanford Open Policing Project (https://openpolicing.stanford.edu/) has studied this, and provides data that we can use to analyze the question.  We will use the data from the State of Connecticut since they are fairly small.  These data were first cleaned up to remove all unnecessary data.
 

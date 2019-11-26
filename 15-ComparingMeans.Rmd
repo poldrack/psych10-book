@@ -42,7 +42,7 @@ NHANES_adult <-
 We have already encountered a number of cases where we wanted to ask questions about the mean of a sample.  In this chapter, we will delve deeper into the various ways that we can compare means.
 
 
-## Testing the value of a single mean
+## Testing the value of a single mean {#single-mean}
 
 The simplest question we might want to ask of a mean is whether it has a specific value.  Let's say that we want to test whether the mean BMI value in adults from the NHANES dataset is above 25, which is the lower cutoff for being overweight according to the US Centers for Disease Control.  We take a sample of 200 adults in order to ask this question.
 
@@ -90,7 +90,7 @@ tt
 
 This shows us that the mean BMI in the dataset (`r I(tt$estimate)`) is significantly larger than the cutoff for overweight.
 
-## Comparing two means
+## Comparing two means {#comparing-two-means}
 
 A more common question that often arises in statistics is whether there is a difference between the means of two different groups.  Let's say that we would like to know whether regular marijuana smokers watch more television.  We can ask this question using the NHANES dataset; let's take a sample of 200 individuals from the dataset and test whether the number of hours of television watching per day is related to regular marijuana use.  The left panel of Figure \@ref(fig:PotTVViolin) shows these data using a violin plot.
 
@@ -159,7 +159,7 @@ ttresult
 
 In this case we see that there is a statistically significant difference between groups, in the expected direction - regular pot smokers watch more TV.
 
-## The t-test as a linear model
+## The t-test as a linear model {#ttest-linear-model}
 
 The t-test is often presented as a specialized tool for comparing means, but it can also be viewed as an application of the general linear model.  In this case, the model would look like this:
 
@@ -203,7 +203,7 @@ bf
 ```
 This shows us that the evidence against the null hypothesis is moderately strong.
 
-## Paired t-tests
+## Comparing paired observations {#paired-ttests}
 
 
 ```{r BPfig, echo=FALSE,fig.cap='Left: Violin plot of systolic blood pressure on first and second recording, from NHANES. Right: Same violin plot with lines connecting the two data points for each individual.',fig.width=8,fig.height=4,out.height='50%'}
@@ -319,7 +319,7 @@ df$sysBP[df$group=='drug2'] <- rnorm(nPerGroup,mean=meanSysBP,sd=noiseSD)
 ggplot(df,aes(group,sysBP)) + geom_boxplot()
 ```
 
-### Analysis of variance
+### Analysis of variance {#ANOVA}
 
 We would first like to test the null hypothesis that the means of all of the groups are equal -- that is, neither of the treatments had any effect. We can do this using a method called *analysis of variance* (ANOVA). This is one of the most commonly used methods in psychological statistics, and we will only scratch the surface here.  The basic idea behind ANOVA is one that we already discussed in the chapter on the general linear model, and in fact ANOVA is just a name for a specific implementation of such a model.
 

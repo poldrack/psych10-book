@@ -102,7 +102,7 @@ corTestResult
 
 The correlation is quite high, but just barely reaches statistical significance because the sample size is so small.  
 
-## Linear regression
+## Linear regression {#linear-regression}
 
 We can also use the general linear model to describe the relation between two variables and to decide whether that relationship is statistically significant; in addition, the model allows us to predict the value of the dependent variable given some new value(s) of the independent variable(s).  Most importantly, the general linear model will allow us to build models that incorporate multiple independent variables, whereas correlation can only tell us about the relationship between two individual variables.
 
@@ -144,7 +144,7 @@ print(p3)
 
 We will not go into the details of how the best fitting slope and intercept are actually estimated from the data; if you are interested, details are available in the Appendix.
 
-### Regression to the mean
+### Regression to the mean {#regression-to-the-mean}
 
 The concept of *regression to the mean* was one of Galton's essential contributions to science, and it remains a critical point to understand when we interpret the results of experimental data analyses.  Let's say that we want to study the effects of a reading intervention on the performance of poor readers.  To test our hypothesis, we might go into a school and recruit those individuals in the bottom 25% of the distribution on some reading test, administer the intervention, and then examine their performance.  Let's say that the intervention actually has no effect, such that reading scores for each individual are simply independent samples from a normal distribution.  We can simulate this:
 
@@ -435,7 +435,7 @@ anova(lmResultCafAnx, lmResultInteraction)
 
 This tells us that there is good evidence to prefer the model with the interaction over the one without an interaction.  Model comparison is relatively simple in this case because the two models are *nested* -- one of the models is a simplified version of the other model.  Model comparison with non-nested models can get much more complicated.
 
-## Criticizing our model and checking assumptions
+## Criticizing our model and checking assumptions {#model-criticism}
 
 
 
@@ -534,7 +534,7 @@ Here we see that whereas the model fit on the original data showed a very good f
 
 Another way to see the effects of overfitting is to look at what happens if we randomly shuffle the values of the weight variable (shown in the second row of the table). Randomly shuffling the value should make it impossible to predict weight from the other variables, because they should have no systematic relationship.  This shows us that even when there is no true relationship to be modeled (because shuffling should have obliterated the relationship), the complex model still shows a very low error in its predictions, because it fits the noise in the specific dataset.  However, when that model is applied to a new dataset, we see that the error is much larger, as it should be.
 
-### Cross-validation
+### Cross-validation {#cross-validation}
 
 One method that has been developed to help address the problem of overfitting is known as *cross-validation*.  This technique is commonly used within the field of machine learning, which is focused on building models that will generalize well to new data, even when we don't have a new dataset to test the model. The idea behind cross-validation is that we fit our model repeatedly, each time leaving out a subset of the data, and then test the ability of the model to predict the values in each held-out subset.  
 

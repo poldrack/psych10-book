@@ -73,7 +73,7 @@ ggplot(hateCrimes,aes(gini_index,avg_hatecrimes_per_100k_fbi,label=state_abb)) +
 The relationship between income inequality and rates of hate crimes is shown in Figure \@ref(fig:hateCrimeGini).
 Looking at the data, it seems that there may be a positive relationship between the two variables.  How can we quantify that relationship?
 
-## Covariance and correlation
+## Covariance and correlation {#covariance-and-correlation}
 
 One way to quantify the relationship between two variables is the *covariance*.  Remember that variance for a single variable is computed as the average squared difference between each data point and the mean:
 
@@ -179,7 +179,7 @@ ggplot(data.frame(shuffleDist),aes(shuffleDist)) +
 
 We could also use Bayesian inference to estimate the correlation; see the Appendix for more on this.
 
-### Robust correlations
+### Robust correlations {#robust-correlations}
 
 You may have noticed something a bit odd in Figure \@ref(fig:hateCrimeGini) -- one of the datapoints (the one for the District of Columbia) seemed to be quite separate from the others.  We refer to this as an *outlier*, and the standard correlation coefficient is very sensitive to outliers.  For example, in Figure \@ref(fig:outlierCorr) we can see how a single outlying data point can cause a very high positive correlation value, even when the actual relationship between the other data points is perfectly negative.
 
