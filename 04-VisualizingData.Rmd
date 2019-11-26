@@ -206,7 +206,7 @@ One good way to avoid chartjunk is to avoid using popular spreadsheet programs t
 - it has a distracting background texture
 - it uses three-dimensional bars, which distort the data
 
-```{r chartJunk,echo=FALSE,fig.width=4,fig.height=4,out.height='50%',fig.cap="An example of chart junk."}
+```{r chartJunk,echo=FALSE,fig.width=4,fig.height=3,out.height='50%',out.width='50%',fig.cap="An example of chart junk."}
 knitr::include_graphics('images/excel_chartjunk.png')
 ```
 
@@ -325,34 +325,35 @@ This plot allows the viewer to make comparisons based on the the length of the b
 
 Often we are interested in plotting data where the variable of interest is affected by other factors than the one we are interested in.  For example, let's say that we want to understand how the price of gasoline has changed over time.  Figure \@ref(fig:gasPrices) shows historical gas price data, plotted either with or without adjustment for inflation. Whereas the unadjusted data show a huge increase, the adjusted data show that this is mostly just reflective of inflation.  Other examples where one needs to adjust data for other factors include population size (as we saw in the crime rate examples in an earlier chapter) and data collected across different seasons.
 
-```{r gasPrices,echo=FALSE,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation (based on Consumer Price Index).",fig.width=4,fig.height=4,out.height='50%'}
+```{r gasPrices,echo=FALSE,message=FALSE, warning=FALSE,fig.cap="The price of gasoline in the US from 1930 to 201 (obtained from http://www.thepeoplehistory.com/70yearsofpricechange.html) with or without correction for inflation (based on Consumer Price Index).",fig.width=4,fig.height=4,out.height='50%'}
 
 # Consumer Price Index data obtained from 
 # https://inflationdata.com/Inflation/Consumer_Price_Index/HistoricalCPI.aspx
 
 # load CPI data 
-cpiData=read.table('data/cpi_data.txt')
-cpiDataTidy <- gather(cpiData, key, value, -V1)
-meanCPIData=cpiDataTidy %>% 
-  group_by(V1) %>% 
-  summarize(meanCPI=mean(value))
+cpiData <- read_tsv('data/cpi_data.txt',
+                    col_names=FALSE) %>%
+  dplyr::select(X1, X14) %>%
+  rename(year = X1,
+         meanCPI = X14)
 
+# get reference cpi for 1950 dollars
+cpiRef <- cpiData %>%
+  filter(year==1950) %>%
+  pull(meanCPI)
 
-gasPriceData=data.frame(year=c(1930,1940,1950,1960,1970,1980,1990,2009,2013),
-                        gasPrice=c(.10,.11,.18,.25,.36,1.19,1.34,2.05,3.80))
-# convert to 1950 dollars
-cpiRef=meanCPIData[meanCPIData$V1==1950,]$meanCPI
-gasPriceData$gasPrice1950Dollars=array(NA,dim(gasPriceData)[1])
-for (i in 1:dim(gasPriceData)[1]){
-  cpiYear=meanCPIData[meanCPIData$V1==gasPriceData$year[i],]$meanCPI
-  gasPriceData$gasPrice1950Dollars[i]=gasPriceData$gasPrice[i]/(cpiYear/cpiRef
-                                                                )
-}
-ggplot(gasPriceData,aes(year,gasPrice)) +
-  geom_line(aes(color='Unadjusted'),size=1, linetype='dotted') +
-  geom_line(aes(year,gasPrice1950Dollars, color='Adjusted'),size=1) +
+gasPriceData <- tibble(year=c(1930,1940,1950,1960,1970,1980,1990,2009,2013),
+                        Unadjusted=c(.10,.11,.18,.25,.36,1.19,1.34,2.05,3.80))
+
+allData <- left_join(gasPriceData,cpiData,by='year') %>%
+  mutate(Adjusted = Unadjusted/(meanCPI/cpiRef)) %>%
+  gather(key="Type", value="Price", -meanCPI, -year) %>%
+  mutate(Type=as.factor(Type))
+
+ggplot(allData,aes(year,Price,linetype=Type)) +
+  geom_line() +
   ylab('Gasoline prices') + xlab('Year') + 
-  theme(legend.position = c(0,0.6)) 
+  theme(legend.position = c(0.2,0.6)) 
 ```
 
 ## Learning objectives
