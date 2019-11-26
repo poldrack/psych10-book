@@ -57,7 +57,7 @@ The term "random" is often used colloquially to refer to things that are bizarre
 
 Psychologists have shown that humans actually have a fairly bad sense of randomness. First, we tend to see patterns when they don't exist. In the extreme, this leads to the phenomenon of *pareidolia*, in which people will perceive familiar objects within random patterns (such as perceiving a cloud as a human face or seeing the Virgin Mary in a piece of toast).  Second, humans tend to think of random processes as self-correcting, which leads us to expect that we are "due for a win" after losing many rounds in a game of chance, a phenonenon known as the "gambler's fallacy". 
 
-## Generating random numbers
+## Generating random numbers {#generating-random-numbers}
 
 Running a Monte Carlo simulation requires that we generate random numbers.  Generating truly random numbers (i.e. numbers that are completely unpredictable) is only possible through physical processes, such as the decay of atoms or the rolling of dice, which are difficult to obtain and/or too slow to be useful for computer simulation (though they can be obtained from the [NIST Randomness Beacon](https://www.nist.gov/programs-projects/nist-randomness-beacon])).
 

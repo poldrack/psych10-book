@@ -54,7 +54,7 @@ NHANES <-
 
 Let's look at some examples of the use of tables, again using the NHANES dataset.  Type the command `help(NHANES)` in the RStudio console, and scroll through the help page, which should open within the Help panel if you are using RStudio.  This page provides some information about the dataset as well as a listing of all of the variables included in the dataset.  Let's have a look at a simple variable, called "PhysActive" in the dataset.  This variable contains one of three different values: "Yes" or "No" (indicating whether or not the person reports doing "moderate or vigorous-intensity sports, fitness or recreational activities"), or "NA" if the data are missing for that individual. There are different reasons that the data might be missing; for example, this question was not asked of children younger than 12 years of age, while in other cases an adult may have declined to answer the question during the interview. 
 
-### Frequency distributions
+### Frequency distributions  {#frequency-distributions}
 
 Let's look at how many people fall into each of these categories. We will do this in R by selecting the variable of interest (PhysActive) from the NHANES dataset, grouping the data by the different values of the variable, and then counting how many values there are in each group.
 
@@ -103,7 +103,7 @@ kable(PhysActive_table_filtered, caption='Absolute and relative frequencies and 
 
 This lets us see that `r formatC(I(PhysActive_table_filtered %>% subset(PhysActive=='No') %>% dplyr::select(Percentage) %>% pull()), digits=1, format='f')` percent of the individuals in the NHANES sample said "No" and `r formatC(I(PhysActive_table_filtered %>% subset(PhysActive=='Yes') %>% dplyr::select(Percentage) %>% pull()), digits=1, format='f')` percent said "Yes".
 
-### Cumulative distributions
+### Cumulative distributions {#cumulative-distributions}
 
 The PhysActive variable that we examined above only had two possible values, but often we wish to summarize data that can have many more possible values. When those values are quantitative, then one useful way to summarize them is via what we call a *cumulative* frequency representation: rather than asking how many observations take on a specific value, we ask how many have a value of *at least* some specific value.  
 
@@ -229,7 +229,7 @@ plot_grid(p1,p2)
 ```
 
 
-### Plotting histograms
+### Plotting histograms {#plotting-histograms}
 
 ```{r ageHist,echo=FALSE,fig.cap="A histogram of the Age (left) and Height (right) variables in NHANES.",fig.width=8,fig.height=4,out.height='33%'}
 
@@ -299,27 +299,26 @@ plot_grid(p1,p2,p3,ncol=2)
 ### Histogram bins
 
 In our earlier example with the sleep variable, the data were reported in whole numbers, and we simply counted the number of people who reported each possible value. However, if you look at a few values of the Height variable in NHANES, you will see that it was measured in centimeters down to the first decimal place:
+
 ```{r echo=FALSE}
 # take a slice of a few values from the full data frame
 nhanes_slice <- NHANES_adult %>%
   dplyr::select(Height) %>%
   slice(45:50) 
-```
 
-```{r echo=FALSE}
 kable(nhanes_slice, caption='A few values from the NHANES data frame.')
 ```
 
 Panel C of Figure \@ref(fig:heightHistSep) shows a histogram that counts the density of each possible value. That histogram looks really jagged, which is because of the variability in specific decimal place values.  For example, the value 173.2 occurs `r I(sum(NHANES_adult$Height==173.2,na.rm=TRUE))` times, while the value 173.3 only occurs `r I(sum(NHANES_adult$Height==173.3,na.rm=TRUE))` times. We probably don't think that there is really such a big difference between the prevalence of these two weights; more likely this is just due to random variability in our sample of people.  
 
-In general, when we create a histogram of data that are continuous or where there are many possible values, we will *bin* the values so that instead of counting and plotting the frequency of every specific value, we count and plot the frequency of values falling within a specific range.  That's why the plot looked less jagged above in Panel B of \@ref(fig:heightHistSep); if you look at the `geom_histogram` command you will see that we set "binwidth = 1" which told the command to compute the histogram by combining values within bins with a width of one; thus, the values 1.3, 1.5, and 1.6 would all count toward the frequency of the same bin, which would span from values equal to one up through values less than 2.  
+In general, when we create a histogram of data that are continuous or where there are many possible values, we will *bin* the values so that instead of counting and plotting the frequency of every specific value, we count and plot the frequency of values falling within a specific range.  That's why the plot looked less jagged above in Panel B of \@ref(fig:heightHistSep); in this panel we set the bin width to 1, which means that the histogram is computing by combining values within bins with a width of one; thus, the values 1.3, 1.5, and 1.6 would all count toward the frequency of the same bin, which would span from values equal to one up through values less than 2.  
 
 Note that once the bin size has been selected, then the number of bins is determined by the data:
 $$
 number\, of\, bins  = \frac{range\, of\, scores}{bin\, width}
 $$
 
-There is no hard and fast rule for how to choose the optimal bin width.  Occasionally it will be obvious (as when there are only a few possible values), but in many cases it would require trial and error.  There are methods that try to find an optimal bin size automatically, such as the Freedman-Diaconis method that is implemented within the `nclass.FD()` function in R; we will use this function in some of the examples below.
+There is no hard and fast rule for how to choose the optimal bin width.  Occasionally it will be obvious (as when there are only a few possible values), but in many cases it would require trial and error.  There are methods that try to find an optimal bin size automatically, such as the Freedman-Diaconis method (that is implemented within the `nclass.FD()` function in R); we will use this function in some later examples.
 
 ## Idealized representations of distributions
 

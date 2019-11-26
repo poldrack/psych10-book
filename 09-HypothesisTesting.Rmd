@@ -207,7 +207,7 @@ plot_grid(p1,p2)
 
 This is the step where NHST starts to violate our intuition -- rather than determining the likelihood that the null hypothesis is true given the data, we instead determine the likelihood of the data under the null hypothesis - because we started out by assuming that the null hypothesis is true!  To do this, we need to know the probability distribution for the statistic under the null hypothesis, so that we can ask how likely the data are under that distribution. Before we move to our BMI data, let's start with some simpler examples. 
 
-#### Randomization: A very simple example
+#### Randomization: A very simple example {#randomization-very-simple}
 
 Let's say that we wish to determine whether a coin is fair.  To collect data, we flip the coin 100 times, and we count 70 heads.  In this example, $H_0: P(heads)=0.5$ and $H_A: P(heads) \neq 0.5$, and our test statistic is simply the number of heads that we counted.  The question that we then want to ask is: How likely is it that we would observe 70 heads if the true probability of heads is 0.5.  We can imagine that this might happen very occasionally just by chance, but doesn't seem very likely. To quantify this probability, we can use the *binomial distribution*:
 

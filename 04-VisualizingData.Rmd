@@ -7,7 +7,8 @@ output:
   pdf_document: default
   html_document: default
 ---
-# Data Visualization
+
+# Data Visualization {#data-visualization}
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -205,7 +206,7 @@ One good way to avoid chartjunk is to avoid using popular spreadsheet programs t
 - it has a distracting background texture
 - it uses three-dimensional bars, which distort the data
 
-```{r chartJunk,echo=FALSE,fig.width=6,fig.height=6,out.height='50%',fig.cap="An example of chart junk."}
+```{r chartJunk,echo=FALSE,fig.width=4,fig.height=4,out.height='50%',fig.cap="An example of chart junk."}
 knitr::include_graphics('images/excel_chartjunk.png')
 ```
 

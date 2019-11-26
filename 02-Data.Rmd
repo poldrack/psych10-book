@@ -48,18 +48,7 @@ There are several different types of numbers that we work with in statistics.  I
 
 **Binary numbers**. The simplest are binary numbers -- that is, zero or one.  We will often use binary numbers to represent whether something is true or false, or present or absent.  For example, I might ask 10 people if they have ever experienced a migraine headache, recording their answers as "Yes" or "No".  It's often useful to instead use *logical* values, which take the value of either ```TRUE``` or ```FALSE```.  We can create these by testing whether each value is equal to "Yes", which we can do using the ```==``` symbol. This will return the value ```TRUE``` for any matching "Yes" values, and ```FALSE``` otherwise.  These are useful to R knows how to interpret them natively, whereas it doesn't know what "Yes" and "No" mean.
 
-In general, most programming languages treat truth values and binary numbers equivalently. The number 1 is equal to the logical value ```TRUE```:
-
-```
-> TRUE == 1
-[1] TRUE
-```
-
-And the number zero is equal to the logical value ``FALSE``:
-```
-> FALSE == 0
-[1] TRUE
-```
+In general, most programming languages treat truth values and binary numbers equivalently. The number 1 is equal to the logical value ```TRUE```, and the number zero is equal to the logical value ``FALSE``.
 
 **Integers**.  Integers are whole numbers with no fractional or decimal part. We most commonly encounter integers when we count things, but they also often occur in psychological measurement.  For example, in my introductory survey I administer a set of questions about attitudes towards statistics (such as "Statistics seems very mysterious to me."), on which the students respond with a number between 1 ("Disagree strongly") and 7 ("Agree strongly").  
 
@@ -71,7 +60,7 @@ A *discrete* measurement is one that takes one of a set of particular values.  T
 
 A *continuous* measurement is one that is defined in terms of a real number. It could fall anywhere in a particular range of values, though usually our measurement tools will limit the precision with which we can measure; for example, a floor scale might measure weight to the nearest pound, even though weight could in theory be measured with much more precision.
 
-It is common in statistics courses to go into more detail about different "scales" of measurement, which are discussed in more detail in the Appendix to this chapter.  The most important takeaway is that some kinds of statistics don't make sense on some kinds of data.  For example, imagine that we were to collect postal Zip Code data from a number of individuals. Those numbers are represented as integers, but they don't actually refer to a numeric scale; each zip code basically serves as a label for a different region. For this reason, it wouldn't make sense to talk about the average zip code, for example.  
+It is common in statistics courses to go into more detail about different "scales" of measurement, which are discussed in more detail in the Appendix to this chapter.  The most important takeaway from this is that some kinds of statistics don't make sense on some kinds of data.  For example, imagine that we were to collect postal Zip Code data from a number of individuals. Those numbers are represented as integers, but they don't actually refer to a numeric scale; each zip code basically serves as a label for a different region. For this reason, it wouldn't make sense to talk about the average zip code, for example.  
 
 ## What makes a good measurement?
 
@@ -222,7 +211,7 @@ measTypes=data.frame(equal=c('OK','OK','OK','OK'),
 knitr::kable(
   measTypes, booktabs = TRUE,
   caption = 'Different scales of measurement admit different types of numeric operations',
-  col.names=c("Equal/not equal","Greater than/less than", "Add/subtract", "Multiply/divide")
+  col.names=c("Equal/not equal",">/<", "+/-", "Multiply/divide")
 )
 
 

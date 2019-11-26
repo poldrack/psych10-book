@@ -79,7 +79,7 @@ In the case of our coin-flipping example:
 
 Here we see one of the primary differences between frequentist and Bayesian statsistics.  Frequentists do not believe in the idea of a probability of a hypothesis (i.e., our degree of belief about a hypothesis) -- for them, a hypothesis is either true or it isn't. Another way to say this is that for the frequentist, the hypothesis is fixed and the data are random, which is why frequentist inference focuses on describing the probability of data given a hypothesis (i.e. the p-value).  Bayesians, on the other hand, are comfortable making probability statements about both data and hypotheses.
 
-## Doing Bayesian estimation
+## Doing Bayesian estimation {#doing-bayesian-estimation}
 
 We ultimately want to use Bayesian statistics to make decisions about  hypotheses, but before we do that we need to estimate the parameters that are necessary to make the decision. Here we will walk through the process of Bayesian estimation.  Let's use another screening example: Airport security screening.  If you fly a lot, it's just a matter of time until one of the random explosive screenings comes back positive; I had the particularly unfortunate experience of this happening soon after September 11, 2001, when airport security staff were especially on edge.  
 
@@ -95,12 +95,11 @@ bayes_df = data.frame(prior=NA,
                       marginal_likelihood=NA, 
                       posterior=NA)
 
-bayes_df$prior <- 1/1000000 #971595898.
+bayes_df$prior <- 1/1000000 
 
-# USE DIFFERENT NUMBERS?  MAYBE 2/3?
 
-nTests <- 3# 10
-nPositives <- 3# 9
+nTests <- 3
+nPositives <- 3
 sensitivity <- 0.99
 specificity <- 0.99
 
@@ -152,7 +151,7 @@ This result shows us that the posterior probability of an explosive in the bag g
 
 An important aspect of Bayesian analysis is that it can be sequential.  Once we have the posterior from one analysis, it can become the prior for the next analysis!
 
-## Estimating posterior distributions
+## Estimating posterior distributions {#estimating-posterior-distributions}
 
 In the previous example there were only two possible outcomes -- the explosive is either there or it's not -- and we wanted to know which outcome was most likely given the data.  However, in other cases we want to use Bayesian estimation to estimate the numeric value of a parameter.  Let's say that we want to know about the effectiveness of a new drug for pain; to test this, we can administer the drug to a group of patients and then ask them whether their pain was improved or not after taking the drug.  We can use Bayesian analysis to estimate the proportion of people for whom the drug will be effective using these data.
 
@@ -429,7 +428,7 @@ It is also possible to use priors based on the scientific literature or pre-exis
 Having learned how to perform Bayesian estimation, we now turn to the use of Bayesian methods for hypothesis testing.  Let's say that there are two politicians who differ in their beliefs about whether the public is in favor an extra tax to support the national parks. Senator Smith thinks that only 40% of people are in favor of the tax, whereas Senator Jones thinks that 60% of people are in favor.  They arrange to have a poll done to test this, which asks 1000 randomly selected people whether they support such a tax. The results are that 490 of the people in the polled sample were in favor of the tax. Based on these data, we would like to know: Do the data support the claims of one senator over the other,and by how much?  We can test this using a concept known as the [Bayes factor](https://bayesfactor.blogspot.com/2014/02/the-bayesfactor-package-this-blog-is.html),which quantifies which hypothesis is better by comparing how well each predicts the observed data.
 
 
-### Bayes factors
+### Bayes factors {#Bayes-factors}
 
 
 ```{r echo=FALSE}

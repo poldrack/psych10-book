@@ -53,7 +53,7 @@ Now that we know what a probability is, how do we actually figure out what the p
 
 Let's say that I asked you what the probability was that the Beatles would have been equally successful if they had not replaced their original drummer Pete Best with Ringo Starr in 1962.  We will define "success" in terms of the number of number-one hits on the Billboard Hot 100 (which we refer to as $N_{hits}$); the Beatles had 20 such number-one hits, so the sample space is {$N_{hits} < 20$,$N_{hits} \ge 20$ }.  We can't actually do the experiment to find the outcome. However, most people with knowledge of the Beatles would be willing to at leaste offer a guess at the probability of this event.  In many cases personal knowledge and/or opinion is the only guide we have determining the probability of an event, but this is not very scientifically satisfying.
 
-### Empirical frequency
+### Empirical frequency {#empirical-frequency}
 
 Another way to determine the probability of an event is to do the experiment many times and count how often each event happens.  From the relative frequency of the different outcomes, we can compute the probability of each.  For example, let's say that we are interested in knowing the probability of rain in San Francisco.  We first have to define the experiment --- let's say that we will look at the National Weather Service data for each day in 2017 and determine whether there was any rain at the downtown San Francisco weather station.
 
@@ -325,7 +325,7 @@ kable(curry_df, caption='Cumulative probability distribution for number of succe
 
 From the table we can see that the probability of Curry landing 2 or fewer free throws out of 4 attempts is 0.043.
 
-## Conditional probability
+## Conditional probability {#conditional-probability}
 
 So far we have limited ourselves to simple probabilities - that is, the probability of a single event or combination of events.  However, we often wish to determine the probability of some event given that some other event has occurred, which are known as *conditional probabilities*.    
 
