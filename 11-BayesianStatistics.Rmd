@@ -44,7 +44,7 @@ Say you are walking down the street and a friend of yours walks right by but doe
 
 The idea behind a generative model is that a *latent* (unseen) process generates the data we observe, usually with some amount of randomness in the process. When we take a sample of data from a population and estimate a parameter from the sample, what we are doing in essence is trying to learn the value of a latent variable (the population mean) that gives rise through sampling to the observed data (the sample mean).  Figure \@ref(fig:GenerativeModel) shows a schematic of this idea.
 
-```{r GenerativeModel, echo=FALSE,fig.cap="A schematic of the idea of a generative model.",fig.width=6}
+```{r GenerativeModel, echo=FALSE,fig.cap="A schematic of the idea of a generative model.",fig.width=6, out.width="80%"}
 knitr::include_graphics("images/BayesianInference.png")
 ```
 
@@ -252,7 +252,7 @@ bayesDf <-
   )
 ```
 
-```{r posteriorDist,echo=FALSE,fig.cap="Posterior probability distribution for the observed data plotted in solid line against uniform prior distribution (dotted line).",fig.width=4,fig.height=4,out.height='50%'}
+```{r posteriorDist,echo=FALSE,fig.cap="Posterior probability distribution for the observed data plotted in solid line against uniform prior distribution (dotted line). The maximum a posteriori (MAP) value is signified by the diamond symbol.",fig.width=4,fig.height=4,out.height='50%'}
 
 # compute MAP estimate
 MAP_estimate <- 
@@ -399,7 +399,7 @@ df <-
 
 ```
 
-```{r posteriorDistPrior,echo=FALSE,fig.cap="A: Effects of priors on the posterior distribution.  The original posterior distribution based on a flat prior is plotted in blue. The prior based on the observation of 10 responders out of 20 people is plotted in the dotted black line, and the posterior using this prior is plotted in red.  B: Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 50 heads out of 100 people.  The dotted black line shows the prior based on 250 heads out of 500 flips, and the red line shows the posterior based on that prior. C: Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using an absolute prior which states that p(respond) is 0.8 or greater.  The prior is shown in the dotted black line.",fig.width=8,fig.height=8,out.height='50%'}
+```{r posteriorDistPrior,echo=FALSE,fig.cap="A: Effects of priors on the posterior distribution.  The original posterior distribution based on a flat prior is plotted in blue. The prior based on the observation of 10 responders out of 20 people is plotted in the dotted black line, and the posterior using this prior is plotted in red.  B: Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using the prior based on 50 heads out of 100 people.  The dotted black line shows the prior based on 250 heads out of 500 flips, and the red line shows the posterior based on that prior. C: Effects of the strength of the prior on the posterior distribution. The blue line shows the posterior obtained using an absolute prior which states that p(respond) is 0.8 or greater.  The prior is shown in the dotted black line.",fig.width=8,fig.height=8,out.width='80%'}
 
 p3 <- ggplot(df,aes(steps,posteriors_absolute)) + 
   geom_line(color='blue') + 

@@ -21,6 +21,8 @@ library(cowplot)
 library(knitr)
 
 set.seed(123456) # set random seed to exactly replicate results
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
 
 # load the NHANES data library
 library(NHANES)
@@ -92,7 +94,7 @@ As an example, let's generate some simulated data for the relationship between s
 - *Decide*: Is there a statistically significant relationship between grade and study time?
 - *Predict*: Given a particular amount of study time, what grade do we expect?
 
-In the last chapter we learned how to describe the relationship between two variables using the correlation coefficient, so we can use that to describe the relationship here, and to test whether the correlation is statistically significant:
+In the last chapter we learned how to describe the relationship between two variables using the correlation coefficient, so we can use that to describe the relationship here, and to test whether the correlation is statistically significant using the `cor.test()` function in R:
 
 ```{r echo=FALSE}
 # compute correlation between grades and study time
@@ -395,7 +397,7 @@ summary(lmResultInteraction)
 
 From these results we see that there are significant effects of both caffeine and anxiety (which we call *main effects*) and an interaction between caffeine and anxiety. Panel C in Figure \@ref(fig:CaffeineAnxietyInteraction) shows the separate regression lines for each group.
 
-```{r CaffeineAnxietyInteraction, echo=FALSE,fig.cap='A: The relationship between caffeine and public speaking. B: The relationship between caffeine and public speaking, with anxiety represented by the shape of the data points. C: The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group (dashed for anxious, dotted for non-anxious).',fig.width=8,fig.height=8,out.height='50%'}
+```{r CaffeineAnxietyInteraction, echo=FALSE,fig.cap='A: The relationship between caffeine and public speaking. B: The relationship between caffeine and public speaking, with anxiety represented by the shape of the data points. C: The relationship between public speaking and caffeine, including an interaction with anxiety.  This results in two lines that separately model the slope for each group (dashed for anxious, dotted for non-anxious).',fig.width=8,fig.height=8,out.width='80%'}
 
 p1 <- ggplot(df,aes(caffeine,speaking)) +
   geom_point()
@@ -435,11 +437,38 @@ anova(lmResultCafAnx, lmResultInteraction)
 
 This tells us that there is good evidence to prefer the model with the interaction over the one without an interaction.  Model comparison is relatively simple in this case because the two models are *nested* -- one of the models is a simplified version of the other model.  Model comparison with non-nested models can get much more complicated.
 
+## Beyond linear predictors and outcomes
+
+It is important to note that despite the fact that it is called the general *linear* model, we can actually use the same machinery to model effects that don't follow a straight line (such as curves).  The "linear" in the general linear model doesn't refer to the shape of the response, but instead refers to the fact that model is linear in its parameters --- that is, the predictors in the model only get multiplied the parameters, rather than a nonlinear relationship like being raised to a power of the parameter.  It's also common to analyze data where the outcomes are binary rather than continuous, as we saw in the chapter on categorical outcomes. There are ways to adapt the general linear model (known as *generalized linear models*) that allow this kind of analysis. We will explore both of these points in more detail in the following chapter.
+
 ## Criticizing our model and checking assumptions {#model-criticism}
 
+The saying "garbage in, garbage out" is as true of statistics as anywhere else.  In the case of statistical models, we have to make sure that our model is properly specified and that our data are appropriate for the model.
 
+When we say that the model is "properly specified", we mean that we have included the appropriate set of independent variables in the model.  We have already seen examples of misspecified models, in Figure \@ref(fig:childHeightLine).  Remember that we saw several cases where the model failed to properly account for the data, such as failing to include an intercept. When building a model, we need to ensure that it includes all of the appropriate variables.
 
-*TBD: MORE HERE on diagnostics*
+We also need to worry about whether our model satisifies the assumptions of our statisical methods.  One of the most important assumptions that we make when using the general linear model is that the residuals (that is, the difference between the model's predictions and the actual data) are normally distributed. This can fail for many reasons, either because the model was not properly specified or because the data that we are modeling are inappropriate. 
+
+We can use something called a *Q-Q* (quantile-quantile) plot to see whether our residuals are normally distributed.  You have already encountered *quantiles* --- they are the value that cuts off a particular proportion of a cumulative distribution.The Q-Q plot presents the quantiles of two distributions against one another; in this case, we will present the quantiles of the actual data from the quantiles of a normal distribution. Figure \@ref(fig:qqplots) shows examples of two such Q-Q plots.  The left panel shows a Q-Q plot for data from a normal distribution, while the right panel shows a Q-Q plot from non-normal data.  The data points in the right panel diverge substantially from the line, reflecting the fact that they are not normally distributed.
+
+```{r qqplots, fig.width=8, fig.height=4, out.width="80%", fig.cap="Q-Q plotsof normal (left) and non-normal (right) data.  The line shows the point at which the x and y axes are equal."}
+qq_df <- tibble(norm=rnorm(100),
+                unif=runif(100))
+
+p1 <- ggplot(qq_df,aes(sample=norm)) + 
+  geom_qq() + 
+  geom_qq_line() + 
+  ggtitle('Normal data')
+
+p2 <- ggplot(qq_df,aes(sample=unif)) + 
+  geom_qq() + 
+  geom_qq_line()+ 
+  ggtitle('Non-normal data')
+
+plot_grid(p1,p2)
+```
+
+Model diagnostics will be explored in more detail in the following chapter.
 
 ## What does "predict" really mean?
 
@@ -541,11 +570,6 @@ One method that has been developed to help address the problem of overfitting is
 
 ```{r crossvalidation,echo=FALSE,fig.cap="A schematic of the  cross-validation procedure.",fig.height=4,out.height='30%'}
 knitr::include_graphics("images/crossvalidation.png")
-
-```
-
-
-```{r echo=FALSE}
 
 ```
 

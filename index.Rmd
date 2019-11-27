@@ -1,6 +1,6 @@
 ---
 title: "Statistical Thinking for the 21st Century"
-author: "Copyright 2018 Russell A. Poldrack"
+author: "Copyright 2019 Russell A. Poldrack"
 date: "Draft: `r Sys.Date()`"
 knit: "bookdown::render_book"
 bibliography: ["psych10-book.bib"]
@@ -32,23 +32,15 @@ knitr::opts_chunk$set(fig.width=6, fig.height=6, #echo=FALSE,
 
 # Preface {-}
 
+The goal of this book is to the tell the story of statistics as it is used today by researchers around the world.  It's a different story than the one told in most statistics books, which focus on teaching how to use a set of tools to acheive very specific goals.  This book focuses on understanding the basic ideas of *statistical thinking* --- a systematic way of thinking about how we describe the world and make decisions and predictions, all in the context of the inherent uncertainty that exists in the real world. It also brings to bear current methods that have only become feasible in light of the amazing increases in computational power that have happened in the last few decades. Analyses that would have taken years in the 1950's can now be completed in a few seconds on a standard laptop computer, and this power unleashes the ability to use computer simulation to ask questions in new and powerful ways.  
+
+The book is also written in the wake of the reproducibility crisis that has engulfed many areas of science since 2010.  One of the important roots of this crisis is found in the way that statistical hypothesis testing has been used (and abused) by researchers (as I detail in the final chapters of the book), and this ties directly back to statistical education.  Thus, a goal of the book is to highlight the ways in which current statistical methods may be problematic, and to suggest alternatives.
 
 ## Why does this book exist?
 
 In 2018 I began teaching an undergraduate statistics course at Stanford (Psych 10/Stats 60).  I had never taught statistics before, and this was a chance to shake things up.  I have been increasingly unhappy with undergraduate statistics education in psychology, and I wanted to bring a number of new ideas and approaches to the class.  In particular, I wanted to bring to bear the approaches that are increasingly used in real statistical practice in the 21st century.  As Brad Efron and Trevor Hastie laid out so nicely in their book "Computer Age Statistical Inference: Algorithms, Evidence, and Data Science", these methods take advantage of today's increased computing power to solve statistical problems in ways that go far beyond the more standard methods that are usually taught in the undergraduate statistics course for psychology students.
 
 The first year that I taught the class, I used Andy Field's amazing graphic novel statistics book, "An Adventure in Statistics", as the textbook.  There are many things that I really like about this book -- in particular, I like the way that it frames statistical practice around the building of models, and treats null hypothesis testing with sufficient caution (though insufficient disdain, in my opinion). Unfortunately, most of my students hated the book, primarily because it involved wading through a lot of story to get to the statistical knowledge.  I also found it wanting because there are a number of topics (particular those from the field of artificial intelligence known as *machine learning*) that I wanted to include but were not discussed in his book.  I ultimately came to feel that the students would be best served by a book that follows very closely to my lectures, so I started writing down my lectures into a set of computational notebooks that would ultimately become this book.  The outline of this book follows roughly that of Field's book, since the lectures were originally based in large part on the flow of that book, but the content is substantially different (and also much less fun and clever).
-
-
-```{r echo=FALSE}
-## You're not a statistician - why should we listen to you?
-
-#I am trained as a psychologist and neuroscientist, not a statistician.  However, my research on brain imaging for the last 20 years has required the use of sophisticated statistical and computational tools, and this has required me to teach myself many of the fundamental concepts of statistics.  Thus, I think that I have a solid feel for what kinds of statistical methods are important in the scientific trenches.  There are almost certainly some things in this book that would annoy a real statistician (for example, I'm sure that there are places where I should have put a $\hat{hat}$ on a variable but did not).  
-
-#Having said that, I welcome input from readers with greater statistical expertise than mine.  
-# *if I have a statistician read it, then discuss that here*
-
-```
 
 
 ## Why R?

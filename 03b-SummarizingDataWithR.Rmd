@@ -18,23 +18,32 @@ Before doing anything else we need to load the libraries that we will use in thi
 library(tidyverse)
 library(cowplot)
 library(knitr)
-
+set.seed(123456)
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
 ```
 
 We will use the NHANES dataset for several of our examples, so let's load the library that contains the data.
 
 ```{r}
 # load the NHANES data library
+# first unload it if it's already loaded, to make sure
+# we have a clean version
+
+if("NHANES" %in% (.packages())){
+  detach('package:NHANES', unload=TRUE)
+}
 library(NHANES)
+
 ```
 
 ## Introduction to the Tidyverse
 
-In this chapter we will introduce a way of working with data in R that is often referred to as the "Tidyverse." 
+In this chapter we will introduce a way of working with data in R that is often referred to as the "Tidyverse." This comprises a set of packages that provide various tools for working with data, as well as a few special ways of using those functions
 
 ### Making a data frame using tibble()
 
-It's best to work with "tibbles" instead of R's traditional `data.frame`." A tibble is a data frame but with some smart tweaks that make it easier to work with, expecially when using the tidyverse. See here for more information on  the function tibble(): https://r4ds.had.co.nz/tibbles.html
+The tidyverse provides its over version of a data frame, which known as a *tibble*.  A tibble is a data frame but with some smart tweaks that make it easier to work with, expecially when using functions from the tidyverse. See here for more information on  the function `tibble()`: https://r4ds.had.co.nz/tibbles.html
 
 ```{r}
 # first create the individual variables
@@ -55,7 +64,7 @@ myDataFrame <-
 myDataFrame
 ```
 
-Take a quick look at the properties of the data frame us `glimpse()`:
+Take a quick look at the properties of the data frame using `glimpse()`:
 
 ```{r}
 glimpse(myDataFrame) 
@@ -98,9 +107,9 @@ myDataFrame %>%
 
 `slice()` is a function that selects out rows based on their row number.
 
-You will also notice something we haven't discussed before: %>%.  This is called a "pipe", which is commonly used within the tidyverse (which we will discuss more in the R lab on data wrangling); you can read more [here](http://magrittr.tidyverse.org/). A pipe takes the output from one command and feeds it as input to the next command. In this case, simply writing the name of the data frame (myDataFrame) causes it to be input to the slice() command following the pipe. The benefit of pipes will become especially apparent when we want to start stringing together multiple functions into a single command.
+You will also notice something we haven't discussed before: `%>%`.  This is called a "pipe", which is commonly used within the tidyverse; you can read more [here](http://magrittr.tidyverse.org/). A pipe takes the output from one command and feeds it as input to the next command. In this case, simply writing the name of the data frame (myDataFrame) causes it to be input to the `slice()` command following the pipe. The benefit of pipes will become especially apparent when we want to start stringing together multiple data processing operations into a single command.
 
-In this example, no new variable is created - the output is printed to the screen, just like it would be if you typed the name of the variable.  If you wanted to save it to a new variable, you would use the <- assignment operator, like this:
+In this example, no new variable is created - the output is printed to the screen, just like it would be if you typed the name of the variable.  If you wanted to save it to a new variable, you would use the `<-` assignment operator, like this:
 
 ```{r}
 myDataFrameSlice <- myDataFrame %>% 
@@ -118,13 +127,14 @@ myDataFrame %>%
 
 ```
 
-`filter()` is a function that retains only those rows that meet your stated criteria
+`filter()` is a function that retains only those rows that meet your stated criteria.  We can also filter for multiple criteria at once --- in this example, the `|` symbol indicates "or":
 
 ```{r}
 myDataFrame %>% 
-  filter(n == "russ" | n == "lucy") # | indicates "or"
+  filter(n == "russ" | n == "lucy")
 
 ```
+
 
 #### Select a set of columns
 
@@ -198,19 +208,20 @@ myDataFrame <-
   myDataFrame %>%
   mutate(total = x + y + z)
 
-myDataFrame
+kable(myDataFrame)
 ```
 
 mutate() is a function that creates a new variable in a data frame using the existing variables.  In this case, it creates a variable called total that is the sum of the existing variables x, y, and z.
 
 ### Remove a column using the select() function
 
+Adding a minus sign to the name of a variable within the `select()` command will remove that variable, leaving all of the others.
 ```{r}
 myDataFrame <- 
   myDataFrame %>%
   dplyr::select(-total)
 
-myDataFrame
+kable(myDataFrame)
 ```
 
 ## Tidyverse in action
@@ -257,7 +268,8 @@ NHANES %>%
   # extract the PhysActive variable
   pull(PhysActive) %>%
   # extract the first 10 values 
-  head(10)
+  head(10) %>%
+  kable()
 
 ```
 
@@ -271,7 +283,8 @@ NHANES %>%
   # extract the PhysActive variable
   pull(PhysActive) %>%
   # extract the first 10 values 
-  head(10)
+  head(10) %>%
+  kable()
 
 ```
 
@@ -304,7 +317,7 @@ The first step should be familiar from the previous section (we are adding the  
 NHANES_unique %>%
   mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
   head(10) %>% 
-  kable()
+  glimpse()
 ```
 
 You can see that this data frame contains all of the original variables.  Since we are only interested in the `PhysActive` variable, let's extract that one and get rid of the rest.  We can do this using the ```select()``` command from the `dplyr` package.  Because there is also another select command available in R, we need to explicitly refer to the one from the `dplyr` package, which we do by including the package name followed by two colons: ```dplyr::select()```.
@@ -315,7 +328,8 @@ NHANES_unique %>%
   mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
   # select the variable of interest
   dplyr::select(PhysActive) %>% 
-  head(10)
+  head(10) %>%
+  kable()
 
 ```
 
@@ -328,7 +342,8 @@ NHANES_unique %>%
   # select the variable of interest
   dplyr::select(PhysActive) %>% 
   group_by(PhysActive) %>%
-  head(10)
+  head(10) %>%
+  kable()
 ```
 
 The final command tells R to create a new data frame by summarizing the data that we are passing in (which in this case is the PhysActive variable, grouped by its different levels).  We tell the ```summarize()``` function to create a new variable (called `AbsoluteFrequency`) will contain a count of the number of observations for each group, which is generated by the ```n()``` function.
@@ -340,7 +355,8 @@ NHANES_unique %>%
   # select the variable of interest
   dplyr::select(PhysActive) %>% 
   group_by(PhysActive) %>%
-  summarize(AbsoluteFrequency = n()) 
+  summarize(AbsoluteFrequency = n())  %>%
+  kable()
 
 ```
 
@@ -382,6 +398,6 @@ SleepHrsNight_cumulative <-
 kable(SleepHrsNight_cumulative)
 ```
 
-## Exercises
+
 
 

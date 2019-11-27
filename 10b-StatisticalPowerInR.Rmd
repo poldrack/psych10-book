@@ -18,6 +18,8 @@ library(boot)
 library(MASS)
 library(pwr)
 set.seed(123456) # set random seed to exactly replicate results
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
 
 library(knitr)
 
@@ -82,11 +84,15 @@ power_curves <- input_df %>%
 
 Now we can plot the power curves, using a separate line for each effect size.
 
-```{r}
+```{r fig.width=4,fig.height=4,out.width="50%"}
 
-ggplot(power_curves, aes(x=sample_sizes,y=power, linetype=effect_sizes)) + 
+ggplot(power_curves, 
+       aes(x=sample_sizes,
+           y=power, 
+           linetype=effect_sizes)) + 
   geom_line() + 
-  geom_hline(yintercept = 0.8, linetype='dotdash')
+  geom_hline(yintercept = 0.8, 
+             linetype='dotdash')
 ```
 
 

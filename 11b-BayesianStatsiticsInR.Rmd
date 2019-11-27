@@ -72,7 +72,9 @@ bayes_df$marginal_likelihood <-
   ) * 
   (1 - bayes_df$prior)
 
-bayes_df$posterior <- (bayes_df$likelihood * bayes_df$prior) / bayes_df$marginal_likelihood
+bayes_df$posterior <- 
+  (bayes_df$likelihood * bayes_df$prior) / 
+  bayes_df$marginal_likelihood
 
 ```
 
@@ -164,12 +166,16 @@ MAP_estimate <-
 
 ggplot(bayesDf,aes(steps,posteriors)) +
   geom_line() +
-  geom_line(aes(steps,priors),color='black',linetype='dotted') +
-  xlab('p(respond)') + ylab('posterior probability of the observed data') +
+  geom_line(aes(steps,priors),
+            color='black',
+            linetype='dotted') +
+  xlab('p(respond)') + 
+  ylab('posterior probability of the observed data') +
   annotate(
     "point", 
     x = MAP_estimate, 
-    y = max(bayesDf$posteriors), shape=9, 
+    y = max(bayesDf$posteriors), 
+    shape=9, 
     size = 3
   )
 

@@ -58,7 +58,7 @@ df <-
 
 df  %>% 
   gather(Nutrient, RelativeRisk, -quartile) %>%  # convert to long format
-  ggplot(aes(x = quartile, y = RelativeRisk, colour = Nutrient)) +
+  ggplot(aes(x = quartile, y = RelativeRisk, linetype = Nutrient)) +
   geom_line(size = 1) +
   geom_point(size=2) + 
   geom_hline(yintercept = 1,linetype='dashed') +

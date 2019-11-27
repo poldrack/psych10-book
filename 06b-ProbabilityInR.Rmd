@@ -15,6 +15,11 @@ In this chapter we will go over probability computations in R.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(NHANES)
 library(tidyverse)
+
+set.seed(123456)
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
+
 ```
 
 ## Basic probability calculations
@@ -50,7 +55,8 @@ Let's walk through how we computed empirical frequency of rain in San Francisco.
 First we load the data:
 
 ```{r message=FALSE}
-# we will remove the STATION and NAME variables since they are identical for all rows
+# we will remove the STATION and NAME variables 
+# since they are identical for all rows
 SFrain <- read_csv("https://raw.githubusercontent.com/poldrack/psych10-book/master/data/SanFranciscoRain/1329219.csv") %>% 
   dplyr::select(-STATION, -NAME)
   

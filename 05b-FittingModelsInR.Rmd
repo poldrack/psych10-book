@@ -19,6 +19,10 @@ library(cowplot)
 library(knitr)
 library(NHANES)
 
+set.seed(123456)
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
+
 # drop duplicated IDs within the NHANES dataset
 NHANES <- NHANES %>% 
   dplyr::distinct(ID,.keep_all=TRUE)
@@ -75,7 +79,7 @@ mean(NHANES$Height, na.rm=TRUE)
 The median is the middle value after sorting the entire set of values. Let's use the cleand-up `height_noNA` variable created above to determine this for the NHANES height data. First we sort the data in order of their values:
 
 ```{r}
-height_noNA_sorted <- sort(height_noNA)
+height_sorted <- sort(height_noNA)
 ```
 
 Next we find the median value.  If there is an odd number of values in the list, then this is just the value in the middle, whereas if the number of values is even then we take the average of the two middle values.  We can determine whether the number of items is even by dividing the length by two and seeing if there is a remainder; we do this using the `%%` operator, which is known as the *modulus* and returns the remainder:
@@ -98,12 +102,12 @@ if (logical value) {
 Let's do this with our data.  To find the middle value when the number of items is odd, we will divide the length and then round up, using the `ceiling()` function:
 
 ```{r}
-if (length(height_noNA_sorted) %% 2 == 1){
+if (length(height_sorted) %% 2 == 1){
   # length of vector is odd
-  median_height <- height_noNA_sorted[ceiling(length(height_noNA_sorted) / 2)]
+  median_height <- height_sorted[ceiling(length(height_sorted) / 2)]
 } else {
-  median_height <- (height_noNA_sorted[length(height_noNA_sorted) / 2] + 
-                    height_noNA_sorted[1 + length(height_noNA_sorted) / (2)])/2
+  median_height <- (height_sorted[length(height_sorted) / 2] + 
+                    height_sorted[1 + length(height_sorted) / (2)])/2
 }
 
 median_height
@@ -151,7 +155,7 @@ my_mode
 Let's wrap this up into our own custom function:
 
 ```{r}
-getmode <- function(v, print_table=TRUE) {
+getmode <- function(v, print_table=FALSE) {
   mode_table <- table(v)
   if (print_table){
     print(kable(mode_table))
@@ -225,7 +229,8 @@ z_height <- (height_sample - mean_height)/sd_height
 Now let's plot the histogram of Z-scores alongside the histogram for the original values. We will use the `plot_grid()` function from the `cowplot` library to plot the two figures alongside one another.  First we need to put the values into a data frame, since `ggplot()` requires the data to be contained in a data frame.
 
 ```{r fig.height=4, fig.width=8}
-height_df <- data.frame(orig_height=height_sample, z_height=z_height)
+height_df <- data.frame(orig_height=height_sample, 
+                        z_height=z_height)
 
 # create individual plots
 plot_orig <- ggplot(height_df, aes(orig_height)) + 

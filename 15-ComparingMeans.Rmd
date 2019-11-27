@@ -56,7 +56,7 @@ NHANES_sample <-
 ```
 
 
-One simple way to test for this difference is using a test called the *sign test*, which asks whether the proportion of positive differences between the actual value and the hypothesized value is different than what we would expect by chance.  To do this, we take the differences between each data point and the hypothesized mean value and compute their sign.  In our sample, we see that `r I(sprintf('%0.1f',mean(NHANES_sample$BMIdiff)*100))` percent of individuals have a BMI greater than 25.  We can then use a binomial test to ask whether this proportion of positive differences is greater than 0.5.
+One simple way to test for this difference is using a test called the *sign test*, which asks whether the proportion of positive differences between the actual value and the hypothesized value is different than what we would expect by chance.  To do this, we take the differences between each data point and the hypothesized mean value and compute their sign.  In our sample, we see that `r I(sprintf('%0.1f',mean(NHANES_sample$BMIdiff)*100))` percent of individuals have a BMI greater than 25.  We can then use a binomial test to ask whether this proportion of positive differences is greater than 0.5, using the `binom.test()` function in R:
 
 ```{r echo=FALSE}
 # compute sign test for differences between first and second measurement
@@ -238,7 +238,7 @@ p2 <- p1 +geom_line(aes(group=ID))
 plot_grid(p1, p2)
 ```
 
-In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in mean blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)). We see that there does not seem to be much of a difference in mean blood pressure between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that pairs of data points come from the the same individuals.   
+In experimental research, we often use *within-subjects* designs, in which we compare the same person on multiple measurements.  The measurement that come from this kind of design are often referred to as *repeated measures*. For example, in the NHANES dataset blood pressure was measured three times. Let's say that we are interested in testing whether there is a difference in mean blood pressure between the first and second measurement (Figure  \@ref(fig:BPfig)). We see that there does not seem to be much of a difference in mean blood pressure between time points (about one point). First let's test for a difference using an independent samples t-test, which ignores the fact that pairs of data points come from the the same individuals.   
 
 ```{r echo=FALSE}
 t.test(
@@ -395,7 +395,8 @@ We can also define the paired t-test in terms of a general linear model.  To do 
 ```{r,messages=FALSE}
 # compute mixed model for paired test
 
-lmrResult <- lmer(BPsys ~ timepoint + (1 | ID), data = NHANES_sample_tidy)
+lmrResult <- lmer(BPsys ~ timepoint + (1 | ID), 
+                  data = NHANES_sample_tidy)
 summary(lmrResult)
 ```
 

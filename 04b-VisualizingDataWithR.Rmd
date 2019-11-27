@@ -13,6 +13,10 @@ library(cowplot)
 library(knitr)
 library(NHANES)
 
+set.seed(123456)
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
+
 # drop duplicated IDs within the NHANES dataset
 NHANES <- NHANES %>% 
   dplyr::distinct(ID,.keep_all=TRUE)
@@ -55,9 +59,7 @@ We'll go over other aspects of the grammar of graphics (suxh as facets, statisti
 
 ## Getting started
 
-Load ggplot and choose a theme you like
-
-<!-- ![](https://bookdown.org/asmundhreinn/r4ds-master/images/visualization-themes.png) -->
+Load ggplot and choose a theme you like (see [here](https://bookdown.org/asmundhreinn/r4ds-master/graphics-for-communication.html#themes) for examples).
 
 
 ```{r}
@@ -92,7 +94,7 @@ How do you choose which **geometry** to use? ggplot allows you to choose from a 
 
 The histogram shows the ogerall distribution of the data.  Here we use the nclass.FD function to compute the optimal bin size.
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(hwy)) +
   geom_histogram(bins = nclass.FD(mpg$hwy)) +
   xlab('Highway mileage') 
@@ -102,7 +104,7 @@ Instead of creating discrete bins, we can look at relative density continuously.
 
 ### Density plot
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(hwy)) +
   geom_density() +
   xlab('Highway mileage') 
@@ -110,7 +112,7 @@ ggplot(mpg, aes(hwy)) +
 
 A note on defaults: The default statistic (or "stat") underlying `geom_density` is called "density" -- not surprising. The default stat for `geom_histogram` is "count". What do you think would happen if you overrode the default and set `stat="count"`?
 
-```{r}
+```{rfig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(hwy)) +
   geom_density(stat = "count")
 ```
@@ -119,14 +121,14 @@ What we discover is that the *geometric* difference between `geom_histogram` and
 
 ### Bar vs. line plots
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(hwy)) +
   geom_bar(stat = "count")
 ```
 
 Note that the geometry tells ggplot what kind of plot to use, and the statistic (*stat*) tells it what kind of summary to present.
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(hwy)) +
   geom_line(stat = "density")
 ```
@@ -137,7 +139,7 @@ Let's check out mileage by car manufacturer. We'll plot one *continuous* variabl
 
 First, let's make a bar plot by choosing the stat "summary" and picking the "mean" function to summarize the data.
 
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 ggplot(mpg, aes(manufacturer, hwy)) +
   geom_bar(stat = "summary", fun.y = "mean")  + 
   ylab('Highway mileage')
@@ -147,7 +149,7 @@ One problem with this plot is that it's hard to read some of the labels because 
 
 *TBD: fix*
 
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 ggplot(mpg, aes(manufacturer, hwy)) +
   geom_bar(stat = "summary", fun.y = "mean")  + 
   ylab('Highway mileage')
@@ -158,31 +160,38 @@ ggplot(mpg, aes(manufacturer, hwy)) +
 
 What if we wanted to add another variable into the mix? Maybe the *year* of the car is also important to consider. We have a few options here. First, you could map the variable to another **aesthetic**.
 
-```{r}
-mpg$year <- factor(mpg$year) # first, year needs to be converted to a factor
+```{r fig.width=8, fig.height=4, out.width="80%"}
+# first, year needs to be converted to a factor
+mpg$year <- factor(mpg$year) 
 
 ggplot(mpg, aes(manufacturer, hwy, fill = year)) +
   geom_bar(stat = "summary", fun.y = "mean")
 ```
 By default, the bars are *stacked* on top of one another. If you want to separate them, you can change the `position` argument form its default to "dodge".
 
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 ggplot(mpg, aes(manufacturer, hwy, fill=year)) +
-  geom_bar(stat = "summary", fun.y = "mean", position = "dodge")
+  geom_bar(stat = "summary", 
+           fun.y = "mean", 
+           position = "dodge")
 ```
 
-```{r}
-ggplot(mpg, aes(year, hwy, group=manufacturer,color=manufacturer)) +
+```{r fig.width=4, fig.height=4, out.width="50%"}
+ggplot(mpg, aes(year, hwy, 
+                group=manufacturer,
+                color=manufacturer)) +
   geom_line(stat = "summary", fun.y = "mean")
 
 ```
 
 For a less visually cluttered plot, let's try **facetting**. This creates *subplots* for each value of the `year` variable.
 
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 ggplot(mpg, aes(manufacturer, hwy)) +
-  facet_grid(year ~ .) + # split up the bar plot into two
-  geom_bar(stat = "summary", fun.y = "mean")
+  # split up the bar plot into two by year
+  facet_grid(year ~ .) + 
+  geom_bar(stat = "summary", 
+           fun.y = "mean")
 ```
 
 ### Plotting dispersion
@@ -190,7 +199,7 @@ ggplot(mpg, aes(manufacturer, hwy)) +
 Instead of looking at just the means, we can get a sense of the entire distribution of mileage values for each manufacturer.
 
 #### Box plot
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 ggplot(mpg, aes(manufacturer, hwy)) +
   geom_boxplot()
 ```
@@ -201,7 +210,7 @@ A **box plot** (or box and whiskers plot) uses quartiles to give us a sense of s
 
 Now, let's do something a bit more complex, but much more useful -- let's create our own summary of the data, so we can choose which summary statistic to plot and also compute a measure of dispersion of our choosing.
 
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 # summarise data
 mpg_summary <- mpg %>%
   group_by(manufacturer) %>% 
@@ -211,13 +220,21 @@ mpg_summary <- mpg %>%
 
 # compute confidence intervals for the error bars
 # (we'll talk about this later in the course!)
-limits <- aes(ymin = mean_hwy - 1.96 * sd_hwy / sqrt(n), # compute the lower limit of the error bar
-              ymax = mean_hwy + 1.96 * sd_hwy / sqrt(n)) # compute the upper limit
 
-# now we're giving ggplot the mean for each group, instead of the datapoints themselves
+limits <- aes(
+  # compute the lower limit of the error bar
+  ymin = mean_hwy - 1.96 * sd_hwy / sqrt(n), 
+  # compute the upper limit
+  ymax = mean_hwy + 1.96 * sd_hwy / sqrt(n))
+
+# now we're giving ggplot the mean for each group, 
+# instead of the datapoints themselves
+
 ggplot(mpg_summary, aes(manufacturer, mean_hwy)) +
-  geom_bar(stat = "identity") + # we set stat = "identity" on the summary data 
-  geom_errorbar(limits) # we create error bars using the limits we computed above
+  # we set stat = "identity" on the summary data 
+  geom_bar(stat = "identity") + 
+  # we create error bars using the limits we computed above
+  geom_errorbar(limits, width=0.5) 
 ```
 
 Error bars don't always mean the same thing -- it's important to determine whether you're looking at e.g. standard error or confidence intervals (which we'll talk more about later in the course).
@@ -226,17 +243,22 @@ Error bars don't always mean the same thing -- it's important to determine wheth
 
 The plot we just created is nice and all, but it's tough to look at. The bar plots add a lot of ink that doesn't help us compare engine sizes across manufacturers. Similarly, the width of the error bars doesn't add any information. Let's tweak which *geometry* we use, and tweak the appearance of the error bars.
 
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 ggplot(mpg_summary, aes(manufacturer, mean_hwy)) +
-  geom_point() + # switch to point instead of bar to minimize ink used
-  geom_errorbar(limits, width = 0) # remove the horizontal parts of the error bars
+  # switch to point instead of bar to minimize ink used
+  geom_point() + 
+  # remove the horizontal parts of the error bars
+  geom_errorbar(limits, width = 0) 
 ```
 
 Looks a lot cleaner, but our points are all over the place. Let's make a final tweak to make *learning something* from this plot a bit easier.
 
-```{r}
+```{r fig.width=8, fig.height=4, out.width="80%"}
 mpg_summary_ordered <- mpg_summary %>%
-  transform(manufacturer = reorder(manufacturer, -mean_hwy)) # we sort manufacturers by mean engine size
+  mutate(
+    # we sort manufacturers by mean engine size
+    manufacturer = reorder(manufacturer, -mean_hwy)
+  )
 
 ggplot(mpg_summary_ordered, aes(manufacturer, mean_hwy)) +
   geom_point() + 
@@ -248,7 +270,7 @@ ggplot(mpg_summary_ordered, aes(manufacturer, mean_hwy)) +
 
 When we have multiple *continuous* variables, we can use points to plot each variable on an axis. This is known as a **scatter plot**. You've seen this example in your reading.
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(displ, hwy)) +
   geom_point()
 ```
@@ -257,7 +279,7 @@ ggplot(mpg, aes(displ, hwy)) +
 
 We can add layers of data onto this graph, like a *line of best fit*. We use a geometry known as a **smooth** to accomplish this.
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   geom_smooth(color = "black")
@@ -265,7 +287,7 @@ ggplot(mpg, aes(displ, hwy)) +
 
 We can add on points and a smooth line for another set of data as well (efficiency in the city instead of on the highway).
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg) +
   geom_point(aes(displ, hwy), color = "grey") +
   geom_smooth(aes(displ, hwy), color = "grey") +
@@ -274,87 +296,22 @@ ggplot(mpg) +
 ```
 
 
-## Plotting a histogram (Section \@ref(plotting-histograms))
-
-Now let's create a histogram to show the distribution of heights for adults in the NHANES dataset.  To to this, we will first create a new data frame that contains the height data with missing values removed:
-
-```{r}
-height_df <- NHANES_adult %>% 
-  dplyr::select(Height) %>% 
-  drop_na()
-
-```
-
-
-To create the histogram, we first set up the `ggplot()` command. This requires us to specify two things.  First, we need to tell it which data frame to obtain the data from (in this case, `NHANES_sample`).  Second, we need to tell it which variables from the data frame to use, which we do via the *aesthetics* function `aes()`.  In this case, we are only working with the `Height` variable. The command generates a set of plot axes but doesn't actually show any data.
-
-```{r emptyPlot,fig.cap='Empty plot frame generated by ggplot()',fig.width=4,fig.height=4,out.height='50%'}
-
-ggplot(height_df, aes(Height))
-
-```
-
-We next need to add a presentation of the data. The way that we tell `ggplot` what to show is by adding various commands to the main `ggplot()` command.  In particular, we generally need to add a *geometry* or "geom", which specifies how the data will be arranged in the plot.  For example, to show each data point we can use the `geom_histogram()` geometry. If you look at the help for this function, you will see that it includes optional arguments to specify various features, including the bin width for the histogram, which we will set to 1.
-
-The way that plots are created using `ggplot()` can be a bit confusing, because we add features to the plot by simply adding them (using a plus sign) to the main ggplot object.  In this case, we will add the `geom_histogram()` function as well as a function called `ggtitle()` that will add a title to the figure:
-
-```{r}
-
-ggplot(height_df, aes(Height)) +
-  geom_histogram(binwidth = 1) +
-  ggtitle('Height')
-
-```
-
-## Creating a scatterplot
-
-Let's say that we want to create a *scatterplot* that plots height against weight for each adult in a sample of 150 people from the NHANES dataset, with different markers used to denote men and women.  First we create our sample:
-
-```{r}
-NHANES_sample <- 
-  NHANES_adult %>%
-  # remove rows (individuals) with 
-  # missing values for Weight and Gender
-  drop_na(Weight, Gender) %>% 
-  # take a random sample of 
-  # n = 150 rows (individuals)
-  sample_n(150) 
-```
-
-Now let's set up the `ggplot()` command. First, we need to tell it which data frame to obtain the data from (in this case, `NHANES_sample`).  Second, we need to tell it which variables from the data frame to use within `aes()`.  In this case, we want to plot height on the X axis and weight on the Y axis, so we set both of these within the aesthetics.  To create the scatterplot, we use the `geom_point()` geometry, which creates a point symbol for each pair of x/y values --- that is, each individual row in our `NHANES_sample` dataset with each row corresponding to an individual person.
-
-```{r simpleGeom,fig.cap='Simple scatter plot',fig.width=8,fig.height=4,out.height='50%'}
-
-NHANES_sample %>% 
-  ggplot(aes(x = Height, y = Weight)) +
-  geom_point()
-
-```
-
-Finally, we want to plot the points in separate colors depending on their gender. We do this by simply adding a *color* keyword to the aesthetics, which tells the `geom_point()` function to differently shape and color points by Gender. The figure also shows an example of how we can include multiple geometry layers in a single figure -- in this case, we use `geom_smooth()` to plot the lines that best describe the relation between height and weight, separately by gender.  The shading around the lines reflects our confidence in the estimate at that point.
-
-```{r colorPoints,fig.cap='Scatterplot with points differently shaped and colored by Gender.', fig.width=4,fig.height=4,out.height='50%'}
-NHANES_sample %>% 
-  ggplot(aes(x = Height, y = Weight, color = Gender)) +
-  scale_colour_manual(values=cbPalette) + 
-  geom_point(aes(shape=Gender)) +
-  geom_smooth(method = "lm")
-```
-
-Why do we use both different shapes and colors for the points? For two reasons.  First, colorblind people may have difficulty seeing the differences between colors, so it's always helpful to use shape as well. In addition, we have chosen colors here that should be distinguishable even by people who are colorblind.  Second, sometimes people will print a figure out using a black-and-white laser printer, in which case the color will not be visible.
-
 ## Creating a more complex plot
 
-In this section we will recreate Figure \@ref(fig:challengerTemps) from Chapter \@ref{chapter:data-visualization}.  Here is the code to generate the figure; we will go through each of its sections below.
+In this section we will recreate Figure \@ref(fig:challengerTemps) from Chapter \@ref{data-visualization}.  Here is the code to generate the figure; we will go through each of its sections below.
 
 ```{r fig.width=8,fig.height=4,out.height='50%'}
-oringDf <- read.table("data/orings.csv", sep = ",", header = TRUE)
+oringDf <- read.table("data/orings.csv", sep = ",",
+                      header = TRUE)
 
 oringDf %>%
   ggplot(aes(x = Temperature, y = DamageIndex)) +
   geom_point() +
-  geom_smooth(method = "loess", se = FALSE, span = 1) + ylim(0, 12) +
-  geom_vline(xintercept = 27.5, size =8, alpha = 0.3, color = "red") +
+  geom_smooth(method = "loess",
+              se = FALSE, span = 1) + 
+  ylim(0, 12) +
+  geom_vline(xintercept = 27.5, size =8, 
+             alpha = 0.3, color = "red") +
   labs(
     y = "Damage Index",
     x = "Temperature at time of launch"

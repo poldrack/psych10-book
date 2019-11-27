@@ -11,6 +11,31 @@ output:
 
 In this chapter we will present several examples of using R to perform hypothesis testing.
 
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+set.seed(123456) # set random seed to exactly replicate results
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
+
+library(knitr)
+
+# load the NHANES data library
+library(NHANES)
+
+# drop duplicated IDs within the NHANES dataset
+NHANES <- 
+  NHANES %>% 
+  dplyr::distinct(ID,.keep_all = TRUE)
+
+NHANES_adult <- 
+  NHANES %>%
+  drop_na(PhysActive,BMI) %>%
+  subset(Age >= 18)
+
+```
+
 ## Simple example: Coin-flipping (Section \@ref(randomization-very-simple))
 
 Let's say that we flipped 100 coins and observed 70 heads. We would like to use these data to test the hypothesis that the true probability is 0.5.
@@ -18,8 +43,8 @@ Let's say that we flipped 100 coins and observed 70 heads. We would like to use 
 First let's generate our data, simulating 100,000 sets of 100 flips. We use such a large number because it turns out that it's very rare to get 70 heads, so we need many attempts in order to get a reliable estimate of these probabilties.  This will take a couple of minutes to complete.
 
 ```{r}
-# simulate tossing of 100,000 flips of 100 coins to identify empirical 
-# probability of 70 or more heads out of 100 flips
+# simulate tossing of 100,000 flips of 100 coins to identify 
+# empirical probability of 70 or more heads out of 100 flips
 
 nRuns <- 100000
 
@@ -52,10 +77,12 @@ p_ge_70_sim
 For comparison, we can also compute the p-value for 70 or more heads based on a null hypothesis of $P_{heads}=0.5$, using the binomial distribution.
 
 ```{r}
-# compute the probability of 69 or fewer heads, when P(heads)=0.5
+# compute the probability of 69 or fewer heads, 
+# when P(heads)=0.5
 p_lt_70 <- pbinom(69, 100, 0.5) 
 
-# the probability of 70 or more heads is simply the complement of p_lt_70
+# the probability of 70 or more heads is simply 
+# the complement of p_lt_70
 p_ge_70 <- 1 - p_lt_70
 
 p_ge_70

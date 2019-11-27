@@ -194,7 +194,7 @@ $$
 = \frac{1}{6} + \frac{1}{6} - \frac{1}{36} = \frac{11}{36}
 $$
 
-```{r ThrowMatrix, echo=FALSE,fig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second throw. Cells shown in light blue represent the cells with a one in either the first or second throw; the rest are shown in dark blue.',fig.width=4,fig.height=4,out.height='50%'}
+```{r ThrowMatrix, echo=FALSE,fig.cap='Each cell in this matrix represents one outcome of two throws of a die, with the columns representing the first throw and the rows representing the second throw. Cells shown in red represent the cells with a one in either the first or second throw; the rest are shown in blue.',fig.width=4,fig.height=4,out.height='50%'}
 imgmtx <-
   matrix(0, nrow = 6, ncol = 6) 
 
@@ -205,6 +205,7 @@ plot <-
   imgmtx %>% 
   melt() %>% 
   ggplot(aes(Var1, Var2, fill = value)) +
+  scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF")) +
   geom_raster(interpolate = FALSE)
 
 for (i in seq(0.5, 6.5)) {
@@ -389,8 +390,6 @@ kable(all_summary, caption='Summary data for diabetes and physical activity')
 
 The table shows that the probability that someone in the NHANES dataset has diabetes is .1, and the probability that someone is inactive is .45.  
 
-To compute  $P(diabetes|inactive)$ we would also need to know the joint probability of being diabetic *and* inactive, in addition to the simple probabilities of each:
-
 ```{r echo=FALSE}
 # compute joint probabilities for diabetes and physical activity
 
@@ -403,6 +402,8 @@ NHANES_diabetes_stats_by_activity <-
 
 kable(NHANES_diabetes_stats_by_activity, caption='Joint probabilities for Diabetes and PhysActive variables.')
 ```
+
+To compute  $P(diabetes|inactive)$ we would also need to know the joint probability of being diabetic *and* inactive, in addition to the simple probabilities of each.
 
 
 ```{r echo=FALSE}
@@ -423,7 +424,7 @@ P_diabetes_and_inactive <-
 P_diabetes_given_inactive <-
   P_diabetes_and_inactive / P_inactive
 
-P_diabetes_given_inactive
+# P_diabetes_given_inactive
 ```
 
 Based on these joint probabilities, we can compute $P(diabetes|inactive)$.  To do this, we can first determine the truth value of whether the PhysActive variable was equal to "No" for each indivdual, and then take the mean of those truth values.  Since TRUE/FALSE values are treated as 1/0 respectively by most programming languages (including R), this allows us to easily identify the probability of a simple event by simply taking the mean of a logical variable representing its truth value. We then use that value to compute the conditional probability, where we find that the probability of someone having diabetes given that they are physically inactive is `r I(sprintf('%0.3f',P_diabetes_given_inactive))`.

@@ -15,12 +15,14 @@ library(tidyverse)
 library(ggplot2)
 library(tidyr)
 library(fivethirtyeight)
-library(BayesMed)
 library(BayesFactor)
 library(lme4)
 library(lmerTest)
 library(cowplot)
 library(knitr)
+library(pwr)
+library(emmeans)
+library(ggfortify)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -42,22 +44,312 @@ NHANES_adult <-
 
 ## Testing the value of a single mean (Section \@ref(single-mean))
 
+In this example, we will show multiple ways to test a hypothesis about the value of a single mean.  As an example, let's test whether the mean systolic blood pressure (BP) in the NHANES dataset (averaged over the three measurements that were taken for each person) is greater than 120 mm, which is the standard value for normal systolic BP.
+
+First let's perform a power analysis to see how large our sample would need to be in order to detect a small difference (Cohen's d = .2).
+
+```{r}
+pwr.result <- pwr.t.test(d=0.2, power=0.8, 
+           type='one.sample', 
+           alternative='greater')
+pwr.result
+```
+
+Based on this, we take a sample of 156 individuals from the dataset.
+
+```{r}
+NHANES_BP_sample <- NHANES_adult %>%
+  drop_na(BPSysAve) %>%
+  dplyr::select(BPSysAve) %>%
+  sample_n(pwr.result$n)
+
+print('Mean BP:')
+meanBP <- NHANES_BP_sample %>%
+  summarize(meanBP=mean(BPSysAve)) %>%
+  pull()
+meanBP
+```
+
+First let's perform a sign test to see whether the observed mean of `r I(sprintf('%.2f', meanBP))` is significantly different from zero. To do this, we count the number of values that are greater than the hypothesized mean, and then use a binomial test to ask how surprising that number is if the true proportion is 0.5 (as it would be if the distribution were centered at the hypothesized mean).
+
+```{r}
+NHANES_BP_sample <- NHANES_BP_sample %>%
+  mutate(BPover120=BPSysAve>120)
+
+nOver120 <- NHANES_BP_sample %>%
+  summarize(nOver120=sum(BPover120)) %>%
+  pull()
+
+binom.test(nOver120, nrow(NHANES_BP_sample), alternative='greater')
+```
+
+This shows no significant difference. Next let's perform a one-sample t-test:
+
+```{r}
+t.test(NHANES_BP_sample$BPSysAve, mu=120, alternative='greater')
+```
+
+Here we see that the difference is not statistically signficant.  Finally, we can perform a randomization test to test the hypothesis.  Under the null hypothesis we would expect roughly half of the differences from the expected mean to be positive and half to be negative (assuming the distribution is centered around the mean), so we can cause the null hypothesis to be true on average by randomly flipping the signs of the differences.  
+
+```{r}
+
+nruns = 5000
+
+# create a function to compute the 
+# t on the shuffled values 
+shuffleOneSample <- function(x,mu) {
+  # randomly flip signs
+  flip <- runif(length(x))>0.5
+  diff <- x - mu
+  diff[flip]=-1*diff[flip]
+  # compute and return correlation 
+  # with shuffled variable
+  return(tibble(meanDiff=mean(diff)))
+}
+
+index_df <- tibble(id=seq(nruns)) %>%
+  group_by(id)
+
+shuffle_results <- index_df %>%
+  do(shuffleOneSample(NHANES_BP_sample$BPSysAve,120))
+
+observed_diff <- mean(NHANES_BP_sample$BPSysAve-120)
+p_shuffle <- mean(shuffle_results$meanDiff>observed_diff)
+p_shuffle
+```
+
+This gives us a very similar p value to the one observed with the standard t-test.
+
+We might also want to quantify the degree of evidence in favor of the null hypothesis, which we can do using the Bayes Factor:
+
+```{r}
+ttestBF(NHANES_BP_sample$BPSysAve,
+        mu=120,  
+        nullInterval = c(-Inf, 0))
+```
+
+This tells us that our result doesn't provide particularly strong evidence for either the null or alternative hypothesis; that is, it's inconclusive.
+
 
 ## Comparing two means (Section \@ref(comparing-two-means))
 
+To compare two means from independent samples, we can use the two-sample t-test. Let's say that we want to compare blood pressure of smokers and non-smokers; we don't have an expectation for the direction, so we will use a two-sided test.  First let's perform a power analysis, again for a small effect:
+
+```{r}
+power_results_2sample <- pwr.t.test(d=0.2, power=0.8,
+                                    type='two.sample'
+                                    )
+power_results_2sample
+```
+
+This tells us that we need 394 subjects in each group, so let's sample 394 smokers and 394 nonsmokers from the NHANES dataset, and then put them into a single data frame with a variable denoting their smoking status.
+
+```{r}
+nonsmoker_df <- NHANES_adult %>%
+  dplyr::filter(SmokeNow=="Yes") %>%
+  drop_na(BPSysAve) %>%
+  dplyr::select(BPSysAve,SmokeNow) %>%
+  sample_n(power_results_2sample$n)
+
+smoker_df <- NHANES_adult %>%
+  dplyr::filter(SmokeNow=="No") %>%
+  drop_na(BPSysAve) %>%
+  dplyr::select(BPSysAve,SmokeNow) %>%
+  sample_n(power_results_2sample$n)
+
+sample_df <- smoker_df %>%
+  bind_rows(nonsmoker_df)
+```
+
+Let's test our hypothesis using a standard two-sample t-test. We can use the formula notation to specify the analysis, just like we would for `lm()`.
+
+```{r}
+t.test(BPSysAve ~ SmokeNow, data=sample_df)
+```
+
+This shows us that there is a significant difference, though the direction is surprising: Smokers have *lower* blood pressure!
+
+Let's look at the Bayes factor to quantify the evidence:
+
+```{r}
+sample_df <- sample_df %>%
+  mutate(SmokeNowInt=as.integer(SmokeNow))
+ttestBF(formula=BPSysAve ~ SmokeNowInt, 
+        data=sample_df)
+```
+
+This shows that there is very strong evidence against the null hypothesis of no difference.
+
 ## The t-test as a linear model (Section \@ref(ttest-linear-model))
 
+We can also use `lm()` to implement these t-tests.  
+
+The one-sample t-test is basically a test for whether the intercept is different from zero, so we use a model with only an intercept and apply this to the data after subtracting the null hypothesis mean (so that the expectation under the null hypothesis is an intercept of zero):
+
+```{r}
+NHANES_BP_sample <- NHANES_BP_sample %>%
+  mutate(BPSysAveDiff = BPSysAve-120)
+lm_result <- lm(BPSysAveDiff ~ 1, data=NHANES_BP_sample)
+summary(lm_result)
+```
+You will notice that this p-value is twice as big as the one obtained from the one-sample t-test above; this is because that was a one-tailed test, while `lm()` is performing a two-tailed test.
+
+We can also run the two-sample t-test using `lm()`:
+
+```{r}
+lm_ttest_result <- lm(BPSysAve ~ SmokeNow, data=sample_df)
+summary(lm_ttest_result)
+
+```
+
+This gives the same p-value for the SmokeNowYes variable as it did for the two-sample t-test above.
 
 ## Comparing paired observations (Section \@ref(paired-ttests))
 
-### Sign test
+Let's look at how to perform a paired t-test in R.  In this case, let's generate some data for a set of individuals on two tests, where each indivdual varies in their overall ability, but there is also a practice effect such that performance on the second test is generally better than the first. 
+
+First, let's see how big of a sample we will require to find a medium (d=0.5) sized effect.  Let's say that we want to be extra sure in our results, so we will find the sample size that gives us 95% power to find an effect if it's there:
 
 
-### Paired t-test
+```{r}
+paired_power <- pwr.t.test(d=0.5, power=0.95, type='paired', alternative='greater')
+paired_power
+```
 
+Now let's generate a dataset with the required number of subjects:
+
+```{r}
+subject_id <- seq(paired_power$n)
+# we code the tests as 0/1 so that we can simply
+# multiply this by the effect to generate the data
+test_id <- c(0,1)
+repeat_effect <- 5
+noise_sd <- 5
+
+subject_means <- rnorm(paired_power$n, mean=100, sd=15)
+paired_data <- crossing(subject_id,test_id) %>%
+  mutate(subMean=subject_means[subject_id],
+         score=subject_means + 
+           test_id*repeat_effect + 
+           rnorm(paired_power$n, mean=noise_sd))
+         
+         
+```
+
+Let's perform a paired t-test on these data.  To do that, we need to separate the first and second test data into separate variables, which we can do by converting our *long* data frame into a *wide* data frame.
+
+```{r}
+paired_data_wide <- paired_data %>%
+  spread(test_id, score) %>%
+  rename(test1=`0`,
+         test2=`1`)
+
+glimpse(paired_data_wide)
+
+```
+
+Now we can pass those new variables into the `t.test()` function:
+
+```{r}
+paired_ttest_result <- t.test(paired_data_wide$test1,
+                              paired_data_wide$test2,
+                              type='paired')
+paired_ttest_result 
+```
+
+This analysis is a bit trickier to perform using the linear model, because we need to estimate a separate intercept for each subject in order to account for the overall differences between subjects.  We can't do this using `lm()` but we can do it using a function called `lmer()` from the `lme4` package.  To do this, we need to add `(1|subject_id)` to the formula, which tells `lmer()` to add a separate intercept ("1") for each value of `subject_id`.
+
+```{r}
+paired_test_lmer <- lmer(score ~ test_id + (1|subject_id),
+                         data=paired_data)
+summary(paired_test_lmer)
+```
+This gives a similar answer to the standard paired t-test.  The advantage is that it's more flexible, allowing us to perform *repeated measures* analyses, as we will see below.
 
 ## Analysis of variance (Section \@ref(ANOVA))
 
+Often we want to compare several different means, to determine whether any of them are different from the others. In this case, let's look at the data from NHANES to determine whether Marital Status is related to sleep quality. First we clean up the data:
+
+```{r}
+NHANES_sleep_marriage <- 
+  NHANES_adult %>%
+  dplyr::select(SleepHrsNight, MaritalStatus, Age) %>%
+  drop_na()
+
+```
+
+In this case we are going to treat the full NHANES dataset as our sample, with the goal of generalizing to the entire US population (from which the NHANES dataset is mean to be a representative sample). First let's look at the distribution of the different values of the `MaritalStatus` variable:
+
+```{r}
+NHANES_sleep_marriage %>%
+  group_by(MaritalStatus) %>%
+  summarize(n=n()) %>%
+  kable()
+```
+
+There are reasonable numbers of most of these categories, but let's remove the `Separated` category since it has relatively few members:
+
+```{r}
+NHANES_sleep_marriage <-
+  NHANES_sleep_marriage %>%
+  dplyr::filter(MaritalStatus!="Separated")
+
+```
 
 
+Now let's use `lm()` to perform an analysis of variance. Since we also suspect that Age is related to the amount of sleep, we will also include Age in the model. 
+
+```{r}
+lm_sleep_marriage <- lm(SleepHrsNight ~ MaritalStatus + Age,
+                        data=NHANES_sleep_marriage)
+summary(lm_sleep_marriage)
+```
+
+This tells us that there is a highly significant effect of marital status (based on the F test), though it accounts for a very small amount of variance (less than 1%).  
+
+It's also useful to look in more detail at which groups differ from which others, which we can do by examining the *estimated marginal means* for each group using the `emmeans()` function.
+
+```{r}
+# compute the differences between each of the means
+leastsquare <- emmeans(lm_sleep_marriage, 
+                      pairwise ~ MaritalStatus,
+                      adjust="tukey")
+ 
+# display the results by grouping using letters
+
+CLD(leastsquare$emmeans, 
+    alpha=.05,  
+    Letters=letters)
+
+```
+
+The letters in the `group` column tell us which individual conditions differ from which others; any pair of conditions that don't share a group identifier (in this case, the letters `a` and `b`) are significantly different from one another. In this case, we see that Divorced people sleep less than Married or Widowed individuals; no other pairs differ significantly.
+
+### Repeated measures analysis of variance
+
+The standard analysis of variance assumes that the observations are independent, which should be true for different people in the NHANES dataset, but may not be true if the data are based on repeated measures of the same individual.  For example, the NHANES dataset involves three measurements of blood pressure for each individual. If we want to test whether there are any differences between those, then we would need to use a *repeated measures* analysis of variance. We can do this using `lmer()` as we did above. First, we need to create a "long" version of the dataset.
+
+```{r}
+NHANES_bp_all <- NHANES_adult %>%
+  drop_na(BPSys1,BPSys2,BPSys3) %>%
+  dplyr::select(BPSys1,BPSys2,BPSys3, ID) %>%
+  gather(test, BPsys, -ID)
+```
+
+Then we fit a model that includes a separate intercept for each individual.
+
+```{r}
+repeated_lmer <-lmer(BPsys ~ test + (1|ID), data=NHANES_bp_all)
+summary(repeated_lmer)
+```
+
+This shows us that the second and third tests are significant different from the first test (which was automatically assigned as the baseline by `lmer()`).  We might also want to know whether there is an overall effect of test.  We can determine this by comparing the fit of our model to the fit of a model that does not include the test variable, which we will fit here.  We then compare the models using the `anova()` function, which performs an F test to compare the two models.
+
+```{r}
+repeated_lmer_baseline <-lmer(BPsys ~ (1|ID), data=NHANES_bp_all)
+anova(repeated_lmer,repeated_lmer_baseline)
+
+```
+
+This shows that blood pressure differs significantly across the three tests.
 

@@ -17,6 +17,8 @@ library(cowplot)
 library(knitr)
 
 set.seed(123456) # set random seed to exactly replicate results
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
 
 # load the NHANES data library
 library(NHANES)
@@ -96,7 +98,7 @@ plot_grid(p1, p2, p3, p4, ncol = 2)
 
 Let's simulate 150 samples, collecting the maximum value from each sample, and then plotting the distribution of maxima.
 
-```{r}
+```{r fig.width=4, fig.height=4, out.width="50%"}
 # sample maximum value 5000 times and compute 99th percentile
 nRuns <- 5000
 sampSize <- 150
@@ -149,6 +151,6 @@ bootCI <- tibble(`Lower CI limit`=quantile(bootMeans$medianHeight,.025),
             Median=median(heightSample$Height),
             `Upper CI limit`=quantile(bootMeans$medianHeight,.975)
             )
-  
+kable(bootCI)
 ```
 

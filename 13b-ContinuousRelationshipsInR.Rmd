@@ -18,9 +18,6 @@ library(fivethirtyeight)
 library(BayesMed)
 library(cowplot)
 library(knitr)
-library(DiagrammeR)
-library(htmltools)
-library(webshot)
 
 set.seed(123456) # set random seed to exactly replicate results
 
@@ -40,67 +37,153 @@ NHANES_adult <-
 ```
 
 
-## Computing covariance and correlation (Section \@#ref(covariance-and-correlation))
+## Computing covariance and correlation (Section \@ref(covariance-and-correlation))
 
+Let's first look at our toy example of covariance and correlation.  For this example, we first start by generating a set of X values.  
+
+```{r}
+df <-
+  tibble(x = c(3, 5, 8, 10, 12))
+
+```
+
+Then we create a related Y variable by adding some random noise to the X variable:
 
 ```{r echo=FALSE}
-# create data for toy example of covariance
-df <-
-  tibble(x = c(3, 5, 8, 10, 12)) %>%
-  mutate(y = x + round(rnorm(n = 5, mean = 0, sd = 2))) %>%
+df <- df %>%
+  mutate(y = x + round(rnorm(n = 5, mean = 0, sd = 2))) 
+
+```
+
+We compute the deviations and multiply them together to get the crossproduct:
+
+```{r echo=FALSE}
+
+df <- df %>%
   mutate(
     y_dev = y - mean(y),
-    x_dev = x - mean(x)
-  ) %>%
-  mutate(crossproduct = y_dev * x_dev)
+    x_dev = x - mean(x),
+    crossproduct = y_dev * x_dev)
 
-covXY <- sum(df$crossproduct) / (nrow(df) - 1)
-corXY <- sum(df$crossproduct) / ((nrow(df) - 1) * sd(df$x) * sd(df$y))
+```
 
-kable(df, caption='Data for toy example of covariance')
+And then we compute the covariance and correlation:
+
+```{r}
+
+results_df <- tibble(
+  covXY=sum(df$crossproduct) / (nrow(df) - 1),
+  corXY= sum(df$crossproduct) / 
+    ((nrow(df) - 1) * sd(df$x) * sd(df$y)))
+
+kable(results_df)
+
+```
+
+## Hate crime example
+
+Now we will look at the hate crime data from the `fivethirtyeight` package.  First we need to prepare the data by getting rid of NA values and creating abbreviations for the states.  To do the latter, we use the `state.abb` and `state.name` variables that come with R along with the `match()` function that will match the state names in the `hate_crimes` variable to those in the list. 
+
+```{r}
+hateCrimes <- 
+  hate_crimes %>%
+  mutate(state_abb = state.abb[match(state,state.name)]) %>%
+  drop_na(avg_hatecrimes_per_100k_fbi, gini_index)
+
+# manually fix the DC abbreviation
+hateCrimes$state_abb[hateCrimes$state=="District of Columbia"] <- 'DC'
+
 ```
 
 ```{r echo=FALSE}
 # perform correlation test on hate crime data
-cor.test(
+corr_results <- cor.test(
   hateCrimes$avg_hatecrimes_per_100k_fbi,
-  hateCrimes$gini_index
-)
+  hateCrimes$gini_index,
+  alternative='greater')
+
+corr_results
 ```
+
+Remember that we can also compute the p-value using randomization.  To to this, we shuffle the order of one of the variables, so that we break the link between the X and Y variables --- effectively making the null hypothesis (that the correlation is less than or equal to zero) true.  Here we will first create a function that takes in two variables, shuffles the order of one of them (without replacement) and then returns the correlation between that shuffled variable and the original copy of the second variable.
 
 ```{r echo=FALSE}
-# compute null distribution by shuffling order of variable values
 
-# create a function to compute the correlation on the shuffled values 
+# create a function to compute the 
+# correlation on the shuffled values 
 shuffleCorr <- function(x, y) {
+  # randomly reorder x
   xShuffled <- sample(x)
-  return(cor(xShuffled, y))
+  # compute and return correlation 
+  # with shuffled variable
+  return(tibble(cor=cor(xShuffled, y)))
 }
 
-# run this function 2500 times 
-shuffleDist <- 
-  replicate(
-    2500, 
-    shuffleCorr(hateCrimes$avg_hatecrimes_per_100k_fbi, hateCrimes$gini_index)
-  )
-```
-
-```{r shuffleCorr,echo=FALSE,fig.cap="Histogram of correlation values under the null hypothesis, obtained by shuffling values. Observed value is denoted by blue line.",fig.width=4,fig.height=4,out.height='50%'}
-
-ggplot(data.frame(shuffleDist),aes(shuffleDist)) + 
-  geom_histogram(bins=100) +
-  geom_vline(xintercept = corGiniHC,color='blue') +
-  ggtitle(sprintf('p(shuffled r >= observed) = %0.3f',mean(shuffleDist>=corGiniHC))) +
-  theme(plot.title = element_text(size = 16, face = "bold")) +
-  theme(plot.margin = unit(c(0,1,0,0), "cm")) +
-  labs(
-  x = "Correlation coeffcients of shuffled variables"
-  )
+# run this function 5000 times 
+input_df <- tibble(id=seq(5000))
+shuffleDist <- input_df %>% 
+  group_by(id) %>%
+  do(shuffleCorr(
+    hateCrimes$avg_hatecrimes_per_100k_fbi, 
+    hateCrimes$gini_index))
 
 ```
+
+Now we take the distribution of observed correlations after shuffling and compare them to our observed correlation, in order to obtain the empirical probability of our observed data under the null hypothesis.
+
+```{r}
+mean(shuffleDist$cor >corr_results$estimate )
+```
+This value is fairly close (though a bit larger) to the one obtained using `cor.test()`.
 
 
 ## Robust correlations (\@ref(robust-correlations))
 
-show example of computing spearman from scratch
+In the previous chapter we also saw that the hate crime data contained one substantial outlier, which appeared to drive the significant correlation. To compute the Spearman correlation, we first need to convert the data into their ranks, which we can do using the `order()` function:
+
+```{r}
+hateCrimes <- hateCrimes %>%
+  mutate(hatecrimes_rank = order(avg_hatecrimes_per_100k_fbi),
+         gini_rank = order(gini_index))
+```
+
+We can then compute the Spearman correlation by applying the Pearson correlation to the rank variables"
+
+```{r}
+cor(hateCrimes$hatecrimes_rank,
+  hateCrimes$gini_rank)
+
+```
+
+We see that this is much smaller than the value obtained using the Pearson correlation on the original data.  We can assess its statistical signficance using randomization:
+
+
+```{r echo=FALSE}
+
+# create a function to compute the rank
+# correlation on the shuffled values 
+shuffleCorrRank <- function(x, y) {
+  # randomly reorder x
+  xShuffled <- sample(x)
+  # compute and return rank correlation 
+  # with shuffled variable
+  xrank = order(xShuffled)
+  yrank = order(y)
+  return(tibble(cor=cor(xrank, yrank)))
+}
+
+# run this function 5000 times 
+input_df <- tibble(id=seq(5000))
+shuffleDist <- input_df %>% 
+  group_by(id) %>%
+  do(shuffleCorrRank(
+    hateCrimes$avg_hatecrimes_per_100k_fbi, 
+    hateCrimes$gini_index))
+
+mean(shuffleDist$cor >corr_results$estimate )
+
+```
+
+Here we see that the p-value is substantially larger and far from significance.
+
 

@@ -17,6 +17,11 @@ library(ggplot2)
 library(knitr)
 library(cowplot)
 
+set.seed(123456)
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
+
+
 # load the NHANES data library
 library(NHANES)
 
@@ -116,6 +121,7 @@ ggplot(NHANES_cleanAlc, aes(sample=AlcoholYear)) +
   # add the line for x=y
   stat_qq_line()
 ```
+
 We can see from this figure that the distribution is highly non-normal, as the Q-Q plot diverges substantially from the unit line.
 
 Now let's repeatedly sample and compute the mean, and look at the resulting Q-Q plot.  We will take samples of various sizes to see the effect of sample size.  We will use a function from the `dplyr` package called `do()`, which can run a large number of analyses at once.  
@@ -182,9 +188,9 @@ plot_grid(plotlist = qqplots)
 
 This shows that the results become more normally distributed (i.e. following the straight line) as the samples get larger.
 
-## Confidence intervals (Section \@ref{#confidence-intervals})
+## Confidence intervals (Section \@ref{confidence-intervals})
 
-Remember that confidence intervals are intervals that will contain the population parameter on a certain proportion of times.  In this example we will walk through the simulation that was presented in Section \@ref{#confidence-intervals} to show that this actually works properly.  Here we will use a function called `do()` that lets us 
+Remember that confidence intervals are intervals that will contain the population parameter on a certain proportion of times.  In this example we will walk through the simulation that was presented in Section \@ref{confidence-intervals} to show that this actually works properly.  Here we will use a function called `do()` that lets us 
 
 ```{r echo=FALSE}
 # compute how often the confidence interval contains the true population mean
@@ -216,5 +222,6 @@ ci_results <-
   mutate(pop_mean_within_ci = CI_upper > pop_mean & CI_lower < pop_mean) %>%
   summarize(p_popmean_within_ci=mean(pop_mean_within_ci)) %>%
   pull()
+
 ```
 

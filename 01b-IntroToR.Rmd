@@ -16,7 +16,7 @@ R has become one of the most popular programming languages for statistical analy
 
 Many people coming to their first statistics class will have never programmed a computer in any language. Why should they start now?  After all, there are lots of software packages that can perform all of the statistical analyses in this book.
 
-MORE HERE
+TBD: MORE HERE
 
 ## Why programming is hard to learn
 
@@ -262,10 +262,14 @@ Often in a dataset we will have a number of different variables that we want to 
 
 ```{r echo=FALSE}
 # actual data from kbb.com
-car_model <- c("Ford Fusion", "Hyundai Accent", "Toyota Corolla")
+car_model <- c("Ford Fusion",
+               "Hyundai Accent",
+               "Toyota Corolla")
 car_price <- c(25000, 16000, 18000)
 car_mileage <- c(27, 36, 32)
-cars_df <- data.frame(model=car_model, price=car_price, mileage=car_mileage)
+cars_df <- data.frame(model=car_model, 
+                      price=car_price, 
+                      mileage=car_mileage)
 ```
 
 If you are familiar with a spreadsheet (say from Microsoft Excel) then you already have a basic understanding of a data frame.  

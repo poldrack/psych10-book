@@ -18,10 +18,14 @@ library(BayesMed)
 library(caret)
 library(MASS)
 library(cowplot)
+library(ggfortify)
+library(gmodels)
 
 library(knitr)
 
 set.seed(123456) # set random seed to exactly replicate results
+opts_chunk$set(tidy.opts=list(width.cutoff=80))
+options(tibble.width = 60)
 
 # load the NHANES data library
 library(NHANES)
@@ -42,40 +46,221 @@ NHANES_adult <-
 
 ## Linear regression (Section \@ref(linear-regression))
 
-## Regression to the mean (Section \@ref(regression-to-the-mean))
+To perform linear regression in R, we use the `lm()` function.  Let's generate some data and use this function to compute the linear regression solution.
 
-```{r echo=FALSE}
-# create simulated data for regression to the mean example
+```{r fig.width=4, fig.height=4, out.width="50%"}
+npoints <- 100
+intercept = 10
+# slope of X/Y relationship
+slope=0.5
+# this lets us control the strength of the relationship
+# by varying the amount of noise added to the y variable
+noise_sd = 0.6
 
-nstudents <- 100 
+regression_data <- tibble(x = rnorm(npoints)) %>%
+  mutate(y = x*slope + rnorm(npoints)*noise_sd + intercept)
 
-readingScores <- data.frame(
-  #random normal distribution of scores for test 1
-  test1 = rnorm(n = nstudents, mean = 0, sd = 1) * 10 + 100, 
-  #random normal distribution of scores for test 2
-  test2 = rnorm(n = nstudents, mean = 0, sd = 1) * 10 + 100 
-)
-
-# select the students in the bottom 25% on the first test
-cutoff <- quantile(readingScores$test1, 0.25)
-
-readingScores <-
-  readingScores %>%
-  mutate(badTest1 = test1 < cutoff) %>% 
-  dplyr::filter(badTest1 == TRUE) %>%
-  summarize(
-    `Test 1` = mean(test1),
-    `Test 2` = mean(test2)
-  )
-readingScores = as.data.frame(t(readingScores)) %>% rename(Score = V1)
-kable(readingScores, caption='Reading scores for Test 1 (which is lower, because it was the basis for selecting the students) and Test 2 (which is higher because it was not related to Test 1).')
+ggplot(regression_data,aes(x,y)) + 
+  geom_point()
 ```
+
+We can then apply `lm()` to these data:
+
+```{r}
+lm_result <- lm(y ~ x, data=regression_data)
+summary(lm_result)
+```
+
+We should see three things in the `lm()` results:
+
+* The estimate of the Intercept in the model should be very close to the intercept that we specified
+* The estimate for the x parameter should be very close to the slope that we specified
+* The residual standard error should be roughly similar to the noise standard deviation that we specified
+
 
 ## Model criticism and diagnostics (Section \@ref(model-criticism))
 
+Once we have fitted the model, we want to look at some diagnostics to determine whether the model is actually fitting properly.  We can do this using the `autoplot()` function from the `ggfortify` package.
 
 
+```{r fig.width=8, fig.height=4, out.width="80%"}
+autoplot(lm_result,which=1:2)
+
+```
+
+The left panel in this plot shows the relationship between the predicted (or "fitted") values and the residuals.  We would like to make sure that there is no clear relationship between these two (as we will see below).  The right panel shows a Q-Q plot, which helps us assess whether the residuals from the model are normally distributed. In this case, they look reasonably normal, as the points don't differ too much from the unit line.
+
+## Examples of problematic model fit
+
+Let's say that there was another variable at play in this dataset, which we were not aware of. This variable causes some of the cases to have much larger values than others, in a way that is unrelated to the X variable.  We play a trick here using the `seq()` function to create a sequence from zero to one, and then threshold those 0.5 (in order to obtain half of the values as zero and the other half as one) and then multiply by the desired effect size:
+
+```{r}
+effsize=2
+regression_data <- regression_data %>%
+  mutate(y2=y + effsize*(seq(1/npoints,1,1/npoints)>0.5))
+
+lm_result2 <- lm(y2 ~ x, data=regression_data)
+summary(lm_result2)
+
+```
+
+One thing you should notice is that the model now fits overall much worse; the R-squared is about half of what it was in the previous model, which reflects the fact that more variability was added to the data, but it wasn't accounted for in the model.  Let's see if our diagnostic reports can give us any insight:
+
+```{r fig.width=8, fig.height=4, out.width="80%"}
+autoplot(lm_result2,which=1:2)
+
+```
+
+The residual versus fitted graph doesn't give us much insight, but we see from the Q-Q plot that the residuals are diverging quite a bit from the unit line.
+
+Let's look at another potential problem, in which the y variable is nonlinearly related to the X variable.  We can create these data by squaring the X variable when we generate the Y variable:
+
+```{r}
+effsize=2
+regression_data <- regression_data %>%
+  mutate(y3 = (x**2)*slope + rnorm(npoints)*noise_sd + intercept)
+
+lm_result3 <- lm(y3 ~ x, data=regression_data)
+summary(lm_result3)
+
+```
+
+Now we see that there is no significant linear relationship between $X^2$ and Y/ But if we look at the residuals the problem with the model becomes clear:
+
+```{r fig.width=8, fig.height=4, out.width="80%"}
+autoplot(lm_result3,which=1:2)
+
+```
+
+In this case we can see the clearly nonlinear relationship between the predicted and residual values, as well as the clear lack of normality in the residuals.  
+
+As we noted in the previous chapter, the "linear" in the general linear model doesn't refer to the shape of the response, but instead refers to the fact that model is linear in its parameters --- that is, the predictors in the model only get multiplied the parameters (e.g., rather than being raised to a power of the parameter).  Here is how we would build a model that could account for the nonlinear relationship:
+
+```{r}
+# create x^2 variable
+regression_data <- regression_data %>%
+  mutate(x_squared = x**2)
+
+lm_result4 <- lm(y3 ~ x + x_squared, data=regression_data)
+summary(lm_result4)
+
+```
+
+Now we see that the effect of $X^2$ is significant, and if we look at the residual plot we should see that things look much better:
+
+```{r fig.width=8, fig.height=4, out.width="80%"}
+autoplot(lm_result4,which=1:2)
+
+```
+Not perfect, but much better than before!
+
+## Extending regression to binary outcomes.
+
+Let's say that we have a blood test (which is often referred to as a *biomarker*) and we want to know whether it predicts who is going to have a heart attack within the next year.  We will generate a synthetic dataset for a population that is at very high risk for a heart attack in the next year.
+
+```{r}
+# sample size
+npatients=1000
+
+# probability of heart attack
+p_heartattack = 0.5
+
+# true relation to biomarker
+true_effect <- 0.6
+
+# assume biomarker is normally distributed
+disease_df <- tibble(biomarker=rnorm(npatients))
+
+# generate another variable that reflects risk for 
+# heart attack, which is related to the biomarker
+disease_df <- disease_df %>%
+  mutate(risk = biomarker*true_effect + rnorm(npatients))
+
+# create another variable that shows who has a 
+# heart attack, based on the risk variable
+disease_df <- disease_df %>%
+  mutate(
+    heartattack = risk > quantile(disease_df$risk,
+                                       1-p_heartattack))
+
+glimpse(disease_df)
+```
+
+Now we would like to build a model that allows us to predict who will have a heart attack from these data. However, you may have noticed that the heartattack variable is a binary variable; because linear regression assumes that the residuals from the model will be normally distributed, and the binary nature of the data will violate this, we instead need to use a different kind of model, known as a *logistic regression* model, which is built to deal with binary outcomes.  We can fit this model using the `glm()` function:
+
+```{r}
+glm_result <- glm(heartattack ~ biomarker, data=disease_df,
+                  family=binomial())
+summary(glm_result)
+```
+
+This looks very similar to the output from the `lm()` function, and it shows us that there is a significant relationship between the biomarker and heart attacks. The model provides us with a predicted probability that each individual will have a heart attack; if this is greater than 0.5, then that means that the model predicts that the individual is more likely than not to have a heart attack.  
+We can start by simply comparing those predictions to the actual outcomes. 
+
+```{r}
+# add predictions to data frame
+disease_df <- disease_df %>%
+  mutate(prediction = glm_result$fitted.values>0.5,
+         heartattack = heartattack)
+
+# create table comparing predicted to actual outcomes
+CrossTable(disease_df$prediction,
+           disease_df$heartattack,
+           prop.t=FALSE,
+           prop.r=FALSE,
+           prop.chisq=FALSE)
+
+```
+
+This shows us that of the 500 people who had heart attacks, the model corrected predicted a heart attack for 343 of them.  It also predicted heart attacks for 168 people who didn't have them, and it failed to predict a heart attack for 157 people who had them. This highlights the distinction that we mentioned before between statistical and practical significance; even though the biomarker shows a highly significant relationship to heart attacks, it's ability to predict them is still relatively poor.  As we will see below, it gets even worse when we try to generalize this to a new group of people.
 
 ## Cross-validation (Section \@ref(cross-validation))
+
+Cross-validation is a powerful technique that allows us to estimate how well our results will generalize to a new dataset. Here we will build our own crossvalidation code to see how it works, continuing the logistic regression example from the previous section.
+
+In cross-validation, we want to split the data into several subsets and then iteratively train the model while leaving out each subset (which we usually call *folds*) and then test the model on that held-out fold  Let's write our own code to do this splitting; one relatively easy way to this is to create a vector that contains the fold numbers, and then randomly shuffle it to create the fold assigments for each data point.  
+
+```{r}
+nfolds <- 4 # number of folds
+
+# we use the kronecker() function to repeat the folds
+fold <-  kronecker(seq(nfolds),rep(1,npatients/nfolds))
+# randomly shuffle using the sample() function
+fold <- sample(fold)
+
+# add variable to store CV predictions
+disease_df <- disease_df %>%
+  mutate(CVpred=NA)
+
+# now loop through folds and separate training and test data
+for (f in seq(nfolds)){
+  # get training and test data
+  train_df <- disease_df[fold!=f,]
+  test_df <- disease_df[fold==f,]
+  # fit model to training data
+  glm_result_cv <- glm(heartattack ~ biomarker, data=train_df,
+                  family=binomial())
+  # get probability of heart attack on test data
+  pred <- predict(glm_result_cv,newdata = test_df)
+  # convert to prediction and put into data frame
+  disease_df$CVpred[fold==f] = (pred>0.5)
+
+}
+```
+
+Now let's look at the performance of the model:
+
+```{r}
+# create table comparing predicted to actual outcomes
+CrossTable(disease_df$CVpred,
+           disease_df$heartattack,
+           prop.t=FALSE,
+           prop.r=FALSE,
+           prop.chisq=FALSE)
+
+```
+
+Now we see that the model only accurately predicts less than half of the heart attacks that occurred when it is predicting to a new sample.  This tells us that this is the level of prediction that we could expect if were to apply the model to a new sample of patients from the same population.
+
 
 

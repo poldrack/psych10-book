@@ -120,7 +120,7 @@ tableDf <- summaryDf %>%
 ```
 
 
-```{r AtoZBMIChangeDensity,echo=FALSE,fig.cap="Violin plots for each condition, with the 50th percentile (i.e the median) shown as a black line for each group.", fig.width=4, fig.height=4}
+```{r AtoZBMIChangeDensity,echo=FALSE,fig.cap="Violin plots for each condition, with the 50th percentile (i.e the median) shown as a black line for each group.", fig.width=4, fig.height=4, out.width="50%"}
 ggplot(dietDf,aes(diet,BMIChange12Months)) + 
   geom_violin(draw_quantiles=.5)
 
