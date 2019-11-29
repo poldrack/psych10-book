@@ -56,7 +56,7 @@ Let's look at some examples of the use of tables, again using the NHANES dataset
 
 ### Frequency distributions  {#frequency-distributions}
 
-Let's look at how many people fall into each of these categories. We will do this in R by selecting the variable of interest (PhysActive) from the NHANES dataset, grouping the data by the different values of the variable, and then counting how many values there are in each group.
+Let's look at how many people fall into each of these categories. We will do this in R by selecting the variable of interest (PhysActive) from the NHANES dataset, grouping the data by the different values of the variable, and then counting how many values there are in each group:
 
 ```{r MakePhysActiveTable, echo=FALSE, warning=FALSE}
 # summarize physical activity data
@@ -68,11 +68,12 @@ PhysActive_table <- NHANES %>%
 
 ```
 
-```{r echo=FALSE}
-kable(PhysActive_table, caption='Frequency distribution for PhysActive variable')
+```{r PhysActiveTable, echo=FALSE}
+
+kable(PhysActive_table) #, label='PhysActiveTable',caption='Frequency distribution for PhysActive variable')
 ```
 
-The R code in this cell generates a table showing the frequencies of each of the different values; there were `r I(PhysActive_table %>% subset(PhysActive=='No') %>% dplyr::select(AbsoluteFrequency))` individuals who responded "No" to the question, `r I(PhysActive_table %>% subset(PhysActive=='Yes') %>% dplyr::select(AbsoluteFrequency))` who responded "Yes", and `r I(PhysActive_table %>% subset(is.na(PhysActive)) %>% dplyr::select(AbsoluteFrequency))` for whom no response was given.  We call this a *frequency distribution* because it tells us how frequent each of the possible values is within our sample.
+This table shows the frequencies of each of the different values; there were `r I(PhysActive_table %>% subset(PhysActive=='No') %>% dplyr::select(AbsoluteFrequency))` individuals who responded "No" to the question, `r I(PhysActive_table %>% subset(PhysActive=='Yes') %>% dplyr::select(AbsoluteFrequency))` who responded "Yes", and `r I(PhysActive_table %>% subset(is.na(PhysActive)) %>% dplyr::select(AbsoluteFrequency))` for whom no response was given.  We call this a *frequency distribution* because it tells us how frequent each of the possible values is within our sample.
 
 This shows us the absolute frequency of the two responses, for everyone who actually gave a response. We can see from this that there are more people saying "Yes" than "No", but it can be hard to tell from absolute numbers how big the difference is.  For this reason, we often would rather present the data using *relative frequency*, which is obtained by dividing each frequency by the sum of all frequencies:
 

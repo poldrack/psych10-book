@@ -11,13 +11,6 @@ This chapter is the first of several distributed throughout the book that will i
 The name "R" is a play on the names of the two authors of the software package (Ross Ihaka and Robert Gentleman) as well as an homage to an older statistical software package called "S".
 R has become one of the most popular programming languages for statistical analysis and "data science".  Unlike general-purpose programming languages such as Python or Java, R is purpose-built for statistics.  That doesn't mean that you can't do more general things with it, but the place where it really shines is in data analysis and statistics.  
 
-
-## Why do you need to learn to program?
-
-Many people coming to their first statistics class will have never programmed a computer in any language. Why should they start now?  After all, there are lots of software packages that can perform all of the statistical analyses in this book.
-
-TBD: MORE HERE
-
 ## Why programming is hard to learn
 
 Programming a computer is a skill, just like playing a musical instrument or speaking a second language. And just like those skills, it takes a lot of work to get good at it --- the only way to acquire a skill is through practice.  There is nothing special or magical about people who are experts, other than the quality and quantity of their experience! However, not all practice is equally effective.  A large amount of psychological research has shown that practice needs to be *deliberate*, meaning that it focuses on developing the specific skills that one needs to perform the skill, at a level that is always pushing one's ability.
@@ -37,7 +30,8 @@ In particular, you should take advantage of the fact that there are millions of 
 The idea behind *rubber duck debugging* is to pretend that you are trying to explain what your code is doing to an inanimate object, like a rubber duck.  Often, the process of explaning it aloud is enough to help you find the problem.
 
 ## Using RStudio
-When I am using R in my own work, I generally use a software package called [RStudio](http://rstudio.net), which provides a number of nice tools for working with R.
+
+When I am using R in my own work, I generally use a free software package called [RStudio](http://rstudio.net), which provides a number of nice tools for working with R. In particular, RStudio provides the ability to create "notebooks" that mix together R code and text (formatted using the [Markdown](https://daringfireball.net/projects/markdown/) text formatting system).  In fact, this book is written using exactly that system! You can see the R code used to generate this book [here](https://github.com/poldrack/psych10-book).
 
 ## Getting started with R
 

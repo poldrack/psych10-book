@@ -57,7 +57,7 @@ First we load the data:
 ```{r message=FALSE}
 # we will remove the STATION and NAME variables 
 # since they are identical for all rows
-SFrain <- read_csv("https://raw.githubusercontent.com/poldrack/psych10-book/master/data/SanFranciscoRain/1329219.csv") %>% 
+SFrain <- read_csv("data/SanFranciscoRain/1329219.csv") %>% 
   dplyr::select(-STATION, -NAME)
   
 glimpse(SFrain)
