@@ -1,0 +1,227 @@
+Rank,Country,GDP
+1,Liechtenstein,141100
+2,Qatar,104300
+3,Luxembourg,81100
+4,Bermuda,69900
+5,Singapore,60500
+6,Jersey,57000
+7,Falkland Islands (Islas Malvinas),55400
+8,Norway,54200
+9,Brunei,50000
+10,Hong Kong,49800
+11,United States,49000
+12,United Arab Emirates,48800
+13,Guernsey,44600
+14,Switzerland,43900
+15,Cayman Islands,43800
+16,Gibraltar,43000
+17,Netherlands,42700
+18,Austria,42400
+19,Kuwait,42200
+20,Canada,41100
+21,Sweden,40900
+22,Australia,40800
+23,Ireland,40100
+24,Iceland,38500
+25,British Virgin Islands,38500
+26,Germany,38400
+27,Taiwan,38200
+28,Belgium,38200
+29,Denmark,37600
+30,Greenland,37400
+31,Andorra,37200
+32,Finland,36700
+33,United Kingdom,36600
+34,San Marino,36200
+35,France,35600
+36,Japan,35200
+37,Isle of Man,35000
+38,European Union,34500
+39,Macau,33000
+40,South Korea,32100
+41,Israel,31400
+42,The Bahamas,31400
+43,Spain,31000
+44,Italy,30900
+45,Faroe Islands,30500
+46,Cyprus,29400
+47,Slovenia,29000
+48,New Zealand,28000
+49,Bahrain,27900
+50,Czech Republic,27400
+51,Oman,26900
+52,Greece,26600
+53,Malta,25800
+54,Seychelles,25000
+55,Saudi Arabia,24500
+56,Barbados,23700
+57,Portugal,23700
+58,Slovakia,23600
+59,Aruba,21800
+60,Poland,20600
+61,Estonia,20600
+62,Trinidad and Tobago,20300
+63,Hungary,19800
+64,Equatorial Guinea,19600
+65,Lithuania,19100
+66,Croatia,18400
+67,Antigua and Barbuda,18200
+68,French Polynesia,18000
+69,Argentina,17700
+70,Chile,17400
+71,Russia,17000
+72,Gabon,16400
+73,Puerto Rico,16300
+74,Botswana,16200
+75,Latvia,15900
+76,Saint Kitts and Nevis,15800
+77,Malaysia,15800
+78,Lebanon,15700
+79,Sint Maarten,15400
+80,Uruguay,15300
+81,Belarus,15200
+82,Mauritius,15100
+83,New Caledonia,15000
+84,Curacao,15000
+85,Mexico,14800
+86,Turkey,14700
+87,Virgin Islands,14500
+88,Panama,14300
+89,Grenada,14100
+90,Libya,14100
+91,Dominica,14000
+92,Bulgaria,13800
+93,Kazakhstan,13200
+94,Iran,13200
+95,Saint Lucia,12800
+96,Venezuela,12700
+97,Romania,12600
+98,Northern Mariana Islands,12500
+99,Anguilla,12200
+100,Costa Rica,12100
+101,Brazil,11900
+102,Montenegro,11700
+103,Saint Vincent and the Grenadines,11600
+104,Turks and Caicos Islands,11500
+105,South Africa,11100
+106,Serbia,10800
+107,Macedonia,10500
+108,Colombia,10400
+109,Azerbaijan,10300
+110,Peru,10200
+111,Cuba,9900
+112,Tunisia,9600
+113,Suriname,9600
+114,Thailand,9500
+115,Dominican Republic,9400
+116,Jamaica,9100
+117,Cook Islands,9100
+118,Maldives,8800
+119,Timor-Leste,8800
+120,Ecuador,8600
+121,China,8500
+122,Montserrat,8500
+123,Belize,8400
+124,Bosnia and Herzegovina,8200
+125,Palau,8100
+126,American Samoa,8000
+127,Turkmenistan,7900
+128,Albania,7800
+129,Guyana,7600
+130,El Salvador,7600
+131,Namibia,7500
+132,Algeria,7400
+133,Tonga,7400
+134,Ukraine,7300
+135,Saint Pierre and Miquelon,7000
+136,Egypt,6600
+137,Kosovo,6500
+138,Bhutan,6200
+139,Samoa,6000
+140,Jordan,6000
+141,Angola,6000
+142,Kiribati,5800
+143,Niue,5800
+144,Sri Lanka,5700
+145,Georgia,5600
+146,Armenia,5500
+147,Paraguay,5500
+148,Swaziland,5400
+149,Morocco,5100
+150,Guatemala,5100
+151,Syria,5100
+152,Vanuatu,5000
+153,Nauru,5000
+154,Bolivia,4900
+155,Mongolia,4800
+156,Indonesia,4700
+157,Fiji,4700
+158,Republic of the Congo,4600
+159,Honduras,4400
+160,Philippines,4100
+161,Cape Verde,4000
+162,Iraq,3900
+163,Wallis and Futuna,3800
+164,India,3700
+165,Moldova,3400
+166,Vietnam,3400
+167,Tuvalu,3400
+168,Uzbekistan,3300
+169,Solomon Islands,3200
+170,Nicaragua,3200
+171,Ghana,3100
+172,West Bank,2900
+173,Sudan,2800
+174,Pakistan,2800
+175,Laos,2700
+176,Djibouti,2700
+177,Papua New Guinea,2600
+178,Nigeria,2600
+179,Saint Helena Ascension and Tristan da Cunha,2500
+180,Marshall Islands,2500
+181,Western Sahara,2500
+182,Kyrgyzstan,2400
+183,Sao Tome and Principe,2300
+184,Cameroon,2300
+185,Yemen,2300
+186,Cambodia,2200
+187,Mauritania,2200
+188,Federated States of Micronesia,2200
+189,Tajikistan,2100
+190,Lesotho,2000
+191,The Gambia,2000
+192,Senegal,1900
+193,Chad,1900
+194,North Korea,1800
+195,Kenya,1800
+196,Bangladesh,1700
+197,Ivory Coast,1600
+198,Zambia,1600
+199,Burkina Faso,1500
+200,Benin,1500
+201,Tanzania,1500
+202,Rwanda,1400
+203,Uganda,1300
+204,Nepal,1300
+205,Haiti,1300
+206,Burma,1300
+207,Comoros,1200
+208,Guinea-Bissau,1200
+209,Mali,1100
+210,Guinea,1100
+211,Mozambique,1100
+212,Ethiopia,1100
+213,Afghanistan,1000
+214,Tokelau,1000
+215,Togo,900
+216,Sierra Leone,900
+217,Malawi,900
+218,Madagascar,900
+219,Central African Republic,800
+220,Niger,800
+221,Eritrea,700
+222,Somalia,600
+223,Burundi,600
+224,Zimbabwe,500
+225,Liberia,500
+226,Democratic Republic of the Congo,400
