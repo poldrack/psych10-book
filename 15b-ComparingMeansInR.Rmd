@@ -1,11 +1,11 @@
 ---
-  output:
+output:
+  pdf_document: default
   bookdown::gitbook:
-  lib_dir: "book_assets"
-includes:
-  in_header: google_analytics.html
-pdf_document: default
-html_document: default
+    lib_dir: "book_assets"
+    includes:
+      in_header: google_analytics.html
+  html_document: default
 ---
 
 # Comparing means in R

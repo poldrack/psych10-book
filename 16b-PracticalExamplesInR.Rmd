@@ -8,7 +8,7 @@ output:
   html_document: default
 ---
 
-# Practical statistical modeling in R {#practical-example}
+# Practical statistical modeling in R
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)

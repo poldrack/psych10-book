@@ -41,7 +41,7 @@ NHANES_adult <-
 ```
 
 
-## Sampling error (Section \@ref{sampling-error})
+## Sampling error (Section \@ref{samplingerror})
 
 Here we will repeatedly sample from the NHANES Height variable in order to obtain the sampling distribution of the mean.
 
