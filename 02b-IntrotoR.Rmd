@@ -35,7 +35,7 @@ The idea behind *rubber duck debugging* is to pretend that you are trying to exp
 
 ## Using RStudio
 
-When I am using R in my own work, I generally use a free software package called [RStudio](http://rstudio.net), which provides a number of nice tools for working with R. In particular, RStudio provides the ability to create "notebooks" that mix together R code and text (formatted using the [Markdown](https://daringfireball.net/projects/markdown/) text formatting system).  In fact, this book is written using exactly that system! You can see the R code used to generate this book [here](https://github.com/poldrack/psych10-book).
+When I am using R in my own work, I generally use a free software package called [RStudio](https://rstudio.com/), which provides a number of nice tools for working with R. In particular, RStudio provides the ability to create "notebooks" that mix together R code and text (formatted using the [Markdown](https://daringfireball.net/projects/markdown/) text formatting system).  In fact, this book is written using exactly that system! You can see the R code used to generate this book [here](https://github.com/poldrack/psych10-book).
 
 ## Getting started with R
 
