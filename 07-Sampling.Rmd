@@ -7,7 +7,7 @@ output:
       in_header: google_analytics.html
   html_document: default
 ---
-# Sampling {#sampling}
+# Sampling {#uncertainty}
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
