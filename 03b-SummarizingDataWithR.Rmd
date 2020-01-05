@@ -30,7 +30,7 @@ We will use the NHANES dataset for several of our examples, so let's load the li
 # first unload it if it's already loaded, to make sure
 # we have a clean version
 
-if("NHANES" %in% (.packages())){
+if("NHANES" %in% search()){
   detach('package:NHANES', unload=TRUE)
 }
 library(NHANES)
