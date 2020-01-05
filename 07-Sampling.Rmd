@@ -296,7 +296,7 @@ for (i in 1:nsamples) {
 
 Confidence intervals are notoriously confusing, primarily because they don't mean what we would hope they mean. It seems natural to think that the 95% confidence interval tells us that there is a 95% chance that the population mean falls within the interval.  However, as we will see throughout the course, concepts in statistics often don't mean what we think they should mean.  In the case of confidence intervals, we can't interpret them in this way because the population parameter has a fixed value -- it either is or isn't in the interval.  The proper interpretation of the 95% confidence interval is that it is an interval that will contain the true population mean 95% of the time. We can confirm this by obtaining a large number of samples from the NHANES data and counting how often the interval contains the true population mean.  The proportion of confidence intervals contaning the true mean is (`r I(formatC(mean(ci_contains_mean), digits=2, format='f'))`)This confirms that the confidence interval does indeed capture the population mean about 95% of the time.
 
-## Learning objectives {#learning-objectives}
+## Learning objectives
 
 Having read this chapter, you should be able to:
 
