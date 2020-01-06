@@ -103,7 +103,7 @@ The world is an uncertain place. We now know that cigarette smoking causes lung 
 
 One often sees journalists write that scientific researchers have "proven" some hypothesis.  But statistical analysis can never "prove" a hypothesis, in the sense of demonstrating that it must be true (as one would in a logical or mathematical proof).  Statistics can provide us with evidence, but it's always tentative and subject to the uncertainty that is always present in the real world. 
 
-### Sampling
+### Sampling from a population
 
 The concept of aggregation implies that we can make useful insights by collapsing across data -- but how much data do we need?  The idea of *sampling* says that we can summarize an entire population based on just a small number of samples from the population, as long as those samples are obtained in the right way.  For example, the PURE study enrolled a sample of about 135,000 people, but its goal was to provide insights about the billions of humans who make up the population from which those people were sampled. As we already discussed above, the way that the study sample is obtained is critical, as it determines how broadly we can generalize the results. Another fundamental insight about sampling is that while larger samples are always better (in terms of their ability to accurately represent the entire population), there are diminishing returns as the sample gets larger. In fact, the rate at which the benefit of larger samples decreases follows a simple mathematical rule, growing as the square root of the sample size, such that in order to double the quality of our data we need to quadruple the size of our sample.
 
