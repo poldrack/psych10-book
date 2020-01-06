@@ -171,6 +171,7 @@ mpg$year <- factor(mpg$year)
 ggplot(mpg, aes(manufacturer, hwy, fill = year)) +
   geom_bar(stat = "summary", fun.y = "mean")
 ```
+
 By default, the bars are *stacked* on top of one another. If you want to separate them, you can change the `position` argument form its default to "dodge".
 
 ```{r fig.width=8, fig.height=4, out.width="80%"}

@@ -285,7 +285,7 @@ Humans have both perceptual and cognitive limitations that can make some visuali
 
 ### Perceptual limitations
 
-One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" pallettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R, which we used in Figure \@ref(fig:colorPoints).
+One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" pallettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R.
 
 ```{r badColors,echo=FALSE,fig.cap="Example of a bad figure that relies solely on color contrast.",fig.width=8,fig.height=4,out.height='50%'}
 exampleDf = data.frame(value=c(3,5,4,6,2,5,8,8),
