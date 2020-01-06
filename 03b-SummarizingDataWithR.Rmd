@@ -29,12 +29,9 @@ We will use the NHANES dataset for several of our examples, so let's load the li
 # load the NHANES data library
 # first unload it if it's already loaded, to make sure
 # we have a clean version
-
-if("NHANES" %in% search()){
-  detach('package:NHANES', unload=TRUE)
-}
+rm('NHANES')
 library(NHANES)
-
+dim(NHANES)
 ```
 
 ## Introduction to the Tidyverse
