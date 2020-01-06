@@ -17,11 +17,13 @@ library(tidyverse)
 library(ggplot2)
 library(cowplot)
 library(knitr)
+rm('NHANES')
 library(NHANES)
 
 set.seed(123456)
 opts_chunk$set(tidy.opts=list(width.cutoff=80))
 options(tibble.width = 60)
+options(digits = 7) # reset from previous chapter
 
 # drop duplicated IDs within the NHANES dataset
 NHANES <- NHANES %>% 
