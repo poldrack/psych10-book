@@ -523,10 +523,6 @@ These data are in a format that meets the principles of "tidy data", which state
 - Each observation must have its own row.
 - Each value must have its own cell.
 
-This is shown graphically the following figure (from Hadley Wickham, developer of the "tidyverse"):
-
-[Following three rules makes a dataset tidy: variables are in columns, observations are in rows, and values are in cells..]
-
 In our case, each column represents a variable: `ID` identifies which student responded, `Year` contains their year at Stanford, `StatsBefore` contains whether or not they have taken statistics before, and ats1 through ats29 contain their responses to each item on the ATS scale. Each observation (row) is a response from one individual student. Each value has its own cell (e.g., the values for `Year` and `StatsBefoe` are stored in separate cells in separate columns).
 
 For an example of data that are NOT tidy, take a look at these data [Belief in Hell](http://www.pewforum.org/religious-landscape-study/belief-in-hell/#generational-cohort) - click on the "Table" tab to see the data.
