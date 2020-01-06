@@ -127,7 +127,7 @@ We can change the value of a variable by simply assigning a new value to it.
 
 ```
 
-A note: You can also use the equals sign ```=``` instead of the 
+A note: You can also use the equals sign ```=``` instead of the   ```<-```
 
 ## Functions
 
