@@ -7,7 +7,7 @@ output:
       in_header: google_analytics.html
   html_document: default
 ---
-# Sampling {#sampling}
+# Sampling {#sampling} 
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -20,7 +20,7 @@ One of the foundational ideas in statistics is that we can make inferences about
 
 Anyone living in the United States will be familiar with the concept of sampling from the political polls that have become a central part of our electoral process. In some cases, these polls can be incredibly accurate at predicting the outcomes of elections. The best known example comes from the 2008 and 2012 US Presidential elections, when the pollster Nate Silver correctly predicted electoral outcomes for 49/50 states in 2008 and for all 50 states in 2012.  Silver did this by combining data from 21 different polls, which vary in the degree to which they tend to lean towards either the Republican or Democratic side.  Each of these polls included data from about 1000 likely voters -- meaning that Silver was able to almost perfectly predict the pattern of votes of more than 125 million voters using data from only 21,000 people, along with other knowledge (such as how those states have voted in the past).
 
-## How do we sample?
+## How do we sample? {#how-do-we-sample}
 
 Our goal in sampling is to determine the value of a statistic for an entire population of interest, using just a small subset of the population.  We do this primarily to save time and effort -- why go to the trouble of measuring every individual in the population when just a small sample is sufficient to accurately estimate the variable of interest? 
 
@@ -121,7 +121,7 @@ sampMeans_df %>%
   )
 ```
 
-## Standard error of the mean
+## Standard error of the mean {#standard-error-of-the-mean}
 
 Later in the course it will become essential to be able to characterize how variable our samples are, in order to make inferences about the sample statistics. For the mean, we do this using a quantity called the *standard error* of the mean (SEM), which one can think of as the standard deviation of the sampling distribution. To compute the standard error of the mean for our sample, we divide the estimated standard deviation by the square root of the sample size:
 
@@ -135,21 +135,12 @@ Because we have many samples from the NHANES population and we actually know the
 
 The formula for the standard error of the mean says that the quality of our measurement involves two quantities: the population variability, and the size of our sample.  Because the sample size is the denominator in the formula for SEM, a larger sample size will yield a smaller SEM when holding the population variability constant. We have no control over the population variability, but we *do* have control over the sample size.  Thus, if we wish to improve our sample statistics (by reducing their sampling variability) then we should use larger samples.  However, the formula also tells us something very fundamental about statistical sampling -- namely, that the utility of larger samples diminishes with the square root of the sample size. This means that doubling the sample size will *not* double the quality of the statistics; rather, it will improve it by a factor of $\sqrt{2}$. In Section \@ref(statistical-power) we will discuss statistical power, which is intimately tied to this idea.
 
-## The Central Limit Theorem
+## The Central Limit Theorem {#the-central-limit-theorem}
 
 The Central Limit Theorem tells us that as sample sizes get larger, the sampling distribution of the mean will become normally distributed, *even if the data within each sample are not normally distributed*.  
 
 
-```{r alcoholYearDist, echo=FALSE,fig.width=8,fig.height=4,out.height='50%'}
-NHANES_cleanAlc <- NHANES %>%
-  drop_na(AlcoholYear)
-
-p1 <- ggplot(NHANES_cleanAlc, aes(AlcoholYear)) +
-  geom_histogram(binwidth = 7)
-
-```
-
-We can see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in the left panel of Figure  \@ref(fig:alcoholYearDist). This distribution is, for lack of a better word, funky -- and definitely not normally distributed.  Now let's look at the sampling distribution of the mean for this variable. Figure \@ref(fig:alcDist50) shows the sampling distribution for this variable, which is obtained by repeatedly drawing samples of size 50 from the NHANES dataset and taking the mean. Despite the clear non-normality of the original data, the sampling distribution is remarkably close to the normal. 
+We can see this in real data. Let's work with the variable AlcoholYear in the NHANES distribution, which is highly skewed, as shown in the left panel of Figure \@ref(fig:alcDist50). This distribution is, for lack of a better word, funky -- and definitely not normally distributed.  Now let's look at the sampling distribution of the mean for this variable. Figure \@ref(fig:alcDist50) shows the sampling distribution for this variable, which is obtained by repeatedly drawing samples of size 50 from the NHANES dataset and taking the mean. Despite the clear non-normality of the original data, the sampling distribution is remarkably close to the normal. 
 
 ```{r, echo=FALSE}
 # create sampling distribution function
