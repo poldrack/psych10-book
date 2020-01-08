@@ -16,7 +16,7 @@ library(cowplot)
 
 ## What are data?
 
-The first important point about data is that data *are* - meaning that the word "data" is plural (though some people disagree with me on this).  You might also wonder how to pronounce "data" -- I say "day-tah" but I know many people who say "dah-tah" and I have been able to remain friends with them in spite of this. Now if I heard them say "the data is" then that would be bigger issue...
+The first important point about data is that data *are* - meaning that the word "data" is plural (though some people disagree with me on this).  You might also wonder how to pronounce "data" -- I say "day-tah" but I know many people who say "dah-tah" and I have been able to remain friends with them in spite of this. Now if I heard them say "the data is" then that would be a bigger issue...
 
 ### Qualitative data
 Data are composed of *variables*, where a variable reflects a unique measurement or quantity.  Some variables are *qualitative*, meaning that they describe a quality rather than a numeric quantity.  For example, in my stats course I generally give an introductory survey, both to obtain data to use in class and to learn more about the students. One of the questions that I ask is "What is your favorite food?", to which some of the answers have been: blueberries, chocolate, tamales, pasta, pizza, and mango.  Those data are not intrinsically numerical; we could assign numbers to each one (1=blueberries, 2=chocolate, etc), but we would just be using the numbers as labels rather than as real numbers; for example, it wouldn't make sense to add the numbers together in this case.  However, we will often code qualitative data using numbers in order to make them easier to work with, as you will see later.
