@@ -41,7 +41,7 @@ NHANES_adult <-
 ```
 
 
-## Sampling error (Section \@ref{samplingerror})
+## Sampling error \@ref(samplingerror)
 
 Here we will repeatedly sample from the NHANES Height variable in order to obtain the sampling distribution of the mean.
 
@@ -188,9 +188,9 @@ plot_grid(plotlist = qqplots)
 
 This shows that the results become more normally distributed (i.e. following the straight line) as the samples get larger.
 
-## Confidence intervals (Section \@ref{confidence-intervals})
+## Confidence intervals \@ref(confidence-intervals)
 
-Remember that confidence intervals are intervals that will contain the population parameter on a certain proportion of times.  In this example we will walk through the simulation that was presented in Section \@ref{confidence-intervals} to show that this actually works properly.  Here we will use a function called `do()` that lets us 
+Remember that confidence intervals are intervals that will contain the population parameter on a certain proportion of times.  In this example we will walk through the simulation that was presented in Section \@ref(confidence-intervals) to show that this actually works properly.  Here we will use a function called `do()` that lets us 
 
 ```{r echo=FALSE}
 # compute how often the confidence interval contains the true population mean
