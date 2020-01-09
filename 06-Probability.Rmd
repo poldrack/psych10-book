@@ -77,7 +77,9 @@ SFrain_summary <-
 names(SFrain_summary) <- c('Number of rainy days','Number of days measured', 'P(rain)')
 kable(SFrain_summary)
 ```
-According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays)` rainy days.  To compute the probability of rain in San Francisco, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017) = `r I(SFrain_summary$pRainInSF)`.
+
+
+According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays[1])` rainy days.  To compute the probability of rain in San Francisco, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017) = `r I(SFrain_summary$pRainInSF[1])`.
 
 How do we know that empirical probability gives us the right number? The answer to this question comes from the *law of large numbers*, which shows that the empirical probability will approach the true probability as the sample size increases.  We can see this by simulating a large number of coin flips, and looking at our estimate of the probability of heads after each flip.  We will spend more time discussing simulation in a later chapter; for now, just assume that we have a computational way to generate a random outcome for each coin flip.
 

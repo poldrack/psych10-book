@@ -220,7 +220,7 @@ $$
 P(X \ge k) = 1 - P(X < k)
 $$
 
-```{r coinFlips,echo=FALSE,fig.cap="Distribution of numbers of heads (out of 100 flips) across 100,000 simulated runsl with the observed value of 70 flips represented by the vertical line.",fig.width=4,fig.height=4,out.height='50%'}
+```{r coinFlips,echo=FALSE,fig.cap="Distribution of numbers of heads (out of 100 flips) across 100,000 simulated runs with the observed value of 70 flips represented by the vertical line.",fig.width=4,fig.height=4,out.height='50%'}
 
 # simulate tossing of 100,000 flips of 100 coins to identify empirical 
 # probability of 70 or more heads out of 100 flips
