@@ -29,12 +29,9 @@ We will use the NHANES dataset for several of our examples, so let's load the li
 # load the NHANES data library
 # first unload it if it's already loaded, to make sure
 # we have a clean version
-
-if("NHANES" %in% (.packages())){
-  detach('package:NHANES', unload=TRUE)
-}
+rm('NHANES')
 library(NHANES)
-
+dim(NHANES)
 ```
 
 ## Introduction to the Tidyverse
@@ -109,7 +106,7 @@ myDataFrame %>%
 
 You will also notice something we haven't discussed before: `%>%`.  This is called a "pipe", which is commonly used within the tidyverse; you can read more [here](http://magrittr.tidyverse.org/). A pipe takes the output from one command and feeds it as input to the next command. In this case, simply writing the name of the data frame (myDataFrame) causes it to be input to the `slice()` command following the pipe. The benefit of pipes will become especially apparent when we want to start stringing together multiple data processing operations into a single command.
 
-In this example, no new variable is created - the output is printed to the screen, just like it would be if you typed the name of the variable.  If you wanted to save it to a new variable, you would use the `<-` assignment operator, like this:
+In the previous example, no new variable was created - the output was simply printed to the screen, just like it would be if you typed the name of the variable.  If you wanted to save it to a new variable, you would use the `<-` assignment operator, like this:
 
 ```{r}
 myDataFrameSlice <- myDataFrame %>% 
@@ -311,16 +308,7 @@ PhysActive_table <- NHANES_unique %>%
 kable(PhysActive_table)
 ```
 
-The first step should be familiar from the previous section (we are adding the  ```head()``` function here to show us the first few rows of the data frame):
-
-```{r}
-NHANES_unique %>%
-  mutate(PhysActive = fct_explicit_na(PhysActive)) %>%
-  head(10) %>% 
-  glimpse()
-```
-
-You can see that this data frame contains all of the original variables.  Since we are only interested in the `PhysActive` variable, let's extract that one and get rid of the rest.  We can do this using the ```select()``` command from the `dplyr` package.  Because there is also another select command available in R, we need to explicitly refer to the one from the `dplyr` package, which we do by including the package name followed by two colons: ```dplyr::select()```.
+This data frame still contains all of the original variables.  Since we are only interested in the `PhysActive` variable, let's extract that one and get rid of the rest.  We can do this using the ```select()``` command from the `dplyr` package.  Because there is also another select command available in R, we need to explicitly refer to the one from the `dplyr` package, which we do by including the package name followed by two colons: ```dplyr::select()```.
 
 ```{r}
 NHANES_unique %>%
@@ -365,7 +353,8 @@ Now let's say we want to add another column with percentage of observations in e
 ```{r}
 PhysActive_table <- PhysActive_table %>%
   mutate(
-    Percentage = AbsoluteFrequency / sum(AbsoluteFrequency) * 100
+    Percentage = AbsoluteFrequency / 
+      sum(AbsoluteFrequency) * 100
   )
 
 kable(PhysActive_table, digits=2)
@@ -391,7 +380,8 @@ SleepHrsNight_cumulative <-
   summarize(AbsoluteFrequency = n()) %>%
   # create relative and cumulative frequencies
   mutate(
-    RelativeFrequency = AbsoluteFrequency / sum(AbsoluteFrequency),
+    RelativeFrequency = AbsoluteFrequency / 
+      sum(AbsoluteFrequency),
     CumulativeDensity = cumsum(RelativeFrequency)
   )
 
@@ -399,7 +389,7 @@ kable(SleepHrsNight_cumulative)
 ```
 
 
-#@ Data cleaning and tidying with R
+## Data cleaning and tidying with R
 
 Now that you know a bit about the tidyverse, let's look at the various tools that it provides for working with data. We will use as an example an analysis of whether attitudes about statistics are different between the different student year groups in the class.  
 
@@ -426,17 +416,19 @@ attitudeData_file <- 'data/statsAttitude.txt'
 
 Next, let's load the data from the file using the tidyverse function `read_tsv()`. There are several functions available for reading in different file formats as part of the the `readr` tidyverse package.
 
-```{r}
+```{r, echo=FALSE, message=FALSE}
 attitudeData <- read_tsv(attitudeData_file)
-                         
-glimpse(attitudeData)
+                       
 ```
 
 Right now the variable names are unwieldy, since they include the entire name of the item; this is how Google Forms stores the data.  Let's change the variable names to be somewhat more readable.  We will change the names to "ats<X>" where <X> is replaced with the question number and ats indicates Attitudes Toward Statistics scale.  We can create these names using the `rename()` and `paste0()` functions. `rename()` is pretty self-explanatory: a new name is assigned to an old name or a column position. The `paste0()` function takes a string along with a set of numbers, and creates a vector that combines the string with the number.
 
 
 ```{r}
-nQuestions <- 29 # other than the first two columns, the rest of the columns are for the 29 questions in the statistics attitude survey; we'll use this below to rename these columns based on their question number
+nQuestions <- 29 # other than the first two columns, 
+# the rest of the columns are for the 29 questions in the statistics
+# attitude survey; we'll use this below to rename these columns 
+# based on their question number
 
 # use rename to change the first two column names
 # rename can refer to columns either by their number or their name
@@ -445,14 +437,15 @@ attitudeData <-
   rename(     # rename using columm numbers
     # The first column is the year 
     Year = 1, 
-    # The second column indicates whether the person took stats before
+    # The second column indicates 
+    # whether the person took stats before
     StatsBefore = 2 
   ) %>% 
   rename_at( 
     # rename all the columns except Year and StatsBefore
     vars(-Year, -StatsBefore), 
     #rename by pasting the word "stat" and the number
-    funs(paste0('ats', 1:nQuestions)) 
+    list(name = ~paste0('ats', 1:nQuestions)) 
   )
 
 # print out the column names
@@ -465,7 +458,8 @@ glimpse(attitudeData)
 The next thing we need to do is to create an ID for each individual. To do this, we will use the `rownames_to_column()` function from the tidyverse.  This creates a new variable (which we name "ID") that contains the row names from the data frame; thsee are simply the numbers 1 to N.
 
 ```{r}
-# let's add a participant ID so that we will be able to identify them later
+# let's add a participant ID so that we will be able to 
+# identify them later
 attitudeData <- 
   attitudeData %>% 
   rownames_to_column(var = 'ID')
@@ -485,7 +479,9 @@ The summarize() function creates a summary of the data, with the new variables b
 attitudeData <- 
   attitudeData %>% 
   mutate(
-    numNA = rowSums(is.na(.)) # we use the . symbol to tell the is.na function to look at the entire data frame
+    # we use the . symbol to tell the is.na function 
+    # to look at the entire data frame
+    numNA = rowSums(is.na(.)) 
   )
   
 # present a table with counts of the number of missing responses
@@ -513,7 +509,6 @@ attitudeDataNoNA <-
   drop_na() %>% 
   select(-numNA)
 
-glimpse(attitudeDataNoNA)
 ```
 
 Try the following on your own:  Using the attitudeData data frame, drop the NA values, create a  new variable called mystery that contains a value of 1 for anyone who answered 7 to question ats4 ("Statistics seems very mysterious to me"). Create a summary that includes the number of people reporting 7 on this question, and the proportion of people who reported 7.
@@ -525,10 +520,6 @@ These data are in a format that meets the principles of "tidy data", which state
 - Each variable must have its own column.
 - Each observation must have its own row.
 - Each value must have its own cell.
-
-This is shown graphically the following figure (from Hadley Wickham, developer of the "tidyverse"):
-
-[Following three rules makes a dataset tidy: variables are in columns, observations are in rows, and values are in cells..]
 
 In our case, each column represents a variable: `ID` identifies which student responded, `Year` contains their year at Stanford, `StatsBefore` contains whether or not they have taken statistics before, and ats1 through ats29 contain their responses to each item on the ATS scale. Each observation (row) is a response from one individual student. Each value has its own cell (e.g., the values for `Year` and `StatsBefoe` are stored in separate cells in separate columns).
 
@@ -564,7 +555,8 @@ attitudeDataNoNA %>%
 
 The second way is more efficient and takes advatange of the use of "scoped verbs" (https://dplyr.tidyverse.org/reference/scoped.html), which allow you to apply the same code to several variables at once. Because you don't have to keep repeating the same code, you're less likely to make an error:
 ```{r}
-ats_recode <- #create a vector of the names of the variables to recode
+#create a vector of the names of the variables to recode
+ats_recode <- 
   c(
     "ats2",
     "ats4",
@@ -642,11 +634,15 @@ We change the format to "wide" using the `gather()` function.
 ```{r}
 attitudeData_long <- 
   attitudeDataNoNA %>% 
-  select(-ats_recode) %>% #remove the raw variables that you recoded
+  #remove the raw variables that you recoded
+  select(-ats_recode) %>% 
   gather(
-    key = question, # key refers to the new variable containing the question number
-    value = response, # value refers to the new response variable
-    -ID, -Year, -StatsBefore #the only variables we DON'T want to gather
+    # key refers to the new variable containing the question number
+    key = question,
+    # value refers to the new response variable
+    value = response, 
+    #the only variables we DON'T want to gather
+    -ID, -Year, -StatsBefore 
   )
 
 attitudeData_long %>% 
@@ -660,7 +656,9 @@ Say we now wanted to undo the `gather()` and return our dataset to wide format. 
 attitudeData_wide <-
   attitudeData_long %>% 
   spread(
-    key = question, #key refers to the variable indicating which question each response belongs to
+    #key refers to the variable indicating which question 
+    # each response belongs to
+    key = question, 
     value = response
   )
 

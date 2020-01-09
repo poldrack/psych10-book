@@ -17,11 +17,13 @@ library(tidyverse)
 library(ggplot2)
 library(cowplot)
 library(knitr)
+rm('NHANES')
 library(NHANES)
 
 set.seed(123456)
 opts_chunk$set(tidy.opts=list(width.cutoff=80))
 options(tibble.width = 60)
+options(digits = 7) # reset from previous chapter
 
 # drop duplicated IDs within the NHANES dataset
 NHANES <- NHANES %>% 
@@ -104,10 +106,12 @@ Let's do this with our data.  To find the middle value when the number of items 
 ```{r}
 if (length(height_sorted) %% 2 == 1){
   # length of vector is odd
-  median_height <- height_sorted[ceiling(length(height_sorted) / 2)]
+  median_height <- 
+    height_sorted[ceiling(length(height_sorted) / 2)]
 } else {
-  median_height <- (height_sorted[length(height_sorted) / 2] + 
-                    height_sorted[1 + length(height_sorted) / (2)])/2
+  median_height <- 
+    (height_sorted[length(height_sorted) / 2] + 
+        height_sorted[1 + length(height_sorted) / (2)])/2
 }
 
 median_height
