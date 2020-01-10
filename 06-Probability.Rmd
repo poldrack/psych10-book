@@ -161,6 +161,7 @@ $$
 $$
 de Méré's \ error:
 $$
+$$
 P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) = 1/6 + 1/6 = 1/3
 $$
 
