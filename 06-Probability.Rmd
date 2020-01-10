@@ -79,7 +79,7 @@ kable(SFrain_summary)
 ```
 
 
-According to these data, in 2017 there were `r I(SFrain_summary$nRainyDays[1])` rainy days.  To compute the probability of rain in San Francisco, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017) = `r I(SFrain_summary$pRainInSF[1])`.
+According to these data, in 2017 there were 73 rainy days.  To compute the probability of rain in San Francisco, we simply divide the number of rainy days by the number of days counted (365), giving P(rain in SF in 2017) = 0.2.
 
 How do we know that empirical probability gives us the right number? The answer to this question comes from the *law of large numbers*, which shows that the empirical probability will approach the true probability as the sample size increases.  We can see this by simulating a large number of coin flips, and looking at our estimate of the probability of heads after each flip.  We will spend more time discussing simulation in a later chapter; for now, just assume that we have a computational way to generate a random outcome for each coin flip.
 
@@ -147,7 +147,7 @@ $$
 For the six-sided die, the probability of each individual outcome is 1/6. 
 
 This is nice, but de Méré was interested in more complex events, like what happens on multiple dice throws.  How do we compute the probability of a complex event (which is a *union* of single events), like rolling a one on the first *or* the second throw?  
-We represent the union of events mathematically using the $\cup$ symbol: for example, if the probability of rolling a one on the first throw is referred to as $P(Roll1_{throw1})$ and the probability of rolling a one on the second throw is $P(Roll1_{throw2})$, then we the union is referred to as $P(Roll1_{throw1} \cup Roll1_{throw2})$.
+We represent the union of events mathematically using the $\cup$ symbol: for example, if the probability of rolling a one on the first throw is referred to as $P(Roll1_{throw1})$ and the probability of rolling a one on the second throw is $P(Roll1_{throw2})$, then the union is referred to as $P(Roll1_{throw1} \cup Roll1_{throw2})$.
 
 de Méré thought (incorrectly, as we will see below) that he could simply add together the probabilities of the individual events to compute the probability of the combined event, meaning that the probability of rolling a one on the first or second roll would be computed as follows:
 
@@ -159,10 +159,12 @@ P(Roll1_{throw2}) = 1/6
 $$
 
 $$
-Demere's \ error: P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) = 1/6 + 1/6 = 1/3
+de Méré's \ error:
+$$
+P(Roll1_{throw1} \cup Roll1_{throw2}) = P(Roll1_{throw1}) + P(Roll1_{throw2}) = 1/6 + 1/6 = 1/3
 $$
 
-De Méré reasoned based on this that the probability of at least one six in four rolls was the sum of the probabilities on each of the individual throws: $4*\frac{1}{6}=\frac{2}{3}$.  Similarly, he reasoned that since the probability of a double-six in throws of dice is 1/36, then the probability of at least one double-six on 24 rolls of two dice would be $24*\frac{1}{36}=\frac{2}{3}$.  Yet, while he consistently won money on the first bet, he lost money on the second bet.  What gives?
+de Méré reasoned based on this that the probability of at least one six in four rolls was the sum of the probabilities on each of the individual throws: $4*\frac{1}{6}=\frac{2}{3}$.  Similarly, he reasoned that since the probability of a double-six in throws of dice is 1/36, then the probability of at least one double-six on 24 rolls of two dice would be $24*\frac{1}{36}=\frac{2}{3}$.  Yet, while he consistently won money on the first bet, he lost money on the second bet.  What gives?
 
 To understand de Méré's error, we need to introduce some of the rules of probability theory.  The first is the *rule of subtraction*, which says that the probability of some event A *not* happening is one minus the probability of the event happening:
 

@@ -27,7 +27,7 @@ The hardest part of programming is figuring out why something didn't work, which
 
 ### Use the web
 
-In particular, you should take advantage of the fact that there are millions of people programming in R around the world, so nearly any error message you see has already been seen by someone else.  Whenever I experience an error that I don't understand, the first thing that I do is to copy and paste the error message into a search engine Often this will provide several pages discussing the problem and the ways that people have solved it.
+In particular, you should take advantage of the fact that there are millions of people programming in R around the world, so nearly any error message you see has already been seen by someone else.  Whenever I experience an error that I don't understand, the first thing that I do is to copy and paste the error message into a search engine. Often this will provide several pages discussing the problem and the ways that people have solved it.
 
 ### Rubber duck debugging
 
@@ -39,7 +39,7 @@ When I am using R in my own work, I generally use a free software package called
 
 ## Getting started with R
 
-When we work with R, we often do this using a *command line* in which we type commands and it responds to those commands.  In the simplest case, if we just type in a number, it will simply respond with that number.  Go into the R console and type the number 3.  You should see somethign like this:
+When we work with R, we often do this using a *command line* in which we type commands and it responds to those commands.  In the simplest case, if we just type in a number, it will simply respond with that number.  Go into the R console and type the number 3.  You should see something like this:
 
 ```
 > 3
@@ -131,7 +131,7 @@ A note: You can also use the equals sign ```=``` instead of the   ```<-```
 
 ## Functions
 
-A *function* is an operator that takes some input and gives an output based on the input.  For example, let's say that have a number and we want to determine its absolute value.  R has a function called ```abs()``` that takes in a number and outputs its absolute value:
+A *function* is an operator that takes some input and gives an output based on the input.  For example, let's say that have a number, and we want to determine its absolute value.  R has a function called ```abs()``` that takes in a number and outputs its absolute value:
 
 
 ```
@@ -244,7 +244,7 @@ We can also apply logical operations across vectors; again, this will return a v
 
 ```
 
-Most functions will work with vectors just as they would with a single number.  For example, let's say we wanted to obtain the trignometric sine for each of a set of values.  We could create a vector and pass it to the ```sin()``` function, which will return as many sine values as there are input values:
+Most functions will work with vectors just as they would with a single number.  For example, let's say we wanted to obtain the trigonometric sine for each of a set of values.  We could create a vector and pass it to the ```sin()``` function, which will return as many sine values as there are input values:
 
 ```
 > my_angle_values <- c(0, 1, 2)
