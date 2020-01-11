@@ -137,7 +137,7 @@ mean(shuffleDist$cor >corr_results$estimate )
 This value is fairly close (though a bit larger) to the one obtained using `cor.test()`.
 
 
-## Robust correlations (\@ref(robust-correlations))
+## Robust correlations (Section \@ref(robust-correlations))
 
 In the previous chapter we also saw that the hate crime data contained one substantial outlier, which appeared to drive the significant correlation. To compute the Spearman correlation, we first need to convert the data into their ranks, which we can do using the `order()` function:
 

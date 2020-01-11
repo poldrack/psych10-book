@@ -47,7 +47,7 @@ NHANES_adult <-
 
 
 
-## Two-way tests (Section \@refwo-way-test})
+## Two-way tests (Section \@ref(two-way-test})
 
 ```{r}
 
