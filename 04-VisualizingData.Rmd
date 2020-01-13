@@ -285,7 +285,7 @@ Humans have both perceptual and cognitive limitations that can make some visuali
 
 ### Perceptual limitations
 
-One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" pallettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R.
+One important perceptual limitation that many people (including myself) suffer from is color blindness.  This can make it very difficult to perceive the information in a figure (like the one in Figure \@ref(fig:badColors)) where there is only color contrast between the elements but no brightness contrast. It is always helpful to use graph elements that differ substantially in brightness and/or texture, in addition to color.  There are also ["colorblind-friendly" palettes](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette) available for use in R.
 
 ```{r badColors,echo=FALSE,fig.cap="Example of a bad figure that relies solely on color contrast.",fig.width=8,fig.height=4,out.height='50%'}
 exampleDf = data.frame(value=c(3,5,4,6,2,5,8,8),
@@ -299,7 +299,7 @@ ggplot(exampleDf,aes(v1,value)) +
 
 Even for people with perfect color vision, there are perceptual limitations that can make some plots ineffective.  This is one reason why statisticians *never* use pie charts: It can be very difficult for humans to accurately perceive differences in the volume of shapes. The pie chart in Figure \@ref(fig:pieChart) (presenting the same data on religious affiliation that we showed above) shows how tricky this can be. 
 
-```{r pieChart,echo=FALSE,fig.cap="An example of a pie chart, highlighting the difficult in apprehending the relative volume of the different pie slices.", fig.width=6,fig.height=6,out.height='50%'}
+```{r pieChart,echo=FALSE,fig.cap="An example of a pie chart, highlighting the difficulty in apprehending the relative volume of the different pie slices.", fig.width=6,fig.height=6,out.height='50%'}
 knitr::include_graphics("images/religion_piechart.png")
 ```
 
