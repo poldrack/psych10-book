@@ -58,7 +58,7 @@ Now we need to tell ggplot *how* to plot those variables, by mapping each variab
 
 How was ggplot able to figure that out? Because of **geometries**, which are *shapes* we use to represent our data. You've seen `geom_histogram`, which basically gives our graph a bar plot shape, except that it also sets the default y axis variable to be `count`. Other shapes include points and lines, among many others.
 
-We'll go over other aspects of the grammar of graphics (suxh as facets, statistics, and coordinates) as they come up. Let's start visualizing some data by first  choosing a **theme**, which describes all of the non-data ink in our plot, like grid lines and text.
+We'll go over other aspects of the grammar of graphics (such as facets, statistics, and coordinates) as they come up. Let's start visualizing some data by first  choosing a **theme**, which describes all of the non-data ink in our plot, like grid lines and text.
 
 
 ## Getting started
@@ -96,7 +96,7 @@ How do you choose which **geometry** to use? ggplot allows you to choose from a 
 
 ### Histogram
 
-The histogram shows the ogerall distribution of the data.  Here we use the nclass.FD function to compute the optimal bin size.
+The histogram shows the overall distribution of the data.  Here we use the nclass.FD function to compute the optimal bin size.
 
 ```{r fig.width=4, fig.height=4, out.width="50%"}
 ggplot(mpg, aes(hwy)) +
