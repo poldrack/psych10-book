@@ -51,7 +51,7 @@ Now that we know what a probability is, how do we actually figure out what the p
 
 ### Personal belief
 
-Let's say that I asked you what the probability was that the Beatles would have been equally successful if they had not replaced their original drummer Pete Best with Ringo Starr in 1962.  We will define "success" in terms of the number of number-one hits on the Billboard Hot 100 (which we refer to as $N_{hits}$); the Beatles had 20 such number-one hits, so the sample space is {$N_{hits} < 20$,$N_{hits} \ge 20$ }.  We can't actually do the experiment to find the outcome. However, most people with knowledge of the Beatles would be willing to at leaste offer a guess at the probability of this event.  In many cases personal knowledge and/or opinion is the only guide we have determining the probability of an event, but this is not very scientifically satisfying.
+Let's say that I asked you what the probability was that the Beatles would have been equally successful if they had not replaced their original drummer Pete Best with Ringo Starr in 1962.  We will define "success" in terms of the number of number-one hits on the Billboard Hot 100 (which we refer to as $N_{hits}$); the Beatles had 20 such number-one hits, so the sample space is {$N_{hits} < 20$,$N_{hits} \ge 20$ }.  We can't actually do the experiment to find the outcome. However, most people with knowledge of the Beatles would be willing to at least offer a guess at the probability of this event.  In many cases personal knowledge and/or opinion is the only guide we have determining the probability of an event, but this is not very scientifically satisfying.
 
 ### Empirical frequency {#empirical-frequency}
 
