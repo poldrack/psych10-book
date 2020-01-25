@@ -194,7 +194,7 @@ $$
 
 where $\beta$ is a *parameter* that we multiply by age to get the smallest error.  
 
-You may remember from algebra that a line is define as follows:
+You may remember from algebra that a line is defined as follows:
 
 $$
 y = slope*x + intercept
@@ -206,7 +206,7 @@ $$
 \hat{height_i} = constant + \beta * age_i
 $$
 
-where *constant* is a constant value added to the prediction for each individual; we also call the *intercept*, since it maps onto the intercept in the equation for a line.  We will learn later how it is that we actually compute these values for a particular dataset; for now, we will use the `lm()` function in R to compute the values of the constant and $\beta$ that give us the smallest error for these particular data. Panel C in Figure \@ref(fig:childHeightLine) shows this model applied to the NHANES data, where we see that the line matches the data much better than the one without a constant. 
+where *constant* is a constant value added to the prediction for each individual; we also call it the *intercept*, since it maps onto the intercept in the equation for a line.  We will learn later how it is that we actually compute these values for a particular dataset; for now, we will use the `lm()` function in R to compute the values of the constant and $\beta$ that give us the smallest error for these particular data. Panel C in Figure \@ref(fig:childHeightLine) shows this model applied to the NHANES data, where we see that the line matches the data much better than the one without a constant. 
 
 ```{r ageHeightError,echo=FALSE,fig.cap="Distribution of errors from model including constant and age.",fig.width=4,fig.height=4,out.height='50%'}
 # find the best fitting model to predict height given age
@@ -245,7 +245,7 @@ rmse_age_gender <-
 
 ```
 
-Our error is much smaller using this model -- only `r I(rmse_age)` centimeters on average.  Can you think of other variables that might also be related to height? What about gender?  In Panel D of Figure \@ref(fig:childHeightLine) we plot the data with lines fitted separately for males and females. From the plot, it seems that there is a difference between males and females, but it is relatively small and only emerges after the age of puberty.  Let's estimate this model and see how the errors look.  In Figure \@ref(fig:msePlot) we plot the root mean squared error values across the different models. From this we see that the model got a little bit better going from mode to mean, much better going from mean to mean+age, and only very slighly better by including gender as well.
+Our error is much smaller using this model -- only `r I(rmse_age)` centimeters on average.  Can you think of other variables that might also be related to height? What about gender?  In Panel D of Figure \@ref(fig:childHeightLine) we plot the data with lines fitted separately for males and females. From the plot, it seems that there is a difference between males and females, but it is relatively small and only emerges after the age of puberty.  Let's estimate this model and see how the errors look.  In Figure \@ref(fig:msePlot) we plot the root mean squared error values across the different models. From this we see that the model got a little bit better going from mode to mean, much better going from mean to mean+age, and only very slightly better by including gender as well.
 
 
 ```{r msePlot,echo=FALSE, fig.cap="Mean squared error plotted for each of the models tested above.",fig.width=4,fig.height=4,out.height='50%'}
@@ -331,7 +331,7 @@ We could also imagine data that show the same linear relationship, but have much
 
 These were both examples where the *linear model* seems appropriate, and the error reflects noise in our measurement. The linear model specifies that the relationship between two variables follows a straight line. For example, in a linear model, change in BAC is always associated with a specific change in ReactionTime, regardless of the level of BAC.
 
-On the other hand, there are other situations where the linear model is incorrect, and error will be increased because the model is not properly specified.  Let's say that we are interested in the relationship between caffeine intake and performance on a test.  The relation between stimulants like caffeine and test performance is often *nonlinear* - that is, it doesn't follow a straight line.  This is because performance goes up with smaller amounts of caffeine (as the person becomes more alert), but then starts to decline with larger amounts (as the person becomes nervous and jittery). We can simulate data of this form, and then fit a linear model to the data (see Panel C of Figure \@ref(fig:BACrt)). The blue line shows the straight line that bests fits these data; clearly, there is a high degree of error.  Although there is a very lawful relation between test performance and caffeine intake, it follows a curve rather than a straight line.  The linear model has high error because it's the wrong model for these data.
+On the other hand, there are other situations where the linear model is incorrect, and error will be increased because the model is not properly specified.  Let's say that we are interested in the relationship between caffeine intake and performance on a test.  The relation between stimulants like caffeine and test performance is often *nonlinear* - that is, it doesn't follow a straight line.  This is because performance goes up with smaller amounts of caffeine (as the person becomes more alert), but then starts to decline with larger amounts (as the person becomes nervous and jittery). We can simulate data of this form, and then fit a linear model to the data (see Panel C of Figure \@ref(fig:BACrt)). The blue line shows the straight line that best fits these data; clearly, there is a high degree of error.  Although there is a very lawful relation between test performance and caffeine intake, it follows a curve rather than a straight line.  The linear model has high error because it's the wrong model for these data.
 
 ## Can a model be too good? {#overfitting}
 
@@ -615,7 +615,7 @@ So when we say that we have "lost" a degree of freedom, it means that there is a
 
 ## Using simulations to understand statistics
 
-I am a strong beleiver in the use of computer simulations to understand statistical concepts, and in later sessions we will dig deeply into their use.  Here we will introduce the idea by asking whether we can confirm the need to subtract 1 from the sample size in computing the sample variance.
+I am a strong believer in the use of computer simulations to understand statistical concepts, and in later sessions we will dig deeply into their use.  Here we will introduce the idea by asking whether we can confirm the need to subtract 1 from the sample size in computing the sample variance.
 
 Let's treat the entire sample of children from the NHANES data as our "population", and see how well the calculations of sample variance using either $n$ or $n-1$ in the denominator will estimate variance of this population, across a large number of simulated random samples from the data.  We will return to the details of how to do this in a later chapter.
 
@@ -827,7 +827,7 @@ This provides us with a slightly more interpretable view of the data. For exampl
 
 ### Interpreting Z-scores
 
-The "Z" in "Z-score"" comes from the fact that the standard normal distribution (that is, a normal distribution with a mean of zero and a standard deviation of 1) is often referred to as the "Z" distribution.  We can use the standard normal distribution to help us understand what specific Z scores tell us about where a data point sits with respect to the rest of the distribution.
+The "Z" in "Z-score" comes from the fact that the standard normal distribution (that is, a normal distribution with a mean of zero and a standard deviation of 1) is often referred to as the "Z" distribution.  We can use the standard normal distribution to help us understand what specific Z scores tell us about where a data point sits with respect to the rest of the distribution.
 
 ```{r zDensityCDF,echo=FALSE,fig.cap="Density (top) and cumulative distribution (bottom) of a standard normal distribution, with cutoffs at one standard deviation above/below the mean."}
 # First, create a function to generate plots of the density and CDF
