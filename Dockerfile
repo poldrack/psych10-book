@@ -42,6 +42,7 @@ RUN echo 'install.packages(c( \
 "fivethirtyeight", \
 "sfsmisc", \
 "bookdown",\
+"reticulate",\
 "ggfortify"), \
   repos="http://cran.us.r-project.org", dependencies=TRUE)' > /tmp/packages.R && \
   Rscript /tmp/packages.R
@@ -50,5 +51,14 @@ RUN echo 'install.packages(c( \
 
 RUN echo 'install.packages("https://cran.r-project.org/src/contrib/Archive/fiftystater/fiftystater_1.0.1.tar.gz",\
   repos=NULL,dependencies=TRUE)' > /tmp/packages2.R  && Rscript /tmp/packages2.R
+
+# install anaconda/python
+RUN wget https://repo.anaconda.com/archive/Anaconda3-2019.10-Linux-x86_64.sh
+RUN bash Anaconda3-2019.10-Linux-x86_64.sh -b -p ~/anaconda
+RUN echo 'export PATH="~/anaconda/bin:$PATH"' >> ~/.bash_profile 
+RUN export PATH="~/anaconda/bin:$PATH"
+RUN conda update conda
+RUN conda create --name py3 python=3.7 scipy numpy pandas statsmodels matplotlib
+
 
 CMD ["/bin/bash"]
