@@ -260,7 +260,7 @@ Often in a dataset we will have a number of different variables that we want to 
 
 ```{r echo=FALSE}
 library(reticulate)
-use_condaenv('py37')
+use_condaenv('py3')
 ```
 
 ```{python}
