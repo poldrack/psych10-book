@@ -20,17 +20,3 @@ jobs:
            name: rendering gitbook
            command: |
              make render-gitbook
-      - run:
-           name: check out site repo
-           command: |
-             cd /tmp
-             ssh-keyscan github.com >> ~/.ssh/known_hosts
-             git clone git@github.com:psych10/thinkstats.git 
-             cd thinkstats
-             cp -r ~/project/_book/* . 
-             git add .
-             git config --global user.email poldrack@gmail.com
-             git config --global user.name "Russ Poldrack"
-             git commit -m"automated update"
-             git push origin master
-
