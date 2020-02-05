@@ -349,7 +349,7 @@ knitr::include_graphics("images/conditional_probability.png")
 
 ```
 
-It can be useful to think of this is graphically. Figure \@ref(fig:conditionalProbability) shows a flow chart depicting how the full population of voters breaks down into Republicans and Democrats, and how the conditional probability (conditioning on party) further breaks down the members of each party according to their vote.
+It can be useful to think of this graphically. Figure \@ref(fig:conditionalProbability) shows a flow chart depicting how the full population of voters breaks down into Republicans and Democrats, and how the conditional probability (conditioning on party) further breaks down the members of each party according to their vote.
 
 ## Computing conditional probabilities from data
 
@@ -515,7 +515,7 @@ $$
 The different parts of Bayes' rule have specific names, that relate to their role in using Bayes rule to update our beliefs. We start out with an initial guess about the probability of B ($P(B)$), which we refer to as the *prior* probability.  In the PSA example we used the base rate for the prior, since it was our best guess as to the individual's chance of cancer before we knew the test result.  We then collect some data, which in our example was the test result.  The degree to which the data A are consistent with outcome B is given by $P(A|B)$, which we refer to as the *likelihood*.  You can think of this as how likely the data are, given the particular hypothesis being tested.  In our example, the hypothesis being tested was whether the individual had cancer, and the likelihood was based on our knowledge about the sensitivity of the test (that is, the probability of cancer given a positive test outcome). The denominator ($P(A)$) is referred to as the *marginal likelihood*, because it expresses the overall likelihood of the data, averaged across all of the possible values of A (which in our example were the positive and negative test results).
 The outcome to the left ($P(B|A)$) is referred to as the *posterior* - because it's what comes out the back end of the computation.  
 
-There is a another way of writing Bayes rule that makes this a bit clearer:
+There is another way of writing Bayes rule that makes this a bit clearer:
 
 $$
 P(B|A) = \frac{P(A|B)}{P(A)}*P(B)
@@ -556,7 +556,7 @@ $$
 \text{odds ratio} = \frac{\text{posterior odds}}{\text{prior odds}} = \frac{0.16}{0.061} = 2.62
 $$
 
-This tells us that the odds of having cancer are increased by 2.62 times given the positive test result.  An odds ratio is example of what we will later call an *effect size*, which is a way of quantifying how relatively large any particular statistical effect is.
+This tells us that the odds of having cancer are increased by 2.62 times given the positive test result.  An odds ratio is an example of what we will later call an *effect size*, which is a way of quantifying how relatively large any particular statistical effect is.
 
 ## What do probabilities mean?
 
