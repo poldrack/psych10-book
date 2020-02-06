@@ -40,7 +40,7 @@ outcome1isTrue
 
 ```
 
-Rememer that the simple probability of an outcome is number of occurrences of the outcome divided by the total number of events.  To compute a probability, we can take advantage of the fact that TRUE/FALSE are equivalent to 1/0 in R.  The formula for the mean (sum of values divided by the number of values) is thus exactly the same as the formula for the simple probability!  So, we can compute the probability of the event by simply taking the mean of the logical vector.
+Remember that the simple probability of an outcome is number of occurrences of the outcome divided by the total number of events.  To compute a probability, we can take advantage of the fact that TRUE/FALSE are equivalent to 1/0 in R.  The formula for the mean (sum of values divided by the number of values) is thus exactly the same as the formula for the simple probability!  So, we can compute the probability of the event by simply taking the mean of the logical vector.
 
 ```{r}
 p1isTrue <- mean(outcome1isTrue)
@@ -89,7 +89,7 @@ pRainInSF
 
 ## Conditional probability (Section \@ref(conditional-probability))
 
-Let's determine the conditional probability of someone being unhealthy, given that they are over 70 years of age, using the NHANES dataset.  Let's create a new data frame that 
+Let's determine the conditional probability of someone being unhealthy, given that they are over 70 years of age, using the NHANES dataset.  Let's create a new data frame that only contains people over 70 years old.
 
 ```{r}
 healthDataFrame <-
@@ -128,7 +128,7 @@ pUnhealthy <-
 pUnhealthy
 ```
 
-What's the probability for each combination of unhealthy/healthly and over 70/ not? We can create a new variable that finds the joint probability by multiplying the two individual binary variables together; since anything times zero is zero, this will only have the value 1 for any case where both are true.
+What's the probability for each combination of unhealthy/healthy and over 70/ not? We can create a new variable that finds the joint probability by multiplying the two individual binary variables together; since anything times zero is zero, this will only have the value 1 for any case where both are true.
 
 ```{r}
 pBoth <- healthDataFrame %>% 
