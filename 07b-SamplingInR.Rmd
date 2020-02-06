@@ -109,7 +109,7 @@ sampMeans %>%
 
 ## Central limit theorem
 
-The central limit theorem tells us that the sampling distribution of the mean becomes normal as the sample size grows.  Let's test this by sampling a clearly non-normal variable and look at the normality of the results using a Q-Q plot. We saw in Figure \@ref{fig:alcDist50} that the variable `AlcoholYear` is distributed in a very non-normal way. Let's first look at the Q-Q plot for these data, to see what it looks like.  We will use the `stat_qq()` function from `ggplot2` to create the plot for us.
+The central limit theorem tells us that the sampling distribution of the mean becomes normal as the sample size grows.  Let's test this by sampling a clearly non-normal variable and look at the normality of the results using a Q-Q plot. We saw in Figure \@ref(fig:alcDist50) that the variable `AlcoholYear` is distributed in a very non-normal way. Let's first look at the Q-Q plot for these data, to see what it looks like.  We will use the `stat_qq()` function from `ggplot2` to create the plot for us.
 
 ```{r fig.width=4, fig.height=4}
 # prepare the dta
