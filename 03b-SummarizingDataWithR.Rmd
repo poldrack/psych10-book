@@ -40,7 +40,7 @@ In this chapter we will introduce a way of working with data in R that is often 
 
 ### Making a data frame using tibble()
 
-The tidyverse provides its over version of a data frame, which known as a *tibble*.  A tibble is a data frame but with some smart tweaks that make it easier to work with, expecially when using functions from the tidyverse. See here for more information on  the function `tibble()`: https://r4ds.had.co.nz/tibbles.html
+The tidyverse provides its own version of a data frame, which is known as a *tibble*.  A tibble is a data frame but with some smart tweaks that make it easier to work with, expecially when using functions from the tidyverse. See here for more information on  the function `tibble()`: https://r4ds.had.co.nz/tibbles.html
 
 ```{r}
 # first create the individual variables
