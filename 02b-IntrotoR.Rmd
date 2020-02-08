@@ -131,7 +131,7 @@ A note: You can also use the equals sign ```=``` instead of the   ```<-```
 
 ## Functions
 
-A *function* is an operator that takes some input and gives an output based on the input.  For example, let's say that have a number, and we want to determine its absolute value.  R has a function called ```abs()``` that takes in a number and outputs its absolute value:
+A *function* is an operator that takes some input and gives an output based on the input.  For example, let's say that we have a number, and we want to determine its absolute value.  R has a function called ```abs()``` that takes in a number and outputs its absolute value:
 
 
 ```
