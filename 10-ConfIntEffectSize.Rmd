@@ -57,7 +57,7 @@ sample_summary <-
 # knitr(sample_summary,)
 ```
 
-So far in the book we have focused on estimating the specific value of a statistic.  For example, let's say we want to estimate the mean weight of adults in the NHANES dataset.  Let's take a sample from the dataset and estimate the mean. In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe the difference.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly from the data of the entire population.
+So far in the book we have focused on estimating the specific value of a statistic.  For example, let's say we want to estimate the mean weight of adults in the NHANES dataset.  Let's take a sample from the dataset and estimate the mean. In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe our estimate of the population parameter.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly from the data of the entire population.
 
 You may also remember that earlier we introduced the concept of a *confidence interval*, which is a way of describing our uncertainty about a statistical estimate.  Remember that a confidence interval describes an interval that will on average contain the true population parameter with a given probability; for example, the 95% confidence interval is an interval that will capture the true population parameter 95% of the time.  Note again that this is not a statement about the population parameter; any particular confidence interval either does or does not contain the true parameter.  As Jerzy Neyman, the inventor of the confidence interval, said:
 
@@ -96,8 +96,9 @@ sample_summary <-
   mutate(
     cutoff_lower = qt(0.025, sampSize),
     cutoff_upper = qt(0.975, sampSize),
-    CI_lower = meanWeight + cutoff_lower * sdWeight / sqrt(sampSize),
-    CI_upper = meanWeight + cutoff_upper * sdWeight / sqrt(sampSize)
+    SEM = sdWeight / sqrt(sampSize),
+    CI_lower = meanWeight + cutoff_lower * SEM,
+    CI_upper = meanWeight + cutoff_upper * SEM
   ) 
 
 ```
@@ -109,7 +110,7 @@ CI = \bar{X} \pm t_{crit}*SE
 $$
 
 where $t_{crit}$ is the critical t value.
-For the NHANES weight example (with sample size of `r I(sampSize)`), the confidence interval would be `r I(sprintf('%0.2f +/- %0.2f [%0.2f - %0.2f]', sample_summary$meanWeight,sample_summary$cutoff_upper, sample_summary$CI_lower, sample_summary$CI_upper))`.
+For the NHANES weight example (with sample size of `r I(sampSize)`), the confidence interval would be `r I(sprintf('%0.2f +/- %0.2f * %0.2f [%0.2f - %0.2f]', sample_summary$meanWeight,sample_summary$cutoff_upper,sample_summary$SEM,  sample_summary$CI_lower, sample_summary$CI_upper))`.
 
 Remember that this doesn't tell us anything about the probability of the true population value falling within this interval, since it is a fixed parameter (which we know is `r I(mean(NHANES_adult$Weight))` because we have the entire population in this case) and it either does or does not fall within this specific interval (in this case, it does).  Instead, it tells us that in the long run, if we compute the confidence interval using this procedure, 95% of the time that confidence interval will capture the true population parameter.
 
