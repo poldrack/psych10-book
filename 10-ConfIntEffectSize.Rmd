@@ -66,7 +66,7 @@ You may also remember that earlier we introduced the concept of a *confidence in
 The confidence interval for the mean is computed as:
 
 $$
-CI = point\ estimate\ \pm critical\ value
+CI = \text{point estimate} \pm \text{critical value} * \text{standard error}
 $$
 
 where the critical value is determined by the sampling distribution of the estimate.  The important question, then, is what that sampling distribution is.
@@ -388,10 +388,10 @@ There are at least two important reasons to care about statistical power, one of
 
 Fortunately, there are tools available that allow us to determine the statistical power of an experiment. The most common use of these tools is in planning an experiment, when we would like to determine how large our sample needs to be in order to have sufficient power to find our effect of interest.
 
-Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the `pwr.t.test()` function from the `pwr` library:
+Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the `power.t.test()` function:
 
 ```{r echo=FALSE}
-pwr.t.test(d = 0.5, power = 0.8, sig.level = 0.05)
+power.t.test(d = 0.5, power = 0.8, sig.level = 0.05)
 ```
 
 This tells us that we would need at least 64 subjects in each group in order to have sufficient power to find a medium-sized effect.  It's always important to run a power analysis before one starts a new study, to make sure that the study won't be futile due to a sample that is too small.
