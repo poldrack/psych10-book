@@ -212,7 +212,7 @@ This is the step where NHST starts to violate our intuition -- rather than deter
 Let's say that we wish to determine whether a coin is fair.  To collect data, we flip the coin 100 times, and we count 70 heads.  In this example, $H_0: P(heads)=0.5$ and $H_A: P(heads) \neq 0.5$, and our test statistic is simply the number of heads that we counted.  The question that we then want to ask is: How likely is it that we would observe 70 heads if the true probability of heads is 0.5.  We can imagine that this might happen very occasionally just by chance, but doesn't seem very likely. To quantify this probability, we can use the *binomial distribution*:
 
 $$
-P(X < k) = \sum_{i=0}^k \binom{N}{k} p^i (1-p)^{(n-i)}
+P(X \le k) = \sum_{i=0}^k \binom{N}{k} p^i (1-p)^{(n-i)}
 $$
 This equation will tell us the likelihood of a certain number of heads or fewer, given a particular probability of heads.  However, what we really want to know is the probability of a certain number or more, which we can obtain by subtracting from one, based on the rules of probability:
 
