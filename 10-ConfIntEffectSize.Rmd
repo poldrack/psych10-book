@@ -7,7 +7,7 @@ output:
   html_document: default
   pdf_document: default
 ---
-# Quantifying effects and desiging studies {#ci-effect-size-power}
+# Quantifying effects and designing studies {#ci-effect-size-power}
 
 In the previous chapter we discussed how we can use data to test hypotheses.  Those methods provided a binary answer: we either reject or fail to reject the null hypothesis. However, this kind of decision overlooks a couple of important questions.  First, we would like to know how much uncertainty we have about the answer (regardless of which way it goes).  In addition, sometimes we don't have a clear null hypothesis, so we would like to see what range of estimates are consistent with the data.  Second, we would like to know how large the effect actually is, since as we saw in the weight loss example in the previous chapter, a statistically significant effect is not necessarily a practically important effect.
 
