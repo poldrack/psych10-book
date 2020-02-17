@@ -248,7 +248,7 @@ ggplot(data.frame(coinFlips),aes(coinFlips))  +
 
 ```
 
-We can compute the probability for our example using the `pbinom()` function.  The probability of 69 or fewer heads given P(heads)=0.5 is `r I(sprintf("%0.6f", p_lt_70))`, so the probability of 70 or more heads is simply one minus that value (`r I(sprintf("%0.6f", p_ge_70))`)
+We can compute the probability for our example using the `pbinom()` function.  The probability of 69 or fewer heads given P(heads)=0.5 is `r I(sprintf("%0.6f", p_lt_70))`, so the probability of 70 or more heads is simply one minus that value (`r I(sprintf("%0.6f", p_ge_70))`).
 This computation shows us that the likelihood of getting 70 heads if the coin is indeed fair is very small.  
 
 Now, what if we didn't have the `pbinom()` function to tell us the probability of that number of heads?  We could instead determine it by simulation -- we repeatedly flip a coin 100 times using a true probability of 0.5, and then compute the distribution of the number of heads across those simulation runs.  Figure \@ref(fig:coinFlips) shows the result from this simulation. Here we can see that the probability computed via simulation (`r I(sprintf('%0.6f',p_ge_70_sim))`) is very close to the theoretical probability (.00004).  
