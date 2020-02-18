@@ -54,8 +54,6 @@ If we know the value of the latent variable, then it's easy to reconstruct what 
 
 The reason that Bayesian statistics has its name is because it takes advantage of Bayes' theorem to make inferences from data about the underlying process that generated the data.  Let's say that we want to know whether a coin is fair.  To test this, we flip the coin 10 times and come up with 7 heads.  Before this test we were pretty sure that the $P_{heads}=0.5$), but finding 7 heads out of 10 flips would certainly give us pause if we believed that $P_{heads}=0.5$.  We already know how to compute the conditional probability that we would flip 7 or more heads out of 10 if the coin is really fair ($P(n\ge7|p_{heads}=0.5)$), using the binomial distribution.
 
-*TBD: MOTIVATE SWITCH FROM 7 To 7 OR MORE*
-
 The resulting probability is `r I(sprintf("%.3f",pbinom(7, 10, .5, lower.tail = FALSE)))`.  That is a fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of 7 or more heads given some particular probability of heads, whereas what we really want to know is the probability of heads. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
 
 Remember that Bayes' theorem provides us with the tool that we need to invert a conditional probability:
