@@ -70,6 +70,7 @@ We can think of this theorem as having four parts:
 - *posterior* ($P(Hypothesis|Data)$): Our updated belief about hypothesis H, given the data D
 
 In the case of our coin-flipping example:
+
 - *prior* ($P_{heads}$): Our degree of belief the likelhood of flipping heads, which was $P_{heads}=0.5$
 - *likelihood* ($P(\text{7 or more heads out of 10 flips}|P_{heads}=0.5)$): How likely are 7 or more heads out of 10 flips if $P_{heads}=0.5)$?
 - *marginal likelihood* ($P(\text{7 or more heads out of 10 flips})$): How likely are we to observe 7 heads out of 10 coin flips, in general?
