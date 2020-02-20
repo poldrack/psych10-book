@@ -67,10 +67,10 @@ The book is licensed according to the [Creative Commons Attribution-NonCommercia
 
 ## Acknowledgements
 
-I'd first like to thank Susan Holmes, who first inspired me to consider writing my own statistics book.  Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse.  Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. Particular thanks also go to Yihui Xie, creator of the Bookdown package, for improving the book's use of Bookdown features (including the ability for users to directly generate edits via the Edit button).  
+I'd first like to thank Susan Holmes, who first inspired me to consider writing my own statistics book.  Anna Khazenzon provided early comments and inspiration.  Lucy King provided detailed comments and edits on the entire book, and helped clean up the code so that it was consistent with the Tidyverse.  Michael Henry Tessler provided very helpful comments on the Bayesian analysis chapter. Particular thanks also go to Yihui Xie, creator of the Bookdown package, for improving the book's use of Bookdown features (including the ability for users to directly generate edits via the Edit button).  
 
 I'd also like to thank others who provided helpful comments and suggestions: Athanassios Protopapas, Wesley Tansey, Jack Van Horn, Thor Aspelund.
 
 Thanks to the following Twitter users for helpful suggestions: \@enoriverbend
 
-Thanks to the following individuals/usernames for submitting edits or issues via Github or email: Mehdi Rahim, Shanaathanan Modchalingam, Alan He, Wenjin Tao,  Martijn Stegeman, Dan Kessler, Philipp Kuhnke, James Kent, Michael Waskom, Alexander Wang, Isis Anderson, Albane Valenzuela, Chuanji Gao, Jassary Rico-Herrera, Isil Bilgin, Larissa Bersh, basicv8vc, jiamingkong, carlosivanr, khtan, hktang, ttaweel, epetsen, brettelizabeth .
+Thanks to the following individuals/usernames for submitting edits or issues via Github or email: Mehdi Rahim, Shanaathanan Modchalingam, Alan He, Wenjin Tao,  Martijn Stegeman, Dan Kessler, Philipp Kuhnke, James Kent, Michael Waskom, Alexander Wang, Isis Anderson, Albane Valenzuela, Chuanji Gao, Jassary Rico-Herrera, Isil Bilgin, Larissa Bersh, Forrest Dollins, Laura Tobar, basicv8vc, jiamingkong, carlosivanr, khtan,  kiyofumi-kan, hktang, ttaweel, epetsen, brettelizabeth, barbyh, kmettler5, codetrainee, dzonimn.
