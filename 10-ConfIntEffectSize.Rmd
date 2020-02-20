@@ -57,7 +57,7 @@ sample_summary <-
 # knitr(sample_summary,)
 ```
 
-So far in the book we have focused on estimating the specific value of a statistic.  For example, let's say we want to estimate the mean weight of adults in the NHANES dataset.  Let's take a sample from the dataset and estimate the mean. In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe the difference.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly from the data of the entire population.
+So far in the book we have focused on estimating the specific value of a statistic.  For example, let's say we want to estimate the mean weight of adults in the NHANES dataset.  Let's take a sample from the dataset and estimate the mean. In this sample, the mean weight was `r I(sample_summary$meanWeight)` kilograms.  We refer to this as a *point estimate* since it provides us with a single number to describe our estimate of the population parameter.  However, we know from our earlier discussion of sampling error that there is some uncertainty about this estimate, which is described by the standard error.  You should also remember that the standard error is determined by two components: the population standard deviation (which is the numerator), and the square root of the sample size (which is in the denominator).  The population standard deviation is an unknown but fixed parameter that is not under our control, whereas the sample size *is* under our control.  Thus, we can decrease our uncertainty about the estimate by increasing our sample size -- up to the limit of the entire population size, at which point there is no uncertainty at all because we can just calculate the population parameter directly from the data of the entire population.
 
 You may also remember that earlier we introduced the concept of a *confidence interval*, which is a way of describing our uncertainty about a statistical estimate.  Remember that a confidence interval describes an interval that will on average contain the true population parameter with a given probability; for example, the 95% confidence interval is an interval that will capture the true population parameter 95% of the time.  Note again that this is not a statement about the population parameter; any particular confidence interval either does or does not contain the true parameter.  As Jerzy Neyman, the inventor of the confidence interval, said:
 
@@ -66,7 +66,7 @@ You may also remember that earlier we introduced the concept of a *confidence in
 The confidence interval for the mean is computed as:
 
 $$
-CI = point\ estimate\ \pm critical\ value
+CI = \text{point estimate} \pm \text{critical value} * \text{standard error}
 $$
 
 where the critical value is determined by the sampling distribution of the estimate.  The important question, then, is what that sampling distribution is.
@@ -96,8 +96,9 @@ sample_summary <-
   mutate(
     cutoff_lower = qt(0.025, sampSize),
     cutoff_upper = qt(0.975, sampSize),
-    CI_lower = meanWeight + cutoff_lower * sdWeight / sqrt(sampSize),
-    CI_upper = meanWeight + cutoff_upper * sdWeight / sqrt(sampSize)
+    SEM = sdWeight / sqrt(sampSize),
+    CI_lower = meanWeight + cutoff_lower * SEM,
+    CI_upper = meanWeight + cutoff_upper * SEM
   ) 
 
 ```
@@ -109,7 +110,7 @@ CI = \bar{X} \pm t_{crit}*SE
 $$
 
 where $t_{crit}$ is the critical t value.
-For the NHANES weight example (with sample size of `r I(sampSize)`), the confidence interval would be `r I(sprintf('%0.2f +/- %0.2f [%0.2f - %0.2f]', sample_summary$meanWeight,sample_summary$cutoff_upper, sample_summary$CI_lower, sample_summary$CI_upper))`.
+For the NHANES weight example (with sample size of `r I(sampSize)`), the confidence interval would be `r I(sprintf('%0.2f +/- %0.2f * %0.2f [%0.2f - %0.2f]', sample_summary$meanWeight,sample_summary$cutoff_upper,sample_summary$SEM,  sample_summary$CI_lower, sample_summary$CI_upper))`.
 
 Remember that this doesn't tell us anything about the probability of the true population value falling within this interval, since it is a fixed parameter (which we know is `r I(mean(NHANES_adult$Weight))` because we have the entire population in this case) and it either does or does not fall within this specific interval (in this case, it does).  Instead, it tells us that in the long run, if we compute the confidence interval using this procedure, 95% of the time that confidence interval will capture the true population parameter.
 
@@ -387,10 +388,10 @@ There are at least two important reasons to care about statistical power, one of
 
 Fortunately, there are tools available that allow us to determine the statistical power of an experiment. The most common use of these tools is in planning an experiment, when we would like to determine how large our sample needs to be in order to have sufficient power to find our effect of interest.
 
-Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the `pwr.t.test()` function from the `pwr` library:
+Let's say that we are interested in running a study of how a particular personality trait differs between users of iOS versus Android devices.  Our plan is collect two groups of individuals and measure them on the personality trait, and then compare the two groups using a t-test.  In order to determine the necessary sample size, we can use the `power.t.test()` function:
 
 ```{r echo=FALSE}
-pwr.t.test(d = 0.5, power = 0.8, sig.level = 0.05)
+power.t.test(d = 0.5, power = 0.8, sig.level = 0.05)
 ```
 
 This tells us that we would need at least 64 subjects in each group in order to have sufficient power to find a medium-sized effect.  It's always important to run a power analysis before one starts a new study, to make sure that the study won't be futile due to a sample that is too small.
