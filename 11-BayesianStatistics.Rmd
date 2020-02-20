@@ -71,12 +71,12 @@ We can think of this theorem as having four parts:
 
 In the case of our coin-flipping example:
 
-- *prior* ($P_{heads}$): Our degree of belief the likelhood of flipping heads, which was $P_{heads}=0.5$
+- *prior* ($P_{heads}$): Our degree of belief about the likelhood of flipping heads, which was $P_{heads}=0.5$
 - *likelihood* ($P(\text{7 or more heads out of 10 flips}|P_{heads}=0.5)$): How likely are 7 or more heads out of 10 flips if $P_{heads}=0.5)$?
 - *marginal likelihood* ($P(\text{7 or more heads out of 10 flips})$): How likely are we to observe 7 heads out of 10 coin flips, in general?
 - *posterior* ($P_{heads}|\text{7 or more heads out of 10 coin flips})$): Our updated belief about $P_{heads}$ given the observed coin flips
 
-Here we see one of the primary differences between frequentist and Bayesian statsistics.  Frequentists do not believe in the idea of a probability of a hypothesis (i.e., our degree of belief about a hypothesis) -- for them, a hypothesis is either true or it isn't. Another way to say this is that for the frequentist, the hypothesis is fixed and the data are random, which is why frequentist inference focuses on describing the probability of data given a hypothesis (i.e. the p-value).  Bayesians, on the other hand, are comfortable making probability statements about both data and hypotheses.
+Here we see one of the primary differences between frequentist and Bayesian statistics. Frequentists do not believe in the idea of a probability of a hypothesis (i.e. our degree of belief about a hypothesis) -- for them, a hypothesis is either true or it isn't. Another way to say this is that for the frequentist, the hypothesis is fixed and the data are random, which is why frequentist inference focuses on describing the probability of data given a hypothesis (i.e. the p-value). Bayesians, on the other hand, are comfortable making probability statements about both data and hypotheses.
 
 ## Doing Bayesian estimation {#doing-bayesian-estimation}
 
