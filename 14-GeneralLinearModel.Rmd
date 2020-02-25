@@ -187,10 +187,10 @@ There is a close relationship between correlation coefficients and regression co
 $$
 \hat{r} = \frac{covariance_{xy}}{s_x * s_y}
 $$
-whereas the regression beta is computed as:
+whereas the regression beta for x is computed as:
 
 $$
-\hat{\beta} = \frac{covariance_{xy}}{s_x*s_x}
+\hat{\beta_x} = \frac{covariance_{xy}}{s_x*s_x}
 $$
 
 Based on these two equations, we can derive the relationship between $\hat{r}$ and $\hat{beta}$:
@@ -230,7 +230,7 @@ $$
 In order to get the standard error for a specific regression parameter estimate, $SE_{\beta_x}$, we need to rescale the standard error of the model by the square root of the sum of squares of the X variable:
 
 $$
-SE_{\beta_x} = \frac{SE_{model}}{\sqrt{{\sum{(x_i - \bar{x})^2}}}}
+SE_{\hat{\beta}_x} = \frac{SE_{model}}{\sqrt{{\sum{(x_i - \bar{x})^2}}}}
 $$
 
 ### Statistical tests for regression parameters
