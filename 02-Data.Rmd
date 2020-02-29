@@ -52,13 +52,13 @@ In general, most programming languages treat truth values and binary numbers equ
 
 **Integers**.  Integers are whole numbers with no fractional or decimal part. We most commonly encounter integers when we count things, but they also often occur in psychological measurement.  For example, in my introductory survey I administer a set of questions about attitudes towards statistics (such as "Statistics seems very mysterious to me."), on which the students respond with a number between 1 ("Disagree strongly") and 7 ("Agree strongly").  
 
-**Real numbers**.  Most commonly in statistics we work with real numbers, which have a fractional/decimal part.  For example, we might measure someone's weight, which can be measured to an arbitrary level of precision, from whole pounds down to micrograms.
+**Real numbers**.  Most commonly in statistics we work with real numbers, which have a fractional/decimal part.  For example, we might measure someone's weight, which can be measured to an arbitrary level of precision, from whole kg down to micrograms.
 
 ## Discrete versus continuous measurements
 
 A *discrete* measurement is one that takes one of a set of particular values.  These could be qualitative values (for example, different breeds of dogs) or numerical values (for example, how many friends one has on Facebook).  Importantly, there is no middle ground between the measurements; it doesn't make sense to say that one has 33.7 friends.
 
-A *continuous* measurement is one that is defined in terms of a real number. It could fall anywhere in a particular range of values, though usually our measurement tools will limit the precision with which we can measure; for example, a floor scale might measure weight to the nearest pound, even though weight could in theory be measured with much more precision.
+A *continuous* measurement is one that is defined in terms of a real number. It could fall anywhere in a particular range of values, though usually our measurement tools will limit the precision with which we can measure; for example, a floor scale might measure weight to the nearest kg, even though weight could in theory be measured with much more precision.
 
 It is common in statistics courses to go into more detail about different "scales" of measurement, which are discussed in more detail in the Appendix to this chapter.  The most important takeaway from this is that some kinds of statistics don't make sense on some kinds of data.  For example, imagine that we were to collect postal Zip Code data from a number of individuals. Those numbers are represented as integers, but they don't actually refer to a numeric scale; each zip code basically serves as a label for a different region. For this reason, it wouldn't make sense to talk about the average zip code, for example.  
 
