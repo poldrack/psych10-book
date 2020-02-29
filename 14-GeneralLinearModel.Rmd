@@ -631,7 +631,7 @@ get_sample_predictions_cv <- function(sample_size, shuffle = FALSE) {
 
 #implement the function
 sim_results <- 
-  replicate(100, get_sample_predictions_cv(sample_size = 48, shuffle = FALSE))
+  replicate(1000, get_sample_predictions_cv(sample_size = 48, shuffle = FALSE))
 
 sim_results <- 
   t(sim_results) %>%
@@ -640,15 +640,15 @@ sim_results <-
 mean_rsquared <-
   sim_results %>%
   summarize(
-    `Original data` = mean(X4),
-    `New data` = mean(X5),
-    `Cross-validation` = mean(X6)
+    `Original data` = mean(X1),
+    `New data` = mean(X2),
+    `Cross-validation` = mean(X3)
   ) 
 
 mean_rsquared_t = as.data.frame(t(mean_rsquared)) %>%
-  rename(`Root mean squared error`=V1)
+  rename(`R-squared`=V1)
 
-kable(mean_rsquared_t, caption="Root mean squared error from cross-validation and new data, showing that cross-validation provides a reasonable estimate of the model's performance on new data.")
+kable(mean_rsquared_t, caption="R-squared from cross-validation and new data, showing that cross-validation provides a reasonable estimate of the model's performance on new data.")
 ```
 
 Here we see that cross-validation gives us an estimate of predictive accuracy that is much closer to what we see with a completely new dataset than it is to the inflated accuracy that we see with the original dataset -- in fact, it's even slighlty more pessimistic than the average for a new dataset, probably because only part of the data are being used to train each of the models.  
