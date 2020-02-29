@@ -54,6 +54,11 @@ If we know the value of the latent variable, then it's easy to reconstruct what 
 
 The reason that Bayesian statistics has its name is because it takes advantage of Bayes' theorem to make inferences from data about the underlying process that generated the data.  Let's say that we want to know whether a coin is fair.  To test this, we flip the coin 10 times and come up with 7 heads.  Before this test we were pretty sure that the $P_{heads}=0.5$), but finding 7 heads out of 10 flips would certainly give us pause if we believed that $P_{heads}=0.5$.  We already know how to compute the conditional probability that we would flip 7 or more heads out of 10 if the coin is really fair ($P(n\ge7|p_{heads}=0.5)$), using the binomial distribution.
 
+
+```{r echo=FALSE}
+# *TBD: MOTIVATE SWITCH FROM 7 To 7 OR MORE*
+```
+
 The resulting probability is `r I(sprintf("%.3f",pbinom(7, 10, .5, lower.tail = FALSE)))`.  That is a fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of 7 or more heads given some particular probability of heads, whereas what we really want to know is the probability of heads. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
 
 Remember that Bayes' theorem provides us with the tool that we need to invert a conditional probability:
@@ -210,10 +215,11 @@ ggplot(likeDf,aes(resp,likelihood5)) +
 
 In addition to the likelihood of the data under different hypotheses, we need to know the overall likelihood of the data, combining across all hypotheses (i.e., the marginal likelihood). This marginal likelihood is primarily important because it helps to ensure that the posterior values are true probabilities. In this case, our use of a set of discrete possible parameter values makes it easy to compute the marginal likelihood, because we can just compute the likelihood of each parameter value under each hypothesis and add them up. 
 
+```{r ,echo=FALSE}
+#  *MH:*not sure there’s a been clear discussion of the marginal likelihood up this point. it’s a confusing and also very deep construct..  the overall likelihood of the data is the likelihood of the data under each hypothesis, averaged together (weighted by) the prior probability of those hypotheses. it is how likely the data is under your prior beliefs about the hypotheses.
 
-*MH:*not sure there’s a been clear discussion of the marginal likelihood up this point. it’s a confusing and also very deep construct..  the overall likelihood of the data is the likelihood of the data under each hypothesis, averaged together (weighted by) the prior probability of those hypotheses. it is how likely the data is under your prior beliefs about the hypotheses.
-
-might be worth thinking of two examples, where the likelihood of the data under that hypothesis of interest is the same, but where the marginal likelihood changes i.e., the hypothesis is pretty good at predicting the data, while other hypothese are bad vs. other hypotheses are always good (perhaps better)
+# might be worth thinking of two examples, where the likelihood of the data under that hypothesis of interest is the same, but where the marginal likelihood changes i.e., the hypothesis is pretty good at predicting the data, while other hypothese are bad vs. other hypotheses are always good (perhaps better)
+```
 
 ```{r echo=FALSE}
 # compute marginal likelihood
@@ -289,10 +295,11 @@ Given our data we would like to obtain an estimate of $p_{respond}$ for our samp
 
 Often we would like to know not just a single estimate for the posterior, but an interval in which we are confident that the posterior falls.  We previously discussed the concept of confidence intervals in the context of frequentist inference, and you may remember that the interpretation of confidence intervals was particularly convoluted: It was an interval that will contain the the value of the parameter 95% of the time.  What we really want is an interval in which we are confident that the true parameter falls, and Bayesian statistics can give us such an interval, which we call a *credible interval*.
 
-```{r echo=FALSE}
-# *TBD: USE POSTERIOR FROM ABOVE*
-```
 
+```{r ,echo=FALSE}
+#  *TBD: USE POSTERIOR FROM ABOVE*
+
+```
 
 The interpretation of this credible interval is much closer to what we had hoped we could get from a confidence interval (but could not): It tells us that there is a 95% probability that the value of $p_{respond}$ falls between these two values.  Importantly, it shows that we have high confidence that $p_{respond} > 0.0$, meaning that the drug seems to have a positive effect.
 
@@ -302,8 +309,11 @@ In some cases the credible interval can be computed *numerically* based on a kno
 
 In the previous example we used a *flat prior*, meaning that we didn't have any reason to believe that any particular value of $p_{respond}$ was more or less likely.  However, let's say that we had instead started with some previous data: In a previous study, researchers had tested 20 people and found that 10 of them had responded positively.  This would have lead us to start with a prior belief that the treatment has an effect in 50% of people.  We can do the same computation as above, but using the information from our previous study to inform our prior (see oanel A in Figure \@ref(fig:posteriorDistPrior)).  
 
-*MH:* i wonder what you’re doing here: is this the same thing as doing a bayesian inference assuming 10 / 20 data and using the posterior from that as the prior for this analysis? that is what woud normally be the straightfoward thing to do.
+```{r ,echo=FALSE}
 
+# *MH:* i wonder what you’re doing here: is this the same thing as doing a bayesian inference assuming 10 / 20 data and using the posterior from that as the prior for this analysis? that is what woud normally be the straightfoward thing to do.
+
+```
 
 ```{r echo=FALSE}
 # compute likelihoods for data under all values of p(heads) 
