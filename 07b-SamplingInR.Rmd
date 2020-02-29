@@ -91,7 +91,7 @@ sampMeans %>%
     size=6
   ) +
   # label the x axis
-  labs(x = "Height (inches)") +
+  labs(x = "Height (cm)") +
   # add normal based on population mean/sd
   stat_function(
       fun = dnorm, n = sampSize,
