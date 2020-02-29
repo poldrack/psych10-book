@@ -258,7 +258,7 @@ error_df <- #build a dataframe using the function tribble()
     "mean + age + gender", rmse_age_gender
   ) %>% 
   mutate(
-    RMSE = sqrt(error)
+    RMSE = error
   )
 
 error_df %>% 

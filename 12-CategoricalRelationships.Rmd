@@ -49,7 +49,7 @@ candyDf <-
 # kable(candyDf, caption='Counts of different candies in our bag.')
 ```
 
-Let's say that I have purchased a bag of 100 candies, which are labeled as having 1/3 chocolates, 1/3 licorices, and 1/3 gumballs.  When I count the candies in the bag, we get the following numbers: 30 chccolates, 33 licorices, and 37 gumballs. Because I like chocolate much more than licorice or gumballs, I feel slightly ripped off and I'd like to know if this was just a random accident.  To answer than question, I need to know: What is the likelihood that the count would come out this way if the true probability of each candy type is the averaged proportion of 1/3 each?
+Let's say that I have purchased a bag of 100 candies, which are labeled as having 1/3 chocolates, 1/3 licorices, and 1/3 gumballs.  When I count the candies in the bag, we get the following numbers: 30 chocolates, 33 licorices, and 37 gumballs. Because I like chocolate much more than licorice or gumballs, I feel slightly ripped off and I'd like to know if this was just a random accident.  To answer that question, I need to know: What is the likelihood that the count would come out this way if the true probability of each candy type is the averaged proportion of 1/3 each?
 
 ## Pearson's chi-squared test {#chi-squared-test}
 
@@ -59,9 +59,9 @@ $$
 \chi^2 = \sum_i\frac{(observed_i - expected_i)^2}{expected_i}
 $$
 
-In the case of our candy example, the null hypothesis is that the proportion of each type of candies is equal.  To compute the chi-squared statistic, we first need to come up with our expected counts under the null hypothesis: since the null is that they are all the same, then this is just the total count split across the three categories (as shown in the Table).  We then take the difference between each count and its expectation under the null hypothesis, square them, divide them by the null expectation, and add them up to obtain the chi-squared statistic.
+In the case of our candy example, the null hypothesis is that the proportion of each type of candy is equal.  To compute the chi-squared statistic, we first need to come up with our expected counts under the null hypothesis: since the null is that they are all the same, then this is just the total count split across the three categories (as shown in Table \@ref(tab:candyDf)).  We then take the difference between each count and its expectation under the null hypothesis, square them, divide them by the null expectation, and add them up to obtain the chi-squared statistic.
 
-```{r echo=FALSE}
+```{r candyDf, echo=FALSE}
 # compute chi-squared statistic
 
 candyDf <- candyDf %>%

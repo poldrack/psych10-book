@@ -173,6 +173,11 @@ get_sampling_dist <- function(sampSize, nsamps = 2500) {
 
 ```{r alcDist50,echo=FALSE,fig.cap="Left: Distribution of the variable AlcoholYear in the NHANES dataset, which reflects the number of days that the individual drank in a year. Right: The sampling distribution of the mean for AlcoholYear in the NHANES dataset, obtained by drawing repeated samples of size 50, in blue.  The normal distribution with the same mean and standard deviation is shown in red.", fig.width=8,fig.height=4,out.height='50%'}
 
+NHANES_cleanAlc <- NHANES %>%	
+  drop_na(AlcoholYear)	
+p1 <- ggplot(NHANES_cleanAlc, aes(AlcoholYear)) +	
+  geom_histogram(binwidth = 7)
+
 p2 <- get_sampling_dist(50)
 plot_grid(p1,p2)
 ```

@@ -187,10 +187,10 @@ There is a close relationship between correlation coefficients and regression co
 $$
 \hat{r} = \frac{covariance_{xy}}{s_x * s_y}
 $$
-whereas the regression beta is computed as:
+whereas the regression beta for x is computed as:
 
 $$
-\hat{\beta} = \frac{covariance_{xy}}{s_x*s_x}
+\hat{\beta_x} = \frac{covariance_{xy}}{s_x*s_x}
 $$
 
 Based on these two equations, we can derive the relationship between $\hat{r}$ and $\hat{beta}$:
@@ -230,7 +230,7 @@ $$
 In order to get the standard error for a specific regression parameter estimate, $SE_{\beta_x}$, we need to rescale the standard error of the model by the square root of the sum of squares of the X variable:
 
 $$
-SE_{\beta_x} = \frac{SE_{model}}{\sqrt{{\sum{(x_i - \bar{x})^2}}}}
+SE_{\hat{\beta}_x} = \frac{SE_{model}}{\sqrt{{\sum{(x_i - \bar{x})^2}}}}
 $$
 
 ### Statistical tests for regression parameters
@@ -631,7 +631,7 @@ get_sample_predictions_cv <- function(sample_size, shuffle = FALSE) {
 
 #implement the function
 sim_results <- 
-  replicate(100, get_sample_predictions_cv(sample_size = 48, shuffle = FALSE))
+  replicate(1000, get_sample_predictions_cv(sample_size = 48, shuffle = FALSE))
 
 sim_results <- 
   t(sim_results) %>%
@@ -640,15 +640,15 @@ sim_results <-
 mean_rsquared <-
   sim_results %>%
   summarize(
-    `Original data` = mean(X4),
-    `New data` = mean(X5),
-    `Cross-validation` = mean(X6)
+    `Original data` = mean(X1),
+    `New data` = mean(X2),
+    `Cross-validation` = mean(X3)
   ) 
 
 mean_rsquared_t = as.data.frame(t(mean_rsquared)) %>%
-  rename(`Root mean squared error`=V1)
+  rename(`R-squared`=V1)
 
-kable(mean_rsquared_t, caption="Root mean squared error from cross-validation and new data, showing that cross-validation provides a reasonable estimate of the model's performance on new data.")
+kable(mean_rsquared_t, caption="R-squared from cross-validation and new data, showing that cross-validation provides a reasonable estimate of the model's performance on new data.")
 ```
 
 Here we see that cross-validation gives us an estimate of predictive accuracy that is much closer to what we see with a completely new dataset than it is to the inflated accuracy that we see with the original dataset -- in fact, it's even slighlty more pessimistic than the average for a new dataset, probably because only part of the data are being used to train each of the models.  

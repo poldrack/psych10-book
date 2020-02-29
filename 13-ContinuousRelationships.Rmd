@@ -111,7 +111,7 @@ The covariance is simply the mean of the crossproducts, which in this case is `r
 $$
 r = \frac{covariance}{s_xs_y} = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{(N - 1)s_x s_y}
 $$
-In this case, the value is`r I(corXY)`. We can also compute the correlation value easily using the `cor()` function in R, rather than computing it by hand.
+In this case, the value is `r I(corXY)`. We can also compute the correlation value easily using the `cor()` function in R, rather than computing it by hand.
 
 The correlation coefficient is useful because it varies between -1 and 1 regardless of the nature of the data - in fact, we already discussed the correlation coefficient earlier in the discussion of effect sizes.  As we saw in the previous chapter on effect sizes, a correlation of 1 indicates a perfect linear relationship, a correlation of -1 indicates a perfect negative relationship, and a correlation of zero indicates no linear relationship.
 

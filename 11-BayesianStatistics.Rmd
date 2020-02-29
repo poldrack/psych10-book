@@ -54,9 +54,11 @@ If we know the value of the latent variable, then it's easy to reconstruct what 
 
 The reason that Bayesian statistics has its name is because it takes advantage of Bayes' theorem to make inferences from data about the underlying process that generated the data.  Let's say that we want to know whether a coin is fair.  To test this, we flip the coin 10 times and come up with 7 heads.  Before this test we were pretty sure that the $P_{heads}=0.5$), but finding 7 heads out of 10 flips would certainly give us pause if we believed that $P_{heads}=0.5$.  We already know how to compute the conditional probability that we would flip 7 or more heads out of 10 if the coin is really fair ($P(n\ge7|p_{heads}=0.5)$), using the binomial distribution.
 
+
 ```{r echo=FALSE}
 # *TBD: MOTIVATE SWITCH FROM 7 To 7 OR MORE*
 ```
+
 The resulting probability is `r I(sprintf("%.3f",pbinom(7, 10, .5, lower.tail = FALSE)))`.  That is a fairly small number, but this number doesn't really answer the question that we are asking -- it is telling us about the likelihood of 7 or more heads given some particular probability of heads, whereas what we really want to know is the probability of heads. This should sound familiar, as it's exactly the situation that we were in with null hypothesis testing, which told us about the likelihood of data rather than the likelihood of hypotheses.
 
 Remember that Bayes' theorem provides us with the tool that we need to invert a conditional probability:
@@ -73,12 +75,13 @@ We can think of this theorem as having four parts:
 - *posterior* ($P(Hypothesis|Data)$): Our updated belief about hypothesis H, given the data D
 
 In the case of our coin-flipping example:
-- *prior* ($P_{heads}$): Our degree of belief the likelhood of flipping heads, which was $P_{heads}=0.5$
+
+- *prior* ($P_{heads}$): Our degree of belief about the likelhood of flipping heads, which was $P_{heads}=0.5$
 - *likelihood* ($P(\text{7 or more heads out of 10 flips}|P_{heads}=0.5)$): How likely are 7 or more heads out of 10 flips if $P_{heads}=0.5)$?
 - *marginal likelihood* ($P(\text{7 or more heads out of 10 flips})$): How likely are we to observe 7 heads out of 10 coin flips, in general?
 - *posterior* ($P_{heads}|\text{7 or more heads out of 10 coin flips})$): Our updated belief about $P_{heads}$ given the observed coin flips
 
-Here we see one of the primary differences between frequentist and Bayesian statsistics.  Frequentists do not believe in the idea of a probability of a hypothesis (i.e., our degree of belief about a hypothesis) -- for them, a hypothesis is either true or it isn't. Another way to say this is that for the frequentist, the hypothesis is fixed and the data are random, which is why frequentist inference focuses on describing the probability of data given a hypothesis (i.e. the p-value).  Bayesians, on the other hand, are comfortable making probability statements about both data and hypotheses.
+Here we see one of the primary differences between frequentist and Bayesian statistics. Frequentists do not believe in the idea of a probability of a hypothesis (i.e. our degree of belief about a hypothesis) -- for them, a hypothesis is either true or it isn't. Another way to say this is that for the frequentist, the hypothesis is fixed and the data are random, which is why frequentist inference focuses on describing the probability of data given a hypothesis (i.e. the p-value). Bayesians, on the other hand, are comfortable making probability statements about both data and hypotheses.
 
 ## Doing Bayesian estimation {#doing-bayesian-estimation}
 
@@ -161,6 +164,7 @@ In the previous example there were only two possible outcomes -- the explosive i
 ```{r echo=FALSE}
 # *TBD: MH: USE PRIOR BIASED TOWARDS ZERO?*
 ```
+
 
 In this case, we don't have any prior information about the effectiveness of the drug, so we will use a *uniform distribution* as our prior, since all values are equally likely under a uniform distribution.  In order to simplify the example, we will only look at a subset of 99 possible values of effectiveness (from .01 to .99, in steps of .01). Therefore, each possible value has a prior probability of 1/99. 
 
@@ -290,7 +294,6 @@ Given our data we would like to obtain an estimate of $p_{respond}$ for our samp
 ### Credible intervals
 
 Often we would like to know not just a single estimate for the posterior, but an interval in which we are confident that the posterior falls.  We previously discussed the concept of confidence intervals in the context of frequentist inference, and you may remember that the interpretation of confidence intervals was particularly convoluted: It was an interval that will contain the the value of the parameter 95% of the time.  What we really want is an interval in which we are confident that the true parameter falls, and Bayesian statistics can give us such an interval, which we call a *credible interval*.
-
 
 
 ```{r ,echo=FALSE}

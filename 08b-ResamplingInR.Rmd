@@ -34,7 +34,7 @@ NHANES_adult <- NHANES %>%
 
 ```
 
-## Generating random samples (Section \@ref{generating-random-numbers})
+## Generating random samples (Section \@ref(generating-random-numbers))
 
 Here we will generate random samples from a number of different distributions and plot their histograms.
 
