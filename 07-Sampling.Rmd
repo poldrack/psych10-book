@@ -117,7 +117,7 @@ sampMeans_df %>%
     label = "Population mean"
   ) +
   labs(
-      x = "Height (inches)"
+      x = "Height (cm)"
   )
 ```
 
