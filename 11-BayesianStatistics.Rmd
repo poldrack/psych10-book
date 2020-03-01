@@ -52,7 +52,7 @@ If we know the value of the latent variable, then it's easy to reconstruct what 
 
 ## Bayes' theorem and inverse inference
 
-The reason that Bayesian statistics has its name is because it takes advantage of Bayes' theorem to make inferences from data about the underlying process that generated the data.  Let's say that we want to know whether a coin is fair.  To test this, we flip the coin 10 times and come up with 7 heads.  Before this test we were pretty sure that the $P_{heads}=0.5$), but finding 7 heads out of 10 flips would certainly give us pause if we believed that $P_{heads}=0.5$.  We already know how to compute the conditional probability that we would flip 7 or more heads out of 10 if the coin is really fair ($P(n\ge7|p_{heads}=0.5)$), using the binomial distribution.
+The reason that Bayesian statistics has its name is because it takes advantage of Bayes' theorem to make inferences from data about the underlying process that generated the data.  Let's say that we want to know whether a coin is fair.  To test this, we flip the coin 10 times and come up with 7 heads.  Before this test we were pretty sure that the $P_{heads}=0.5$, but finding 7 heads out of 10 flips would certainly give us pause if we believed that $P_{heads}=0.5$.  We already know how to compute the conditional probability that we would flip 7 or more heads out of 10 if the coin is really fair ($P(n\ge7|p_{heads}=0.5)$), using the binomial distribution.
 
 
 ```{r echo=FALSE}
