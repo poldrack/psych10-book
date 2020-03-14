@@ -164,7 +164,7 @@ In this case we see that there is a statistically significant difference between
 The t-test is often presented as a specialized tool for comparing means, but it can also be viewed as an application of the general linear model.  In this case, the model would look like this:
 
 $$
-\hat{BP} = \hat{\beta_1}*Marijuana + \hat{\beta_0}
+\hat{TV} = \hat{\beta_1}*Marijuana + \hat{\beta_0}
 $$
 However, smoking is a binary variable, so we treat it as a *dummy variable* like we discussed in the previous chapter, setting it to a value of 1 for smokers and zero for nonsmokers.  In that case, $\hat{\beta_1}$ is simply the difference in means between the two groups, and $\hat{\beta_0}$ is the mean for the group that was coded as zero.  We can fit this model using the ```lm()``` function, and see that it gives the same t statistic as the t-test above:
 
@@ -369,6 +369,13 @@ df <-
 Now we can fit a model using the same approach that we used in the previous chapter:
 
 ```{r echo=FALSE}
+# test model without separate duymmies
+lmResultAnovaBasic <- lm(sysBP ~ group, data=df)
+emm.result <- emmeans(lmResultAnovaBasic, "group" )
+# pairs(emm.result)
+```
+
+```{r echo=FALSE}
 # fit ANOVA model
 lmResultANOVA <- lm(sysBP ~ d1 + d2, data = df)
 summary(lmResultANOVA)
@@ -376,6 +383,11 @@ summary(lmResultANOVA)
 The output from this command provides us with two things.  First, it shows us the result of a t-test for each of the dummy variables, which basically tell us whether each of the conditions separately differs from placebo; it appears that Drug 1 does whereas Drug 2 does not.  However, keep in mind that if we wanted to interpret these tests, we would need to correct the p-values to account for the fact that we have done multiple hypothesis tests; we will see an example of how to do this in the next chapter.
 
 Remember that the hypothesis that we started out wanting to test was whether there was any difference between any of the conditions; we refer to this as an *omnibus* hypothesis test, and it is the test that is provided by the F statistic. The F statistic basically tells us whether our model is better than a simple model that just includes an intercept.  In this case we see that the F test is highly significant, consistent with our impression that there did seem to be differences between the groups (which in fact we know there were, because we created the data).
+
+```{r echo=FALSE}
+# Add section on post-hoc tests using emmeans
+
+```
 
 ## Learning objectives
 
