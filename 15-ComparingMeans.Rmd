@@ -20,6 +20,7 @@ library(lme4)
 library(lmerTest)
 library(cowplot)
 library(knitr)
+library(emmeans)
 
 set.seed(123456) # set random seed to exactly replicate results
 
